@@ -66,11 +66,11 @@ void csr_free_v (csr_vector &v)
 void csr_mvp (const csr_matrix &A, const csr_vector& x, csr_vector &y)
 {
   unsigned int num_rows=A.num_rows;
-  unsigned int *restrict row_offsets=A.row_offsets;
-  unsigned int *restrict cols=A.cols;
-  double *restrict Acoefs=A.coefs;
-  double *restrict xcoefs=x.coefs;
-  double *restrict ycoefs=y.coefs;
+  unsigned int *row_offsets=A.row_offsets;
+  unsigned int *cols=A.cols;
+  double *Acoefs=A.coefs;
+  double *xcoefs=x.coefs;
+  double *ycoefs=y.coefs;
 
   for(int i=0;i<num_rows;i++) {
     double sum=0;
@@ -90,8 +90,8 @@ double dot(const csr_vector& x, const csr_vector &y)
 {
   double sum=0;
   unsigned int n=x.n;
-  double *restrict xcoefs=x.coefs;
-  double *restrict ycoefs=y.coefs;
+  double *xcoefs=x.coefs;
+  double *ycoefs=y.coefs;
 
   for(int i=0;i<n;i++) {
     sum+=xcoefs[i]*ycoefs[i];
@@ -103,9 +103,9 @@ void waxpby(double alpha, const csr_vector &x, double beta, const csr_vector &y,
 {
   // w = alpha * x + beta * y
   unsigned int n=x.n;
-  double *restrict xcoefs=x.coefs;
-  double *restrict ycoefs=y.coefs;
-  double *restrict wcoefs=w.coefs;
+  double * xcoefs=x.coefs;
+  double * ycoefs=y.coefs;
+  double * wcoefs=w.coefs;
 
   for(int i=0;i<n;i++) {
     wcoefs[i]=alpha*xcoefs[i]+beta*ycoefs[i];
@@ -122,9 +122,13 @@ void csr_cg (const csr_matrix &A, const csr_vector& x, csr_vector &b)
   double one=1.0, zero=0.0;
   double normr, rtrans, oldtrans, p_ap_dot , alpha, beta;
   int iter=0;
+  csr_vector r, p, Ap;
+  csr_alloc_v (r, x.n);
+  csr_alloc_v (p, x.n);
+  csr_alloc_v (Ap, x.n);
 
   waxpby(one, x, zero, x, p);
-  matvec(A,p,Ap);
+  csr_mvp(A,p,Ap);
   waxpby(one, b, -one, Ap, r);
   
   rtrans=dot(r,r);
@@ -142,7 +146,7 @@ void csr_cg (const csr_matrix &A, const csr_vector& x, csr_vector &b)
     
     normr=sqrt(rtrans);
   
-    matvec(A,p,Ap);
+    csr_mvp(A,p,Ap);
     p_ap_dot = dot(Ap,p);
 
     alpha = rtrans/p_ap_dot;
@@ -156,5 +160,8 @@ void csr_cg (const csr_matrix &A, const csr_vector& x, csr_vector &b)
 
   } while(iter<MAX_ITERS && normr>TOL);
 
-  return 0;
+  csr_free_v (r);
+  csr_free_v (p);
+  csr_free_v (Ap);
+
 }
