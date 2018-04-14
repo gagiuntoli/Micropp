@@ -38,18 +38,6 @@ int get_elemental (int e, double (&Ae)[8][8])
   return 0;
 }
 
-int csr_assembly_A (csr_matrix& A)
-{
-  int dim = 3, npe = 4, nelem = 1; 
-  int ix[8];
-  double Ae[8][8];
-
-  for (int e = 0; e<nelem; e++){
-    get_elemental (e, Ae);
-  }
-
-  return 0;
-}
 
 void csr_alloc_v (csr_vector &v, unsigned int n)
 {

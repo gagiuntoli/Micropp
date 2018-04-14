@@ -7,9 +7,9 @@ class Problem {
 
   public:
 
-    static const int npe = 4;
-    static const int dim = 2;
-    static const int nvoi= 3;
+    int npe = 4;
+    int dim = 2;
+    int nvoi= 3;
 
     std::vector<int> bc_nods, bc_y0, bc_y1, bc_x0, bc_x1;
     double xg[4][2];
@@ -38,7 +38,8 @@ class Problem {
 
 Problem::Problem (int argc, char *argv[])
 {
-
+  nx = 4;
+  ny = 4;
 }
 
 #endif
