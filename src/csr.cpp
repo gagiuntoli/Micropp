@@ -1,5 +1,8 @@
 #include<cstdlib>
+#include<iostream>
 #include<cmath>
+
+using namespace std;
 
 struct csr_matrix {
   unsigned int num_rows;
@@ -94,9 +97,8 @@ void waxpby(double alpha, const csr_vector &x, double beta, const csr_vector &y,
   }
 }
 
-#define N 200
-#define MAX_ITERS 100
-#define TOL 1e-12
+const int MAX_ITERS = 100;
+const double TOL = 1e-12;
 
 void csr_cg (const csr_matrix &A, const csr_vector& x, csr_vector &b)
 {
@@ -136,11 +138,13 @@ void csr_cg (const csr_matrix &A, const csr_vector& x, csr_vector &b)
     waxpby(one,x,alpha,p,x);
     waxpby(one,r,-alpha,Ap,r);
 
-//    if(iter%10==0)
-//      printf("Iteration: %d, Tolerance: %.4e\n", iter, normr);
+    if(iter%10==0)
+      cout << "Iteration: "<<iter<<" Tolerance: "<<normr<< endl;
     iter++;
 
   } while(iter<MAX_ITERS && normr>TOL);
+
+  cout << "Iteration: "<<iter<<" Tolerance: "<<normr<< endl;
 
   csr_free_v (r);
   csr_free_v (p);

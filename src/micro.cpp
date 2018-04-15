@@ -1,6 +1,3 @@
-#ifndef MICRO_HPP
-#define MICRO_HPP
-
 #include <vector>
 
 class Problem {
@@ -33,13 +30,12 @@ class Problem {
     double Sy_f, Sy_m;
 
     Problem (int argc, char *argv[]);
-
 };
 
 Problem::Problem (int argc, char *argv[])
 {
-  nx = 4;
-  ny = 4;
+  nx = 40;
+  ny = 40;
   nz = 1;
   lx = 1.0;
   ly = 1.0;
@@ -77,5 +73,3 @@ Problem::Problem (int argc, char *argv[])
     }
   }
 }
-
-#endif

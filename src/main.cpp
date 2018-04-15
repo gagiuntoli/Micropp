@@ -1,6 +1,6 @@
-#include <../inc/micro.hpp>
-#include <../inc/csr.hpp>
 #include <iostream>
+#include "micro.cpp"
+#include "csr.cpp"
 
 using namespace std;
 
@@ -161,16 +161,17 @@ int csr_set_A (csr_matrix &A, Problem &problem)
       }
     }
   }
-  cout << "A.num_rows = " << A.num_rows << endl;
-  for (int i=0; i<(A.num_rows+1); i++)
-    cout << A.row_offsets[i] << " ";
-  cout << endl << endl;
-  for (int i=0; i<A.num_rows; i++) {
-    for (int j=0; j<18; j++)
-      cout << A.cols[i*18 + j] << " ";
-    cout << endl;
-  }
-  cout << endl ;
+
+//  cout << "A.num_rows = " << A.num_rows << endl;
+//  for (int i=0; i<(A.num_rows+1); i++)
+//    cout << A.row_offsets[i] << " ";
+//  cout << endl << endl;
+//  for (int i=0; i<A.num_rows; i++) {
+//    for (int j=0; j<18; j++)
+//      cout << A.cols[i*18 + j] << " ";
+//    cout << endl;
+//  }
+//  cout << endl ;
 
 }
 
@@ -230,7 +231,7 @@ void get_elemental (int e, double (&Ae)[8][8], Problem &problem)
   
 }
 
-int csr_assembly_A (csr_matrix &A, Problem &problem)
+void csr_assembly_A (csr_matrix &A, Problem &problem)
 {
   int dim = problem.dim;
   int npe = problem.npe;
@@ -261,7 +262,7 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
     n1 = yfactor     * nx + xfactor + 1 ;
     n2 = (yfactor+1) * nx + xfactor + 1 ;
     n3 = (yfactor+1) * nx + xfactor     ;
-    cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
+    //cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
     get_elemental (e, Ae, problem);
 
@@ -314,14 +315,29 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
     A.coefs[(n*nx-1)*dim*18 + 9 + 18] = 1.0;
   }
 
-  for (int i=0; i<A.num_rows; i++) {
-    for (int j=0; j<18; j++)
-      cout << A.coefs[i*18 + j] << " ";
-    cout << endl;
-  }
-  cout << endl ;
+//  for (int i=0; i<A.num_rows; i++) {
+//    for (int j=0; j<18; j++)
+//      cout << A.coefs[i*18 + j] << " ";
+//    cout << endl;
+//  }
+//  cout << endl ;
 
-  return 0;
+}
+
+void csr_assembly_res (csr_vector &res, Problem &problem)
+{
+  int dim = problem.dim;
+  int nn = problem.nn; 
+  for (int i=0; i<nn*dim; i++)
+    res.coefs[i] = 1.1;
+}
+
+void csr_assembly_dx (csr_vector &dx, Problem &problem)
+{
+  int dim = problem.dim;
+  int nn = problem.nn; 
+  for (int i=0; i<nn*dim; i++)
+    dx.coefs[i] = 0.0;
 }
 
 int main (int argc, char *argv[])
@@ -335,9 +351,9 @@ int main (int argc, char *argv[])
   int dim = problem.dim;
 
   csr_alloc_A (A, nn*dim);
-  csr_alloc_v (res, nn);
-  csr_alloc_v (dx, nn);
-  csr_alloc_v (x, nn);
+  csr_alloc_v (res, nn*dim);
+  csr_alloc_v (dx, nn*dim);
+  csr_alloc_v (x, nn*dim);
   csr_set_A (A, problem);
 
   cout << "Init micropp -> preparing ..." << endl;
@@ -350,9 +366,12 @@ int main (int argc, char *argv[])
   // assembly res
 
   // assembly A
-  csr_assembly_A (A, problem);
+  csr_assembly_A   (A, problem);
+  csr_assembly_res (res, problem);
+  csr_assembly_res (dx, problem);
 
   // solve system  A * dx = -res
+  csr_cg (A, dx, res);
 
   // free memory
   csr_free_A (A);
