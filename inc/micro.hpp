@@ -42,6 +42,9 @@ Problem::Problem (int argc, char *argv[])
   ny = 3;
   nz = 1;
   nn = nx*ny*nz;
+  if (dim == 2) {
+    nelem = (nx-1) * (ny-1);
+  }
 }
 
 #endif

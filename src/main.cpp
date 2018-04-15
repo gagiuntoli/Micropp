@@ -114,7 +114,6 @@ int csr_set_A (csr_matrix &A, Problem &problem)
     }
     // x=0
     else if ((i%nx) == 0) {
-      cout << "im in x = 0 : " << i << endl;
       for (int d1=0; d1<2; d1++){
 	for (int d=0; d<2; d++){
 	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = 0;
@@ -145,7 +144,8 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 	}
       }
     }
-    else { // not y=0 neither y=ly, x=0, x=lx
+    // not y=0 neither y=ly, x=0, x=lx
+    else {
       for (int d1=0; d1<2; d1++){
 	for (int d=0; d<2; d++){
 	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = (i - nx - 1)*dim + d;
@@ -174,6 +174,13 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 
 }
 
+void get_elemental (int e, double (&Ae)[8][8])
+{
+  for (int i=0; i<8; i++)
+    for (int j=0; j<8; j++)
+      Ae[i][j] = 1;
+}
+
 int csr_assembly_A (csr_matrix &A, Problem &problem)
 {
   int dim = problem.dim;
@@ -193,32 +200,43 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
 
   double Ae[8][8];
 
+  for (int i=0; i<A.num_rows*18; i++)
+    A.coefs[i] = 0.0;
+
   for (int e=0; e<nelem; e++){
 
-    xfactor = e%nx;
-    yfactor = e/ny;
+    xfactor = e%(nx-1);
+    yfactor = e/(ny-1);
 
     n0 = yfactor     * nx + xfactor     ;
     n1 = yfactor     * nx + xfactor + 1 ;
     n2 = (yfactor+1) * nx + xfactor + 1 ;
     n3 = (yfactor+1) * nx + xfactor     ;
+    cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
     get_elemental (e, Ae);
 
-      for (int n=0; n<4; n++){
-	for (int d=0; d<2; d++){
-	  A.coefs[n0*18 + cols_row_0[n]*2 + d    ] = Ae[0][n*2+d];
-	  A.coefs[n0*18 + cols_row_0[n]*2 + d + 1] = Ae[1][n*2+d];
-	  A.coefs[n1*18 + cols_row_1[n]*2 + d    ] = Ae[2][n*2+d];
-	  A.coefs[n1*18 + cols_row_1[n]*2 + d + 1] = Ae[3][n*2+d];
-	  A.coefs[n2*18 + cols_row_2[n]*2 + d    ] = Ae[4][n*2+d];
-	  A.coefs[n2*18 + cols_row_2[n]*2 + d + 1] = Ae[5][n*2+d];
-	  A.coefs[n3*18 + cols_row_3[n]*2 + d    ] = Ae[6][n*2+d];
-	  A.coefs[n3*18 + cols_row_3[n]*2 + d + 1] = Ae[7][n*2+d];
-	}
+    for (int n=0; n<4; n++){
+      for (int d=0; d<2; d++){
+	A.coefs[n0*18 + cols_row_0[n]*2 + d    ] = Ae[0][n*2+d];
+	A.coefs[n0*18 + cols_row_0[n]*2 + d + 1] = Ae[1][n*2+d];
+	A.coefs[n1*18 + cols_row_1[n]*2 + d    ] = Ae[2][n*2+d];
+	A.coefs[n1*18 + cols_row_1[n]*2 + d + 1] = Ae[3][n*2+d];
+	A.coefs[n2*18 + cols_row_2[n]*2 + d    ] = Ae[4][n*2+d];
+	A.coefs[n2*18 + cols_row_2[n]*2 + d + 1] = Ae[5][n*2+d];
+	A.coefs[n3*18 + cols_row_3[n]*2 + d    ] = Ae[6][n*2+d];
+	A.coefs[n3*18 + cols_row_3[n]*2 + d + 1] = Ae[7][n*2+d];
       }
+    }
 
   }
+
+  for (int i=0; i<A.num_rows; i++) {
+    for (int j=0; j<18; j++)
+      cout << A.coefs[i*18 + j] << " ";
+    cout << endl;
+  }
+  cout << endl ;
 
   return 0;
 }
@@ -240,15 +258,16 @@ int main (int argc, char *argv[])
   csr_set_A (A, problem);
 
   cout << "Init micropp -> preparing ..." << endl;
-  cout << "dim = " << problem.dim << endl;
-  cout << "nx  = " << problem.nx << endl;
-  cout << "ny  = " << problem.ny << endl;
-  cout << "nn  = " << problem.nn << endl;
+  cout << "dim   = " << problem.dim << endl;
+  cout << "nx    = " << problem.nx << endl;
+  cout << "ny    = " << problem.ny << endl;
+  cout << "nn    = " << problem.nn << endl;
+  cout << "nelem = " << problem.nelem << endl;
 
   // assembly res
 
   // assembly A
-  //  csr_assembly_A (A, problem);
+  csr_assembly_A (A, problem);
 
   // solve system  A * dx = -res
 

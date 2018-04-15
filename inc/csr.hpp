@@ -33,12 +33,6 @@ int csr_free_A (csr_matrix& A)
   return 0;
 }
 
-int get_elemental (int e, double (&Ae)[8][8])
-{
-  return 0;
-}
-
-
 void csr_alloc_v (csr_vector &v, unsigned int n)
 {
   v.n=n;
