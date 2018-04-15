@@ -19,26 +19,8 @@ int csr_set_A (csr_matrix &A, Problem &problem)
     A.row_offsets[i] =  18*i;
   
   for (int i=0; i<nn; i++){
-    if (i>=nx && i<(ny-1)*nx) { // not y=0 neither y=ly
-      if ((i%nx)!=0 && (i+1)%nx!=0) { // not x=0 neither x=lx
-	cout << "im in " << i << endl;
-	for (int d1=0; d1<2; d1++){
-	  for (int d=0; d<2; d++){
-	    A.cols[i*dim*18 + 0*dim + d + 18*d1] = (i - nx - 1)*dim + d;
-	    A.cols[i*dim*18 + 1*dim + d + 18*d1] = (i - nx    )*dim + d;
-	    A.cols[i*dim*18 + 2*dim + d + 18*d1] = (i - nx + 1)*dim + d;
-	    A.cols[i*dim*18 + 3*dim + d + 18*d1] = (i - 1     )*dim + d;
-	    A.cols[i*dim*18 + 4*dim + d + 18*d1] = (i         )*dim + d;
-	    A.cols[i*dim*18 + 5*dim + d + 18*d1] = (i + 1     )*dim + d;
-	    A.cols[i*dim*18 + 6*dim + d + 18*d1] = (i + nx - 1)*dim + d;
-	    A.cols[i*dim*18 + 7*dim + d + 18*d1] = (i + nx    )*dim + d;
-	    A.cols[i*dim*18 + 8*dim + d + 18*d1] = (i + nx + 1)*dim + d;
-	  }
-	}
-      }
-    }
     // the coorners
-    else if (i==0) {       
+    if (i == 0) {       
       for (int d1=0; d1<2; d1++){
 	for (int d=0; d<2; d++){
 	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = 0;
@@ -53,7 +35,7 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 	}
       }
     }
-    else if (i==nx-1) {
+    else if (i == nx-1) {
       for (int d1=0; d1<2; d1++){
 	for (int d=0; d<2; d++){
 	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = 0;
@@ -68,7 +50,7 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 	}
       }
     }
-    else if (i==nx*ny-1) {
+    else if (i == nx*ny-1) {
       for (int d1=0; d1<2; d1++){
 	for (int d=0; d<2; d++){
 	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = (i - nx - 1)*dim + d;
@@ -83,7 +65,7 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 	}
       }
     }
-    else if (i==(ny-1)*nx) {
+    else if (i == (ny-1)*nx) {
       for (int d1=0; d1<2; d1++){
 	for (int d=0; d<2; d++){
 	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = 0;
@@ -98,16 +80,97 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 	}
       }
     }
+    // y=0
+    else if (i < nx) {
+      for (int d1=0; d1<2; d1++){
+	for (int d=0; d<2; d++){
+	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 1*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 2*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 3*dim + d + 18*d1] = (i - 1     )*dim + d;
+	  A.cols[i*dim*18 + 4*dim + d + 18*d1] = (i         )*dim + d;
+	  A.cols[i*dim*18 + 5*dim + d + 18*d1] = (i + 1     )*dim + d;
+	  A.cols[i*dim*18 + 6*dim + d + 18*d1] = (i + nx - 1)*dim + d;
+	  A.cols[i*dim*18 + 7*dim + d + 18*d1] = (i + nx    )*dim + d;
+	  A.cols[i*dim*18 + 8*dim + d + 18*d1] = (i + nx + 1)*dim + d;
+	}
+      }
+    }
+    // y=ly
+    else if (i > (ny-1)*nx) {
+      for (int d1=0; d1<2; d1++){
+	for (int d=0; d<2; d++){
+	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = (i - nx - 1)*dim + d;
+	  A.cols[i*dim*18 + 1*dim + d + 18*d1] = (i - nx    )*dim + d;
+	  A.cols[i*dim*18 + 2*dim + d + 18*d1] = (i - nx + 1)*dim + d;
+	  A.cols[i*dim*18 + 3*dim + d + 18*d1] = (i - 1     )*dim + d;
+	  A.cols[i*dim*18 + 4*dim + d + 18*d1] = (i         )*dim + d;
+	  A.cols[i*dim*18 + 5*dim + d + 18*d1] = (i + 1     )*dim + d;
+	  A.cols[i*dim*18 + 6*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 7*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 8*dim + d + 18*d1] = 0;
+	}
+      }
+    }
+    // x=0
+    else if ((i%nx) == 0) {
+      cout << "im in x = 0 : " << i << endl;
+      for (int d1=0; d1<2; d1++){
+	for (int d=0; d<2; d++){
+	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 1*dim + d + 18*d1] = (i - nx    )*dim + d;
+	  A.cols[i*dim*18 + 2*dim + d + 18*d1] = (i - nx + 1)*dim + d;
+	  A.cols[i*dim*18 + 3*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 4*dim + d + 18*d1] = (i         )*dim + d;
+	  A.cols[i*dim*18 + 5*dim + d + 18*d1] = (i + 1     )*dim + d;
+	  A.cols[i*dim*18 + 6*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 7*dim + d + 18*d1] = (i + nx    )*dim + d;
+	  A.cols[i*dim*18 + 8*dim + d + 18*d1] = (i + nx + 1)*dim + d;
+	}
+      }
+    }
+    // x=ly
+    else if ((i+1)%nx == 0) {
+      for (int d1=0; d1<2; d1++){
+	for (int d=0; d<2; d++){
+	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = (i - nx - 1)*dim + d;
+	  A.cols[i*dim*18 + 1*dim + d + 18*d1] = (i - nx    )*dim + d;
+	  A.cols[i*dim*18 + 2*dim + d + 18*d1] = 0; 
+	  A.cols[i*dim*18 + 3*dim + d + 18*d1] = (i - 1     )*dim + d;
+	  A.cols[i*dim*18 + 4*dim + d + 18*d1] = (i         )*dim + d;
+	  A.cols[i*dim*18 + 5*dim + d + 18*d1] = 0;
+	  A.cols[i*dim*18 + 6*dim + d + 18*d1] = (i + nx - 1)*dim + d;
+	  A.cols[i*dim*18 + 7*dim + d + 18*d1] = (i         )*dim + d;
+	  A.cols[i*dim*18 + 8*dim + d + 18*d1] = 0;
+	}
+      }
+    }
+    else { // not y=0 neither y=ly, x=0, x=lx
+      for (int d1=0; d1<2; d1++){
+	for (int d=0; d<2; d++){
+	  A.cols[i*dim*18 + 0*dim + d + 18*d1] = (i - nx - 1)*dim + d;
+	  A.cols[i*dim*18 + 1*dim + d + 18*d1] = (i - nx    )*dim + d;
+	  A.cols[i*dim*18 + 2*dim + d + 18*d1] = (i - nx + 1)*dim + d;
+	  A.cols[i*dim*18 + 3*dim + d + 18*d1] = (i - 1     )*dim + d;
+	  A.cols[i*dim*18 + 4*dim + d + 18*d1] = (i         )*dim + d;
+	  A.cols[i*dim*18 + 5*dim + d + 18*d1] = (i + 1     )*dim + d;
+	  A.cols[i*dim*18 + 6*dim + d + 18*d1] = (i + nx - 1)*dim + d;
+	  A.cols[i*dim*18 + 7*dim + d + 18*d1] = (i + nx    )*dim + d;
+	  A.cols[i*dim*18 + 8*dim + d + 18*d1] = (i + nx + 1)*dim + d;
+	}
+      }
+    }
   }
   cout << "A.num_rows = " << A.num_rows << endl;
   for (int i=0; i<(A.num_rows+1); i++)
     cout << A.row_offsets[i] << " ";
-  cout << endl;
+  cout << endl << endl;
   for (int i=0; i<A.num_rows; i++) {
     for (int j=0; j<18; j++)
       cout << A.cols[i*18 + j] << " ";
     cout << endl;
   }
+  cout << endl ;
 
 }
 
