@@ -190,10 +190,10 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
   int ny = problem.ny; 
 
   int n0, n1, n2, n3;
-  int cols_row_0[4]={4,5,7,8};
-  int cols_row_1[4]={3,4,6,7};
-  int cols_row_2[4]={0,1,3,4};
-  int cols_row_3[4]={1,2,4,5};
+  int cols_row_0[4]={4,5,8,7};
+  int cols_row_1[4]={3,4,7,6};
+  int cols_row_2[4]={0,1,4,3};
+  int cols_row_3[4]={1,2,5,4};
   int yfactor;
   int xfactor;
   int index;
@@ -218,14 +218,14 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
 
     for (int n=0; n<4; n++){
       for (int d=0; d<2; d++){
-	A.coefs[n0*18 + cols_row_0[n]*2 + d    ] = Ae[0][n*2+d];
-	A.coefs[n0*18 + cols_row_0[n]*2 + d + 1] = Ae[1][n*2+d];
-	A.coefs[n1*18 + cols_row_1[n]*2 + d    ] = Ae[2][n*2+d];
-	A.coefs[n1*18 + cols_row_1[n]*2 + d + 1] = Ae[3][n*2+d];
-	A.coefs[n2*18 + cols_row_2[n]*2 + d    ] = Ae[4][n*2+d];
-	A.coefs[n2*18 + cols_row_2[n]*2 + d + 1] = Ae[5][n*2+d];
-	A.coefs[n3*18 + cols_row_3[n]*2 + d    ] = Ae[6][n*2+d];
-	A.coefs[n3*18 + cols_row_3[n]*2 + d + 1] = Ae[7][n*2+d];
+	A.coefs[n0*dim*18 + cols_row_0[n]*dim + d     ] += Ae[0][n*2+d];
+	A.coefs[n0*dim*18 + cols_row_0[n]*dim + d + 18] += Ae[1][n*2+d];
+	A.coefs[n1*dim*18 + cols_row_1[n]*dim + d     ] += Ae[2][n*2+d];
+	A.coefs[n1*dim*18 + cols_row_1[n]*dim + d + 18] += Ae[3][n*2+d];
+	A.coefs[n2*dim*18 + cols_row_2[n]*dim + d     ] += Ae[4][n*2+d];
+	A.coefs[n2*dim*18 + cols_row_2[n]*dim + d + 18] += Ae[5][n*2+d];
+	A.coefs[n3*dim*18 + cols_row_3[n]*dim + d     ] += Ae[6][n*2+d];
+	A.coefs[n3*dim*18 + cols_row_3[n]*dim + d + 18] += Ae[7][n*2+d];
       }
     }
 
