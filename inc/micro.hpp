@@ -16,7 +16,7 @@ class Problem {
     double wg[4];
     double b_mat[3][8][4];
     double dsh[4][2][4];
-    int nx, ny, nn; 
+    int nx, ny, nz, nn; 
     double lx, ly, dx, dy;
     int nelem;
     int X0Y0_nod;
@@ -38,8 +38,10 @@ class Problem {
 
 Problem::Problem (int argc, char *argv[])
 {
-  nx = 4;
-  ny = 4;
+  nx = 3;
+  ny = 3;
+  nz = 1;
+  nn = nx*ny*nz;
 }
 
 #endif

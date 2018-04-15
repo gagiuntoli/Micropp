@@ -16,7 +16,7 @@ struct csr_vector {
 
 int csr_alloc_A (csr_matrix& A, int N)
 {
-  int num_rows=(N+1)*(N+1)*(N+1);
+  int num_rows=N;
   int nnz=18*num_rows; // 9*2 = 18 if dim = 2 
   A.num_rows=num_rows;
   A.row_offsets=(unsigned int*)malloc((num_rows+1)*sizeof(unsigned int));

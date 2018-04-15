@@ -12,35 +12,89 @@ int csr_set_A (csr_matrix &A, Problem &problem)
   int nelem = problem.nelem; 
   int nx = problem.nx; 
   int ny = problem.ny; 
+  int nn = problem.nn; 
 
   A.row_offsets[0] = 0;
   for (int i=1; i<(A.num_rows+1); i++)
     A.row_offsets[i] =  18*i;
   
-  for (int i=0; i<A.num_rows; i++){
-    if (i>=nx && i<(ny-1)*nx) { // over y=0 and below y=ly
-      if ((i%nx)>0 && (i%nx)<(nx-1)) {
+  for (int i=0; i<problem.nn; i++){
+    if (i>=nx && i<(ny-1)*nx) { // not y=0 neither y=ly
+      if ((i%nx)!=0 && (i%(nx-1))!=0) { // not x=0 neither x=lx
 	for (int d=0; d<2; d++){
-	  A.cols[i*18 + 0*2 + d] = (i - nx - 1)*2 + d;
-	  A.cols[i*18 + 1*2 + d] = (i - nx    )*2 + d;
-	  A.cols[i*18 + 2*2 + d] = (i - nx + 1)*2 + d;
-	  A.cols[i*18 + 3*2 + d] = (i - 1     )*2 + d;
-	  A.cols[i*18 + 4*2 + d] = (i         )*2 + d;
-	  A.cols[i*18 + 5*2 + d] = (i + 1     )*2 + d;
-	  A.cols[i*18 + 6*2 + d] = (i + nx - 1)*2 + d;
-	  A.cols[i*18 + 7*2 + d] = (i + nx    )*2 + d;
-	  A.cols[i*18 + 8*2 + d] = (i + nx + 1)*2 + d;
+	  A.cols[i*dim*9 + 0*dim + d] = (i - nx - 1)*dim + d;
+	  A.cols[i*dim*9 + 1*dim + d] = (i - nx    )*dim + d;
+	  A.cols[i*dim*9 + 2*dim + d] = (i - nx + 1)*dim + d;
+	  A.cols[i*dim*9 + 3*dim + d] = (i - 1     )*dim + d;
+	  A.cols[i*dim*9 + 4*dim + d] = (i         )*dim + d;
+	  A.cols[i*dim*9 + 5*dim + d] = (i + 1     )*dim + d;
+	  A.cols[i*dim*9 + 6*dim + d] = (i + nx - 1)*dim + d;
+	  A.cols[i*dim*9 + 7*dim + d] = (i + nx    )*dim + d;
+	  A.cols[i*dim*9 + 8*dim + d] = (i + nx + 1)*dim + d;
 	}
       }
     }
     else if (i==0) {       // the coorners
+      for (int d=0; d<2; d++){
+	A.cols[i*dim*9 + 0*dim + d] = 0;
+	A.cols[i*dim*9 + 1*dim + d] = 0;
+	A.cols[i*dim*9 + 2*dim + d] = 0;
+	A.cols[i*dim*9 + 3*dim + d] = 0;
+	A.cols[i*dim*9 + 4*dim + d] = (i         )*dim + d;
+	A.cols[i*dim*9 + 5*dim + d] = (i + 1     )*dim + d;
+	A.cols[i*dim*9 + 6*dim + d] = 0;
+	A.cols[i*dim*9 + 7*dim + d] = (i + nx    )*dim + d;
+	A.cols[i*dim*9 + 8*dim + d] = (i + nx + 1)*dim + d;
+      }
     }
     else if (i==nx-1) {
+      for (int d=0; d<2; d++){
+	A.cols[i*dim*9 + 0*dim + d] = 0;
+	A.cols[i*dim*9 + 1*dim + d] = 0;
+	A.cols[i*dim*9 + 2*dim + d] = 0;
+	A.cols[i*dim*9 + 3*dim + d] = (i - 1     )*dim + d;
+	A.cols[i*dim*9 + 4*dim + d] = (i         )*dim + d;
+	A.cols[i*dim*9 + 5*dim + d] = 0;
+	A.cols[i*dim*9 + 6*dim + d] = (i + nx - 1)*dim + d;
+	A.cols[i*dim*9 + 7*dim + d] = (i + nx    )*dim + d;
+	A.cols[i*dim*9 + 8*dim + d] = 0;
+      }
     }
     else if (i==nx*ny-1) {
+      for (int d=0; d<2; d++){
+	A.cols[i*dim*9 + 0*dim + d] = (i - nx - 1)*dim + d;
+	A.cols[i*dim*9 + 1*dim + d] = (i - nx    )*dim + d;
+	A.cols[i*dim*9 + 2*dim + d] = 0;
+	A.cols[i*dim*9 + 3*dim + d] = (i - 1     )*dim + d;
+	A.cols[i*dim*9 + 4*dim + d] = (i         )*dim + d;
+	A.cols[i*dim*9 + 5*dim + d] = 0;
+	A.cols[i*dim*9 + 6*dim + d] = 0;
+	A.cols[i*dim*9 + 7*dim + d] = 0;
+	A.cols[i*dim*9 + 8*dim + d] = 0;
+      }
     }
     else if (i==(ny-1)*nx) {
+      for (int d=0; d<2; d++){
+	A.cols[i*dim*9 + 0*dim + d] = 0;
+	A.cols[i*dim*9 + 1*dim + d] = (i - nx    )*dim + d;
+	A.cols[i*dim*9 + 2*dim + d] = (i - nx + 1)*dim + d;
+	A.cols[i*dim*9 + 3*dim + d] = 0;
+	A.cols[i*dim*9 + 4*dim + d] = (i         )*dim + d;
+	A.cols[i*dim*9 + 5*dim + d] = (i + 1     )*dim + d;
+	A.cols[i*dim*9 + 6*dim + d] = 0;
+	A.cols[i*dim*9 + 7*dim + d] = 0;
+	A.cols[i*dim*9 + 8*dim + d] = 0;
+      }
     }
+  }
+  cout << "A.num_rows = " << A.num_rows << endl;
+  for (int i=0; i<(A.num_rows+1); i++)
+    cout << A.row_offsets[i] << " ";
+  cout << endl;
+  for (int i=0; i<A.num_rows; i++) {
+    for (int j=0; j<18; j++)
+      cout << A.cols[i*18 + j] << " ";
+    cout << endl;
   }
 
 }
@@ -101,18 +155,20 @@ int main (int argc, char *argv[])
   csr_vector x, dx, res;
 
   double eps [] = { 0.005, 0.0, 0.0 };
-  int n = 10;
+  int nn = problem.nn;
+  int dim = problem.dim;
 
-  csr_alloc_A (A, n);
-  csr_alloc_v (res, n);
-  csr_alloc_v (dx, n);
-  csr_alloc_v (x, n);
+  csr_alloc_A (A, nn*dim);
+  csr_alloc_v (res, nn);
+  csr_alloc_v (dx, nn);
+  csr_alloc_v (x, nn);
   csr_set_A (A, problem);
 
   cout << "Init micropp -> preparing ..." << endl;
   cout << "dim = " << problem.dim << endl;
   cout << "nx  = " << problem.nx << endl;
   cout << "ny  = " << problem.ny << endl;
+  cout << "nn  = " << problem.nn << endl;
 
   // assembly res
 
