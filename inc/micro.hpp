@@ -17,7 +17,7 @@ class Problem {
     double b_mat[3][8][4];
     double dsh[4][2][4];
     int nx, ny, nz, nn; 
-    double lx, ly, dx, dy;
+    double lx, ly, lz, dx, dy, dz;
     int nelem;
     int X0Y0_nod;
     int X1Y0_nod;
@@ -38,12 +38,43 @@ class Problem {
 
 Problem::Problem (int argc, char *argv[])
 {
-  nx = 3;
-  ny = 3;
+  nx = 4;
+  ny = 4;
   nz = 1;
+  lx = 1.0;
+  ly = 1.0;
+  lz = 1.0;
+  dx = lx/(nx-1);
+  dy = ly/(ny-1);
   nn = nx*ny*nz;
   if (dim == 2) {
     nelem = (nx-1) * (ny-1);
+  }
+
+  wg[0] = 0.25*(dx*dy);
+  wg[1] = 0.25*(dx*dy);
+  wg[2] = 0.25*(dx*dy);
+  wg[3] = 0.25*(dx*dy);
+
+  double xg[4][2] = {
+    {-0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626}};
+
+  for (int gp=0; gp<4; gp++) {
+    dsh[0][0][gp] = -(1-xg[gp][1])/4*2/dx ; dsh[0][1][gp] = -(1-xg[gp][0])/4*2/dy;
+    dsh[1][0][gp] = +(1-xg[gp][1])/4*2/dx ; dsh[1][1][gp] = -(1+xg[gp][0])/4*2/dy;
+    dsh[2][0][gp] = +(1+xg[gp][1])/4*2/dx ; dsh[2][1][gp] = +(1+xg[gp][0])/4*2/dy;
+    dsh[3][0][gp] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1][gp] = +(1-xg[gp][0])/4*2/dy;
+  }
+
+  for (int gp=0; gp<4; gp++) {
+    for (int i=0; i<4; i++) {
+      b_mat[1][i*dim][gp] = dsh[i][0][gp]; b_mat[1][i*dim+1][gp] = 0            ;
+      b_mat[2][i*dim][gp] = 0            ; b_mat[2][i*dim+1][gp] = dsh[i][1][gp];
+      b_mat[3][i*dim][gp] = dsh[i][1][gp]; b_mat[3][i*dim+1][gp] = dsh[i][0][gp];
+    }
   }
 }
 

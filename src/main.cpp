@@ -174,11 +174,60 @@ int csr_set_A (csr_matrix &A, Problem &problem)
 
 }
 
-void get_elemental (int e, double (&Ae)[8][8])
+double distance (int e, Problem &problem)
 {
-  for (int i=0; i<8; i++)
-    for (int j=0; j<8; j++)
-      Ae[i][j] = 1;
+  int nx = problem.nx;
+  int ny = problem.ny;
+  double dx = problem.dx;
+  double dy = problem.dy;
+  double lx = problem.lx;
+  double ly = problem.ly;
+  int xfactor = e%(nx-1);
+  int yfactor = e/(ny-1);
+  double xdis = pow(xfactor*dx + dx/2 - lx/2,2);
+  double ydis = pow(yfactor*dy + dy/2 - ly/2,2);
+  return sqrt(xdis + ydis);
+}
+
+void get_elemental (int e, double (&Ae)[8][8], Problem &problem)
+{
+  /* // for debugging purposes
+     for (int i=0; i<8; i++)
+     for (int j=0; j<8; j++)
+     Ae[i][j] = 1;
+   */
+
+  double nu = 0.3, E;
+  double ctan[3][3];
+  E  = 1e7;
+  if (distance(e, problem) < 0.75) {
+    E  = 1e7;
+  }
+  else {
+     E  = 1e6;
+  }
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
+  ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+    }
+  }
+
+  for (int i=0; i<8; i++) {
+    for (int j=0; j<8; j++) {
+      Ae[i][j] = 0.0;
+      for (int gp=0; gp<4; gp++) {
+	for (int m=0; m<8; m++) {
+	  for (int k=0; k<3; k++) {
+	    Ae[i][j] += problem.b_mat[m][i][gp] * ctan[m][k] * problem.b_mat[k][j][gp] * problem.wg[gp];
+	  }
+	}
+      }
+    }
+  }
+  
 }
 
 int csr_assembly_A (csr_matrix &A, Problem &problem)
@@ -214,7 +263,7 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
     n3 = (yfactor+1) * nx + xfactor     ;
     cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
-    get_elemental (e, Ae);
+    get_elemental (e, Ae, problem);
 
     for (int n=0; n<4; n++){
       for (int d=0; d<2; d++){
@@ -231,6 +280,40 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
 
   }
 
+  /* boundary conditions */
+  for (int n=0; n<nx; n++){ // y=0
+    for (int k=0; k<18; k++){
+      A.coefs[n*dim*18 + k     ] = 0.0;
+      A.coefs[n*dim*18 + k + 18] = 0.0;
+    }
+    A.coefs[n*dim*18 + 8     ] = 1.0;
+    A.coefs[n*dim*18 + 9 + 18] = 1.0;
+  }
+  for (int n=(ny-1)*nx; n<nx*ny; n++){ // y=ly
+    for (int k=0; k<18; k++){
+      A.coefs[n*dim*18 + k     ] = 0.0;
+      A.coefs[n*dim*18 + k + 18] = 0.0;
+    }
+    A.coefs[n*dim*18 + 8     ] = 1.0;
+    A.coefs[n*dim*18 + 9 + 18] = 1.0;
+  }
+  for (int n=1; n<ny-1; n++){ // x=0
+    for (int k=0; k<18; k++){
+      A.coefs[(n*nx)*dim*18 + k     ] = 0.0;
+      A.coefs[(n*nx)*dim*18 + k + 18] = 0.0;
+    }
+    A.coefs[(n*nx)*dim*18 + 8     ] = 1.0;
+    A.coefs[(n*nx)*dim*18 + 9 + 18] = 1.0;
+  }
+  for (int n=2; n<ny; n++){ // x=lx
+    for (int k=0; k<18; k++){
+      A.coefs[(n*nx-1)*dim*18 + k     ] = 0.0;
+      A.coefs[(n*nx-1)*dim*18 + k + 18] = 0.0;
+    }
+    A.coefs[(n*nx-1)*dim*18 + 8     ] = 1.0;
+    A.coefs[(n*nx-1)*dim*18 + 9 + 18] = 1.0;
+  }
+
   for (int i=0; i<A.num_rows; i++) {
     for (int j=0; j<18; j++)
       cout << A.coefs[i*18 + j] << " ";
@@ -243,9 +326,9 @@ int csr_assembly_A (csr_matrix &A, Problem &problem)
 
 int main (int argc, char *argv[])
 {
-  Problem problem (argc, argv);
   csr_matrix A;
   csr_vector x, dx, res;
+  Problem problem (argc, argv);
 
   double eps [] = { 0.005, 0.0, 0.0 };
   int nn = problem.nn;
