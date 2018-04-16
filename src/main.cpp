@@ -396,14 +396,14 @@ int main (int argc, char *argv[])
     end = clock();
 
     elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-    cout << "time assembly = "<<elapsed_secs<<endl;
+    cout << "time assembly             = "<<elapsed_secs<<endl;
 
     // solve system  A * dx = -res
     start = clock();
     csr_cg (A, dx, res);
     end = clock();
     elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-    cout << "time solve    = "<<elapsed_secs<<endl;
+    cout << "time solve                = "<<elapsed_secs<<endl;
 
     // free memory
     csr_free_A (A);
