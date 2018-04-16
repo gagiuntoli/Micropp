@@ -203,10 +203,10 @@ void get_elemental (int e, double (&Ae)[8][8], Problem &problem)
   double ctan[3][3];
   E  = 1e7;
   if (distance(e, problem) < -1.75) {
-    E  = 0e7;
+    E  = 1.0e7;
   }
   else {
-     E  = 0e6;
+     E  = 1.0e6;
   }
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
@@ -385,6 +385,8 @@ int main (int argc, char *argv[])
     cout << "ny    = " << problem.ny << endl;
     cout << "nn    = " << problem.nn << endl;
     cout << "nelem = " << problem.nelem << endl;
+    cout << "dx    = " << problem.dx << endl;
+    cout << "dy    = " << problem.dy << endl;
 
     // assembly
     start = clock();
