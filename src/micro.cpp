@@ -49,12 +49,10 @@ Problem::Problem (int argc, char *argv[])
     options_description desc{"Options Guido"};
     desc.add_options()
       ("help,h", "Help screen")
-      ("pi", value<float>()->default_value(3.14f), "Pi")
       ("nx", value<int>()->default_value(10), "Num of Nodes in X dir")
       ("ny", value<int>()->default_value(10), "Num of Nodes in Y dir")
       ("nz", value<int>()->default_value(1) , "Num of Nodes in Z dir")
-      ("dim", value<int>()->default_value(2), "Dimension")
-      ("age", value<int>()->notifier(on_age), "Age");
+      ("dim", value<int>()->default_value(2), "Dimension");
 
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -62,10 +60,6 @@ Problem::Problem (int argc, char *argv[])
 
     if (vm.count("help"))
       std::cout << desc << '\n';
-    else if (vm.count("age"))
-      std::cout << "Age: " << vm["age"].as<int>() << '\n';
-    else if (vm.count("pi"))
-      std::cout << "Pi: " << vm["pi"].as<float>() << '\n';
 
     nx = vm["nx"].as<int>();
     ny = vm["ny"].as<int>();
@@ -76,6 +70,7 @@ Problem::Problem (int argc, char *argv[])
   catch (const error &ex)
   {
     std::cerr << ex.what() << '\n';
+    throw 1;
   }
 
   lx = 1.0;

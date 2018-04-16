@@ -138,8 +138,8 @@ void csr_cg (const csr_matrix &A, const csr_vector& x, csr_vector &b)
     waxpby(one,x,alpha,p,x);
     waxpby(one,r,-alpha,Ap,r);
 
-    if(iter%10==0)
-      cout << "Iteration: "<<iter<<" Tolerance: "<<normr<< endl;
+//    if(iter%10==0)
+//      cout << "Iteration: "<<iter<<" Tolerance: "<<normr<< endl;
     iter++;
 
   } while(iter<MAX_ITERS && normr>TOL);
