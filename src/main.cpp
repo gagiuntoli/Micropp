@@ -1,7 +1,8 @@
 #include <iostream>
 #include <ctime>
-#include "micro.cpp"
-#include "csr.cpp"
+#include <cmath>
+#include "micro.h"
+#include "csr.h"
 
 using namespace std;
 

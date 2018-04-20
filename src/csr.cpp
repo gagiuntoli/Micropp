@@ -1,21 +1,9 @@
-#include<cstdlib>
-#include<iostream>
-#include<cmath>
+#include <cstdlib>
+#include <iostream>
+#include <cmath>
+#include "csr.h"
 
 using namespace std;
-
-struct csr_matrix {
-  unsigned int num_rows;
-  unsigned int nnz;
-  unsigned int *row_offsets;
-  unsigned int *cols;
-  double *coefs;
-};
-
-struct csr_vector {
-  unsigned int n;
-  double *coefs;
-};
 
 int csr_alloc_A (csr_matrix& A, int N)
 {
