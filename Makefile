@@ -1,4 +1,4 @@
-CFLAGS= -c -g -std=c++11 
+CFLAGS= -c -O3 -std=c++11 
 LFLAGS= -lboost_program_options
 
 micropp: build/main.o build/csr.o build/micro.o

@@ -286,14 +286,11 @@ void csr_assembly_A (csr_matrix &A, Problem &problem)
   int index;
 
   double Ae[8][8];
-  clock_t start, end, start_1, end_1;
-  double elapsed_secs, elaps_1=0.0, elaps_2=0.0;
 
   for (int i=0; i<A.num_rows*18; i++)
     A.coefs[i] = 0.0;
 
-  start = clock();
-  for (int e=0; e<nelem; e++){
+  for (int e=0; e<nelem; e++) {
 
     xfactor = e%(nx-1);
     yfactor = e/(ny-1);
@@ -304,14 +301,10 @@ void csr_assembly_A (csr_matrix &A, Problem &problem)
     n3 = (yfactor+1) * nx + xfactor     ;
     //cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
-    start_1 = clock();
     get_elemental (e, Ae, problem);
-    end_1 = clock();
-    elaps_1 += double(end_1 - start_1) / CLOCKS_PER_SEC;
 
-    start_1 = clock();
-    for (int n=0; n<4; n++){
-      for (int d=0; d<2; d++){
+    for (int n=0; n<4; n++) {
+      for (int d=0; d<2; d++) {
 	A.coefs[n0*dim*18 + cols_row_0[n]*dim + d     ] += Ae[0][n*2+d];
 	A.coefs[n0*dim*18 + cols_row_0[n]*dim + d + 18] += Ae[1][n*2+d];
 	A.coefs[n1*dim*18 + cols_row_1[n]*dim + d     ] += Ae[2][n*2+d];
@@ -322,18 +315,10 @@ void csr_assembly_A (csr_matrix &A, Problem &problem)
 	A.coefs[n3*dim*18 + cols_row_3[n]*dim + d + 18] += Ae[7][n*2+d];
       }
     }
-    end_1 = clock();
-    elaps_2 += double(end_1 - start_1) / CLOCKS_PER_SEC;
 
   }
-  end = clock();
-  elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-  cout << "time assembly loop in e   = "<<elapsed_secs<<endl;
-  cout << "time assembly calc     Ae = "<<elaps_1<<endl;
-  cout << "time assembly assembly Ae = "<<elaps_2<<endl;
 
   /* boundary conditions */
-  start = clock();
   for (int n=0; n<nx; n++){ // y=0
     for (int k=0; k<18; k++){
       A.coefs[n*dim*18 + k     ] = 0.0;
@@ -366,9 +351,6 @@ void csr_assembly_A (csr_matrix &A, Problem &problem)
     A.coefs[(n*nx-1)*dim*18 + 8     ] = 1.0;
     A.coefs[(n*nx-1)*dim*18 + 9 + 18] = 1.0;
   }
-  end = clock();
-  elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-  cout << "time assembly bc          = "<<elapsed_secs<<endl;
 
 //  for (int i=0; i<A.num_rows; i++) {
 //    for (int j=0; j<18; j++)
@@ -403,7 +385,7 @@ int main (int argc, char *argv[])
     csr_vector x, dx, res;
     Problem problem (argc, argv);
     clock_t start, end;
-    double elapsed_secs;
+    double t_solve, t_assembly;
 
     double eps [] = { 0.005, 0.0, 0.0 };
     int nn = problem.nn;
@@ -426,22 +408,19 @@ int main (int argc, char *argv[])
 
     // assembly
     start = clock();
-
     csr_assembly_A   (A, problem);
     csr_assembly_res (res, problem);
     csr_assembly_res (dx, problem);
-
     end = clock();
-
-    elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-    cout << "time assembly             = "<<elapsed_secs<<endl;
+    t_assembly = double(end - start) / CLOCKS_PER_SEC;
 
     // solve system  A * dx = -res
     start = clock();
     csr_cg (A, dx, res);
     end = clock();
-    elapsed_secs = double(end - start) / CLOCKS_PER_SEC;
-    cout << "time solve                = "<<elapsed_secs<<endl;
+    t_solve = double(end - start) / CLOCKS_PER_SEC;
+    cout << "time assembly = "<<t_assembly<<endl;
+    cout << "time solve    = "<<t_solve   <<endl;
 
     // free memory
     csr_free_A (A);
