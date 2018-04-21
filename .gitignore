@@ -1,5 +1,5 @@
 *.dat
-*.out
+*.out*
 *.swp
 *.o
 build/*

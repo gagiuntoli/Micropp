@@ -194,12 +194,13 @@ double distance (int e, Problem &problem)
 
 void get_elemental (int e, double (&Ae)[8][8], Problem &problem)
 {
-  /* // for debugging purposes
+/* 
+  // for debugging purposes
      for (int i=0; i<8; i++)
      for (int j=0; j<8; j++)
      Ae[i][j] = 1;
-   */
-
+ */
+  
   double nu = 0.3, E;
   double ctan[3][3];
   E  = 1e7;
@@ -218,18 +219,52 @@ void get_elemental (int e, double (&Ae)[8][8], Problem &problem)
     }
   }
 
-  for (int i=0; i<8; i++) {
-    for (int j=0; j<8; j++) {
+  double xg[4][2] = {
+    {-0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626}};
+
+  double dsh[4][2], b_mat[3][8], cxb[3][8];
+
+  for (int i=0; i<8; i++) 
+    for (int j=0; j<8; j++) 
       Ae[i][j] = 0.0;
-      for (int gp=0; gp<4; gp++) {
-	for (int m=0; m<8; m++) {
-	  for (int k=0; k<3; k++) {
-	    Ae[i][j] += problem.b_mat[m][i][gp] * ctan[m][k] * problem.b_mat[k][j][gp] * problem.wg[gp];
-	  }
+
+  int dim = problem.dim;
+  double dx = problem.dx;
+  double dy = problem.dy;
+
+  for (int gp=0; gp<4; gp++) {
+
+    dsh[0][0] = -(1-xg[gp][1])/4*2/dx ; dsh[0][1] = -(1-xg[gp][0])/4*2/dy;
+    dsh[1][0] = +(1-xg[gp][1])/4*2/dx ; dsh[1][1] = -(1+xg[gp][0])/4*2/dy;
+    dsh[2][0] = +(1+xg[gp][1])/4*2/dx ; dsh[2][1] = +(1+xg[gp][0])/4*2/dy;
+    dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
+
+    for (int i=0; i<4; i++) {
+      b_mat[1][i*dim] = dsh[i][0]; b_mat[1][i*dim + 1] = 0        ;
+      b_mat[2][i*dim] = 0        ; b_mat[2][i*dim + 1] = dsh[i][1];
+      b_mat[3][i*dim] = dsh[i][1]; b_mat[3][i*dim + 1] = dsh[i][0];
+    }
+
+    for (int i=0; i<3; i++) {
+      for (int j=0; j<8; j++) {
+	for (int k=0; k<3; k++) {
+	  cxb[i][j] += ctan[i][k] * b_mat[k][j];
 	}
       }
     }
-  }
+
+    for (int i=0; i<8; i++) {
+      for (int j=0; j<8; j++) {
+	for (int m=0; m<3; m++) {
+	    Ae[i][j] += b_mat[m][i] * cxb[m][j] * problem.wg[gp];
+	}
+      }
+    }
+
+  } // gp loop
   
 }
 
