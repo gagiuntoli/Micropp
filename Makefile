@@ -12,7 +12,7 @@ build/main.o: src/main.cpp
 	g++ $(CFLAGS) $< -I ./inc -o build/main.o
 
 build/micro.o: src/micro.cpp
-	g++ $(CFLAGS) $< -I ./inc -I $(INC) -o build/micro.o
+	g++ $(CFLAGS) $< -I ./inc -o build/micro.o
 
 build/csr.o: src/csr.cpp
 	g++ $(CFLAGS) $< -I ./inc -o build/csr.o

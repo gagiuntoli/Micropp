@@ -1,4 +1,5 @@
 #include <vector>
+#include "csr.h"
 
 class Problem {
 
@@ -31,3 +32,9 @@ class Problem {
 
     Problem (int argc, char *argv[]);
 };
+
+double distance (int e, Problem &problem);
+void get_elemental (int e, double (&Ae)[8][8], Problem &problem);
+void csr_assembly_A (csr_matrix &A, Problem &problem);
+void csr_assembly_res (csr_vector &res, Problem &problem);
+int csr_set_A (csr_matrix &A, Problem &problem);
