@@ -5,12 +5,12 @@
 //  int npe = mesh_struct.npe;
 //  int dim = mesh_struct.dim;
 //  int nn = mesh_struct.nn;
-//  int nelm = mesh_struct.nelm;
+//  int nelem = mesh_struct.nelem;
 //  double *res_e = malloc((dim*npe) * sizeof(double));
 //
 //  for (int i = 0 ; i < (nn*dim) ; i++) res_ell[i] = 0.0;
 //
-//  for (int e = 0 ; e < nelm ; e++) {
+//  for (int e = 0 ; e < nelem ; e++) {
 //
 //    for (int i = 0 ; i < (npe*dim) ; i++) res_e[i] = 0.0;
 //    mesh_struct_get_elem_indeces(&mesh_struct, e, elem_index);
@@ -54,20 +54,38 @@ void ell_assembly_A (ell_matrix &A, Problem &problem)
 {
   int npe = problem.npe;
   int dim = problem.dim;
-  int nelm = problem.nelm;
+  int nx = problem.nx;
+  int ny = problem.ny;
+  int nelem = problem.nelem;
+  int index[8];
   double Ae[8][8], Ae_vec[64];
 
-  ell_set_zero_mat(&jac_ell);
-  for (int e = 0 ; e < nelm ; e++) {
+  ell_set_zero_mat(&A);
+  for (int e = 0 ; e < nelem ; e++) {
 
-    mesh_struct_get_elem_indeces(&mesh_struct, e, elem_index);
+    int xfactor = e%(nx-1);
+    int yfactor = e/(ny-1);
+
+    int n0 = yfactor     * nx + xfactor     ;
+    int n1 = yfactor     * nx + xfactor + 1 ;
+    int n2 = (yfactor+1) * nx + xfactor + 1 ;
+    int n3 = (yfactor+1) * nx + xfactor     ;
+    index[0] = n0*dim;
+    index[1] = n0*dim + 1;
+    index[2] = n1*dim;
+    index[3] = n1*dim + 1;
+    index[4] = n2*dim;
+    index[5] = n2*dim + 1;
+    index[6] = n3*dim;
+    index[7] = n3*dim + 1;
+    //cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
     get_elemental (e, Ae, problem);
     for (int i=0; i<npe*dim; i++)
       for (int j=0; j<npe*dim; j++)
 	Ae_vec[i*8+j] = Ae[i][j];
 
-    ell_add_vals(A, elem_index, npe*dim, elem_index, npe*dim, Ae_vec); // assembly
+    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae_vec); // assembly
   }
 
 //  for (int d = 0; d < dim ; d++) {

@@ -23,9 +23,9 @@ int main (int argc, char *argv[])
     double *x = (double*)malloc(nn*dim*sizeof(double));
     double *b = (double*)malloc(nn*dim*sizeof(double));
 
-    ell_matrix m;
+    ell_matrix A;
     ell_solver solver;
-    ell_init(&m, dim*nn, dim*nn, 9*dim);
+    ell_init(&A, dim*nn, dim*nn, 9*dim);
 
 //    csr_alloc_A (A, nn*dim);
 //    csr_alloc_v (res, nn*dim);
@@ -47,6 +47,7 @@ int main (int argc, char *argv[])
 //    csr_assembly_A   (A, problem);
 //    csr_assembly_res (res, problem);
 //    csr_assembly_res (dx, problem);
+    ell_assembly_A (A, problem);
     end = clock();
     t_assembly = double(end - start) / CLOCKS_PER_SEC;
 
