@@ -7,7 +7,7 @@
 #include <fstream>
 #include "ell.h"
 
-#define N 5
+#define N 100
 
 using namespace std;
 
@@ -33,8 +33,8 @@ int main(void)
   ell_set_zero_col(&m, 0  , 1);
   ell_set_zero_col(&m, N-1, 1);
 
-  cout << "matrix =" << endl;
-  ell_print_full(&m);
+//  cout << "matrix =" << endl;
+//  ell_print_full(&m);
 
   for (int i = 0 ; i < N ; i++) {
     x[i] = 0.0;
@@ -42,7 +42,7 @@ int main(void)
   }
   b[0]   = 0.0;
   b[N-1] = 0.0;
-  solver.max_its = 20;
+  solver.max_its = 100;
   solver.min_tol = 1.0e-5;
   ell_solve_cg(&solver, &m, b, x);
 
@@ -53,11 +53,11 @@ int main(void)
   for (int i = 0 ; i < N ; i++)
     fl << setprecision(3) << x[i] << " " << b[i] << endl;
   fl.close();
-  cout << "err = " << solver.err << " its = " << solver.its << endl;
+  cout << "err = " << setw(10) << solver.err << " its = " << solver.its << endl;
 
   for (int i = 0 ; i < N ; i++)
     x[i] = 0.0;
-  solver.max_its = 100000;
+  solver.max_its = 2000;
   solver.min_tol = 1.0e-5;
   ell_solve_jacobi(&solver, &m, b, x);
 
@@ -67,7 +67,7 @@ int main(void)
   for (int i = 0 ; i < N ; i++)
     fl << setprecision(3) << x[i] << " " << b[i] << endl;
   fl.close();
-  cout << "err = " << solver.err << " its = " << solver.its << endl;
+  cout << "err = " << setw(10) << solver.err << " its = " << solver.its << endl;
 
   return 0;
 }
