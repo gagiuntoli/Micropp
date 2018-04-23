@@ -5,23 +5,23 @@ LFLAGS= -lboost_program_options
 #INC=/apps/BOOST/1.67.0/include
 INC=
 
-micropp: build/main.o build/csr.o build/micro.o
+micropp: build/main.o build/csr.o build/micro.o build/ell.o
 	g++ $(LFLAGS) $^ -o micropp
     
 build/main.o: src/main.cpp
-	g++ $(CFLAGS) $< -I ./inc -o build/main.o
+	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/micro.o: src/micro.cpp
-	g++ $(CFLAGS) $< -I ./inc -o build/micro.o
+	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/assembly.o: src/assembly.cpp
-	g++ $(CFLAGS) $< -I ./inc -o build/assembly.o
+	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/csr.o: src/csr.cpp
-	g++ $(CFLAGS) $< -I ./inc -o build/csr.o
+	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/ell.o: src/ell.cpp
-	g++ $(CFLAGS) $< -I ./inc -o build/micro.o
+	g++ $(CFLAGS) $< -I ./inc -o $@
 
 clean:
 	rm -f micropp build/*
