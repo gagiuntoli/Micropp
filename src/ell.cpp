@@ -1,4 +1,9 @@
 #include "ell.h"
+#include <iostream>
+#include <iomanip> // print with format
+#include <cmath>
+
+using namespace std;
 
 int ell_init (ell_matrix * m, int nrow, int ncol, int nnz)
 {
@@ -6,8 +11,8 @@ int ell_init (ell_matrix * m, int nrow, int ncol, int nnz)
   m->nnz = nnz;
   m->nrow = nrow;
   m->ncol = ncol;
-  m->cols = malloc((nrow*nnz) * sizeof(int));
-  m->vals = malloc((nrow*nnz) * sizeof(double));
+  m->cols = (int*)malloc((nrow*nnz) * sizeof(int));
+  m->vals = (double*)malloc((nrow*nnz) * sizeof(double));
   if (m->vals == NULL || m->cols == NULL) return 2;
   for (int i = 0 ; i < (nrow*nnz) ; i++) m->cols[i] = -1;
   for (int i = 0 ; i < (nrow*nnz) ; i++) m->vals[i] = +0;
@@ -16,13 +21,18 @@ int ell_init (ell_matrix * m, int nrow, int ncol, int nnz)
 
 int ell_set_val (ell_matrix * m, int row, int col, double val)
 {
-  if (row >= m->nrow || col >= m->ncol) {
-    printf(RED "ell error: row %d or col %d greater than the dimension of the matrix\n" NRM, row, col);
+  if (row >= m->nrow) { 
+    cout << "ell error: row " << row << " is greater than the dimension of the matrix" << endl;
     return 1;
-  }
-  if (row < 0 || col < 0) {
-    printf(RED "ell error: negative values in row %d or col %d\n" NRM, row, col);
+  } else if(col >= m->ncol) {
+    cout << "ell error: col " << col << " is greater than the dimension of the matrix" << endl;
     return 2;
+  } else if (row < 0) {
+    cout << "ell error: negative values in row " << row << endl;
+    return 3;
+  } else if (col < 0) {
+    cout << "ell error: negative values in col " << col << endl;
+    return 4;
   }
   int j = 0;
   while (j < m->nnz) {
@@ -37,20 +47,20 @@ int ell_set_val (ell_matrix * m, int row, int col, double val)
     j++;
   }
   if (j == m->nnz) {
-    printf(RED "ell error: not enought space to store value in row %d and col %d\n" NRM, row, col);
-    return 3;
+    cout << "ell error: not enought space to store value in row " << row << "and col " << col << endl;
+    return 5;
   }
-  return 4;
+  return 6;
 }
 
 int ell_add_val (ell_matrix * m, int row, int col, double val)
 {
   if (row >= m->nrow || col >= m->ncol) {
-    printf(RED "ell error: row %d or col %d greater than the dimension of the matrix\n" NRM, row, col);
+    cout << "ell error: row " << row << " or col " << col << " greater than the dimension of the matrix" << endl;
     return 1;
   }
   if (row < 0 || col < 0) {
-    printf(RED "ell error: negative values in row %d or col %d\n" NRM, row, col);
+    cout << "ell error: negative values in row or col" << endl;
     return 2;
   }
   int j = 0;
@@ -66,7 +76,7 @@ int ell_add_val (ell_matrix * m, int row, int col, double val)
     j++;
   }
   if (j == m->nnz) {
-    printf(RED "ell error: not enought space to add value in row %d and col %d\n" NRM, row, col);
+    cout << "ell error: not enought space to add value in row and col" << endl;
     return 3;
   }
   return 4;
@@ -151,8 +161,8 @@ int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
    */
   if (m == NULL || b == NULL || x == NULL) return 1;
   
-  double *k = malloc (m->nrow * sizeof(double)); // K = diag(A)
-  double *e_i = malloc(m->nrow * sizeof(double));
+  double *k = (double*)malloc (m->nrow * sizeof(double)); // K = diag(A)
+  double *e_i = (double*)malloc(m->nrow * sizeof(double));
 
   for (int i = 0 ; i < m->nrow ; i++) {
     ell_get_val (m, i, i, &k[i]);
@@ -210,11 +220,11 @@ int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
   if (m == NULL || b == NULL || x == NULL) return 1;
   
   int its = 0;
-  double *k = malloc(m->nrow * sizeof(double)); // K = diag(A)
-  double *r = malloc(m->nrow * sizeof(double));
-  double *z = malloc(m->nrow * sizeof(double));
-  double *p = malloc(m->nrow * sizeof(double));
-  double *q = malloc(m->nrow * sizeof(double));
+  double *k = (double*)malloc(m->nrow * sizeof(double)); // K = diag(A)
+  double *r = (double*)malloc(m->nrow * sizeof(double));
+  double *z = (double*)malloc(m->nrow * sizeof(double));
+  double *p = (double*)malloc(m->nrow * sizeof(double));
+  double *q = (double*)malloc(m->nrow * sizeof(double));
   double rho_0, rho_1, d;
   double err;
 
@@ -278,11 +288,11 @@ int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
 int ell_get_val (ell_matrix * m, int row, int col, double *val)
 {
   if (row >= m->nrow || col >= m->ncol) {
-    printf(RED "ell_get_val: row %d or col %d greater than the dimension of the matrix\n" NRM, row, col);
+    cout << "ell_get_val: row or col greater than the dimension of the matrix" << endl;
     return 1;
   }
   if (row < 0 || col < 0) {
-    printf(RED "ell_get_val: negative values in row %d or col %d\n" NRM, row, col);
+    cout << "ell_get_val: negative values in row or col" << endl;
     return 2;
   }
   int j = 0;
@@ -306,8 +316,11 @@ int ell_print_full (ell_matrix * m)
   double val;
   for (int i = 0 ; i < m->nrow ; i++) {
     for (int j = 0 ; j < m->ncol ; j++) {
-      printf("%lf%s",(ell_get_val(m, i, j, &val) == 0)?val:0.0, (j == m->ncol - 1) ? "\n" : " ");
+      if (ell_get_val(m, i, j, &val) == 0) {
+	cout << setw(4) << val << " ";
+      } else return 1;
     }
+    cout << endl;
   }
   return 0;
 }

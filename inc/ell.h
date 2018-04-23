@@ -2,9 +2,9 @@
 #define ELL_H_
 
 typedef struct {
-  int nrow;
-  int ncol;
-  int nnz;
+  int nrow;     // number of rows
+  int ncol;     // number of columns
+  int nnz;      // non zeros per row
   int *cols;
   double *vals;
 } ell_matrix;
