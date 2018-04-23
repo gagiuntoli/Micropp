@@ -48,27 +48,6 @@ Problem::Problem (int argc, char *argv[])
   wg[1] = 0.25*(dx*dy);
   wg[2] = 0.25*(dx*dy);
   wg[3] = 0.25*(dx*dy);
-
-  double xg[4][2] = {
-    {-0.577350269189626, -0.577350269189626},
-    {+0.577350269189626, -0.577350269189626},
-    {+0.577350269189626, +0.577350269189626},
-    {-0.577350269189626, +0.577350269189626}};
-
-  for (int gp=0; gp<4; gp++) {
-    dsh[0][0][gp] = -(1-xg[gp][1])/4*2/dx ; dsh[0][1][gp] = -(1-xg[gp][0])/4*2/dy;
-    dsh[1][0][gp] = +(1-xg[gp][1])/4*2/dx ; dsh[1][1][gp] = -(1+xg[gp][0])/4*2/dy;
-    dsh[2][0][gp] = +(1+xg[gp][1])/4*2/dx ; dsh[2][1][gp] = +(1+xg[gp][0])/4*2/dy;
-    dsh[3][0][gp] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1][gp] = +(1-xg[gp][0])/4*2/dy;
-  }
-
-  for (int gp=0; gp<4; gp++) {
-    for (int i=0; i<4; i++) {
-      b_mat[1][i*dim][gp] = dsh[i][0][gp]; b_mat[1][i*dim+1][gp] = 0            ;
-      b_mat[2][i*dim][gp] = 0            ; b_mat[2][i*dim+1][gp] = dsh[i][1][gp];
-      b_mat[3][i*dim][gp] = dsh[i][1][gp]; b_mat[3][i*dim+1][gp] = dsh[i][0][gp];
-    }
-  }
 }
 
 double distance (int e, Problem &problem)

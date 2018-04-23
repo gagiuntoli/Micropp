@@ -14,6 +14,9 @@ build/main.o: src/main.cpp
 build/micro.o: src/micro.cpp
 	g++ $(CFLAGS) $< -I ./inc -o build/micro.o
 
+build/assembly.o: src/assembly.cpp
+	g++ $(CFLAGS) $< -I ./inc -o build/assembly.o
+
 build/csr.o: src/csr.cpp
 	g++ $(CFLAGS) $< -I ./inc -o build/csr.o
 

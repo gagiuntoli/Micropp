@@ -1,5 +1,6 @@
 #include <vector>
 #include "csr.h"
+#include "ell.h"
 
 class Problem {
 
@@ -10,10 +11,7 @@ class Problem {
     int nvoi= 3;
 
     std::vector<int> bc_nods, bc_y0, bc_y1, bc_x0, bc_x1;
-    double xg[4][2];
     double wg[4];
-    double b_mat[3][8][4];
-    double dsh[4][2][4];
     int nx, ny, nz, nn; 
     double lx, ly, lz, dx, dy, dz;
     int nelem;
@@ -35,6 +33,8 @@ class Problem {
 
 double distance (int e, Problem &problem);
 void get_elemental (int e, double (&Ae)[8][8], Problem &problem);
+void ell_assembly_A (ell_matrix &A, Problem &problem);
 void csr_assembly_A (csr_matrix &A, Problem &problem);
 void csr_assembly_res (csr_vector &res, Problem &problem);
 int csr_set_A (csr_matrix &A, Problem &problem);
+
