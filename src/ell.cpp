@@ -63,14 +63,14 @@ int ell_add_val (ell_matrix * m, int row, int col, double val)
     cout << "ell error: negative values in row or col" << endl;
     return 2;
   }
-  int j = 0;
+  int j = 0, row_start = row*m->nnz;
   while (j < m->nnz) {
-    if (m->cols[(row*m->nnz) + j] == -1) {
-      m->cols[(row*m->nnz) + j] = col;
-      m->vals[(row*m->nnz) + j] = val;
+    if (m->cols[row_start + j] == -1) {
+      m->cols[row_start + j] = col;
+      m->vals[row_start + j] = val;
       return 0;
-    } else if (m->cols[(row*m->nnz) + j] == col) {
-      m->vals[(row*m->nnz) + j] += val;
+    } else if (m->cols[row_start + j] == col) {
+      m->vals[row_start + j] += val;
       return 0;
     }
     j++;
@@ -139,7 +139,6 @@ int ell_mvp (ell_matrix * m, double *x, double *y)
   //  y = m * x
   if (m == NULL || x == NULL || y == NULL) return 1;
 
-#pragma omp parallel for
   for (int i = 0 ; i < m->nrow ; i++) {
     y[i] = 0;
     int j = 0;

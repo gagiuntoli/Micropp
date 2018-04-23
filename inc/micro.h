@@ -33,7 +33,9 @@ class Problem {
 
 double distance (int e, Problem &problem);
 void get_elemental (int e, double (&Ae)[8][8], Problem &problem);
-void ell_assembly_A (ell_matrix &A, Problem &problem);
+void get_elemental_b (int e, double (&be)[8], Problem &problem);
+void assembly_A (ell_matrix &A, Problem &problem);
+double assembly_b (double *b, Problem &problem);
 void csr_assembly_A (csr_matrix &A, Problem &problem);
 void csr_assembly_res (csr_vector &res, Problem &problem);
 int csr_set_A (csr_matrix &A, Problem &problem);

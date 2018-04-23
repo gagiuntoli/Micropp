@@ -65,6 +65,75 @@ double distance (int e, Problem &problem)
   return sqrt(xdis + ydis);
 }
 
+void get_elemental_b (int e, double (&be)[8], Problem &problem)
+{
+// for debugging
+     for (int i=0; i<8; i++)
+     be[i] = 1;
+  
+  double nu = 0.3, E;
+  double ctan[3][3];
+  E  = 1e7;
+  if (distance(e, problem) < -1.75) {
+    E  = 1.0e7;
+  } else {
+    E  = 1.0e6;
+  }
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
+  ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
+  for (int i=0; i<3; i++) {
+    for (int j=0; j<3; j++) {
+      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+    }
+  }
+
+  double xg[4][2] = {
+    {-0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626}};
+
+  double dsh[4][2], b_mat[3][8], cxb[3][8];
+
+  for (int i=0; i<8; i++) 
+    be[i] = 0.0;
+
+  int dim = problem.dim;
+  double dx = problem.dx;
+  double dy = problem.dy;
+
+  for (int gp=0; gp<4; gp++) {
+
+    dsh[0][0] = -(1-xg[gp][1])/4*2/dx ; dsh[0][1] = -(1-xg[gp][0])/4*2/dy;
+    dsh[1][0] = +(1-xg[gp][1])/4*2/dx ; dsh[1][1] = -(1+xg[gp][0])/4*2/dy;
+    dsh[2][0] = +(1+xg[gp][1])/4*2/dx ; dsh[2][1] = +(1+xg[gp][0])/4*2/dy;
+    dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
+
+    for (int i=0; i<4; i++) {
+      b_mat[1][i*dim] = dsh[i][0]; b_mat[1][i*dim + 1] = 0        ;
+      b_mat[2][i*dim] = 0        ; b_mat[2][i*dim + 1] = dsh[i][1];
+      b_mat[3][i*dim] = dsh[i][1]; b_mat[3][i*dim + 1] = dsh[i][0];
+    }
+
+//    for (int i=0; i<3; i++) {
+//      for (int j=0; j<8; j++) {
+//	for (int k=0; k<3; k++) {
+//	  cxb[i][j] += ctan[i][k] * b_mat[k][j];
+//	}
+//      }
+//    }
+//
+//    for (int i=0; i<8; i++) {
+//      for (int j=0; j<8; j++) {
+//	for (int m=0; m<3; m++) {
+//	    Ae[i][j] += b_mat[m][i] * cxb[m][j] * problem.wg[gp];
+//	}
+//      }
+//    }
+  } // gp loop
+}
+
 void get_elemental (int e, double (&Ae)[8][8], Problem &problem)
 {
 /*   // for debugging

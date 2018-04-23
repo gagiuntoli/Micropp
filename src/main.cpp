@@ -47,7 +47,8 @@ int main (int argc, char *argv[])
 //    csr_assembly_A   (A, problem);
 //    csr_assembly_res (res, problem);
 //    csr_assembly_res (dx, problem);
-    ell_assembly_A (A, problem);
+    assembly_A (A, problem);
+    assembly_b (b, problem);
     end = clock();
     t_assembly = double(end - start) / CLOCKS_PER_SEC;
 
