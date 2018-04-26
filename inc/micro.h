@@ -41,4 +41,6 @@ class Problem {
     void get_elemental_A (int e, double (&Ae)[8][8]);
     void get_elemental_b (int e, double (&be)[8]);
     double distance (int e);
+    void write_vtu (void);
+
 };

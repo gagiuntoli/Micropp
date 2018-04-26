@@ -13,7 +13,7 @@ micropp: build/main.o build/assembly.o build/csr.o build/micro.o build/ell.o
 test_1: build/test_1.o build/libmicropp.a
 	g++ $< -o $@ $(LFLAGS) -L build -lmicropp
 
-build/libmicropp.a: build/assembly.o build/solve.o build/csr.o build/micro.o build/ell.o 
+build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/csr.o build/micro.o build/ell.o 
 	ar rcs $@ $^
     
 build/main.o: src/main.cpp inc/micro.h
@@ -35,6 +35,9 @@ build/test_1.o: src/test_1.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/solve.o: src/solve.cpp inc/micro.h
+	g++ $(CFLAGS) $< -I ./inc -o $@
+
+build/output.o: src/output.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
 clean:

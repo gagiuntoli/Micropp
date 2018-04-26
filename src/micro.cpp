@@ -28,13 +28,15 @@ Problem::Problem (int dim, int size[3])
   wg[3] = 0.25*(dx*dy);
 
   ell_init (&A_ell, nn*dim, nn*dim, 18);
-  b = (double*)malloc(nn*dim*sizeof(double));
-  u = (double*)malloc(nn*dim*sizeof(double));
+  b  = (double*)malloc(nn*dim*sizeof(double));
   du = (double*)malloc(nn*dim*sizeof(double));
+  u  = (double*)malloc(nn*dim*sizeof(double));
+
+  for (int i=0; i<nn*dim; i++)
+    u[i] = 0.0;
 
 }
 
-//
 //void csr_assembly_A (csr_matrix &A, Problem &problem)
 //{
 //  int dim = problem.dim;

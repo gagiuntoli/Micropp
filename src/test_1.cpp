@@ -37,23 +37,30 @@ int main (int argc, char *argv[])
     size[1] = ny;
     size[2] = nz;
 
-    double start, end, t_assembly;
-    Problem micropp (dim, size);
+    double start, end, t_lap;
+    Problem micro (dim, size);
 
     // assembly
     start = clock();
-    micropp.assembly_A();
-    micropp.assembly_b();
+    micro.assembly_A();
+    micro.assembly_b();
     end = clock();
-    t_assembly = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Assembly : " << t_assembly << endl;
+    t_lap = double(end - start) / CLOCKS_PER_SEC;
+    cerr << "Time Assembly : " << t_lap << endl;
 
     // solve
     start = clock();
-    micropp.solve();
+    micro.solve();
     end = clock();
-    t_assembly = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Solving  : " << t_assembly << endl;
+    t_lap = double(end - start) / CLOCKS_PER_SEC;
+    cerr << "Time Solving  : " << t_lap << endl;
+
+    // writting
+    start = clock();
+    micro.write_vtu();
+    end = clock();
+    t_lap = double(end - start) / CLOCKS_PER_SEC;
+    cerr << "Time Writing  : " << t_lap << endl;
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

@@ -2,6 +2,8 @@
 *.out*
 *.swp
 *.o
+*.vtu
+*.pvtu
 build/*
 micropp
 ell_solvers
