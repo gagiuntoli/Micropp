@@ -48,6 +48,13 @@ int main (int argc, char *argv[])
     t_assembly = double(end - start) / CLOCKS_PER_SEC;
     cerr << "Time Assembly : " << t_assembly << endl;
 
+    // solve
+    start = clock();
+    micropp.solve();
+    end = clock();
+    t_assembly = double(end - start) / CLOCKS_PER_SEC;
+    cerr << "Time Solving  : " << t_assembly << endl;
+
   } catch (int &e) {
     cerr << "Error : " << e << endl;
     return 1;

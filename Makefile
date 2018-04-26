@@ -13,25 +13,28 @@ micropp: build/main.o build/assembly.o build/csr.o build/micro.o build/ell.o
 test_1: build/test_1.o build/libmicropp.a
 	g++ $< -o $@ $(LFLAGS) -L build -lmicropp
 
-build/libmicropp.a: build/assembly.o build/csr.o build/micro.o build/ell.o
+build/libmicropp.a: build/assembly.o build/solve.o build/csr.o build/micro.o build/ell.o 
 	ar rcs $@ $^
     
-build/main.o: src/main.cpp
+build/main.o: src/main.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
-build/micro.o: src/micro.cpp
+build/micro.o: src/micro.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
-build/assembly.o: src/assembly.cpp
+build/assembly.o: src/assembly.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
-build/csr.o: src/csr.cpp
+build/csr.o: src/csr.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
-build/ell.o: src/ell.cpp
+build/ell.o: src/ell.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
-build/test_1.o: src/test_1.cpp
+build/test_1.o: src/test_1.cpp inc/micro.h
+	g++ $(CFLAGS) $< -I ./inc -o $@
+
+build/solve.o: src/solve.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
 clean:
