@@ -1,5 +1,4 @@
 #include <vector>
-#include "csr.h"
 #include "ell.h"
 
 class Problem {

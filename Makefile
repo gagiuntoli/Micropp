@@ -7,13 +7,13 @@ INC=
 
 all: test_1
 
-micropp: build/main.o build/assembly.o build/csr.o build/micro.o build/ell.o
+micropp: build/main.o build/assembly.o build/micro.o build/ell.o
 	g++ $(LFLAGS) $^ -o $@
 
 test_1: build/test_1.o build/libmicropp.a
 	g++ $< -o $@ $(LFLAGS) -L build -lmicropp
 
-build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/csr.o build/micro.o build/ell.o 
+build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/micro.o build/ell.o 
 	ar rcs $@ $^
     
 build/main.o: src/main.cpp inc/micro.h
@@ -23,9 +23,6 @@ build/micro.o: src/micro.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/assembly.o: src/assembly.cpp inc/micro.h
-	g++ $(CFLAGS) $< -I ./inc -o $@
-
-build/csr.o: src/csr.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
 build/ell.o: src/ell.cpp inc/micro.h
@@ -41,4 +38,4 @@ build/output.o: src/output.cpp inc/micro.h
 	g++ $(CFLAGS) $< -I ./inc -o $@
 
 clean:
-	rm -f micropp build/*
+	rm -f micropp test_1 build/*
