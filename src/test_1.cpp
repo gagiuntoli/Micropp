@@ -43,6 +43,7 @@ int main (int argc, char *argv[])
     // assembly
     start = clock();
     micropp.assembly_A();
+    micropp.assembly_b();
     end = clock();
     t_assembly = double(end - start) / CLOCKS_PER_SEC;
     cerr << "Time Assembly : " << t_assembly << endl;

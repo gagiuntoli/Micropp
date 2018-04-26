@@ -30,20 +30,15 @@ class Problem {
 
     ell_matrix A_ell;
     ell_solver solver_ell;
-    double *x_sol;
-    double *dx_sol;
-    double *b_rhs;
+    double *u;
+    double *du;
+    double *b;
 
     Problem (int dim, int size[3]);
     void assembly_A (void);
+    double assembly_b (void);
     void solve (void);
     void get_elemental_A (int e, double (&Ae)[8][8]);
+    void get_elemental_b (int e, double (&be)[8]);
     double distance (int e);
 };
-
-void get_elemental_b (int e, double (&be)[8], Problem &problem);
-void assembly_A (ell_matrix &A, Problem &problem);
-double assembly_b (double *b, Problem &problem);
-void csr_assembly_A (csr_matrix &A, Problem &problem);
-void csr_assembly_res (csr_vector &res, Problem &problem);
-int csr_set_A (csr_matrix &A, Problem &problem);
