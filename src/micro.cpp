@@ -8,6 +8,7 @@ using namespace boost::program_options;
 Problem::Problem (int argc, char *argv[])
 {
   try {
+
     options_description desc{"Options"};
     desc.add_options()
       ("help,h", "Help screen")
@@ -29,27 +30,27 @@ Problem::Problem (int argc, char *argv[])
     nz = vm["nz"].as<int>();
     dim = vm["dim"].as<int>();
 
+    lx = 1.0;
+    ly = 1.0;
+    lz = 1.0;
+    dx = lx/(nx-1);
+    dy = ly/(ny-1);
+    nn = nx*ny*nz;
+    if (dim == 2) {
+      nelem = (nx-1) * (ny-1);
+    }
+
+    wg[0] = 0.25*(dx*dy);
+    wg[1] = 0.25*(dx*dy);
+    wg[2] = 0.25*(dx*dy);
+    wg[3] = 0.25*(dx*dy);
+
+    ell_init (&A_ell, nn*dim, nn*dim, 18);
+
   } catch (const error &ex) {
     std::cerr << ex.what() << '\n';
     throw 1;
   }
-
-  lx = 1.0;
-  ly = 1.0;
-  lz = 1.0;
-  dx = lx/(nx-1);
-  dy = ly/(ny-1);
-  nn = nx*ny*nz;
-  if (dim == 2) {
-    nelem = (nx-1) * (ny-1);
-  }
-
-  wg[0] = 0.25*(dx*dy);
-  wg[1] = 0.25*(dx*dy);
-  wg[2] = 0.25*(dx*dy);
-  wg[3] = 0.25*(dx*dy);
-
-  ell_init (&A_ell, nn*dim, nn*dim, 18);
 
 }
 

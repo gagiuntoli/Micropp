@@ -5,6 +5,8 @@ LFLAGS= -lboost_program_options
 #INC=/apps/BOOST/1.67.0/include
 INC=
 
+all: test_1
+
 micropp: build/main.o build/assembly.o build/csr.o build/micro.o build/ell.o
 	g++ $(LFLAGS) $^ -o $@
 
