@@ -1,56 +1,34 @@
 #include <vector>
-#include <boost/program_options.hpp>
 #include <iostream>
 #include "micro.h"
 
-using namespace boost::program_options;
 
-Problem::Problem (int argc, char *argv[])
+Problem::Problem (int dim, int size[3])
 {
-  try {
 
-    options_description desc{"Options"};
-    desc.add_options()
-      ("help,h", "Help screen")
-      ("nx", value<int>()->default_value(10), "Num of Nodes in X dir")
-      ("nr", value<int>()->default_value(10), "Num of Nodes in X dir")
-      ("ny", value<int>()->default_value(10), "Num of Nodes in Y dir")
-      ("nz", value<int>()->default_value(1) , "Num of Nodes in Z dir")
-      ("dim", value<int>()->default_value(2), "Dimension");
-
-    variables_map vm;
-    store(parse_command_line(argc, argv, desc), vm);
-    notify(vm);
-
-    if (vm.count("help"))
-      std::cout << desc << '\n';
-
-    nx = vm["nx"].as<int>();
-    ny = vm["ny"].as<int>();
-    nz = vm["nz"].as<int>();
-    dim = vm["dim"].as<int>();
-
-    lx = 1.0;
-    ly = 1.0;
-    lz = 1.0;
-    dx = lx/(nx-1);
-    dy = ly/(ny-1);
-    nn = nx*ny*nz;
-    if (dim == 2) {
-      nelem = (nx-1) * (ny-1);
-    }
-
-    wg[0] = 0.25*(dx*dy);
-    wg[1] = 0.25*(dx*dy);
-    wg[2] = 0.25*(dx*dy);
-    wg[3] = 0.25*(dx*dy);
-
-    ell_init (&A_ell, nn*dim, nn*dim, 18);
-
-  } catch (const error &ex) {
-    std::cerr << ex.what() << '\n';
-    throw 1;
+  this->dim = dim;
+  if (dim == 2) {
+    nx = size[0];
+    ny = size[1];
+    nz = 1;
   }
+
+  lx = 1.0;
+  ly = 1.0;
+  lz = 1.0;
+  dx = lx/(nx-1);
+  dy = ly/(ny-1);
+  nn = nx*ny*nz;
+  if (dim == 2) {
+    nelem = (nx-1) * (ny-1);
+  }
+
+  wg[0] = 0.25*(dx*dy);
+  wg[1] = 0.25*(dx*dy);
+  wg[2] = 0.25*(dx*dy);
+  wg[3] = 0.25*(dx*dy);
+
+  ell_init (&A_ell, nn*dim, nn*dim, 18);
 
 }
 

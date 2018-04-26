@@ -34,7 +34,7 @@ class Problem {
     double *dx_sol;
     double *b_rhs;
 
-    Problem (int argc, char *argv[]);
+    Problem (int dim, int size[3]);
     void assembly_A (void);
     void solve (void);
     void get_elemental_A (int e, double (&Ae)[8][8]);
