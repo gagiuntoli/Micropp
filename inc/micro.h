@@ -28,15 +28,22 @@ class Problem {
     double Ef, Em;
     double Sy_f, Sy_m;
 
+    ell_matrix A_ell;
+    ell_solver solver_ell;
+    double *x_sol;
+    double *dx_sol;
+    double *b_rhs;
+
     Problem (int argc, char *argv[]);
+    void assembly_A (void);
+    void solve (void);
+    void get_elemental_A (int e, double (&Ae)[8][8]);
+    double distance (int e);
 };
 
-double distance (int e, Problem &problem);
-void get_elemental (int e, double (&Ae)[8][8], Problem &problem);
 void get_elemental_b (int e, double (&be)[8], Problem &problem);
 void assembly_A (ell_matrix &A, Problem &problem);
 double assembly_b (double *b, Problem &problem);
 void csr_assembly_A (csr_matrix &A, Problem &problem);
 void csr_assembly_res (csr_vector &res, Problem &problem);
 int csr_set_A (csr_matrix &A, Problem &problem);
-
