@@ -2,14 +2,17 @@
 #include <iostream>
 #include "micro.h"
 
-Problem::Problem (int dim, int size[3])
+Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 {
 
+  solver.max_its = cg_its;
+  solver.min_tol = cg_tol;
   this->dim = dim;
   if (dim == 2) {
     nx = size[0];
     ny = size[1];
     nz = 1;
+    nvoi = 3;
   }
 
   lx = 1.0;
@@ -27,13 +30,32 @@ Problem::Problem (int dim, int size[3])
   wg[2] = 0.25*(dx*dy);
   wg[3] = 0.25*(dx*dy);
 
-  ell_init (&A_ell, nn*dim, nn*dim, 18);
+  ell_init (&A, nn*dim, nn*dim, 18);
   b  = (double*)malloc(nn*dim*sizeof(double));
   du = (double*)malloc(nn*dim*sizeof(double));
   u  = (double*)malloc(nn*dim*sizeof(double));
+  stress = (double*)malloc(nelem*nvoi*sizeof(double));
+  strain = (double*)malloc(nelem*nvoi*sizeof(double));
+  elem_type = (int*)malloc(nelem*sizeof(int));
+//  int_vars  = (double*)malloc(nn*dim*sizeof(double));
 
   for (int i=0; i<nn*dim; i++)
     u[i] = 0.0;
+
+  for (int e=0; e<nelem; e++) {
+    elem_type[e] = getElemType(e);
+  }
+}
+
+int Problem::getElemType (int e) {
+
+  if (distance(e) < 0.2) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+  return -1;
 
 }
 

@@ -68,7 +68,7 @@ void Problem::assembly_A(void)
   int index[8];
   double Ae[8][8], Ae_vec[64];
 
-  ell_set_zero_mat(&A_ell);
+  ell_set_zero_mat(&A);
   for (int e = 0 ; e < nelem ; e++) {
 
     int xfactor = e%(nx-1);
@@ -89,9 +89,11 @@ void Problem::assembly_A(void)
       for (int j=0; j<npe*dim; j++)
 	Ae_vec[i*8+j] = Ae[i][j];
 
-    ell_add_vals(&A_ell, index, npe*dim, index, npe*dim, Ae_vec); // assembly
+    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae_vec); // assembly
   }
 
+  if (flag_print_A == true)
+    ell_print (&A);
 //  for (int d = 0; d < dim ; d++) {
 //    for (int n = 0; n < mesh_struct.ny - 2 ; n++) {
 //      ell_set_zero_row (&jac_ell, mesh_struct.nods_x0[n]*dim + d, 1.0);

@@ -115,10 +115,11 @@ void Problem::write_vtu (void)
 //  }
 //  fprintf(fm,"</DataArray>\n");
 //
-//  fprintf(fm,"<DataArray type=\"Int32\" Name=\"elem_type\" NumberOfComponents=\"1\" format=\"ascii\">\n");
-//  for (int e = 0; e < mesh_struct.nelm ; e++)
-//    fprintf(fm, "%d ", elem_type[e]);
-//  fprintf(fm,"\n</DataArray>\n");
+  file << "<DataArray type=\"Int32\" Name=\"elem_type\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+  for (int e=0; e<nelem; e++) {
+    file << elem_type[e] << " ";
+  }
+  file << endl << "</DataArray>" << endl;
 
   file << "</CellData>" << endl;
   file << "</Piece>" << endl << "</UnstructuredGrid>" << endl << "</VTKFile>" << endl;

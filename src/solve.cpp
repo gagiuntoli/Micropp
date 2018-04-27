@@ -3,6 +3,6 @@
 void Problem::solve (void)
 {
 
-  ell_solve_cg (&solver_ell, &A_ell, b, du);
+  ell_solve_cg (&solver, &A, b, du);
 
 }
