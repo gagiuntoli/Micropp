@@ -30,6 +30,9 @@ class Problem {
     double *b;
 
     bool flag_print_A;
+    bool flag_print_b;
+    bool flag_print_u;
+    bool flag_print_du;
 
     Problem (int dim, int size[3], int cg_its, double cg_tol);
     void assembly_A (void);
@@ -37,12 +40,15 @@ class Problem {
     void solve (void);
     void NewtonRaphson (void);
     void get_elemental_A (int e, double (&Ae)[8][8]);
-    void get_elemental_b (int e, double (&be)[8]);
+    void getElemental_b (int e, double (&be)[8]);
     double distance (int e);
     void write_vtu (void);
+    void getStrain (int e, int gp, double *strain_gp);
+    void getStress (int e, int gp, double *stress_gp);
+    void getElemDisp (int e, double *elem_disp);
+    int getElemType (int e);
 
 //  private:
 
-    int getElemType (int e);
 
 };
