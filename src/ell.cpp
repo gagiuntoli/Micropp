@@ -323,3 +323,18 @@ int ell_print_full (ell_matrix * m)
   }
   return 0;
 }
+
+int ell_print (ell_matrix * m)
+{
+  if (m == NULL) return 1;
+  if (m->vals == NULL || m->cols == NULL) return 2;
+
+  for (int i=0; i<m->nrow; i++) {
+    for (int j=0; j<m->nnz; j++) {
+//	cout << setw(4) << m->vals[i*m->nnz + j] << " ";
+	cout << setw(14) << std::setprecision (4) << m->vals[i*m->nnz + j] << " ";
+    }
+    cout << endl;
+  }
+  return 0;
+}

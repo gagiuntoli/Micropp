@@ -28,5 +28,6 @@ int ell_set_zero_row (ell_matrix *m, int row, double diag_val);
 int ell_set_zero_col (ell_matrix *m, int col, double diag_val);
 int ell_set_zero_mat (ell_matrix * m);
 int ell_print_full (ell_matrix * m);
+int ell_print (ell_matrix * m);
 
 #endif
