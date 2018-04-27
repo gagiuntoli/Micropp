@@ -35,8 +35,9 @@ class Problem {
     bool flag_print_du;
 
     Problem (int dim, int size[3], int cg_its, double cg_tol);
-    void assembly_A (void);
-    double assembly_b (void);
+    void setDisp (double *eps);
+    void Assembly_A (void);
+    double Assembly_b (void);
     void solve (void);
     void NewtonRaphson (void);
     void get_elemental_A (int e, double (&Ae)[8][8]);

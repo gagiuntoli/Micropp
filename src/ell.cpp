@@ -331,8 +331,7 @@ int ell_print (ell_matrix * m)
 
   for (int i=0; i<m->nrow; i++) {
     for (int j=0; j<m->nnz; j++) {
-//	cout << setw(4) << m->vals[i*m->nnz + j] << " ";
-	cout << setw(14) << std::setprecision (4) << m->vals[i*m->nnz + j] << " ";
+      cout << setw(14) << std::setprecision (4) << m->vals[i*m->nnz + j] << " ";
     }
     cout << endl;
   }

@@ -4,6 +4,7 @@
 *.o
 *.vtu
 *.pvtu
+.gdb_history
 build/*
 micropp
 ell_solvers

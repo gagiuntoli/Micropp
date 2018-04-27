@@ -60,8 +60,10 @@ int main (int argc, char *argv[])
 
     // assembly
     start = clock();
-    micro.assembly_A();
-    micro.assembly_b();
+    double eps[3] = {0.005, 0.0, 0.0};
+//    micro.setDisp(eps);
+    micro.Assembly_A();
+    micro.Assembly_b();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cerr << "Time Assembly : " << t_lap << endl;

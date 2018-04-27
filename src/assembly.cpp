@@ -4,7 +4,60 @@
 
 using namespace std;
 
-double Problem::assembly_b (void)
+void Problem::setDisp (double *eps)
+{
+  /* dim 2 
+     | eps(0)    eps(2)/2 |
+     | eps(2)/2  eps(1)   |
+  */
+  double dux, duy, xcoor, ycoor;
+  
+  // y = 0
+  for (int i=0; i<nx; i++) {
+    xcoor = i*dx;
+    ycoor = 0.0;
+    dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+    duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+    u[i*dim  ] = dux;
+    u[i*dim+1] = duy;
+  }
+  // y = ly
+  for (int i=0; i<nx; i++) {
+    xcoor = i*dx;
+    ycoor = ly;
+    dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+    duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+    u[i*dim  ] = dux;
+    u[i*dim+1] = duy;
+  }
+  // x = 0
+  for (int i=0; i<ny-2; i++) {
+    xcoor = 0.0;
+    ycoor = (i+1)*dy;
+    dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+    duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+    u[(i+1)*nx*dim  ] = dux;
+    u[(i+1)*nx*dim+1] = duy;
+  }
+  // x = lx
+  for (int i=0; i<ny-2; i++) {
+    xcoor = lx;
+    ycoor = (i+1)*dy;
+    dux =       eps[0]*xcoor + 0.5 * eps[2]*ycoor;
+    duy = 0.5 * eps[2]*xcoor +       eps[1]*ycoor;
+    u[((i+2)*nx-1)*dim  ] = dux;
+    u[((i+2)*nx-1)*dim+1] = duy;
+  }
+
+  if (flag_print_u == true) {
+    for (int i=0; i<nn; i++) {
+      cout << u[i*dim] << " " << u[i*dim+1] << endl;
+    }
+  }
+
+}
+
+double Problem::Assembly_b (void)
 {
   int index[8];
   double be[8];
@@ -33,8 +86,34 @@ double Problem::assembly_b (void)
     for (int i=0; i<npe*dim; i++) {
       b[index[i]] += be[i]; // assembly
     }
-  }
+  } // loop over elements
 
+  // boundary conditions
+  // y = 0
+  for (int i=0; i<nx; i++) {
+    for (int d=0; d<dim; d++) {
+      b[i*dim + d] = 0.0;
+    }
+  }
+  // y = ly
+  for (int i=0; i<nx; i++) {
+    for (int d=0; d<dim; d++) {
+      b[(i+(ny-1)*nx)*dim + d] = 0.0;
+    }
+  }
+  // x = 0
+  for (int i=0; i<ny-2; i++) {
+    for (int d=0; d<dim; d++) {
+      b[(i+1)*nx*dim + d] = 0.0;
+    }
+  }
+  // x = lx
+  for (int i=0; i<ny-2; i++) {
+    for (int d=0; d<dim; d++) {
+      b[((i+2)*nx-1)*dim + d] = 0.0;
+    }
+  }
+  // end of boundary conditions
 
   if (flag_print_b == true) {
     for (int i=0; i<nn*dim; i++) {
@@ -51,7 +130,7 @@ double Problem::assembly_b (void)
   return norm;
 }
 
-void Problem::assembly_A(void)
+void Problem::Assembly_A (void)
 {
   int index[8];
   double Ae[8][8], Ae_vec[64];

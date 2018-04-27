@@ -1,5 +1,5 @@
 
-CFLAGS= -c -g -std=c++11 -O3
+CFLAGS= -c -g -std=c++11
 #LFLAGS= -L/apps/BOOST/1.67.0/lib -lboost_program_options
 LFLAGS= -lboost_program_options
 #INC=/apps/BOOST/1.67.0/include
