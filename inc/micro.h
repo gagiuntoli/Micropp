@@ -23,6 +23,9 @@ class Problem {
     double Ef, Em;
     double Sy_f, Sy_m;
 
+    int NewRap_Its;
+    double NewRap_Tol;
+
     ell_matrix A;
     ell_solver solver;
     double *u;
@@ -39,7 +42,7 @@ class Problem {
     void Assembly_A (void);
     double Assembly_b (void);
     void solve (void);
-    void NewtonRaphson (void);
+    void newtonRaphson (void);
     void get_elemental_A (int e, double (&Ae)[8][8]);
     void getElemental_b (int e, double (&be)[8]);
     double distance (int e);

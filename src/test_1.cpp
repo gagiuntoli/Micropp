@@ -68,6 +68,8 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cerr << "Time Assembly : " << t_lap << endl;
 
+    micro.newtonRaphson();
+
     // solve
     start = clock();
     micro.solve();
