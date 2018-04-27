@@ -27,8 +27,8 @@ void Problem::setDisp (double *eps)
     ycoor = ly;
     dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
     duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
-    u[i*dim  ] = dux;
-    u[i*dim+1] = duy;
+    u[(i+(ny-1)*nx)*dim  ] = dux;
+    u[(i+(ny-1)*nx)*dim+1] = duy;
   }
   // x = 0
   for (int i=0; i<ny-2; i++) {
@@ -291,9 +291,9 @@ void Problem::getElemental_b (int e, double (&be)[8])
     dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
 
     for (int i=0; i<4; i++) {
-      bmat[1][i*dim] = dsh[i][0]; bmat[1][i*dim + 1] = 0        ;
-      bmat[2][i*dim] = 0        ; bmat[2][i*dim + 1] = dsh[i][1];
-      bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim + 1] = dsh[i][0];
+      bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ;
+      bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1];
+      bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim+1] = dsh[i][0];
     }
 
     getStress (e, gp, stress_gp);
@@ -360,9 +360,9 @@ void Problem::getStrain (int e, int gp, double *strain_gp)
     dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
 
     for (int i=0; i<4; i++) {
-      bmat[1][i*dim] = dsh[i][0]; bmat[1][i*dim + 1] = 0        ;
-      bmat[2][i*dim] = 0        ; bmat[2][i*dim + 1] = dsh[i][1];
-      bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim + 1] = dsh[i][0];
+      bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim + 1] = 0        ;
+      bmat[1][i*dim] = 0        ; bmat[1][i*dim + 1] = dsh[i][1];
+      bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim + 1] = dsh[i][0];
     }
     for (int v=0; v<nvoi; v++) {
       strain_gp[v] = 0.0;

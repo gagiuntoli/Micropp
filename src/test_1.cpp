@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
     // assembly
     start = clock();
     double eps[3] = {0.005, 0.0, 0.0};
-//    micro.setDisp(eps);
+    micro.setDisp(eps);
     micro.Assembly_A();
     micro.Assembly_b();
     end = clock();
