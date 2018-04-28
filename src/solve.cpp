@@ -23,6 +23,8 @@ void Problem::newtonRaphson (void)
     if (tol < NewRap_Tol) break;
     Assembly_A();
 
+    for (int i=0; i<nn*dim; i++)
+      du[i] = 0.0;
     ell_solve_cg (&solver, &A, b, du);
     cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 

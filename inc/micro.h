@@ -50,6 +50,7 @@ class Problem {
     void getStress (int e, int gp, double *stress_gp);
     void getElemDisp (int e, double *elem_disp);
     int getElemType (int e);
+    void calcDistributions (void);
 
 //  private:
 

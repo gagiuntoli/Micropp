@@ -98,23 +98,23 @@ void Problem::write_vtu (void)
   file << "</PointData>" << endl;
 
   file << "<CellData>" << endl;
-//
-//  fprintf(fm,"<DataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"%d\" format=\"ascii\">\n",nvoi);
-//  for (int e = 0; e < mesh_struct.nelm; e++) {
-//    for (int v = 0; v < nvoi; v++)
-//      fprintf(fm, "%lf ", elem_strain[e*nvoi + v]);
-//    fprintf(fm, "\n");
-//  }
-//  fprintf(fm,"</DataArray>\n");
-//
-//  fprintf(fm,"<DataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"%d\" format=\"ascii\">\n",nvoi);
-//  for (int e = 0; e < mesh_struct.nelm; e++) {
-//    for (int v = 0; v < nvoi; v++)
-//      fprintf(fm, "%lf ", elem_stress[e*nvoi + v]);
-//    fprintf(fm,"\n");
-//  }
-//  fprintf(fm,"</DataArray>\n");
-//
+
+  file << "<DataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
+  for (int e=0; e<nelem; e++) {
+    for (int v=0; v<nvoi; v++)
+      file << strain[e*nvoi + v] << " ";
+    file << endl;
+  }
+  file << "</DataArray>";
+
+  file << "<DataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
+  for (int e=0; e<nelem; e++) {
+    for (int v=0; v<nvoi; v++)
+      file << stress[e*nvoi + v] << " ";
+    file << endl;
+  }
+  file << "</DataArray>";
+
   file << "<DataArray type=\"Int32\" Name=\"elem_type\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     file << elem_type[e] << " ";

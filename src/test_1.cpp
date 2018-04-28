@@ -79,6 +79,7 @@ int main (int argc, char *argv[])
 
     // writting
     start = clock();
+    micro.calcDistributions();
     micro.write_vtu();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;

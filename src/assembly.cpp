@@ -111,6 +111,10 @@ double Problem::Assembly_b (void)
     for (int i=0; i<nn*dim; i++)
       cout << b[i*dim] << " " << b[i*dim+1] << endl;
 
+  for (int i=0 ; i<nn*dim; i++) {
+    b[i] = -b[i];
+  }
+
   double norm = 0.0;
   for (int i=0; i<nn*dim; i++)
     norm += b[i]*b[i];
@@ -299,6 +303,38 @@ void Problem::getElemental_b (int e, double (&be)[8])
     }
 
   } // gp loop
+}
+
+void Problem::calcDistributions (void)
+{
+  for (int e=0; e<nelem; e++) {
+
+    double strain_aux[6];
+    double stress_aux[6];
+    for (int i=0; i<nvoi; i++) {
+      strain_aux[i] = 0.0;
+      stress_aux[i] = 0.0;
+    }
+
+    for (int gp=0; gp<4; gp++) {
+
+      double stress_gp[6], strain_gp[6];
+      double wg = 0.25*dx*dy;
+
+      getStress (e, gp, stress_gp);
+      getStrain (e, gp, strain_gp);
+      for (int v=0; v<nvoi; v++) {
+	strain_aux[v] += strain_gp[v] * wg;
+	stress_aux[v] += stress_gp[v] * wg;
+      }
+
+    }
+    double vol = dx*dy;
+    for (int v=0; v<nvoi; v++) {
+      strain[e*nvoi + v] = strain_aux[v] / vol;
+      stress[e*nvoi + v] = stress_aux[v] / vol;
+    }
+  }
 }
 
 void Problem::getStress (int e, int gp, double *stress_gp)
