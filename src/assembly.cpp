@@ -10,51 +10,47 @@ void Problem::setDisp (double *eps)
      | eps(0)    eps(2)/2 |
      | eps(2)/2  eps(1)   |
   */
-  double dux, duy, xcoor, ycoor;
   
   // y = 0
   for (int i=0; i<nx; i++) {
-    xcoor = i*dx;
-    ycoor = 0.0;
-    dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
-    duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+    double xcoor = i*dx;
+    double ycoor = 0.0;
+    double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+    double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
     u[i*dim  ] = dux;
     u[i*dim+1] = duy;
   }
   // y = ly
   for (int i=0; i<nx; i++) {
-    xcoor = i*dx;
-    ycoor = ly;
-    dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
-    duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+    double xcoor = i*dx;
+    double ycoor = ly;
+    double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+    double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
     u[(i+(ny-1)*nx)*dim  ] = dux;
     u[(i+(ny-1)*nx)*dim+1] = duy;
   }
   // x = 0
   for (int i=0; i<ny-2; i++) {
-    xcoor = 0.0;
-    ycoor = (i+1)*dy;
-    dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
-    duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+    double xcoor = 0.0;
+    double ycoor = (i+1)*dy;
+    double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+    double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
     u[(i+1)*nx*dim  ] = dux;
     u[(i+1)*nx*dim+1] = duy;
   }
   // x = lx
   for (int i=0; i<ny-2; i++) {
-    xcoor = lx;
-    ycoor = (i+1)*dy;
-    dux =       eps[0]*xcoor + 0.5 * eps[2]*ycoor;
-    duy = 0.5 * eps[2]*xcoor +       eps[1]*ycoor;
+    double xcoor = lx;
+    double ycoor = (i+1)*dy;
+    double dux =       eps[0]*xcoor + 0.5 * eps[2]*ycoor;
+    double duy = 0.5 * eps[2]*xcoor +       eps[1]*ycoor;
     u[((i+2)*nx-1)*dim  ] = dux;
     u[((i+2)*nx-1)*dim+1] = duy;
   }
 
-  if (flag_print_u == true) {
-    for (int i=0; i<nn; i++) {
+  if (flag_print_u == true)
+    for (int i=0; i<nn; i++)
       cout << u[i*dim] << " " << u[i*dim+1] << endl;
-    }
-  }
-
 }
 
 double Problem::Assembly_b (void)
@@ -90,41 +86,34 @@ double Problem::Assembly_b (void)
 
   // boundary conditions
   // y = 0
-  for (int i=0; i<nx; i++) {
-    for (int d=0; d<dim; d++) {
+  for (int i=0; i<nx; i++)
+    for (int d=0; d<dim; d++)
       b[i*dim + d] = 0.0;
-    }
-  }
+
   // y = ly
-  for (int i=0; i<nx; i++) {
-    for (int d=0; d<dim; d++) {
+  for (int i=0; i<nx; i++)
+    for (int d=0; d<dim; d++)
       b[(i+(ny-1)*nx)*dim + d] = 0.0;
-    }
-  }
+
   // x = 0
-  for (int i=0; i<ny-2; i++) {
-    for (int d=0; d<dim; d++) {
+  for (int i=0; i<ny-2; i++)
+    for (int d=0; d<dim; d++)
       b[(i+1)*nx*dim + d] = 0.0;
-    }
-  }
+
   // x = lx
-  for (int i=0; i<ny-2; i++) {
-    for (int d=0; d<dim; d++) {
+  for (int i=0; i<ny-2; i++)
+    for (int d=0; d<dim; d++)
       b[((i+2)*nx-1)*dim + d] = 0.0;
-    }
-  }
+
   // end of boundary conditions
 
-  if (flag_print_b == true) {
-    for (int i=0; i<nn*dim; i++) {
-      cout << b[i] << endl;
-    }
-  }
+  if (flag_print_b == true)
+    for (int i=0; i<nn*dim; i++)
+      cout << b[i*dim] << " " << b[i*dim+1] << endl;
 
   double norm = 0.0;
-  for (int i=0; i<nn*dim; i++) {
+  for (int i=0; i<nn*dim; i++)
     norm += b[i]*b[i];
-  }
   norm = sqrt(norm);
 
   return norm;
@@ -133,7 +122,7 @@ double Problem::Assembly_b (void)
 void Problem::Assembly_A (void)
 {
   int index[8];
-  double Ae[8][8], Ae_vec[64];
+  double Ae[64];
 
   ell_set_zero_mat(&A);
   for (int e = 0 ; e < nelem ; e++) {
@@ -151,43 +140,51 @@ void Problem::Assembly_A (void)
     index[6] = n3*dim; index[7] = n3*dim + 1;
     //cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
-    get_elemental_A (e, Ae);
-    for (int i=0; i<npe*dim; i++)
-      for (int j=0; j<npe*dim; j++)
-	Ae_vec[i*8+j] = Ae[i][j];
+    getElemental_A (e, Ae);
 
-    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae_vec); // assembly
+    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae); // assembly
   }
 
-//  for (int d = 0; d < dim ; d++) {
-//    for (int n = 0; n < mesh_struct.ny - 2 ; n++) {
-//      ell_set_zero_row (&jac_ell, mesh_struct.nods_x0[n]*dim + d, 1.0);
-//      ell_set_zero_col (&jac_ell, mesh_struct.nods_x0[n]*dim + d, 1.0);
-//      ell_set_zero_row (&jac_ell, mesh_struct.nods_x1[n]*dim + d, 1.0);
-//      ell_set_zero_col (&jac_ell, mesh_struct.nods_x1[n]*dim + d, 1.0);
-//    }
-//    for (int n = 0; n < mesh_struct.nx - 2 ; n++) {
-//      ell_set_zero_row (&jac_ell, mesh_struct.nods_y0[n]*dim + d, 1.0);
-//      ell_set_zero_col (&jac_ell, mesh_struct.nods_y0[n]*dim + d, 1.0);
-//      ell_set_zero_row (&jac_ell, mesh_struct.nods_y1[n]*dim + d, 1.0);
-//      ell_set_zero_col (&jac_ell, mesh_struct.nods_y1[n]*dim + d, 1.0);
-//    }
-//    ell_set_zero_row (&jac_ell, mesh_struct.nod_x0y0*dim + d, 1.0);
-//    ell_set_zero_col (&jac_ell, mesh_struct.nod_x0y0*dim + d, 1.0);
-//    ell_set_zero_row (&jac_ell, mesh_struct.nod_x1y0*dim + d, 1.0);
-//    ell_set_zero_col (&jac_ell, mesh_struct.nod_x1y0*dim + d, 1.0);
-//    ell_set_zero_row (&jac_ell, mesh_struct.nod_x1y1*dim + d, 1.0);
-//    ell_set_zero_col (&jac_ell, mesh_struct.nod_x1y1*dim + d, 1.0);
-//    ell_set_zero_row (&jac_ell, mesh_struct.nod_x0y1*dim + d, 1.0);
-//    ell_set_zero_col (&jac_ell, mesh_struct.nod_x0y1*dim + d, 1.0);
-//  }
+  // y = 0
+  for (int i=0; i<nx; i++) {
+    for (int d=0; d<dim; d++) {
+      int index = i*dim + d;
+      ell_set_zero_row (&A, index, 1.0);
+      ell_set_zero_col (&A, index, 1.0);
+    }
+  }
+  // y = ly
+  for (int i=0; i<nx; i++) {
+    for (int d=0; d<dim; d++) {
+      int index = (i+(ny-1)*nx)*dim + d;
+      ell_set_zero_row (&A, index, 1.0);
+      ell_set_zero_col (&A, index, 1.0);
+    }
+  }
+  // x = 0
+  for (int i=0; i<ny-2; i++) {
+    for (int d=0; d<dim; d++) {
+      int index = (i+1)*nx*dim + d;
+      ell_set_zero_row (&A, index, 1.0);
+      ell_set_zero_col (&A, index, 1.0);
+    }
+  }
+  // x = lx
+  for (int i=0; i<ny-2; i++) {
+    for (int d=0; d<dim; d++) {
+      int index = ((i+2)*nx-1)*dim + d;
+      ell_set_zero_row (&A, index, 1.0);
+      ell_set_zero_col (&A, index, 1.0);
+    }
+  }
+
   if (flag_print_A == true) {
     ell_print (&A);
   }
 
 }
 
-void Problem::get_elemental_A (int e, double (&Ae)[8][8])
+void Problem::getElemental_A (int e, double (&Ae)[64])
 {
 /*   // for debugging
      for (int i=0; i<8; i++)
@@ -197,21 +194,19 @@ void Problem::get_elemental_A (int e, double (&Ae)[8][8])
   
   double nu = 0.3, E;
   double ctan[3][3];
-  E  = 1e7;
-  if (distance(e) < -1.75) {
+
+  if (elem_type[e] == 0) {
+    E  = 1.0e6;
+  } else {
     E  = 1.0e7;
-  }
-  else {
-     E  = 1.0e6;
   }
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
   ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
-  for (int i=0; i<3; i++) {
-    for (int j=0; j<3; j++) {
+
+  for (int i=0; i<nvoi; i++)
+    for (int j=0; j<nvoi; j++)
       ctan[i][j] *= E/((1+nu)*(1-2*nu));
-    }
-  }
 
   double xg[4][2] = {
     {-0.577350269189626, -0.577350269189626},
@@ -221,9 +216,8 @@ void Problem::get_elemental_A (int e, double (&Ae)[8][8])
 
   double dsh[4][2], b_mat[3][8], cxb[3][8];
 
-  for (int i=0; i<8; i++) 
-    for (int j=0; j<8; j++) 
-      Ae[i][j] = 0.0;
+  for (int i=0; i<npe*dim*npe*dim; i++) 
+    Ae[i] = 0.0;
 
   for (int gp=0; gp<4; gp++) {
 
@@ -233,26 +227,24 @@ void Problem::get_elemental_A (int e, double (&Ae)[8][8])
     dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
 
     for (int i=0; i<4; i++) {
-      b_mat[1][i*dim] = dsh[i][0]; b_mat[1][i*dim + 1] = 0        ;
-      b_mat[2][i*dim] = 0        ; b_mat[2][i*dim + 1] = dsh[i][1];
-      b_mat[3][i*dim] = dsh[i][1]; b_mat[3][i*dim + 1] = dsh[i][0];
+      b_mat[0][i*dim] = dsh[i][0]; b_mat[0][i*dim + 1] = 0        ;
+      b_mat[1][i*dim] = 0        ; b_mat[1][i*dim + 1] = dsh[i][1];
+      b_mat[2][i*dim] = dsh[i][1]; b_mat[2][i*dim + 1] = dsh[i][0];
     }
 
-    for (int i=0; i<3; i++) {
+    for (int i=0; i<3; i++)
       for (int j=0; j<8; j++) {
-	for (int k=0; k<3; k++) {
+	cxb[i][j] = 0.0;
+	for (int k=0; k<3; k++)
 	  cxb[i][j] += ctan[i][k] * b_mat[k][j];
-	}
       }
-    }
 
-    for (int i=0; i<8; i++) {
-      for (int j=0; j<8; j++) {
-	for (int m=0; m<3; m++) {
-	    Ae[i][j] += b_mat[m][i] * cxb[m][j] * wg[gp];
-	}
-      }
-    }
+    double wg = 0.25*dx*dy;
+    for (int i=0; i<npe*dim; i++)
+      for (int j=0; j<npe*dim; j++)
+	for (int m=0; m<nvoi; m++)
+	    Ae[i*npe*dim + j] += b_mat[m][i] * cxb[m][j] * wg;
+
   } // gp loop
 }
 
@@ -298,9 +290,10 @@ void Problem::getElemental_b (int e, double (&be)[8])
 
     getStress (e, gp, stress_gp);
 
+    double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++) {
       for (int j=0; j<nvoi; j++) {
-	be[i] += bmat[j][i] * stress_gp[j] * wg[gp];
+	be[i] += bmat[j][i] * stress_gp[j] * wg;
       }
     }
 

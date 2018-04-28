@@ -25,11 +25,6 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
     nelem = (nx-1) * (ny-1);
   }
 
-  wg[0] = 0.25*(dx*dy);
-  wg[1] = 0.25*(dx*dy);
-  wg[2] = 0.25*(dx*dy);
-  wg[3] = 0.25*(dx*dy);
-
   ell_init (&A, nn*dim, nn*dim, 18);
   b  = (double*)malloc(nn*dim*sizeof(double));
   du = (double*)malloc(nn*dim*sizeof(double));

@@ -9,7 +9,6 @@ class Problem {
     int dim = 2;
     int nvoi= 3;
 
-    double wg[4];
     int nx, ny, nz, nn; 
     double lx, ly, lz, dx, dy, dz;
     int nelem;
@@ -43,7 +42,7 @@ class Problem {
     double Assembly_b (void);
     void solve (void);
     void newtonRaphson (void);
-    void get_elemental_A (int e, double (&Ae)[8][8]);
+    void getElemental_A (int e, double (&Ae)[64]);
     void getElemental_b (int e, double (&be)[8]);
     double distance (int e);
     void write_vtu (void);
@@ -53,6 +52,5 @@ class Problem {
     int getElemType (int e);
 
 //  private:
-
 
 };
