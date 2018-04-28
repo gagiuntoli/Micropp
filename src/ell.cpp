@@ -236,12 +236,12 @@ int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
   for (int i = 0 ; i < m->nrow ; i++)
     r[i] -= b[i];
 
-  err = 0;
-  for (int i = 0 ; i < m->nrow ; i++)
-    err += r[i] * r[i];
-  err = sqrt(err); if (err < solver->min_tol) return 0;
+  do {
 
-  while (its < solver->max_its) {
+    err = 0;
+    for (int i = 0 ; i < m->nrow ; i++)
+      err += r[i] * r[i];
+    err = sqrt(err); if (err < solver->min_tol) break;
 
     for (int i = 0 ; i < m->nrow ; i++)
       z[i] = k[i] * r[i];
@@ -271,14 +271,10 @@ int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
     }
 
     rho_0 = rho_1;
-
-    err = 0;
-    for (int i = 0 ; i < m->nrow ; i++)
-      err += r[i] * r[i];
-    err = sqrt(err); if (err < solver->min_tol) break;
-
     its ++;
-  }
+
+  } while (its < solver->max_its);
+
   solver->err = err;
   solver->its = its;
   return 0;
@@ -331,7 +327,7 @@ int ell_print (ell_matrix * m)
 
   for (int i=0; i<m->nrow; i++) {
     for (int j=0; j<m->nnz; j++) {
-      cout << setw(14) << std::setprecision (4) << m->vals[i*m->nnz + j] << " ";
+      cout << setw(7) << setprecision (4) << m->vals[i*m->nnz + j] << " ";
     }
     cout << endl;
   }
