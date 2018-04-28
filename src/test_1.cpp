@@ -77,6 +77,22 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cerr << "Time Solving  : " << t_lap << endl;
 
+    // calc average
+    start = clock();
+    micro.calcAverageStress();
+    cerr << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
+    end = clock();
+    t_lap = double(end - start) / CLOCKS_PER_SEC;
+    cerr << "Time Averaging Stress: " << t_lap << endl;
+
+    // calc average
+    start = clock();
+    micro.calcAverageStrain();
+    cerr << "Average strain = " << micro.strain_ave[0] << " " << micro.strain_ave[1] << " " << micro.strain_ave[2] << endl;
+    end = clock();
+    t_lap = double(end - start) / CLOCKS_PER_SEC;
+    cerr << "Time Averaging Strain : " << t_lap << endl;
+
     // writting
     start = clock();
     micro.calcDistributions();

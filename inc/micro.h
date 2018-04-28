@@ -25,6 +25,9 @@ class Problem {
     int NewRap_Its;
     double NewRap_Tol;
 
+    double stress_ave[6];
+    double strain_ave[6];
+
     ell_matrix A;
     ell_solver solver;
     double *u;
@@ -51,6 +54,8 @@ class Problem {
     void getElemDisp (int e, double *elem_disp);
     int getElemType (int e);
     void calcDistributions (void);
+    void calcAverageStress (void);
+    void calcAverageStrain (void);
 
 //  private:
 

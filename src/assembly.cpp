@@ -305,6 +305,65 @@ void Problem::getElemental_b (int e, double (&be)[8])
   } // gp loop
 }
 
+void Problem::calcAverageStress (void)
+{
+  for (int v=0; v<nvoi; v++)
+    stress_ave[v] = 0.0;
+
+  for (int e=0; e<nelem; e++) {
+
+    double stress_aux[6];
+    for (int i=0; i<nvoi; i++)
+      stress_aux[i] = 0.0;
+
+    for (int gp=0; gp<4; gp++) {
+
+      double stress_gp[6];
+      double wg = 0.25*dx*dy;
+
+      getStress (e, gp, stress_gp);
+      for (int v=0; v<nvoi; v++)
+	stress_aux[v] += stress_gp[v] * wg;
+
+    }
+    for (int v=0; v<nvoi; v++)
+      stress_ave[v] += stress_aux[v];
+  }
+
+  for (int v=0; v<nvoi; v++)
+    stress_ave[v] /= (lx*ly);
+}
+
+void Problem::calcAverageStrain (void)
+{
+  for (int v=0; v<nvoi; v++)
+    strain_ave[v] = 0.0;
+
+  for (int e=0; e<nelem; e++) {
+
+    double strain_aux[6];
+    for (int i=0; i<nvoi; i++)
+      strain_aux[i] = 0.0;
+
+    for (int gp=0; gp<4; gp++) {
+
+      double strain_gp[6];
+      double wg = 0.25*dx*dy;
+
+      getStrain (e, gp, strain_gp);
+      for (int v=0; v<nvoi; v++)
+	strain_aux[v] += strain_gp[v] * wg;
+
+    }
+
+    for (int v=0; v<nvoi; v++)
+      strain_ave[v] += strain_aux[v];
+  }
+
+  for (int v=0; v<nvoi; v++)
+    strain_ave[v] /= (lx*ly);
+}
+
 void Problem::calcDistributions (void)
 {
   for (int e=0; e<nelem; e++) {

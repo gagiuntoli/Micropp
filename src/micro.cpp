@@ -50,8 +50,8 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   NewRap_Tol = 1.0e-5;
 }
 
-int Problem::getElemType (int e) {
-
+int Problem::getElemType (int e)
+{
   if (distance(e) < 0.2) {
     return 1;
   }
