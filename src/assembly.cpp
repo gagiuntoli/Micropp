@@ -232,12 +232,13 @@ void Problem::getElemental_A (int e, double (&Ae)[64])
       b_mat[2][i*dim] = dsh[i][1]; b_mat[2][i*dim + 1] = dsh[i][0];
     }
 
-    for (int i=0; i<3; i++)
-      for (int j=0; j<8; j++) {
+    for (int i=0; i<nvoi; i++) {
+      for (int j=0; j<npe*dim; j++) {
 	cxb[i][j] = 0.0;
-	for (int k=0; k<3; k++)
+	for (int k=0; k<nvoi; k++)
 	  cxb[i][j] += ctan[i][k] * b_mat[k][j];
       }
+    }
 
     double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++)
@@ -317,15 +318,14 @@ void Problem::getStress (int e, int gp, double *stress_gp)
     ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
     ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
     ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
-    for (int i=0; i<nvoi; i++) {
-      for (int j=0; j<nvoi; j++) {
+    for (int i=0; i<nvoi; i++)
+      for (int j=0; j<nvoi; j++)
 	ctan[i][j] *= E/((1+nu)*(1-2*nu));
-      }
-    }
 
-    for (int i=0; i<nvoi; i++) { 
-      for (int j=0; j<nvoi; j++) { 
-	stress_gp[i] = ctan[i][j] * strain_gp[j];
+    for (int i=0; i<nvoi; i++) {
+      stress_gp[i] = 0.0;
+      for (int j=0; j<nvoi; j++) {
+	stress_gp[i] += ctan[i][j] * strain_gp[j];
       }
     }
 
