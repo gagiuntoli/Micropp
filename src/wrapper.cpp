@@ -2,31 +2,29 @@
 #include <iostream>
 #include "micro.h"
 
+using namespace std;
+
 static Problem* micro = NULL;
 
 extern "C"
 {
-  void
-  micro_create_(int* dim)
+  void micro_construct_(int* dim, int* size, int *cg_its, double *cg_tol)
   {
+    cout<< "dim = " << *dim << endl; 
+    cout<< "size = " << size[0] << " " << size[1] << " " << size[2] << endl; 
+    cout<< "cg_its = " << *cg_its << endl; 
+    cout<< "cg_tol = " << *cg_tol << endl; 
 
-//    int dim = 0 ; 
-    int nx = 0 ; 
-    int ny = 0; 
-    int nz = 0; 
-    int cg_its = 0; 
-    double cg_tol = 0.0; 
-
-    int size[3];
-    size[0] = 0.0;
-    size[1] = 0.0;
-    size[2] = 0.0;
-
-std::cout<< dim[0] << "\n"; 
-
-    micro = new Problem(dim[0], size, cg_its, cg_tol); 
-
+    micro = new Problem(*dim, size, *cg_its, *cg_tol); 
   }
 
+  void micro_loc_hom_stress_(double *MacroStrain, double *MacroStress)
+  {
+    micro->loc_hom_Stress(MacroStrain, MacroStress); 
+  }
 
+  void micro_loc_hom_ctan_(double *MacroStrain, double *MacroCtan)
+  {
+    micro->loc_hom_Ctan(MacroStrain, MacroCtan); 
+  }
 } 
