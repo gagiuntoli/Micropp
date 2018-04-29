@@ -40,6 +40,9 @@ class Problem {
     bool flag_print_du;
 
     Problem (int dim, int size[3], int cg_its, double cg_tol);
+    void loc_hom_Stress (double *MacroStrain, double *MacroStress);
+    void loc_hom_Ctan   (double *MacroStrain, double *MacroCtan);
+
     void setDisp (double *eps);
     void Assembly_A (void);
     double Assembly_b (void);

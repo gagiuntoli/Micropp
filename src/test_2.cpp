@@ -23,7 +23,7 @@ int main (int argc, char *argv[])
       ("nr", value<int>()->default_value(10), "Num of Nodes in X dir")
       ("ny", value<int>()->default_value(10), "Num of Nodes in Y dir")
       ("nz", value<int>()->default_value(1) , "Num of Nodes in Z dir")
-      ("cg_its", value<int>()->default_value(100)     , "Max Number of iterations (CG)")
+      ("cg_its", value<int>()->default_value(1000)    , "Max Number of iterations (CG)")
       ("cg_tol", value<double>()->default_value(1e-8) , "Minimun Tolerance (CG)")
       ("print_A", bool_switch(&flag_print_A), "Print ELL Matrix")
       ("print_b", bool_switch(&flag_print_b), "Print RHS b")
@@ -44,6 +44,7 @@ int main (int argc, char *argv[])
     int nz = vm["nz"].as<int>();
     int cg_its = vm["cg_its"].as<int>();
     double cg_tol = vm["cg_tol"].as<double>();
+    double eps[3] = {0.005, 0.0, 0.0};
 
     int size[3];
     size[0] = nx;
@@ -58,57 +59,28 @@ int main (int argc, char *argv[])
     micro.flag_print_u = flag_print_u;
     micro.flag_print_du = flag_print_du;
 
-    // assembly
-    start = clock();
-    double eps[3] = {0.005, 0.0, 0.0};
-    micro.setDisp(eps);
-    micro.Assembly_A();
-    micro.Assembly_b();
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Assembly : " << t_lap << endl;
-
-    micro.newtonRaphson();
-
-    // solve
-    start = clock();
-    micro.solve();
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Solving  : " << t_lap << endl;
-
-    // calc average
-    start = clock();
-    micro.calcAverageStress();
-    cerr << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Averaging Stress: " << t_lap << endl;
-
-    // calc average
-    start = clock();
-    micro.calcAverageStrain();
-    cerr << "Average strain = " << micro.strain_ave[0] << " " << micro.strain_ave[1] << " " << micro.strain_ave[2] << endl;
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Averaging Strain : " << t_lap << endl;
-
-    // writting
-    start = clock();
-    micro.calcDistributions();
-    micro.write_vtu();
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Writing  : " << t_lap << endl;
-
-    // test localization and homogenization
+    // test localization and homogenization of stress
     double stress_mac[6];
     start = clock();
     micro.loc_hom_Stress(eps, stress_mac);
-    cerr << "The average stress for loc-hom is : " << stress_mac[0] << " " << stress_mac[1] << " " << stress_mac[2] << endl;
+    cout << "The average stress for loc-hom is : " << stress_mac[0] << " " << stress_mac[1] << " " << stress_mac[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Loc-Hom  : " << t_lap << endl;
+    cout << "Time calc MacroStress: " << t_lap << endl;
+
+    // test MacroCtan calculation
+    double MacroCtan[81];
+    start = clock();
+    micro.loc_hom_Ctan (eps, MacroCtan);
+    cout << "MacroCtan: " << endl;
+    for (int i=0; i<micro.nvoi; i++){
+      for (int j=0; j<micro.nvoi; j++)
+	cout << MacroCtan[i*micro.nvoi+j] << " ";
+      cout << endl;
+    }
+    end = clock();
+    t_lap = double(end - start) / CLOCKS_PER_SEC;
+    cout << "Time calc MacroCtan: " << t_lap << endl;
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;
