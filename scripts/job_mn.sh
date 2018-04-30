@@ -4,7 +4,7 @@
 #SBATCH --output=%j.out
 #SBATCH --error=%j.err
 #SBATCH --ntasks=1
-#SBATCH --time=00:02:00
+#SBATCH --time=00:10:00
 #SBATCH --qos=debug
 
 ./porcentages.sh

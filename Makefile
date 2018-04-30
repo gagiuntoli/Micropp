@@ -1,7 +1,7 @@
 
 CC=g++
 FC=gfortran
-CFLAGS= -c -g -std=c++11
+CFLAGS= -c -O3 -std=c++11
 FFLAGS= -c -g 
 
 #LFLAGS= -L/apps/BOOST/1.67.0/lib -lboost_program_options
