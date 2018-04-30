@@ -5,14 +5,14 @@ CFLAGS= -c -g -std=c++11
 FFLAGS= -c -g 
 
 #LFLAGS= -L/apps/BOOST/1.67.0/lib -lboost_program_options
-LFLAGS= -L/apps/BOOST/1.64.0_py3/INTEL/IMPI/lib -lboost_program_options
-#LFLAGS= -lboost_program_options
+#LFLAGS= -L/apps/BOOST/1.64.0_py3/INTEL/IMPI/lib -lboost_program_options
+LFLAGS= -lboost_program_options
 
-INC= -I/apps/BOOST/1.64.0_py3/INTEL/IMPI/include
+#INC= -I/apps/BOOST/1.64.0_py3/INTEL/IMPI/include
 #INC=/apps/BOOST/1.67.0/include
 #INC=
 
-all: test_1 test_2 test_3
+all: build test_1 test_2 test_3
 
 micropp: build/main.o build/assembly.o build/micro.o build/ell.o
 	$(CC) $(LFLAGS) $^ -o $@
@@ -61,6 +61,9 @@ build/wrapper.o: src/wrapper.cpp inc/micro.h
 
 build/test_3.o: test/test_3.f90
 	$(FC) $(FFLAGS) $< -o $@ 
+
+build:
+	mkdir -p build
 
 clean:
 	rm -f micropp test_* build/*
