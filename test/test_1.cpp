@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
     micro.Assembly_b();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Assembly : " << t_lap << endl;
+    cout << "time assembly : " << t_lap << endl;
 
     micro.newtonRaphson();
 
@@ -75,23 +75,23 @@ int main (int argc, char *argv[])
     micro.solve();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Solving  : " << t_lap << endl;
+    cout << "time solve : " << t_lap << endl;
 
     // calc average
     start = clock();
     micro.calcAverageStress();
-    cerr << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
+    cout << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Averaging Stress: " << t_lap << endl;
+    cout << "Time Averaging Stress: " << t_lap << endl;
 
     // calc average
     start = clock();
     micro.calcAverageStrain();
-    cerr << "Average strain = " << micro.strain_ave[0] << " " << micro.strain_ave[1] << " " << micro.strain_ave[2] << endl;
+    cout << "Average strain = " << micro.strain_ave[0] << " " << micro.strain_ave[1] << " " << micro.strain_ave[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Averaging Strain : " << t_lap << endl;
+    cout << "Time Averaging Strain : " << t_lap << endl;
 
     // writting
     start = clock();
@@ -99,16 +99,16 @@ int main (int argc, char *argv[])
     micro.write_vtu();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Writing  : " << t_lap << endl;
+    cout << "Time Writing  : " << t_lap << endl;
 
     // test localization and homogenization
     double stress_mac[6];
     start = clock();
     micro.loc_hom_Stress(eps, stress_mac);
-    cerr << "The average stress for loc-hom is : " << stress_mac[0] << " " << stress_mac[1] << " " << stress_mac[2] << endl;
+    cout << "The average stress for loc-hom is : " << stress_mac[0] << " " << stress_mac[1] << " " << stress_mac[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cerr << "Time Loc-Hom  : " << t_lap << endl;
+    cout << "Time Loc-Hom  : " << t_lap << endl;
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;
