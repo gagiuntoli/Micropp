@@ -6,13 +6,15 @@ FFLAGS= -c -g
 
 #LFLAGS= -L/apps/BOOST/1.67.0/lib -lboost_program_options
 #LFLAGS= -L/apps/BOOST/1.64.0_py3/INTEL/IMPI/lib -lboost_program_options
-LFLAGS= -lboost_program_options
+#LFLAGS= -lboost_program_options
 
 #INC= -I/apps/BOOST/1.64.0_py3/INTEL/IMPI/include
 #INC=/apps/BOOST/1.67.0/include
 #INC=
 
 all: build test_1 test_2 test_3
+
+lib: build/libmicropp.a
 
 micropp: build/main.o build/assembly.o build/micro.o build/ell.o
 	$(CC) $(LFLAGS) $^ -o $@

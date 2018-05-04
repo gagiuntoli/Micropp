@@ -19,14 +19,20 @@ void Problem::newtonRaphson (void)
   do {
 
     tol = Assembly_b();
-    cout << "NewRap It =" << its << " Tol = " << tol << endl;
+
+    if (flag_print_newton == true)
+      cout << "NewRap It =" << its << " Tol = " << tol << endl;
+
     if (tol < NewRap_Tol) break;
+
     Assembly_A();
 
     for (int i=0; i<nn*dim; i++)
       du[i] = 0.0;
     ell_solve_cg (&solver, &A, b, du);
-    cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
+
+    if (flag_print_solver == true)
+      cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 
     // u = u + du
     for (int i=0; i<nn*dim; i++)
