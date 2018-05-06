@@ -368,3 +368,154 @@ void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny)
   }
 
 }
+
+void ell_init_2D (ell_matrix &m, int nFields, int nx, int ny)
+{
+  int nn = nx*ny;
+  int nnz = m.nnz;
+
+  for (int i=0; i<nn; i++){
+    // the coorners
+    if (i == 0) {       
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = (i + 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = (i + nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = (i + nx + 1)*nFields + d2;
+	}
+      }
+    }
+    else if (i == nx-1) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = (i - 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = (i + nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = (i + nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = 0;
+	}
+      }
+    }
+    else if (i == nx*ny-1) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = (i - nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = (i - nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = (i - 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = 0;
+	}
+      }
+    }
+    else if (i == (ny-1)*nx) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = (i - nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = (i - nx + 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = (i + 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = 0;
+	}
+      }
+    }
+    // y=0
+    else if (i < nx) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = (i - 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = (i + 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = (i + nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = (i + nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = (i + nx + 1)*nFields + d2;
+	}
+      }
+    }
+    // y=ly
+    else if (i > (ny-1)*nx) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = (i - nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = (i - nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = (i - nx + 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = (i - 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = (i + 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = 0;
+	}
+      }
+    }
+    // x=0
+    else if ((i%nx) == 0) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = (i - nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = (i - nx + 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = (i + 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = (i + nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = (i + nx + 1)*nFields + d2;
+	}
+      }
+    }
+    // x=ly
+    else if ((i+1)%nx == 0) {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = (i - nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = (i - nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = 0; 
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = (i - 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = 0;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = (i + nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = 0;
+	}
+      }
+    }
+    // not y=0 neither y=ly, x=0, x=lx
+    else {
+      for (int d1=0; d1<nFields; d1++){
+	for (int d2=0; d2<nFields; d2++){
+	  m.cols[i*nFields*nnz + 0*nFields + nnz*d1 + d2] = (i - nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 1*nFields + nnz*d1 + d2] = (i - nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 2*nFields + nnz*d1 + d2] = (i - nx + 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 3*nFields + nnz*d1 + d2] = (i - 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 4*nFields + nnz*d1 + d2] = (i         )*nFields + d2;
+	  m.cols[i*nFields*nnz + 5*nFields + nnz*d1 + d2] = (i + 1     )*nFields + d2;
+	  m.cols[i*nFields*nnz + 6*nFields + nnz*d1 + d2] = (i + nx - 1)*nFields + d2;
+	  m.cols[i*nFields*nnz + 7*nFields + nnz*d1 + d2] = (i + nx    )*nFields + d2;
+	  m.cols[i*nFields*nnz + 8*nFields + nnz*d1 + d2] = (i + nx + 1)*nFields + d2;
+	}
+      }
+    }
+  }
+
+}
