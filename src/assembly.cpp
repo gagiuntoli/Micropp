@@ -146,7 +146,7 @@ void Problem::Assembly_A (void)
 
     getElemental_A (e, Ae);
 
-    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae); // assembly
+//    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae); // assembly
     ell_add_2D (A, e, Ae, dim, nx, ny);
   }
 

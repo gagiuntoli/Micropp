@@ -14,8 +14,8 @@ int ell_init (ell_matrix * m, int nrow, int ncol, int nnz)
   m->cols = (int*)malloc((nrow*nnz) * sizeof(int));
   m->vals = (double*)malloc((nrow*nnz) * sizeof(double));
   if (m->vals == NULL || m->cols == NULL) return 2;
-  for (int i = 0 ; i < (nrow*nnz) ; i++) m->cols[i] = -1;
-  for (int i = 0 ; i < (nrow*nnz) ; i++) m->vals[i] = +0;
+  for (int i = 0 ; i < (nrow*nnz) ; i++) m->cols[i] = 0;
+  for (int i = 0 ; i < (nrow*nnz) ; i++) m->vals[i] = 0;
   return 0;
 }
 
@@ -143,7 +143,6 @@ int ell_mvp (ell_matrix * m, double *x, double *y)
     y[i] = 0;
     int j = 0;
     while (j < m->nnz) {
-      if (m->cols[(i*m->nnz) + j] == -1) break;
       y[i] += m->vals[(i*m->nnz) + j] * x[m->cols[(i*m->nnz) + j]];
       j++;
     }

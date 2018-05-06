@@ -49,6 +49,8 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 
   NewRap_Its = 3;
   NewRap_Tol = 1.0e-5;
+
+  ell_init_2D (A, dim, nx, ny);
 }
 
 int Problem::getElemType (int e)

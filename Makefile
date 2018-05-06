@@ -1,8 +1,16 @@
 
 CC=g++
 FC=gfortran
-CFLAGS= -c -O3 -std=c++11
-FFLAGS= -c -g 
+CFLAGS= -c -std=c++11
+FFLAGS= -c
+
+ifeq ($(DEBUG),1)
+ FFLAGS += -g 
+ CFLAGS += -g
+else
+ FFLAGS += -O3
+ CFLAGS += -O3
+endif
 
 #LFLAGS= -L/apps/BOOST/1.67.0/lib -lboost_program_options
 #LFLAGS= -L/apps/BOOST/1.64.0_py3/INTEL/IMPI/lib -lboost_program_options
