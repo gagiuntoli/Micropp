@@ -333,3 +333,38 @@ int ell_print (ell_matrix * m)
   }
   return 0;
 }
+
+void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny)
+{
+  // assembly Ae in 2D structured grid representation
+  // nFields : number of scalar components on each node
+
+  const int npe = 4;
+  int nnz = m.nnz;
+  int cols_row_0[4] = {4,5,8,7};
+  int cols_row_1[4] = {3,4,7,6};
+  int cols_row_2[4] = {0,1,4,3};
+  int cols_row_3[4] = {1,2,5,4};
+
+  int xfactor = e%(nx-1);
+  int yfactor = e/(ny-1);
+
+  int n0 = yfactor     * nx + xfactor     ;
+  int n1 = yfactor     * nx + xfactor + 1 ;
+  int n2 = (yfactor+1) * nx + xfactor + 1 ;
+  int n3 = (yfactor+1) * nx + xfactor     ;
+
+  for (int i=0; i<nFields; i++) {
+    for (int n=0; n<npe; n++) {
+      for (int j=0; j<nFields; j++) {
+
+	m.vals[n0*nFields*nnz + i*nnz + cols_row_0[n]*nFields + j] += Ae[0*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n1*nFields*nnz + i*nnz + cols_row_1[n]*nFields + j] += Ae[1*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n2*nFields*nnz + i*nnz + cols_row_2[n]*nFields + j] += Ae[2*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n3*nFields*nnz + i*nnz + cols_row_3[n]*nFields + j] += Ae[3*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+
+      }
+    }
+  }
+
+}
