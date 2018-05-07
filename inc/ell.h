@@ -32,5 +32,6 @@ int ell_print (ell_matrix * m);
 
 void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny);
 void ell_init_2D (ell_matrix &m, int nFields, int nx, int ny);
+void ell_set_bc_2D (ell_matrix &m, int nFields, int nx, int ny);
 
 #endif
