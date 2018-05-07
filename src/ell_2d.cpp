@@ -1,4 +1,4 @@
-#include "ell.h"
+#include "ell_2d.h"
 #include <iostream>
 #include <iomanip> // print with format
 #include <cmath>

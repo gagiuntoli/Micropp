@@ -1,4 +1,5 @@
 #include <vector>
+#include "ell_2d.h"
 #include "ell.h"
 
 class Problem {
