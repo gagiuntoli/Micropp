@@ -146,46 +146,13 @@ void Problem::Assembly_A (void)
 
     getElemental_A (e, Ae);
 
-//    ell_add_vals(&A, index, npe*dim, index, npe*dim, Ae); // assembly
     ell_add_2D (A, e, Ae, dim, nx, ny);
   }
 
-  // y = 0
-  for (int i=0; i<nx; i++) {
-    for (int d=0; d<dim; d++) {
-      int index = i*dim + d;
-      ell_set_zero_row (&A, index, 1.0);
-      ell_set_zero_col (&A, index, 1.0);
-    }
-  }
-  // y = ly
-  for (int i=0; i<nx; i++) {
-    for (int d=0; d<dim; d++) {
-      int index = (i+(ny-1)*nx)*dim + d;
-      ell_set_zero_row (&A, index, 1.0);
-      ell_set_zero_col (&A, index, 1.0);
-    }
-  }
-  // x = 0
-  for (int i=0; i<ny-2; i++) {
-    for (int d=0; d<dim; d++) {
-      int index = (i+1)*nx*dim + d;
-      ell_set_zero_row (&A, index, 1.0);
-      ell_set_zero_col (&A, index, 1.0);
-    }
-  }
-  // x = lx
-  for (int i=0; i<ny-2; i++) {
-    for (int d=0; d<dim; d++) {
-      int index = ((i+2)*nx-1)*dim + d;
-      ell_set_zero_row (&A, index, 1.0);
-      ell_set_zero_col (&A, index, 1.0);
-    }
-  }
+  ell_set_bc_2D (A, dim, nx, ny);
 
-  if (flag_print_A == true) {
+  if (flag_print_A == true)
     ell_print (&A);
-  }
 
 }
 

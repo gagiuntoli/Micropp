@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int ell_init (ell_matrix * m, int nrow, int ncol, int nnz)
+int ell_init_2D (ell_matrix * m, int nrow, int ncol, int nnz)
 {
   if (m == NULL) return 1;
   m->nnz = nnz;
@@ -14,143 +14,33 @@ int ell_init (ell_matrix * m, int nrow, int ncol, int nnz)
   m->cols = (int*)malloc((nrow*nnz) * sizeof(int));
   m->vals = (double*)malloc((nrow*nnz) * sizeof(double));
   if (m->vals == NULL || m->cols == NULL) return 2;
-  for (int i = 0 ; i < (nrow*nnz) ; i++) m->cols[i] = 0;
-  for (int i = 0 ; i < (nrow*nnz) ; i++) m->vals[i] = 0;
-  return 0;
-}
-
-int ell_set_val (ell_matrix * m, int row, int col, double val)
-{
-  if (row >= m->nrow) { 
-    cout << "ell error: row " << row << " is greater than the dimension of the matrix" << endl;
-    return 1;
-  } else if(col >= m->ncol) {
-    cout << "ell error: col " << col << " is greater than the dimension of the matrix" << endl;
-    return 2;
-  } else if (row < 0) {
-    cout << "ell error: negative values in row " << row << endl;
-    return 3;
-  } else if (col < 0) {
-    cout << "ell error: negative values in col " << col << endl;
-    return 4;
-  }
-  int j = 0;
-  while (j < m->nnz) {
-    if (m->cols[(row*m->nnz) + j] == -1) {
-      m->cols[(row*m->nnz) + j] = col;
-      m->vals[(row*m->nnz) + j] = val;
-      return 0;
-    } else if (m->cols[(row*m->nnz) + j] == col) {
-      m->vals[(row*m->nnz) + j] = val;
-      return 0;
-    }
-    j++;
-  }
-  if (j == m->nnz) {
-    cout << "ell error: not enought space to store value in row " << row << "and col " << col << endl;
-    return 5;
-  }
-  return 6;
-}
-
-int ell_add_val (ell_matrix * m, int row, int col, double val)
-{
-  if (row >= m->nrow || col >= m->ncol) {
-    cout << "ell error: row " << row << " or col " << col << " greater than the dimension of the matrix" << endl;
-    return 1;
-  }
-  if (row < 0 || col < 0) {
-    cout << "ell error: negative values in row or col" << endl;
-    return 2;
-  }
-  int j = 0, row_start = row*m->nnz;
-  while (j < m->nnz) {
-    if (m->cols[row_start + j] == -1) {
-      m->cols[row_start + j] = col;
-      m->vals[row_start + j] = val;
-      return 0;
-    } else if (m->cols[row_start + j] == col) {
-      m->vals[row_start + j] += val;
-      return 0;
-    }
-    j++;
-  }
-  if (j == m->nnz) {
-    cout << "ell error: not enought space to add value in row and col" << endl;
-    return 3;
-  }
-  return 4;
-}
-
-int ell_add_vals (ell_matrix *m, int *ix, int nx, int *iy, int ny, double *vals)
-{
-  if (m == NULL || ix == NULL || iy == NULL || vals == NULL) return 1;
-  for (int i = 0 ; i < nx ; i++) {
-    for (int j = 0 ; j < ny ; j++) {
-      ell_add_val (m, ix[i], iy[j], vals[i*nx + j]);
-    }
-  }
-  return 0;
-}
-
-int ell_set_zero_row (ell_matrix *m, int row, double diag_val)
-{
-  if (m == NULL) return 1;
-  int j = 0;
-  while (j < m->nnz) {
-    if (m->cols[(row*m->nnz) + j] == -1) {
-      return 0;
-    } else if (m->cols[(row*m->nnz) + j] == row) {
-      m->vals[(row*m->nnz) + j] = diag_val;
-    } else {
-      m->vals[(row*m->nnz) + j] = 0.0;
-    }
-    j++;
-  }
-  return 0;
-}
-
-int ell_set_zero_col (ell_matrix *m, int col, double diag_val)
-{
-  if (m == NULL) return 1;
-  for (int i = 0 ; i < m->nrow ; i++) {
-    int j = 0;
-    while (j < m->nnz) {
-      if (m->cols[(i*m->nnz) + j] == -1) {
-	break;
-      } else if (m->cols[(i*m->nnz) + j] == col) {
-	m->vals[(i*m->nnz) + j] = (i == col) ? diag_val : 0.0;
-      }
-      j++;
-    }
+  for (int i=0; i<nrow*nnz; i++) {
+    m->cols[i] = 0;
+    m->vals[i] = 0;
   }
   return 0;
 }
 
 int ell_set_zero_mat (ell_matrix * m)
 {
-  for (int i = 0 ; i < m->nrow ; i++) ell_set_zero_row (m, i, 0.0);
+  for (int i=0; i<m->nrow; i++)
+    for (int j=0; j<m->nnz; j++)
+      m->vals[i*m->nnz + j] = 0.0;
   return 0;
 }
 
 
-int ell_mvp (ell_matrix * m, double *x, double *y)
+void ell_mvp_2D (ell_matrix * m, double *x, double *y)
 {
   //  y = m * x
-  if (m == NULL || x == NULL || y == NULL) return 1;
-
-  for (int i = 0 ; i < m->nrow ; i++) {
+  for (int i=0; i<m->nrow; i++) {
     y[i] = 0;
-    int j = 0;
-    while (j < m->nnz) {
+    for (int j=0; j<m->nnz; j++)
       y[i] += m->vals[(i*m->nnz) + j] * x[m->cols[(i*m->nnz) + j]];
-      j++;
-    }
   }
-  return 0;
 }
 
-int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
+int ell_solve_jacobi_2D (ell_solver *solver, ell_matrix * m, int nFields, int nx, int ny, double *b, double *x)
 {
   /* A = K - N  
    * K = diag(A)
@@ -161,10 +51,12 @@ int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
   
   double *k = (double*)malloc (m->nrow * sizeof(double)); // K = diag(A)
   double *e_i = (double*)malloc(m->nrow * sizeof(double));
-
-  for (int i = 0 ; i < m->nrow ; i++) {
-    ell_get_val (m, i, i, &k[i]);
-    k[i] = 1 / k[i];
+  
+  int nn = nx*ny;
+  for (int i=0; i<nn; i++) {
+    for (int d=0; d<nFields; d++) {
+      k[i*nFields + d] = 1 / m->vals[i*nFields*m->nnz + 4*nFields + d*m->nnz + d];
+    }
   }
 
   int its = 0;
@@ -190,7 +82,7 @@ int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
     }
 
     err = 0;
-    ell_mvp (m, x, e_i);
+    ell_mvp_2D (m, x, e_i);
     for (int i = 0 ; i < m->nrow ; i++){
       e_i[i] -= b[i];
       err += e_i[i] * e_i[i];
@@ -203,7 +95,7 @@ int ell_solve_jacobi (ell_solver *solver, ell_matrix * m, double *b, double *x)
   return 0;
 }
 
-int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
+int ell_solve_cgpd_2D (ell_solver *solver, ell_matrix * m, int nFields, int nx, int ny, double *b, double *x)
 {
   /* cg with jacobi preconditioner
    * r_1 residue in actual iteration
@@ -226,45 +118,50 @@ int ell_solve_cg (ell_solver *solver, ell_matrix * m, double *b, double *x)
   double rho_0, rho_1, d;
   double err;
 
-  for (int i = 0 ; i < m->nrow ; i++) {
-    ell_get_val (m, i, i, &k[i]);
-    k[i] = 1 / k[i];
+  int nn = nx * ny;
+
+  for (int i=0; i<nn; i++) {
+    for (int d=0; d<nFields; d++) {
+      k[i*nFields + d] = 1 / m->vals[i*nFields*m->nnz + 4*nFields + d*m->nnz + d];
+    }
   }
 
-  ell_mvp (m, x, r);
-  for (int i = 0 ; i < m->nrow ; i++)
+  ell_mvp_2D (m, x, r);
+
+  for (int i=0; i<m->nrow; i++)
     r[i] -= b[i];
 
   do {
 
     err = 0;
-    for (int i = 0 ; i < m->nrow ; i++)
+    for (int i=0; i<m->nrow; i++)
       err += r[i] * r[i];
+//    cout << "cg_err = " << err << endl;
     err = sqrt(err); if (err < solver->min_tol) break;
 
-    for (int i = 0 ; i < m->nrow ; i++)
+    for (int i=0 ; i<m->nrow; i++)
       z[i] = k[i] * r[i];
 
     rho_1 = 0.0;
-    for (int i = 0 ; i < m->nrow ; i++)
+    for (int i=0; i<m->nrow; i++)
       rho_1 += r[i] * z[i];
 
     if (its == 0) {
-      for (int i = 0 ; i < m->nrow ; i++)
+      for (int i=0 ; i<m->nrow; i++)
 	p[i] = z[i];
     } else {
       double beta = rho_1 / rho_0;
-      for (int i = 0 ; i < m->nrow ; i++)
+      for (int i=0; i<m->nrow; i++)
 	p[i] = z[i] + beta * p[i];
     }
 
-    ell_mvp (m, p, q);
+    ell_mvp_2D (m, p, q);
     double aux = 0;
-    for (int i = 0 ; i < m->nrow ; i++)
+    for (int i=0 ; i<m->nrow; i++)
       aux += p[i] * q[i];
     d = rho_1 / aux;
 
-    for (int i = 0 ; i < m->nrow ; i++) {
+    for (int i=0; i<m->nrow; i++) {
       x[i] -= d * p[i];
       r[i] -= d * q[i];
     }

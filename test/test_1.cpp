@@ -15,6 +15,8 @@ int main (int argc, char *argv[])
     bool flag_print_b=false;
     bool flag_print_u=false;
     bool flag_print_du=false;
+    bool flag_print_solver=false;
+    bool flag_print_newton=false;
 
     options_description desc{"Options"};
     desc.add_options()
@@ -24,11 +26,13 @@ int main (int argc, char *argv[])
       ("ny", value<int>()->default_value(10), "Num of Nodes in Y dir")
       ("nz", value<int>()->default_value(1) , "Num of Nodes in Z dir")
       ("cg_its", value<int>()->default_value(1000)     , "Max Number of iterations (CG)")
-      ("cg_tol", value<double>()->default_value(1e-8) , "Minimun Tolerance (CG)")
+      ("cg_tol", value<double>()->default_value(1e-5) , "Minimun Tolerance (CG)")
       ("print_A", bool_switch(&flag_print_A), "Print ELL Matrix")
       ("print_b", bool_switch(&flag_print_b), "Print RHS b")
       ("print_u", bool_switch(&flag_print_u), "Print Solution u")
       ("print_du", bool_switch(&flag_print_du), "Print Increment du")
+      ("print_solver", bool_switch(&flag_print_solver), "Print Solver")
+      ("print_newton", bool_switch(&flag_print_newton), "Print Newton Raphson")
       ("dim", value<int>()->default_value(2), "Dimension");
 
     variables_map vm;
@@ -57,6 +61,8 @@ int main (int argc, char *argv[])
     micro.flag_print_b = flag_print_b;
     micro.flag_print_u = flag_print_u;
     micro.flag_print_du = flag_print_du;
+    micro.flag_print_solver = flag_print_solver;
+    micro.flag_print_newton = flag_print_newton;
 
     // assembly
     start = clock();
@@ -68,14 +74,14 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time assembly : " << t_lap << endl;
 
-    micro.newtonRaphson();
-
     // solve
     start = clock();
     micro.solve();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time solve : " << t_lap << endl;
+
+    micro.newtonRaphson();
 
     // calc average
     start = clock();
