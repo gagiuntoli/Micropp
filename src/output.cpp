@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void Problem::write_vtu (void)
+void Problem::writeVtu (int time_step, int elem)
 {
 
   ofstream file;

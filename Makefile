@@ -24,9 +24,6 @@ all: build test_1 test_2 test_3
 
 lib: build/libmicropp.a
 
-micropp: build/main.o build/assembly.o build/micro.o build/ell_2d.o build/ell.o
-	$(CC) $(LFLAGS) $^ -o $@
-
 test_1: build/test_1.o build/libmicropp.a
 	$(CC) $< -o $@ $(LFLAGS) -L build -lmicropp
 
@@ -36,7 +33,7 @@ test_2: build/test_2.o build/libmicropp.a
 test_3: build/test_3.o build/libmicropp.a
 	$(FC) $< -o $@ -L build -lmicropp -lstdc++ 
 
-build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/micro.o build/ell.o build/ell_2d.o build/loc_hom.o build/wrapper.o  
+build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/micro.o build/ell.o build/loc_hom.o build/wrapper.o  
 	ar rcs $@ $^
     
 build/main.o: src/main.cpp inc/micro.h
@@ -49,9 +46,6 @@ build/assembly.o: src/assembly.cpp inc/micro.h
 	$(CC) $(CFLAGS) $< -I ./inc -o $@
 
 build/ell.o: src/ell.cpp inc/micro.h inc/ell.h
-	$(CC) $(CFLAGS) $< -I ./inc -o $@
-
-build/ell_2d.o: src/ell_2d.cpp inc/ell_2d.h
 	$(CC) $(CFLAGS) $< -I ./inc -o $@
 
 build/test_1.o: test/test_1.cpp inc/micro.h

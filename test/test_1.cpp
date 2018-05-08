@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
     // writting
     start = clock();
     micro.calcDistributions();
-    micro.write_vtu();
+    micro.writeVtu(1, 2);
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time Writing  : " << t_lap << endl;

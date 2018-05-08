@@ -1,5 +1,4 @@
 #include <vector>
-#include "ell_2d.h"
 #include "ell.h"
 
 class Problem {
@@ -55,7 +54,7 @@ class Problem {
     void getElemental_A (int e, double (&Ae)[64]);
     void getElemental_b (int e, double (&be)[8]);
     double distance (int e);
-    void write_vtu (void);
+    void writeVtu (int time_step, int elem) ;
     void getStrain (int e, int gp, double *strain_gp);
     void getStress (int e, int gp, double *stress_gp);
     void getElemDisp (int e, double *elem_disp);
