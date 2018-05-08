@@ -5,9 +5,9 @@ class Problem {
 
   public:
 
-    int npe = 4;
-    int dim = 2;
-    int nvoi= 3;
+    int npe;
+    int dim;
+    int nvoi;
 
     int nx, ny, nz, nn; 
     double lx, ly, lz, dx, dy, dz;

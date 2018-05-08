@@ -4,6 +4,9 @@
 
 Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 {
+  npe = 4;
+  dim = 2;
+  lx = 1.0; ly = 1.0; lz = 1.0;
 
   solver.max_its = cg_its;
   solver.min_tol = cg_tol;
@@ -11,16 +14,19 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   if (dim == 2) {
     nx = size[0];
     ny = size[1];
-    nz = 1;
     nvoi = 3;
+    nn = nx * ny;
+  }
+  else {
+    nx = size[0];
+    ny = size[1];
+    nz = size[2];
+    nvoi = 6;
+    nn = nx * ny * nz;
   }
 
-  lx = 1.0;
-  ly = 1.0;
-  lz = 1.0;
   dx = lx/(nx-1);
   dy = ly/(ny-1);
-  nn = nx*ny*nz;
   if (dim == 2) {
     nelem = (nx-1) * (ny-1);
   }

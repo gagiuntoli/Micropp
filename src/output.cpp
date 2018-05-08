@@ -1,15 +1,21 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include "micro.h"
 
 using namespace std;
 
 void Problem::writeVtu (int time_step, int elem)
 {
+  std::stringstream fname_pvtu_s, fname_vtu_s;;
+  fname_pvtu_s << "micropp_" << elem << "_" << time_step << ".pvtu";
+  fname_vtu_s  << "micropp_" << elem << "_" << time_step << ".vtu";
+  std::string fname_pvtu = fname_pvtu_s.str();
+  std::string fname_vtu  = fname_vtu_s.str();
 
   ofstream file;
-  file.open ("solution.pvtu");
+  file.open (fname_pvtu);
 
   file 
     << "<?xml version=\"1.0\"?>" << endl
@@ -32,12 +38,12 @@ void Problem::writeVtu (int time_step, int elem)
     << "<PDataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"" << 6 << "\"/>"    << endl
     << "<PDataArray type=\"Int32\"   Name=\"elem_type\" NumberOfComponents=\"1\"/>"  << endl
     << "</PCellData>"  << endl
-    << "<Piece Source=\"solution_0.vtu\"/>" << endl
+    << "<Piece Source=\"" << fname_vtu << "\"/>" << endl
     << "</PUnstructuredGrid>" << endl
     << "</VTKFile>" << endl;
   file.close();
 
-  file.open ("solution_0.vtu");
+  file.open (fname_vtu);
   file
       << "<?xml version=\"1.0\"?>" << endl
       << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl
