@@ -23,8 +23,8 @@ extern "C"
     micro->loc_hom_Ctan(MacroStrain, MacroCtan); 
   }
 
-  void micro_write_vtu_(int *time_step, int *elem)
+  void micro_output_(int *time_step, int *elem, int *macro_gp_global, double *MacroStrain)
   {
-    micro->writeVtu(*time_step, *elem); 
+    micro->output (*time_step, *elem, *macro_gp_global, MacroStrain);
   }
 } 

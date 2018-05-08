@@ -6,6 +6,20 @@
 
 using namespace std;
 
+void Problem::output (int time_step, int elem, int macro_gp_global, double *MacroStrain)
+{
+  double MacroStress[6];
+
+  // searchs for macro_gp_global
+  // ... future
+
+  loc_hom_Stress(MacroStrain, MacroStress);
+  calcDistributions();
+
+  // plots the strain, stress, and displacement fields stored now
+  writeVtu(time_step, elem);
+}
+
 void Problem::writeVtu (int time_step, int elem)
 {
   std::stringstream fname_pvtu_s, fname_vtu_s;;

@@ -54,7 +54,6 @@ class Problem {
     void getElemental_A (int e, double (&Ae)[64]);
     void getElemental_b (int e, double (&be)[8]);
     double distance (int e);
-    void writeVtu (int time_step, int elem) ;
     void getStrain (int e, int gp, double *strain_gp);
     void getStress (int e, int gp, double *stress_gp);
     void getElemDisp (int e, double *elem_disp);
@@ -62,6 +61,9 @@ class Problem {
     void calcDistributions (void);
     void calcAverageStress (void);
     void calcAverageStrain (void);
+
+    void writeVtu (int time_step, int elem) ;
+    void output (int time_step, int elem, int macro_gp_global, double *MacroStrain);
 
 //  private:
 

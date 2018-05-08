@@ -5,6 +5,7 @@
 *.aux
 *.log
 *.pdf
+*.png
 *.o
 *.vtu
 *.pvtu
