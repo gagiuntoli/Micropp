@@ -1,5 +1,7 @@
 program main_wrap
 
+  implicit none
+
   integer dims
   integer :: sizes(3)
   real*8 :: strain(3)
