@@ -59,6 +59,8 @@ int main (int argc, char *argv[])
     micro.flag_print_u = flag_print_u;
     micro.flag_print_du = flag_print_du;
 
+    for (int i=0; i<2; i++) {
+
     // test localization and homogenization of stress
     double stress_mac[6];
     start = clock();
@@ -81,6 +83,8 @@ int main (int argc, char *argv[])
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time calc MacroCtan: " << t_lap << endl;
+    }
+    micro.~Problem();
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

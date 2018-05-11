@@ -59,6 +59,17 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   ell_init_2D (A, dim, nx, ny);
 }
 
+Problem::~Problem (void)
+{
+  ell_free_2D (&A);
+  free(b);
+  free(du);
+  free(u);
+  free(stress);
+  free(strain);
+  free(elem_type);
+}
+
 int Problem::getElemType (int e)
 {
   if (distance(e) < 0.2) {

@@ -43,6 +43,8 @@ class Problem {
     bool flag_print_wrapper;
 
     Problem (int dim, int size[3], int cg_its, double cg_tol);
+    ~Problem (void);
+
     void loc_hom_Stress (double *MacroStrain, double *MacroStress);
     void loc_hom_Ctan   (double *MacroStrain, double *MacroCtan);
 
