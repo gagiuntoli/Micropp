@@ -21,13 +21,10 @@ int ell_init_2D (ell_matrix * m, int nrow, int ncol, int nnz)
   return 0;
 }
 
-void ell_free_2D (ell_matrix * m)
+void ell_free_2D (ell_matrix &m)
 {
-  if (m == NULL)
-    return;
-
-  free(m->cols);
-  free(m->vals);
+  free(m.cols);
+  free(m.vals);
 }
 
 int ell_set_zero_mat (ell_matrix * m)

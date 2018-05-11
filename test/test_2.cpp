@@ -84,7 +84,6 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time calc MacroCtan: " << t_lap << endl;
     }
-    micro.~Problem();
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

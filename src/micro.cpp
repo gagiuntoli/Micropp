@@ -61,7 +61,7 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 
 Problem::~Problem (void)
 {
-  ell_free_2D (&A);
+  ell_free_2D (A);
   free(b);
   free(du);
   free(u);

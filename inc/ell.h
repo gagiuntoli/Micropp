@@ -32,7 +32,7 @@ int ell_print_full (ell_matrix * m);
 int ell_print (ell_matrix * m);
 
 int ell_init_2D (ell_matrix *m, int nrow, int ncol, int nnz);
-void ell_free_2D (ell_matrix * m);
+void ell_free_2D (ell_matrix &m);
 
 void ell_mvp_2D (ell_matrix *m, double *x, double *y);
 void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny);
