@@ -173,6 +173,13 @@ int ell_solve_cgpd_2D (ell_solver *solver, ell_matrix * m, int nFields, int nx, 
 
   solver->err = err;
   solver->its = its;
+
+  free(k);
+  free(r);
+  free(z);
+  free(p);
+  free(q);
+
   return 0;
 }
 
