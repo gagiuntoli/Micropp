@@ -164,34 +164,51 @@ void Problem::setDisp (double *eps)
 
 double Problem::Assembly_b (void)
 {
-  int index[8];
-  double be[8];
+  int index[3*8];
+  double be[3*8];
+  int n0, n1, n2, n3, n4, n5, n6, n7;
 
   for (int i=0 ; i<nn*dim; i++) {
     b[i] = 0.0;
   }
 
-  for (int e=0; e<nelem; e++) {
+  if (dim == 2) {
 
-    int xfactor = e%(nx-1);
-    int yfactor = e/(ny-1);
+    for (int e=0; e<nelem; e++) {
 
-    int n0 = yfactor     * nx + xfactor     ;
-    int n1 = yfactor     * nx + xfactor + 1 ;
-    int n2 = (yfactor+1) * nx + xfactor + 1 ;
-    int n3 = (yfactor+1) * nx + xfactor     ;
-    index[0] = n0*dim; index[1] = n0*dim + 1;
-    index[2] = n1*dim; index[3] = n1*dim + 1;
-    index[4] = n2*dim; index[5] = n2*dim + 1;
-    index[6] = n3*dim; index[7] = n3*dim + 1;
-    //cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
-    
-    getElemental_b (e, be);
-         
-    for (int i=0; i<npe*dim; i++) {
-      b[index[i]] += be[i]; // assembly
+      int xfactor = e%(nx-1);
+      int yfactor = e/(ny-1);
+
+      n0 = yfactor     * nx + xfactor     ;
+      n1 = yfactor     * nx + xfactor + 1 ;
+      n2 = (yfactor+1) * nx + xfactor + 1 ;
+      n3 = (yfactor+1) * nx + xfactor     ;
+      index[0] = n0*dim; index[1] = n0*dim + 1;
+      index[2] = n1*dim; index[3] = n1*dim + 1;
+      index[4] = n2*dim; index[5] = n2*dim + 1;
+      index[6] = n3*dim; index[7] = n3*dim + 1;
+
+      getElemental_b (e, be);
+
+      for (int i=0; i<npe*dim; i++) {
+	b[index[i]] += be[i]; // assembly
+      }
+    } 
+
+  } else if (dim == 3) {
+
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ez=0; ez<nz-1; ez++) {
+	  n0 = ez*(nx*ny) + ey*nx + ex;
+	  n1 = ez*(nx*ny) + ey*nx + ex + 1;
+	  n2 = ez*(nx*ny) + ey*nx + ex + 1;
+	  n3 = ez*(nx*ny) + ey*nx + ex;
+	}
+      }
     }
-  } // loop over elements
+
+  }
 
   // boundary conditions
   // y = 0
@@ -235,7 +252,7 @@ double Problem::Assembly_b (void)
 void Problem::Assembly_A (void)
 {
   int index[8];
-  double Ae[64];
+  double Ae[3*8*3*8];
 
   ell_set_zero_mat(&A);
   for (int e = 0 ; e < nelem ; e++) {
@@ -265,7 +282,7 @@ void Problem::Assembly_A (void)
 
 }
 
-void Problem::getElemental_A (int e, double (&Ae)[64])
+void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
 {
 /*   // for debugging
      for (int i=0; i<8; i++)
@@ -339,7 +356,7 @@ double Problem::distance (int e)
   return sqrt(xdis + ydis);
 }
 
-void Problem::getElemental_b (int e, double (&be)[8])
+void Problem::getElemental_b (int e, double (&be)[3*8])
 {
   /*
      // for debugging

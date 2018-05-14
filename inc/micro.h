@@ -53,8 +53,8 @@ class Problem {
     double Assembly_b (void);
     void solve (void);
     void newtonRaphson (void);
-    void getElemental_A (int e, double (&Ae)[64]);
-    void getElemental_b (int e, double (&be)[8]);
+    void getElemental_A (int e, double (&Ae)[3*8*3*8]);
+    void getElemental_b (int e, double (&be)[3*8]);
     double distance (int e);
     void getStrain (int e, int gp, double *strain_gp);
     void getStress (int e, int gp, double *stress_gp);
