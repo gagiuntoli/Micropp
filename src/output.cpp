@@ -92,15 +92,15 @@ void Problem::writeVtu (int time_step, int elem)
 
   file << "<DataArray type=\"Int32\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   if (dim == 2) {
-    for (int e=0; e<nelem; e++) {
-      int xfactor = e%(nx-1);
-      int yfactor = e/(ny-1);
-      int n0 = yfactor     * nx + xfactor     ;
-      int n1 = yfactor     * nx + xfactor + 1 ;
-      int n2 = (yfactor+1) * nx + xfactor + 1 ;
-      int n3 = (yfactor+1) * nx + xfactor     ;
-      file << n0 << " " << n1 << " " << n2 << " " << n3 << " " << endl;
-    } 
+    for (int ey=0; ey<ny-1; ey++) {
+      for (int ex=0; ex<nx-1; ex++) {
+	int n0 = ey*nx     + ex;
+	int n1 = ey*nx     + ex + 1;
+	int n2 = (ey+1)*nx + ex + 1;
+	int n3 = (ey+1)*nx + ex;
+	file<<n0<<" "<<n1<<" "<<n2<<" "<<n3<<" "<<endl;
+      }
+    }
   } else if (dim == 3) {
     for (int ez=0; ez<nz-1; ez++) {
       for (int ey=0; ey<ny-1; ey++) {
