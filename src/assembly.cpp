@@ -6,51 +6,160 @@ using namespace std;
 
 void Problem::setDisp (double *eps)
 {
-  /* dim 2 
-     | eps(0)    eps(2)/2 |
-     | eps(2)/2  eps(1)   |
-  */
-  
-  // y = 0
-  for (int i=0; i<nx; i++) {
-    double xcoor = i*dx;
-    double ycoor = 0.0;
-    double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
-    double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
-    u[i*dim  ] = dux;
-    u[i*dim+1] = duy;
-  }
-  // y = ly
-  for (int i=0; i<nx; i++) {
-    double xcoor = i*dx;
-    double ycoor = ly;
-    double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
-    double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
-    u[(i+(ny-1)*nx)*dim  ] = dux;
-    u[(i+(ny-1)*nx)*dim+1] = duy;
-  }
-  // x = 0
-  for (int i=0; i<ny-2; i++) {
-    double xcoor = 0.0;
-    double ycoor = (i+1)*dy;
-    double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
-    double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
-    u[(i+1)*nx*dim  ] = dux;
-    u[(i+1)*nx*dim+1] = duy;
-  }
-  // x = lx
-  for (int i=0; i<ny-2; i++) {
-    double xcoor = lx;
-    double ycoor = (i+1)*dy;
-    double dux =       eps[0]*xcoor + 0.5 * eps[2]*ycoor;
-    double duy = 0.5 * eps[2]*xcoor +       eps[1]*ycoor;
-    u[((i+2)*nx-1)*dim  ] = dux;
-    u[((i+2)*nx-1)*dim+1] = duy;
+
+  if (dim == 2) {
+
+    /* dim 2 
+       | eps(0)    eps(2)/2 |
+       | eps(2)/2  eps(1)   |
+     */
+
+    // y = 0
+    for (int i=0; i<nx; i++) {
+      double xcoor = i*dx;
+      double ycoor = 0.0;
+      double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+      double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+      u[i*dim  ] = dux;
+      u[i*dim+1] = duy;
+    }
+    // y = ly
+    for (int i=0; i<nx; i++) {
+      double xcoor = i*dx;
+      double ycoor = ly;
+      double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+      double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+      u[(i+(ny-1)*nx)*dim  ] = dux;
+      u[(i+(ny-1)*nx)*dim+1] = duy;
+    }
+    // x = 0
+    for (int i=0; i<ny-2; i++) {
+      double xcoor = 0.0;
+      double ycoor = (i+1)*dy;
+      double dux =     eps[0]*xcoor + 0.5*eps[2]*ycoor;
+      double duy = 0.5*eps[2]*xcoor +     eps[1]*ycoor;
+      u[(i+1)*nx*dim  ] = dux;
+      u[(i+1)*nx*dim+1] = duy;
+    }
+    // x = lx
+    for (int i=0; i<ny-2; i++) {
+      double xcoor = lx;
+      double ycoor = (i+1)*dy;
+      double dux =       eps[0]*xcoor + 0.5 * eps[2]*ycoor;
+      double duy = 0.5 * eps[2]*xcoor +       eps[1]*ycoor;
+      u[((i+2)*nx-1)*dim  ] = dux;
+      u[((i+2)*nx-1)*dim+1] = duy;
+    }
+
+  } else if (dim == 3) {
+
+    /* dim 3
+       | eps(0)    eps(3)/2  eps(4)/2 |
+       | eps(3)/2  eps(1)    eps(5)/2 |
+       | eps(4)/2  eps(5)/2  eps(2)   |
+     */
+
+    // z = 0
+    for (int i=0; i<nx; i++) {
+      for (int j=0; j<ny; j++) {
+	int n = j*nx + i;
+	double xcoor = i*dx;
+	double ycoor = j*dy;
+	double zcoor = 0.0;
+	double dux =     eps[0]*xcoor + 0.5*eps[3]*ycoor + 0.5*eps[4]*zcoor;
+	double duy = 0.5*eps[3]*xcoor +     eps[1]*ycoor + 0.5*eps[5]*zcoor;
+	double duz = 0.5*eps[4]*xcoor + 0.5*eps[5]*ycoor +     eps[2]*zcoor;
+	u[n*dim  ] = dux;
+	u[n*dim+1] = duy;
+	u[n*dim+2] = duz;
+      }
+    }
+    // z = lx
+    for (int i=0; i<nx; i++) {
+      for (int j=0; j<ny; j++) {
+	int n = (nz-1)*nx*ny + j*nx + i;
+	double xcoor = i*dx;
+	double ycoor = j*dy;
+	double zcoor = lz;
+	double dux =     eps[0]*xcoor + 0.5*eps[3]*ycoor + 0.5*eps[4]*zcoor;
+	double duy = 0.5*eps[3]*xcoor +     eps[1]*ycoor + 0.5*eps[5]*zcoor;
+	double duz = 0.5*eps[4]*xcoor + 0.5*eps[5]*ycoor +     eps[2]*zcoor;
+	u[n*dim  ] = dux;
+	u[n*dim+1] = duy;
+	u[n*dim+2] = duz;
+      }
+    }
+
+    // y = 0
+    for (int i=0; i<nx; i++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + 0*nx + i;
+	double xcoor = i*dx;
+	double ycoor = 0.0;
+	double zcoor = k*dz;
+	double dux =     eps[0]*xcoor + 0.5*eps[3]*ycoor + 0.5*eps[4]*zcoor;
+	double duy = 0.5*eps[3]*xcoor +     eps[1]*ycoor + 0.5*eps[5]*zcoor;
+	double duz = 0.5*eps[4]*xcoor + 0.5*eps[5]*ycoor +     eps[2]*zcoor;
+	u[n*dim  ] = dux;
+	u[n*dim+1] = duy;
+	u[n*dim+2] = duz;
+      }
+    }
+
+    // y = ly
+    for (int i=0; i<nx; i++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + (ny-1)*nx + i;
+	double xcoor = i*dx;
+	double ycoor = ly;
+	double zcoor = k*dz;
+	double dux =     eps[0]*xcoor + 0.5*eps[3]*ycoor + 0.5*eps[4]*zcoor;
+	double duy = 0.5*eps[3]*xcoor +     eps[1]*ycoor + 0.5*eps[5]*zcoor;
+	double duz = 0.5*eps[4]*xcoor + 0.5*eps[5]*ycoor +     eps[2]*zcoor;
+	u[n*dim  ] = dux;
+	u[n*dim+1] = duy;
+	u[n*dim+2] = duz;
+      }
+    }
+
+    // x=0
+    for (int j=1; j<ny-1; j++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + j*nx + 0;
+	double xcoor = 0.0;
+	double ycoor = j*dy;
+	double zcoor = k*dz;
+	double dux =     eps[0]*xcoor + 0.5*eps[3]*ycoor + 0.5*eps[4]*zcoor;
+	double duy = 0.5*eps[3]*xcoor +     eps[1]*ycoor + 0.5*eps[5]*zcoor;
+	double duz = 0.5*eps[4]*xcoor + 0.5*eps[5]*ycoor +     eps[2]*zcoor;
+	u[n*dim  ] = dux;
+	u[n*dim+1] = duy;
+	u[n*dim+2] = duz;
+      }
+    }
+
+    // x=lx
+    for (int j=1; j<ny-1; j++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + j*nx + nx - 1;
+	double xcoor = lx;
+	double ycoor = j*dy;
+	double zcoor = k*dz;
+	double dux =     eps[0]*xcoor + 0.5*eps[3]*ycoor + 0.5*eps[4]*zcoor;
+	double duy = 0.5*eps[3]*xcoor +     eps[1]*ycoor + 0.5*eps[5]*zcoor;
+	double duz = 0.5*eps[4]*xcoor + 0.5*eps[5]*ycoor +     eps[2]*zcoor;
+	u[n*dim  ] = dux;
+	u[n*dim+1] = duy;
+	u[n*dim+2] = duz;
+      }
+    }
+
   }
 
   if (flag_print_u == true)
     for (int i=0; i<nn; i++)
       cout << u[i*dim] << " " << u[i*dim+1] << endl;
+
 }
 
 double Problem::Assembly_b (void)

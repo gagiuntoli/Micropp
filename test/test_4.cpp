@@ -44,6 +44,8 @@ int main (int argc, char *argv[])
     double start, end, t_lap;
     Problem micro (dim, size, cg_its, cg_tol);
 
+    micro.setDisp(eps);
+
     micro.writeVtu (1, 2);
 
   } catch (int &e) {
