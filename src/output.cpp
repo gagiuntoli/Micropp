@@ -66,19 +66,33 @@ void Problem::writeVtu (int time_step, int elem)
       << "<Points>" << endl
       << "<DataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
-  double x, y;
-  for (int n=0; n<nn; n++) {
-    if (dim == 2) {
-      x = (n%nx) * dx;
-      y = (n/nx) * dy;
-      file << x << " " << y << " "  << "0.0" << endl;
+  double x, y, z;
+  if (dim == 2) {
+    for (int j=0; j<ny; j++) {
+      for (int i=0; i<nx; i++) {
+	x = j * dx;
+	y = i * dy;
+	file << x << " " << y << " "  << "0.0" << endl;
+      }
+    }
+  }
+  else if (dim == 3) {
+    for (int k=0; k<nz; k++) {
+      for (int j=0; j<ny; j++) {
+	for (int i=0; i<nx; i++) {
+	  x = j * dx;
+	  y = i * dy;
+	  z = k * dz;
+	  file << x << " " << y << " "  << z << endl;
+	}
+      }
     }
   }
   file << "</DataArray>" << endl << "</Points>" << endl << "<Cells>" << endl;
 
   file << "<DataArray type=\"Int32\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-  for (int e=0; e<nelem; e++) {
-    if (dim == 2) {
+  if (dim == 2) {
+    for (int e=0; e<nelem; e++) {
       int xfactor = e%(nx-1);
       int yfactor = e/(ny-1);
       int n0 = yfactor     * nx + xfactor     ;
@@ -86,13 +100,29 @@ void Problem::writeVtu (int time_step, int elem)
       int n2 = (yfactor+1) * nx + xfactor + 1 ;
       int n3 = (yfactor+1) * nx + xfactor     ;
       file << n0 << " " << n1 << " " << n2 << " " << n3 << " " << endl;
+    } 
+  } else if (dim == 3) {
+    for (int ez=0; ez<nz-1; ez++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ex=0; ex<nx-1; ex++) {
+	  int n0 = ez       * (nx*ny) + ey*nx     + ex;
+	  int n1 = ez       * (nx*ny) + ey*nx     + ex + 1;
+	  int n2 = ez       * (nx*ny) + (ey+1)*nx + ex + 1;
+	  int n3 = ez       * (nx*ny) + (ey+1)*nx + ex;
+	  int n4 = (ez + 1) * (nx*ny) + ey*nx     + ex;
+	  int n5 = (ez + 1) * (nx*ny) + ey*nx     + ex + 1;
+	  int n6 = (ez + 1) * (nx*ny) + (ey+1)*nx + ex + 1;
+	  int n7 = (ez + 1) * (nx*ny) + (ey+1)*nx + ex;
+	  file<<n0<<" "<<n1<<" "<<n2<<" "<<n3<<" "<<n4<<" "<<n5<<" "<<n6<<" "<<n7<< endl;
+	}
+      }
     }
   }
   file << "</DataArray>" << endl;
 
   int ce = npe;
   file << "<DataArray type=\"Int32\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-  for (int e = 0 ; e < nelem ; e++) {
+  for (int e=0; e<nelem; e++) {
     file << ce << " ";
     ce += npe;
   }
@@ -102,6 +132,8 @@ void Problem::writeVtu (int time_step, int elem)
   for (int e=0; e<nelem; e++) {
     if(dim == 2) {
       file << "9 ";
+    } else if(dim == 3) {
+      file << "12 ";
     }
   }
   file << endl;
@@ -111,7 +143,9 @@ void Problem::writeVtu (int time_step, int elem)
   file << "<DataArray type=\"Float64\" Name=\"displ\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
   for (int n=0; n<nn; n++) {
     if (dim == 2) {
-      file << u[n*dim] << " " << u[n*dim + 1] << " 0.0" << endl;
+      file<<u[n*dim]<<" "<<u[n*dim + 1]<<" 0.0"<<endl;
+    } else if(dim == 3) {
+      file<<u[n*dim]<<" "<<u[n*dim + 1]<<" "<<u[n*dim + 2]<<endl;
     }
   }
   file << "</DataArray>" << endl;

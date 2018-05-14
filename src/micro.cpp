@@ -4,7 +4,6 @@
 
 Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 {
-  npe = 4;
   lx = 1.0; ly = 1.0; lz = 1.0;
 
   solver.max_its = cg_its;
@@ -15,12 +14,14 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
     ny = size[1];
     nvoi = 3;
     nn = nx * ny;
+    npe = 4;
   } else if (dim == 3) {
     nx = size[0];
     ny = size[1];
     nz = size[2];
     nvoi = 6;
     nn = nx * ny * nz;
+    npe = 8;
   }
 
   dx = lx/(nx-1);

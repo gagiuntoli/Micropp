@@ -552,7 +552,7 @@ void ell_init_2D (ell_matrix &m, int nFields, int nx, int ny)
 
 void ell_init_3D (ell_matrix &m, int nFields, int nx, int ny, int nz)
 {
-  int nn = nx*ny*nz;
+  int nn = nx * ny * nz;
   m.nnz = 27 * nFields;
   m.nrow = nn * nFields;
   m.ncol = nn * nFields;

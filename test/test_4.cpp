@@ -43,7 +43,8 @@ int main (int argc, char *argv[])
 
     double start, end, t_lap;
     Problem micro (dim, size, cg_its, cg_tol);
-    dim=2;
+
+    micro.writeVtu (1, 2);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;
