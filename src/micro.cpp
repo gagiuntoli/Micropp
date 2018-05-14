@@ -5,7 +5,6 @@
 Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 {
   npe = 4;
-  dim = 2;
   lx = 1.0; ly = 1.0; lz = 1.0;
 
   solver.max_its = cg_its;
@@ -16,8 +15,7 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
     ny = size[1];
     nvoi = 3;
     nn = nx * ny;
-  }
-  else {
+  } else if (dim == 3) {
     nx = size[0];
     ny = size[1];
     nz = size[2];
@@ -29,9 +27,11 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   dy = ly/(ny-1);
   if (dim == 2) {
     nelem = (nx-1) * (ny-1);
+  } else if (dim == 3) {
+    dz = lz/(nz-1);
+    nelem = (nx-1) * (ny-1) * (nz-1);
   }
 
-  ell_init_2D (&A, nn*dim, nn*dim, 18);
   b  = (double*)malloc(nn*dim*sizeof(double));
   du = (double*)malloc(nn*dim*sizeof(double));
   u  = (double*)malloc(nn*dim*sizeof(double));
@@ -56,12 +56,18 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   NewRap_Its = 3;
   NewRap_Tol = 1.0e-5;
 
-  ell_init_2D (A, dim, nx, ny);
+  if (dim == 2) {
+    ell_init_2D (A, dim, nx, ny);
+  } else if (dim == 3) {
+    ell_init_3D (A, dim, nx, ny, nz);
+  }
+
+  return;
 }
 
 Problem::~Problem (void)
 {
-  ell_free_2D (A);
+  ell_free (A);
   free(b);
   free(du);
   free(u);
