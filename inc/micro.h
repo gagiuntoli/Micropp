@@ -52,6 +52,7 @@ class Problem {
 
     void Assembly_A (void);
     double Assembly_b (void);
+
     void solve (void);
     void newtonRaphson (void);
 

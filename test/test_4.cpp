@@ -46,6 +46,8 @@ int main (int argc, char *argv[])
 
     micro.setDisp(eps);
     micro.Assembly_b();
+    micro.Assembly_A();
+    micro.solve();
 
     micro.writeVtu (1, 2);
 

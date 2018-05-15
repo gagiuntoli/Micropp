@@ -7,8 +7,11 @@ using namespace std;
 void Problem::solve (void)
 {
 
-  ell_solve_cgpd_2D (&solver, &A, dim, nx, ny, b, du);
-
+  if (dim == 2) {
+    ell_solve_cgpd_2D (&solver, &A, dim, nx, ny, b, du);
+  } else if (dim == 3) {
+    ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
+  }
 }
 
 void Problem::newtonRaphson (void)
@@ -29,7 +32,12 @@ void Problem::newtonRaphson (void)
 
     for (int i=0; i<nn*dim; i++)
       du[i] = 0.0;
-    ell_solve_cgpd_2D (&solver, &A, dim, nx, ny, b, du);
+
+    if (dim == 2) {
+      ell_solve_cgpd_2D (&solver, &A, dim, nx, ny, b, du);
+    } else if (dim == 3) {
+      ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
+    }
 
     if (flag_print_solver == true)
       cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;

@@ -172,6 +172,100 @@ int ell_solve_cgpd_2D (ell_solver *solver, ell_matrix * m, int nFields, int nx, 
   return 0;
 }
 
+int ell_solve_cgpd_struct (ell_solver *solver, ell_matrix * m, int nFields, int dim, int nn, double *b, double *x)
+{
+  /* cg with jacobi preconditioner
+   * r_1 residue in actual iteration
+   * z_1 = K^-1 * r_0 actual auxiliar vector
+   * rho_0 rho_1 = r_0^t * z_1 previous and actual iner products <r_i, K^-1, r_i>
+   * p_1 actual search direction
+   * q_1 = A*p_1 auxiliar vector
+   * d_1 = rho_0 / (p_1^t * q_1) actual step
+   * x_1 = x_0 - d_1 * p_1
+   * r_1 = r_0 - d_1 * q_1
+  */
+  if (m == NULL || b == NULL || x == NULL) return 1;
+  
+  int its = 0;
+  double *k = (double*)malloc(m->nrow * sizeof(double)); // K = diag(A)
+  double *r = (double*)malloc(m->nrow * sizeof(double));
+  double *z = (double*)malloc(m->nrow * sizeof(double));
+  double *p = (double*)malloc(m->nrow * sizeof(double));
+  double *q = (double*)malloc(m->nrow * sizeof(double));
+  double rho_0, rho_1, d;
+  double err;
+
+  if (dim == 2) {
+    for (int i=0; i<nn; i++) {
+      for (int d=0; d<nFields; d++) {
+	k[i*nFields + d] = 1 / m->vals[i*nFields*m->nnz + 4*nFields + d*m->nnz + d];
+      }
+    }
+  } else if (dim == 3) {
+    for (int i=0; i<nn; i++) {
+      for (int d=0; d<nFields; d++) {
+	k[i*nFields + d] = 1 / m->vals[i*nFields*m->nnz + 13*nFields + d*m->nnz + d];
+      }
+    }
+  }
+
+  ell_mvp_2D (m, x, r);
+
+  for (int i=0; i<m->nrow; i++)
+    r[i] -= b[i];
+
+  do {
+
+    err = 0;
+    for (int i=0; i<m->nrow; i++)
+      err += r[i] * r[i];
+    err = sqrt(err); if (err < solver->min_tol) break;
+    cout << "cg_err = " << err << endl;
+
+    for (int i=0 ; i<m->nrow; i++)
+      z[i] = k[i] * r[i];
+
+    rho_1 = 0.0;
+    for (int i=0; i<m->nrow; i++)
+      rho_1 += r[i] * z[i];
+
+    if (its == 0) {
+      for (int i=0 ; i<m->nrow; i++)
+	p[i] = z[i];
+    } else {
+      double beta = rho_1 / rho_0;
+      for (int i=0; i<m->nrow; i++)
+	p[i] = z[i] + beta * p[i];
+    }
+
+    ell_mvp_2D (m, p, q);
+    double aux = 0;
+    for (int i=0 ; i<m->nrow; i++)
+      aux += p[i] * q[i];
+    d = rho_1 / aux;
+
+    for (int i=0; i<m->nrow; i++) {
+      x[i] -= d * p[i];
+      r[i] -= d * q[i];
+    }
+
+    rho_0 = rho_1;
+    its ++;
+
+  } while (its < solver->max_its);
+
+  solver->err = err;
+  solver->its = its;
+
+  free(k);
+  free(r);
+  free(z);
+  free(p);
+  free(q);
+
+  return 0;
+}
+
 int ell_print_full (ell_matrix * m)
 {
   if (m == NULL) return 1;
@@ -238,6 +332,49 @@ void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny)
 	m.vals[n1*nFields*nnz + i*nnz + cols_row_1[n]*nFields + j] += Ae[1*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
 	m.vals[n2*nFields*nnz + i*nnz + cols_row_2[n]*nFields + j] += Ae[2*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
 	m.vals[n3*nFields*nnz + i*nnz + cols_row_3[n]*nFields + j] += Ae[3*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+      }
+    }
+  }
+
+}
+
+void ell_add_3D (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz)
+{
+  // assembly Ae in 3D structured grid representation
+  // nFields : number of scalar components on each node
+
+  int npe = 8;
+
+  int nnz = m.nnz;
+  int cols_row_0[8] = {13,14,16,17,22,23,25,26};
+  int cols_row_1[8] = {12,13,15,16,21,22,24,25};
+  int cols_row_2[8] = {9 ,10,12,13,18,19,21,22};
+  int cols_row_3[8] = {10,11,13,14,19,20,22,23};
+  int cols_row_4[8] = { 0, 1, 3, 4, 9,10,12,13};
+  int cols_row_5[8] = { 1, 2, 4, 5,10,11,13,14};
+  int cols_row_6[8] = { 4, 5, 7, 8,13,14,16,17};
+  int cols_row_7[8] = { 3, 4, 6, 7,12,13,15,16};
+
+  int n0 = ez*(nx*ny) + ey*nx + ex;
+  int n1 = ez*(nx*ny) + ey*nx + ex + 1;
+  int n2 = ez*(nx*ny) + ey*nx + ex + 1;
+  int n3 = ez*(nx*ny) + ey*nx + ex;
+  int n4 = n0 + nx*ny;
+  int n5 = n1 + nx*ny;
+  int n6 = n2 + nx*ny;
+  int n7 = n3 + nx*ny;
+
+  for (int i=0; i<nFields; i++) {
+    for (int n=0; n<npe; n++) {
+      for (int j=0; j<nFields; j++) {
+	m.vals[n0*nFields*nnz + i*nnz + cols_row_0[n]*nFields + j] += Ae[0*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n1*nFields*nnz + i*nnz + cols_row_1[n]*nFields + j] += Ae[1*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n2*nFields*nnz + i*nnz + cols_row_2[n]*nFields + j] += Ae[2*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n3*nFields*nnz + i*nnz + cols_row_3[n]*nFields + j] += Ae[3*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n4*nFields*nnz + i*nnz + cols_row_4[n]*nFields + j] += Ae[4*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n5*nFields*nnz + i*nnz + cols_row_5[n]*nFields + j] += Ae[5*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n6*nFields*nnz + i*nnz + cols_row_6[n]*nFields + j] += Ae[6*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
+	m.vals[n7*nFields*nnz + i*nnz + cols_row_7[n]*nFields + j] += Ae[7*(npe*nFields)*nFields + i*(npe*nFields) + n*nFields + j];
       }
     }
   }

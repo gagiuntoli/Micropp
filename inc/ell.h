@@ -34,10 +34,16 @@ int ell_print (ell_matrix * m);
 void ell_free (ell_matrix &m);
 
 void ell_mvp_2D (ell_matrix *m, double *x, double *y);
+
 void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny);
+void ell_add_3D (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz);
+
 void ell_init_2D (ell_matrix &m, int nFields, int nx, int ny);
 void ell_set_bc_2D (ell_matrix &m, int nFields, int nx, int ny);
+
 int ell_solve_cgpd_2D (ell_solver *solver, ell_matrix * m, int nFields, int nx, int ny, double *b, double *x);
+int ell_solve_cgpd_struct (ell_solver *solver, ell_matrix *m, int nFields, int dim, int nn, double *b, double *x);
+
 int ell_solve_jacobi_2D (ell_solver *solver, ell_matrix * m, int nFields, int nx, int ny, double *b, double *x);
 
 void ell_init_3D (ell_matrix &m, int nFields, int nx, int ny, int nz);
