@@ -141,13 +141,22 @@ void Problem::writeVtu (int time_step, int elem)
   file << endl;
   file << "</DataArray>" << endl << "</Cells>" << endl;
 
-  file << "<PointData Vectors=\"displ\">" << endl; // Vectors inside is a filter we should not use this here
+  file << "<PointData Vectors=\"displ,b\" >>" << endl; // Vectors inside is a filter we should not use this here
   file << "<DataArray type=\"Float64\" Name=\"displ\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
   for (int n=0; n<nn; n++) {
     if (dim == 2) {
       file<<u[n*dim+0]<<" "<<u[n*dim + 1]<<" 0.0"<<endl;
     } else if(dim == 3) {
       file<<u[n*dim+0]<<" "<<u[n*dim + 1]<<" "<<u[n*dim + 2]<<endl;
+    }
+  }
+  file << "</DataArray>" << endl;
+  file << "<DataArray type=\"Float64\" Name=\"b\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
+  for (int n=0; n<nn; n++) {
+    if (dim == 2) {
+      file<<b[n*dim+0]<<" "<<b[n*dim + 1]<<" 0.0"<<endl;
+    } else if(dim == 3) {
+      file<<b[n*dim+0]<<" "<<b[n*dim + 1]<<" "<<b[n*dim + 2]<<endl;
     }
   }
   file << "</DataArray>" << endl;
