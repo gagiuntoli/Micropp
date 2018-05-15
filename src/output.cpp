@@ -113,6 +113,9 @@ void Problem::writeVtu (int time_step, int elem)
 	  int n5 = n1 + (nx*ny);
 	  int n6 = n2 + (nx*ny);
 	  int n7 = n3 + (nx*ny);
+	file
+	  <<n0<<" " <<n1<< " " <<n2<< " " <<n3 << " "
+	  <<n4<<" " <<n5<< " " <<n6<< " " <<n7 << " "<<endl;
 	}
       }
     }

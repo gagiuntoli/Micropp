@@ -252,13 +252,6 @@ double Problem::Assembly_b (void)
 
   }
 
-  //for (int i=0; i<nn; i++) {
-  //  for (int d=0; d<dim; d++) {
-  //    cout << b[i*dim + d] << " ";
-  //  }
-  //  cout << endl;
-  //}
-
   for (int i=0 ; i<nn*dim; i++) {
     b[i] = -b[i];
   }
@@ -372,6 +365,13 @@ double Problem::distance (int e)
   return sqrt(xdis + ydis);
 }
 
+double Problem::distance (int ex, int ey, int ez)
+{
+  double xdis = pow(ex*dx + dx/2 - lx/2,2);
+  double ydis = pow(ey*dy + dy/2 - ly/2,2);
+  return sqrt(xdis + ydis);
+}
+
 void Problem::getElemental_b (int e, double (&be)[3*8])
 {
   double dsh[4][2], bmat[3][8], cxb[3][8], stress_gp[6];
@@ -381,7 +381,7 @@ void Problem::getElemental_b (int e, double (&be)[3*8])
     {+0.577350269189626, +0.577350269189626},
     {-0.577350269189626, +0.577350269189626}};
 
-  for (int i=0; i<8; i++) 
+  for (int i=0; i<2*4; i++) 
     be[i] = 0.0;
 
   for (int gp=0; gp<4; gp++) {
@@ -425,7 +425,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
   for (int i=0; i<3*8; i++) 
     be[i] = 0.0;
 
-  for (int gp=0; gp<4; gp++) {
+  for (int gp=0; gp<8; gp++) {
 
     dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
     dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
@@ -436,7 +436,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
     dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
     dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
 
-    for (int i=0; i<4; i++) {
+    for (int i=0; i<8; i++) {
       bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
       bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1]; bmat[1][i*dim+2] = 0        ;
       bmat[2][i*dim] = 0        ; bmat[2][i*dim+1] = 0        ; bmat[2][i*dim+2] = dsh[i][2];
@@ -585,7 +585,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
   int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
 
   double strain_gp[6];
-  getStrain (e, gp, strain_gp);
+  getStrain (ex, ey, ez, gp, strain_gp);
 
   if (elem_type[e] == 0) {
     E  = 1.0e6;
@@ -618,33 +618,74 @@ void Problem::getStrain (int e, int gp, double *strain_gp)
   double elem_disp[3*8];
   getElemDisp (e, elem_disp);
 
-  if (dim == 2) {
+  double xg[4][2] = {
+    {-0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626}};
 
-    double xg[4][2] = {
-      {-0.577350269189626, -0.577350269189626},
-      {+0.577350269189626, -0.577350269189626},
-      {+0.577350269189626, +0.577350269189626},
-      {-0.577350269189626, +0.577350269189626}};
+  double dsh[4][2], bmat[3][8], cxb[3][8];
 
-    double dsh[4][2], bmat[3][8], cxb[3][8];
+  dsh[0][0] = -(1-xg[gp][1])/4*2/dx ; dsh[0][1] = -(1-xg[gp][0])/4*2/dy;
+  dsh[1][0] = +(1-xg[gp][1])/4*2/dx ; dsh[1][1] = -(1+xg[gp][0])/4*2/dy;
+  dsh[2][0] = +(1+xg[gp][1])/4*2/dx ; dsh[2][1] = +(1+xg[gp][0])/4*2/dy;
+  dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
 
-    dsh[0][0] = -(1-xg[gp][1])/4*2/dx ; dsh[0][1] = -(1-xg[gp][0])/4*2/dy;
-    dsh[1][0] = +(1-xg[gp][1])/4*2/dx ; dsh[1][1] = -(1+xg[gp][0])/4*2/dy;
-    dsh[2][0] = +(1+xg[gp][1])/4*2/dx ; dsh[2][1] = +(1+xg[gp][0])/4*2/dy;
-    dsh[3][0] = -(1+xg[gp][1])/4*2/dx ; dsh[3][1] = +(1-xg[gp][0])/4*2/dy;
-
-    for (int i=0; i<4; i++) {
-      bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim + 1] = 0        ;
-      bmat[1][i*dim] = 0        ; bmat[1][i*dim + 1] = dsh[i][1];
-      bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim + 1] = dsh[i][0];
+  for (int i=0; i<4; i++) {
+    bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim + 1] = 0        ;
+    bmat[1][i*dim] = 0        ; bmat[1][i*dim + 1] = dsh[i][1];
+    bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim + 1] = dsh[i][0];
+  }
+  for (int v=0; v<nvoi; v++) {
+    strain_gp[v] = 0.0;
+    for (int i=0; i<npe*dim; i++) {
+      strain_gp[v] += bmat[v][i] * elem_disp[i];
     }
-    for (int v=0; v<nvoi; v++) {
-      strain_gp[v] = 0.0;
-      for (int i=0; i<npe*dim; i++) {
-	strain_gp[v] += bmat[v][i] * elem_disp[i];
-      }
-    }
+  }
 
+}
+
+void Problem::getStrain (int ex, int ey, int ez, int gp, double *strain_gp)
+{
+
+  double elem_disp[3*8];
+  getElemDisp (ex, ey, ez, elem_disp);
+
+  double dsh[8][3], bmat[6][3*8], cxb[6][3*8];
+
+  double xg[8][3] = {
+    {-0.577350269189626, -0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626, -0.577350269189626},
+    {-0.577350269189626, +0.577350269189626, -0.577350269189626},
+    {-0.577350269189626, -0.577350269189626, +0.577350269189626},
+    {+0.577350269189626, -0.577350269189626, +0.577350269189626},
+    {+0.577350269189626, +0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626, +0.577350269189626}};
+
+  dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+  dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+  dsh[2][0]= +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1]= +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2]= -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+  dsh[3][0]= -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1]= +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2]= -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+  dsh[4][0]= -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1]= -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2]= +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+  dsh[5][0]= +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1]= -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2]= +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+  dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+  dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+
+  for (int i=0; i<8; i++) {
+    bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
+    bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1]; bmat[1][i*dim+2] = 0        ;
+    bmat[2][i*dim] = 0        ; bmat[2][i*dim+1] = 0        ; bmat[2][i*dim+2] = dsh[i][2];
+    bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim+1] = dsh[i][0]; bmat[3][i*dim+2] = 0        ;
+    bmat[4][i*dim] = 0        ; bmat[4][i*dim+1] = dsh[i][2]; bmat[4][i*dim+2] = dsh[i][1];
+    bmat[5][i*dim] = dsh[i][2]; bmat[5][i*dim+1] = 0        ; bmat[5][i*dim+2] = dsh[i][0];
+  }
+
+  for (int v=0; v<nvoi; v++) {
+    strain_gp[v] = 0.0;
+    for (int i=0; i<npe*dim; i++) {
+      strain_gp[v] += bmat[v][i] * elem_disp[i];
+    }
   }
 
 }
@@ -666,5 +707,28 @@ void Problem::getElemDisp (int e, double *elem_disp)
       elem_disp[2*dim + d] = u[n2*dim + d];
       elem_disp[3*dim + d] = u[n3*dim + d];
     }
+  }
+}
+
+void Problem::getElemDisp (int ex, int ey, int ez, double *elem_disp)
+{
+  int n0 = ez*(nx*ny) + ey*nx + ex;
+  int n1 = ez*(nx*ny) + ey*nx + ex + 1;
+  int n2 = ez*(nx*ny) + ey*nx + ex + 1;
+  int n3 = ez*(nx*ny) + ey*nx + ex;
+  int n4 = n0 + nx*ny;
+  int n5 = n1 + nx*ny;
+  int n6 = n2 + nx*ny;
+  int n7 = n3 + nx*ny;
+
+  for (int d=0; d<dim; d++) {
+    elem_disp[0*dim + d] = u[n0*dim + d];
+    elem_disp[1*dim + d] = u[n1*dim + d];
+    elem_disp[2*dim + d] = u[n2*dim + d];
+    elem_disp[3*dim + d] = u[n3*dim + d];
+    elem_disp[4*dim + d] = u[n4*dim + d];
+    elem_disp[5*dim + d] = u[n5*dim + d];
+    elem_disp[6*dim + d] = u[n6*dim + d];
+    elem_disp[7*dim + d] = u[n7*dim + d];
   }
 }

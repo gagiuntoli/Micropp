@@ -88,3 +88,15 @@ int Problem::getElemType (int e)
   return -1;
 
 }
+
+int Problem::getElemType (int ex, int ey, int ez)
+{
+  if (distance(ex, ey, ez) < 0.2) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+  return -1;
+
+}

@@ -49,19 +49,31 @@ class Problem {
     void loc_hom_Ctan   (double *MacroStrain, double *MacroCtan);
 
     void setDisp (double *eps);
+
     void Assembly_A (void);
     double Assembly_b (void);
     void solve (void);
     void newtonRaphson (void);
     void getElemental_A (int e, double (&Ae)[3*8*3*8]);
+
+    double distance (int e);
+    double distance (int ex, int ey, int ez);
+
     void getElemental_b (int e, double (&be)[3*8]);
     void getElemental_b (int ex, int ey, int ez, double (&be)[3*8]);
-    double distance (int e);
+
     void getStrain (int e, int gp, double *strain_gp);
+    void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
+
     void getStress (int e, int gp, double *stress_gp);
     void getStress (int ex, int ey, int ez, int gp, double *stress_gp);
+
     void getElemDisp (int e, double *elem_disp);
+    void getElemDisp (int ex, int ey, int ez, double *elem_disp);
+
     int getElemType (int e);
+    int getElemType (int ex, int ey, int ez);
+
     void calcDistributions (void);
     void calcAverageStress (void);
     void calcAverageStrain (void);
