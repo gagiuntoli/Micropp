@@ -80,8 +80,8 @@ void Problem::writeVtu (int time_step, int elem)
     for (int k=0; k<nz; k++) {
       for (int j=0; j<ny; j++) {
 	for (int i=0; i<nx; i++) {
-	  x = j * dx;
-	  y = i * dy;
+	  x = i * dx;
+	  y = j * dy;
 	  z = k * dz;
 	  file << x << " " << y << " "  << z << endl;
 	}
@@ -143,9 +143,9 @@ void Problem::writeVtu (int time_step, int elem)
   file << "<DataArray type=\"Float64\" Name=\"displ\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
   for (int n=0; n<nn; n++) {
     if (dim == 2) {
-      file<<u[n*dim]<<" "<<u[n*dim + 1]<<" 0.0"<<endl;
+      file<<u[n*dim+0]<<" "<<u[n*dim + 1]<<" 0.0"<<endl;
     } else if(dim == 3) {
-      file<<u[n*dim]<<" "<<u[n*dim + 1]<<" "<<u[n*dim + 2]<<endl;
+      file<<u[n*dim+0]<<" "<<u[n*dim + 1]<<" "<<u[n*dim + 2]<<endl;
     }
   }
   file << "</DataArray>" << endl;

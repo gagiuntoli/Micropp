@@ -155,11 +155,8 @@ void Problem::setDisp (double *eps)
     }
 
   }
-
-  if (flag_print_u == true)
-    for (int i=0; i<nn; i++)
-      cout << u[i*dim] << " " << u[i*dim+1] << endl;
-
+  //    for (int i=0; i<nn; i++)
+  //      cout << u[i*dim] << " " << u[i*dim+1] << endl;
 }
 
 double Problem::Assembly_b (void)

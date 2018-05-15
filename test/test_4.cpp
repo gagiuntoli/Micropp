@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
     int nz = vm["nz"].as<int>();
     int cg_its = vm["cg_its"].as<int>();
     double cg_tol = vm["cg_tol"].as<double>();
-    double eps[3] = {0.005, 0.0, 0.0};
+    double eps[6] = {0.005, 0.0, 0.0, 0.0, 0.0, 0.0};
 
     int size[3];
     size[0] = nx;
