@@ -347,14 +347,14 @@ void ell_add_3D (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields,
   int npe = 8;
 
   int nnz = m.nnz;
-  int cols_row_0[8] = {13,14,16,17,22,23,25,26};
-  int cols_row_1[8] = {12,13,15,16,21,22,24,25};
-  int cols_row_2[8] = {9 ,10,12,13,18,19,21,22};
-  int cols_row_3[8] = {10,11,13,14,19,20,22,23};
-  int cols_row_4[8] = { 0, 1, 3, 4, 9,10,12,13};
-  int cols_row_5[8] = { 1, 2, 4, 5,10,11,13,14};
-  int cols_row_6[8] = { 4, 5, 7, 8,13,14,16,17};
-  int cols_row_7[8] = { 3, 4, 6, 7,12,13,15,16};
+  int cols_row_0[8] = {13,14,17,16,22,23,26,25};
+  int cols_row_1[8] = {12,13,16,15,21,22,25,24};
+  int cols_row_2[8] = { 9,10,13,12,18,19,22,21};
+  int cols_row_3[8] = {10,11,14,13,19,20,23,22};
+  int cols_row_4[8] = { 4, 5, 8, 7,13,14,17,16};
+  int cols_row_5[8] = { 3, 4, 7, 6,12,13,16,15};
+  int cols_row_6[8] = { 0, 1, 4, 3, 9,10,13,12};
+  int cols_row_7[8] = { 1, 2, 5, 4,10,11,14,13};
 
   int n0 = ez*(nx*ny) + ey*nx + ex;
   int n1 = ez*(nx*ny) + ey*nx + ex + 1;

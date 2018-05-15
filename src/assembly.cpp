@@ -300,6 +300,9 @@ double Problem::Assembly_b (void)
       }
     }
 
+    for (int i=0; i<nn; i++)
+      cout << b[i*dim] << " " << b[i*dim + 1] << " " << b[i*dim + 2] << endl;
+
   }
 
   for (int i=0 ; i<nn*dim; i++) {
