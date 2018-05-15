@@ -250,6 +250,56 @@ double Problem::Assembly_b (void)
       }
     }
 
+    // boundary conditions
+    // z=0
+    for (int i=0; i<nx; i++) {
+      for (int j=0; j<ny; j++) {
+	int n = j*nx + i;
+	for (int d=0; d<dim; d++)
+	  b[n*dim+d] = 0.0;
+      }
+    }
+    // z = lx
+    for (int i=0; i<nx; i++) {
+      for (int j=0; j<ny; j++) {
+	int n = (nz-1)*nx*ny + j*nx + i;
+	for (int d=0; d<dim; d++)
+	  b[n*dim+d] = 0.0;
+      }
+    }
+    // y = 0
+    for (int i=0; i<nx; i++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + 0*nx + i;
+	for (int d=0; d<dim; d++)
+	  b[n*dim+d] = 0.0;
+      }
+    }
+    // y = ly
+    for (int i=0; i<nx; i++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + (ny-1)*nx + i;
+	for (int d=0; d<dim; d++)
+	  b[n*dim+d] = 0.0;
+      }
+    }
+    // x=0
+    for (int j=1; j<ny-1; j++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + j*nx + 0;
+	for (int d=0; d<dim; d++)
+	  b[n*dim+d] = 0.0;
+      }
+    }
+    // x=lx
+    for (int j=1; j<ny-1; j++) {
+      for (int k=1; k<nz-1; k++) {
+	int n = k*nx*ny + j*nx + nx - 1;
+	for (int d=0; d<dim; d++)
+	  b[n*dim+d] = 0.0;
+      }
+    }
+
   }
 
   for (int i=0 ; i<nn*dim; i++) {
