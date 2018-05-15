@@ -45,6 +45,7 @@ int main (int argc, char *argv[])
     Problem micro (dim, size, cg_its, cg_tol);
 
     micro.setDisp(eps);
+    micro.Assembly_b();
 
     micro.writeVtu (1, 2);
 

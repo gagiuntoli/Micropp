@@ -164,10 +164,10 @@ double Problem::Assembly_b (void)
   int index[3*8];
   double be[3*8];
   int n0, n1, n2, n3, n4, n5, n6, n7;
+  int e;
 
-  for (int i=0 ; i<nn*dim; i++) {
+  for (int i=0 ; i<nn*dim; i++)
     b[i] = 0.0;
-  }
 
   if (dim == 2) {
 
@@ -197,10 +197,35 @@ double Problem::Assembly_b (void)
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ez=0; ez<nz-1; ez++) {
+
 	  n0 = ez*(nx*ny) + ey*nx + ex;
 	  n1 = ez*(nx*ny) + ey*nx + ex + 1;
 	  n2 = ez*(nx*ny) + ey*nx + ex + 1;
 	  n3 = ez*(nx*ny) + ey*nx + ex;
+	  n4 = n0 + nx*ny;
+	  n5 = n1 + nx*ny;
+	  n6 = n2 + nx*ny;
+	  n7 = n3 + nx*ny;
+
+	  for (int i=0; i<npe; i++) {
+	    for (int d=0; d<dim; d++) {
+	      index[0*dim + d] = n0*dim + d;
+	      index[1*dim + d] = n1*dim + d;
+	      index[2*dim + d] = n2*dim + d;
+	      index[3*dim + d] = n3*dim + d;
+	      index[4*dim + d] = n4*dim + d;
+	      index[5*dim + d] = n5*dim + d;
+	      index[6*dim + d] = n6*dim + d;
+	      index[7*dim + d] = n7*dim + d;
+	    }
+	  }
+
+          e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+	  getElemental_b (e, be);
+
+	  for (int i=0; i<npe*dim; i++)
+	    b[index[i]] += be[i];
+
 	}
       }
     }
@@ -230,9 +255,12 @@ double Problem::Assembly_b (void)
 
   // end of boundary conditions
 
-  if (flag_print_b == true)
-    for (int i=0; i<nn*dim; i++)
-      cout << b[i*dim] << " " << b[i*dim+1] << endl;
+  for (int i=0; i<nn; i++) {
+    for (int d=0; d<dim; d++) {
+      cout << b[i*dim + d] << " ";
+    }
+    cout << endl;
+  }
 
   for (int i=0 ; i<nn*dim; i++) {
     b[i] = -b[i];
@@ -265,7 +293,6 @@ void Problem::Assembly_A (void)
     index[2] = n1*dim; index[3] = n1*dim + 1;
     index[4] = n2*dim; index[5] = n2*dim + 1;
     index[6] = n3*dim; index[7] = n3*dim + 1;
-    //cout << "e : n0="<<n0<<" n1="<<n1<<" n2="<<n2<<" n3="<<n3<<endl;
 
     getElemental_A (e, Ae);
 
@@ -281,11 +308,6 @@ void Problem::Assembly_A (void)
 
 void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
 {
-/*   // for debugging
-     for (int i=0; i<8; i++)
-     for (int j=0; j<8; j++)
-     Ae[i][j] = 1;
- */
   
   double nu = 0.3, E;
   double ctan[3][3];
@@ -355,12 +377,6 @@ double Problem::distance (int e)
 
 void Problem::getElemental_b (int e, double (&be)[3*8])
 {
-  /*
-     // for debugging
-     for (int i=0; i<8; i++)
-        be[i] = 1;
-   */
-
   double dsh[4][2], bmat[3][8], cxb[3][8], stress_gp[6];
   double xg[4][2] = {
     {-0.577350269189626, -0.577350269189626},
@@ -385,6 +401,54 @@ void Problem::getElemental_b (int e, double (&be)[3*8])
     }
 
     getStress (e, gp, stress_gp);
+
+    double wg = 0.25*dx*dy;
+    for (int i=0; i<npe*dim; i++) {
+      for (int j=0; j<nvoi; j++) {
+	be[i] += bmat[j][i] * stress_gp[j] * wg;
+      }
+    }
+
+  } // gp loop
+}
+
+void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
+{
+  double dsh[8][3], bmat[6][3*8], cxb[6][3*8], stress_gp[6];
+  double xg[8][3] = {
+    {-0.577350269189626, -0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626, -0.577350269189626},
+    {-0.577350269189626, +0.577350269189626, -0.577350269189626},
+    {-0.577350269189626, -0.577350269189626, +0.577350269189626},
+    {+0.577350269189626, -0.577350269189626, +0.577350269189626},
+    {+0.577350269189626, +0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626, +0.577350269189626}};
+
+  for (int i=0; i<3*8; i++) 
+    be[i] = 0.0;
+
+  for (int gp=0; gp<4; gp++) {
+
+    dsh[0][0] = -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1] = -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2] = -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[1][0] = +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1] = -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2] = -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[2][0] = +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1] = +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2] = -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[3][0] = -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1] = +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2] = -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[4][0] = -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1] = -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2] = +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[5][0] = +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1] = -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2] = +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[6][0] = +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1] = +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2] = +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[7][0] = -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1] = +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2] = +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+
+    for (int i=0; i<4; i++) {
+      bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
+      bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1]; bmat[1][i*dim+2] = 0        ;
+      bmat[2][i*dim] = 0        ; bmat[2][i*dim+1] = 0        ; bmat[2][i*dim+2] = dsh[i][2];
+      bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim+1] = dsh[i][0]; bmat[3][i*dim+2] = 0        ;
+      bmat[4][i*dim] = 0        ; bmat[4][i*dim+1] = dsh[i][2]; bmat[4][i*dim+2] = dsh[i][1];
+      bmat[5][i*dim] = dsh[i][2]; bmat[5][i*dim+1] = 0        ; bmat[5][i*dim+2] = dsh[i][0];
+    }
+
+    getStress (ex, ey, ez, gp, stress_gp);
 
     double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++) {
@@ -489,33 +553,65 @@ void Problem::calcDistributions (void)
 
 void Problem::getStress (int e, int gp, double *stress_gp)
 {
-  if (dim == 2) {
-    double strain_gp[3];
-    getStrain (e, gp, strain_gp);
+  double strain_gp[3];
+  getStrain (e, gp, strain_gp);
 
-    double nu = 0.3, E;
-    double ctan[3][3];
+  double nu = 0.3, E;
+  double ctan[3][3];
 
-    if (elem_type[e] == 0) {
-      E  = 1.0e6;
-    } else {
-      E  = 1.0e7;
-    }
-    ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
-    ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
-    ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
-    for (int i=0; i<nvoi; i++)
-      for (int j=0; j<nvoi; j++)
-	ctan[i][j] *= E/((1+nu)*(1-2*nu));
-
-    for (int i=0; i<nvoi; i++) {
-      stress_gp[i] = 0.0;
-      for (int j=0; j<nvoi; j++) {
-	stress_gp[i] += ctan[i][j] * strain_gp[j];
-      }
-    }
-
+  if (elem_type[e] == 0) {
+    E  = 1.0e6;
+  } else {
+    E  = 1.0e7;
   }
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
+  ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
+  for (int i=0; i<nvoi; i++)
+    for (int j=0; j<nvoi; j++)
+      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+
+  for (int i=0; i<nvoi; i++) {
+    stress_gp[i] = 0.0;
+    for (int j=0; j<nvoi; j++) {
+      stress_gp[i] += ctan[i][j] * strain_gp[j];
+    }
+  }
+
+}
+
+void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
+{
+  double nu = 0.3, E;
+  double ctan[6][6];
+
+  int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+
+  double strain_gp[6];
+  getStrain (e, gp, strain_gp);
+
+  if (elem_type[e] == 0) {
+    E  = 1.0e6;
+  } else {
+    E  = 1.0e7;
+  }
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0         ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0         ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
+  ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
+  ctan[3][0]=(1-nu); ctan[3][1]=nu    ; ctan[3][2]=0         ; ctan[3][3]=0         ; ctan[3][4]=0         ; ctan[3][5]=0         ;
+  ctan[4][0]=nu    ; ctan[4][1]=(1-nu); ctan[4][2]=0         ; ctan[4][3]=0         ; ctan[4][4]=0         ; ctan[4][5]=0         ;
+  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=(1-2*nu)/2; ctan[5][3]=(1-2*nu)/2; ctan[5][4]=(1-2*nu)/2; ctan[5][5]=(1-2*nu)/2;
+  for (int i=0; i<nvoi; i++)
+    for (int j=0; j<nvoi; j++)
+      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+
+  for (int i=0; i<nvoi; i++) {
+    stress_gp[i] = 0.0;
+    for (int j=0; j<nvoi; j++) {
+      stress_gp[i] += ctan[i][j] * strain_gp[j];
+    }
+  }
+
 }
 
 void Problem::getStrain (int e, int gp, double *strain_gp)

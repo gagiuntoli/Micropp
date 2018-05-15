@@ -105,15 +105,14 @@ void Problem::writeVtu (int time_step, int elem)
     for (int ez=0; ez<nz-1; ez++) {
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ex=0; ex<nx-1; ex++) {
-	  int n0 = ez       * (nx*ny) + ey*nx     + ex;
-	  int n1 = ez       * (nx*ny) + ey*nx     + ex + 1;
-	  int n2 = ez       * (nx*ny) + (ey+1)*nx + ex + 1;
-	  int n3 = ez       * (nx*ny) + (ey+1)*nx + ex;
-	  int n4 = (ez + 1) * (nx*ny) + ey*nx     + ex;
-	  int n5 = (ez + 1) * (nx*ny) + ey*nx     + ex + 1;
-	  int n6 = (ez + 1) * (nx*ny) + (ey+1)*nx + ex + 1;
-	  int n7 = (ez + 1) * (nx*ny) + (ey+1)*nx + ex;
-	  file<<n0<<" "<<n1<<" "<<n2<<" "<<n3<<" "<<n4<<" "<<n5<<" "<<n6<<" "<<n7<< endl;
+	  int n0 = ez * (nx*ny) + ey*nx     + ex;
+	  int n1 = ez * (nx*ny) + ey*nx     + ex + 1;
+	  int n2 = ez * (nx*ny) + (ey+1)*nx + ex + 1;
+	  int n3 = ez * (nx*ny) + (ey+1)*nx + ex;
+	  int n4 = n0 + (nx*ny);
+	  int n5 = n1 + (nx*ny);
+	  int n6 = n2 + (nx*ny);
+	  int n7 = n3 + (nx*ny);
 	}
       }
     }
