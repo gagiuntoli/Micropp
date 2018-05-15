@@ -320,26 +320,44 @@ void Problem::Assembly_A (void)
   double Ae[3*8*3*8];
 
   ell_set_zero_mat(&A);
-  for (int e = 0 ; e < nelem ; e++) {
 
-    int xfactor = e%(nx-1);
-    int yfactor = e/(ny-1);
+  if (dim == 2) {
 
-    int n0 = yfactor     * nx + xfactor     ;
-    int n1 = yfactor     * nx + xfactor + 1 ;
-    int n2 = (yfactor+1) * nx + xfactor + 1 ;
-    int n3 = (yfactor+1) * nx + xfactor     ;
-    index[0] = n0*dim; index[1] = n0*dim + 1;
-    index[2] = n1*dim; index[3] = n1*dim + 1;
-    index[4] = n2*dim; index[5] = n2*dim + 1;
-    index[6] = n3*dim; index[7] = n3*dim + 1;
+    for (int e = 0 ; e < nelem ; e++) {
 
-    getElemental_A (e, Ae);
+      int xfactor = e%(nx-1);
+      int yfactor = e/(ny-1);
 
-    ell_add_2D (A, e, Ae, dim, nx, ny);
+      int n0 = yfactor     * nx + xfactor     ;
+      int n1 = yfactor     * nx + xfactor + 1 ;
+      int n2 = (yfactor+1) * nx + xfactor + 1 ;
+      int n3 = (yfactor+1) * nx + xfactor     ;
+      index[0] = n0*dim; index[1] = n0*dim + 1;
+      index[2] = n1*dim; index[3] = n1*dim + 1;
+      index[4] = n2*dim; index[5] = n2*dim + 1;
+      index[6] = n3*dim; index[7] = n3*dim + 1;
+
+      getElemental_A (e, Ae);
+
+      ell_add_2D (A, e, Ae, dim, nx, ny);
+    }
+
+    ell_set_bc_2D (A, dim, nx, ny);
+
+  } else if (dim == 3) {
+
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ez=0; ez<nz-1; ez++) {
+
+	  getElemental_A (ex, ey, ez, Ae);
+//	  ell_add_3D (A, e, Ae, dim, nx, ny);
+
+	}
+      }
+    }
+
   }
-
-  ell_set_bc_2D (A, dim, nx, ny);
 
   if (flag_print_A == true)
     ell_print (&A);
@@ -402,6 +420,82 @@ void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
       for (int j=0; j<npe*dim; j++)
 	for (int m=0; m<nvoi; m++)
 	    Ae[i*npe*dim + j] += b_mat[m][i] * cxb[m][j] * wg;
+
+  } // gp loop
+}
+
+void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
+{
+  double nu = 0.3, E;
+  double ctan[6][6];
+
+  int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+
+  if (elem_type[e] == 0) {
+    E  = 1.0e6;
+  } else {
+    E  = 1.0e7;
+  }
+
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu      ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu      ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
+  ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu)  ; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
+  ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0       ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
+  ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0       ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
+  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0       ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+
+  for (int i=0; i<nvoi; i++)
+    for (int j=0; j<nvoi; j++)
+      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+
+  double xg[8][3] = {
+    {-0.577350269189626, -0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, -0.577350269189626, -0.577350269189626},
+    {+0.577350269189626, +0.577350269189626, -0.577350269189626},
+    {-0.577350269189626, +0.577350269189626, -0.577350269189626},
+    {-0.577350269189626, -0.577350269189626, +0.577350269189626},
+    {+0.577350269189626, -0.577350269189626, +0.577350269189626},
+    {+0.577350269189626, +0.577350269189626, +0.577350269189626},
+    {-0.577350269189626, +0.577350269189626, +0.577350269189626}};
+
+  double dsh[8][3], bmat[6][3*8], cxb[6][3*8];
+
+  for (int i=0; i<npe*dim*npe*dim; i++) 
+    Ae[i] = 0.0;
+
+  for (int gp=0; gp<8; gp++) {
+
+    dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[2][0]= +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1]= +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2]= -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[3][0]= -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1]= +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2]= -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[4][0]= -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1]= -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2]= +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[5][0]= +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1]= -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2]= +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+
+    for (int i=0; i<8; i++) {
+      bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
+      bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1]; bmat[1][i*dim+2] = 0        ;
+      bmat[2][i*dim] = 0        ; bmat[2][i*dim+1] = 0        ; bmat[2][i*dim+2] = dsh[i][2];
+      bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim+1] = dsh[i][0]; bmat[3][i*dim+2] = 0        ;
+      bmat[4][i*dim] = 0        ; bmat[4][i*dim+1] = dsh[i][2]; bmat[4][i*dim+2] = dsh[i][1];
+      bmat[5][i*dim] = dsh[i][2]; bmat[5][i*dim+1] = 0        ; bmat[5][i*dim+2] = dsh[i][0];
+    }
+
+    for (int i=0; i<nvoi; i++) {
+      for (int j=0; j<npe*dim; j++) {
+	cxb[i][j] = 0.0;
+	for (int k=0; k<nvoi; k++)
+	  cxb[i][j] += ctan[i][k] * bmat[k][j];
+      }
+    }
+
+    double wg = (1/8.0)*dx*dy*dz;
+    for (int i=0; i<npe*dim; i++)
+      for (int j=0; j<npe*dim; j++)
+	for (int m=0; m<nvoi; m++)
+	    Ae[i*npe*dim + j] += bmat[m][i] * cxb[m][j] * wg;
 
   } // gp loop
 }
