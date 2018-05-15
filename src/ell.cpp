@@ -289,6 +289,7 @@ int ell_print (ell_matrix * m)
 
   cout << "Cols = " << endl;
   for (int i=0; i<m->nrow; i++) {
+    cout << setw(7) << "row= " << i ;	
     for (int j=0; j<m->nnz; j++) {
       cout << setw(7) << setprecision (4) << m->cols[i*m->nnz + j] << " ";
     }
@@ -1138,7 +1139,7 @@ void ell_init_3D (ell_matrix &m, int nFields, int nx, int ny, int nz)
   }
 
   // x=0 y=ly z=lz 
-  nn = nx*ny*(nz-1) + nx*ny - 1;
+  nn = nx*ny*(nz-1) + (ny-1)*nx + 0;
   for (int d1=0; d1<nFields; d1++){
     for (int d2=0; d2<nFields; d2++){
       m.cols[nn*nFields*nnz + 0*nFields  + nnz*d1 + d2] = 0;
@@ -1425,7 +1426,7 @@ void ell_init_3D (ell_matrix &m, int nFields, int nx, int ny, int nz)
 
   // y=0 z=lz (linea)
   for (int i=1; i<nx-1; i++){
-    nn = (nz-1)*(nx*ny) + (ny-1)*nx + i;
+    nn = (nz-1)*(nx*ny) + 0*nx + i;
     for (int d1=0; d1<nFields; d1++){
       for (int d2=0; d2<nFields; d2++){
 	m.cols[nn*nFields*nnz + 0*nFields  + nnz*d1 + d2] = 0;

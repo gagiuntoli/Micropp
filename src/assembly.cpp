@@ -343,7 +343,7 @@ void Problem::Assembly_A (void)
 
     ell_set_bc_3D (A, dim, nx, ny, nz);
   }
-  ell_print (&A);
+//  ell_print (&A);
 }
 
 void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
