@@ -192,6 +192,27 @@ double Problem::Assembly_b (void)
       }
     } 
 
+    // boundary conditions
+    // y = 0
+    for (int i=0; i<nx; i++)
+      for (int d=0; d<dim; d++)
+	b[i*dim + d] = 0.0;
+
+    // y = ly
+    for (int i=0; i<nx; i++)
+      for (int d=0; d<dim; d++)
+	b[(i+(ny-1)*nx)*dim + d] = 0.0;
+
+    // x = 0
+    for (int i=0; i<ny-2; i++)
+      for (int d=0; d<dim; d++)
+	b[(i+1)*nx*dim + d] = 0.0;
+
+    // x = lx
+    for (int i=0; i<ny-2; i++)
+      for (int d=0; d<dim; d++)
+	b[((i+2)*nx-1)*dim + d] = 0.0;
+
   } else if (dim == 3) {
 
     for (int ex=0; ex<nx-1; ex++) {
@@ -220,8 +241,7 @@ double Problem::Assembly_b (void)
 	    }
 	  }
 
-          e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
-	  getElemental_b (e, be);
+	  getElemental_b (ex, ey, ez, be);
 
 	  for (int i=0; i<npe*dim; i++)
 	    b[index[i]] += be[i];
@@ -232,35 +252,12 @@ double Problem::Assembly_b (void)
 
   }
 
-  // boundary conditions
-  // y = 0
-  for (int i=0; i<nx; i++)
-    for (int d=0; d<dim; d++)
-      b[i*dim + d] = 0.0;
-
-  // y = ly
-  for (int i=0; i<nx; i++)
-    for (int d=0; d<dim; d++)
-      b[(i+(ny-1)*nx)*dim + d] = 0.0;
-
-  // x = 0
-  for (int i=0; i<ny-2; i++)
-    for (int d=0; d<dim; d++)
-      b[(i+1)*nx*dim + d] = 0.0;
-
-  // x = lx
-  for (int i=0; i<ny-2; i++)
-    for (int d=0; d<dim; d++)
-      b[((i+2)*nx-1)*dim + d] = 0.0;
-
-  // end of boundary conditions
-
-  for (int i=0; i<nn; i++) {
-    for (int d=0; d<dim; d++) {
-      cout << b[i*dim + d] << " ";
-    }
-    cout << endl;
-  }
+  //for (int i=0; i<nn; i++) {
+  //  for (int d=0; d<dim; d++) {
+  //    cout << b[i*dim + d] << " ";
+  //  }
+  //  cout << endl;
+  //}
 
   for (int i=0 ; i<nn*dim; i++) {
     b[i] = -b[i];
@@ -430,14 +427,14 @@ void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
 
   for (int gp=0; gp<4; gp++) {
 
-    dsh[0][0] = -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1] = -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2] = -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[1][0] = +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1] = -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2] = -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[2][0] = +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1] = +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2] = -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
-    dsh[3][0] = -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1] = +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2] = -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
-    dsh[4][0] = -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1] = -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2] = +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[5][0] = +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1] = -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2] = +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[6][0] = +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1] = +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2] = +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
-    dsh[7][0] = -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1] = +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2] = +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[2][0]= +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1]= +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2]= -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[3][0]= -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1]= +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2]= -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[4][0]= -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1]= -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2]= +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[5][0]= +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1]= -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2]= +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
+    dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
 
     for (int i=0; i<4; i++) {
       bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
@@ -595,12 +592,14 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
   } else {
     E  = 1.0e7;
   }
-  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0         ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
-  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0         ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
-  ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
-  ctan[3][0]=(1-nu); ctan[3][1]=nu    ; ctan[3][2]=0         ; ctan[3][3]=0         ; ctan[3][4]=0         ; ctan[3][5]=0         ;
-  ctan[4][0]=nu    ; ctan[4][1]=(1-nu); ctan[4][2]=0         ; ctan[4][3]=0         ; ctan[4][4]=0         ; ctan[4][5]=0         ;
-  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=(1-2*nu)/2; ctan[5][3]=(1-2*nu)/2; ctan[5][4]=(1-2*nu)/2; ctan[5][5]=(1-2*nu)/2;
+
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu      ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu      ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
+  ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu)  ; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
+  ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0       ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
+  ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0       ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
+  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0       ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+
   for (int i=0; i<nvoi; i++)
     for (int j=0; j<nvoi; j++)
       ctan[i][j] *= E/((1+nu)*(1-2*nu));
