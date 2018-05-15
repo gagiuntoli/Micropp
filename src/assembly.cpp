@@ -323,22 +323,8 @@ void Problem::Assembly_A (void)
 
   if (dim == 2) {
 
-    for (int e = 0 ; e < nelem ; e++) {
-
-      int xfactor = e%(nx-1);
-      int yfactor = e/(ny-1);
-
-      int n0 = yfactor     * nx + xfactor     ;
-      int n1 = yfactor     * nx + xfactor + 1 ;
-      int n2 = (yfactor+1) * nx + xfactor + 1 ;
-      int n3 = (yfactor+1) * nx + xfactor     ;
-      index[0] = n0*dim; index[1] = n0*dim + 1;
-      index[2] = n1*dim; index[3] = n1*dim + 1;
-      index[4] = n2*dim; index[5] = n2*dim + 1;
-      index[6] = n3*dim; index[7] = n3*dim + 1;
-
+    for (int e=0; e<nelem; e++) {
       getElemental_A (e, Ae);
-
       ell_add_2D (A, e, Ae, dim, nx, ny);
     }
 
@@ -349,19 +335,15 @@ void Problem::Assembly_A (void)
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ez=0; ez<nz-1; ez++) {
-
 	  getElemental_A (ex, ey, ez, Ae);
 	  ell_add_3D (A, ex, ey, ez, Ae, dim, nx, ny, nz);
-
 	}
       }
     }
 
+    ell_set_bc_3D (A, dim, nx, ny, nz);
   }
-
-  if (flag_print_A == true)
-    ell_print (&A);
-
+  ell_print (&A);
 }
 
 void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
@@ -419,7 +401,7 @@ void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
     for (int i=0; i<npe*dim; i++)
       for (int j=0; j<npe*dim; j++)
 	for (int m=0; m<nvoi; m++)
-	    Ae[i*npe*dim + j] += b_mat[m][i] * cxb[m][j] * wg;
+	  Ae[i*npe*dim + j] += b_mat[m][i] * cxb[m][j] * wg;
 
   } // gp loop
 }

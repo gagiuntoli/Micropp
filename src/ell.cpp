@@ -528,6 +528,210 @@ void ell_set_bc_2D (ell_matrix &m, int nFields, int nx, int ny)
 
 }
 
+void ell_set_bc_3D (ell_matrix &m, int nFields, int nx, int ny, int nz)
+{
+  // Sets 1 on the diagonal of the boundaries and does 0 on the columns corresponding to that values
+  int nnz = m.nnz;
+  int n;
+
+  // z=0
+  for (int d=0; d<nFields; d++){
+    for (int i=0; i<nx; i++){
+      for (int j=0; j<ny; j++){
+	n = 0*(nx*ny) + j*nx + i;
+	for (int col=0; col<nnz; col++) {
+	  m.vals[n*nFields*nnz + d*nnz + col] = 0;
+	} 
+	m.vals[n*nFields*nnz + d*nnz + 13*nFields + d] = 1;
+      }
+    }
+  }
+
+  // z=lz
+  for (int d=0; d<nFields; d++){
+    for (int i=0; i<nx; i++){
+      for (int j=0; j<ny; j++){
+	n = (nz-1)*(nx*ny) + j*nx + i;
+	for (int col=0; col<nnz; col++) {
+	  m.vals[n*nFields*nnz + d*nnz + col] = 0;
+	} 
+	m.vals[n*nFields*nnz + d*nnz + 13*nFields + d] = 1;
+      }
+    }
+  }
+
+  // y=0
+  for (int d=0; d<nFields; d++){
+    for (int i=0; i<nx; i++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + 0*nx + i;
+	for (int col=0; col<nnz; col++) {
+	  m.vals[n*nFields*nnz + d*nnz + col] = 0;
+	} 
+	m.vals[n*nFields*nnz + d*nnz + 13*nFields + d] = 1;
+      }
+    }
+  }
+
+  // y=ly
+  for (int d=0; d<nFields; d++){
+    for (int i=0; i<nx; i++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + (ny-1)*nx + i;
+	for (int col=0; col<nnz; col++) {
+	  m.vals[n*nFields*nnz + d*nnz + col] = 0;
+	} 
+	m.vals[n*nFields*nnz + d*nnz + 13*nFields + d] = 1;
+      }
+    }
+  }
+
+  // x=0
+  for (int d=0; d<nFields; d++){
+    for (int j=0; j<ny; j++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + j*nx + 0;
+	for (int col=0; col<nnz; col++) {
+	  m.vals[n*nFields*nnz + d*nnz + col] = 0;
+	} 
+	m.vals[n*nFields*nnz + d*nnz + 13*nFields + d] = 1;
+      }
+    }
+  }
+
+  // x=lx
+  for (int d=0; d<nFields; d++){
+    for (int j=0; j<ny; j++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + j*nx + nx - 1;
+	for (int col=0; col<nnz; col++) {
+	  m.vals[n*nFields*nnz + d*nnz + col] = 0;
+	} 
+	m.vals[n*nFields*nnz + d*nnz + 13*nFields + d] = 1;
+      }
+    }
+  }
+
+  // z= 0 + dz
+  for (int d1=0; d1<nFields; d1++){
+    for (int i=0; i<nx; i++){
+      for (int j=0; j<ny; j++){
+	n = 1*(nx*ny) + j*nx + i;
+	for (int d2=0; d2<nFields; d2++) {
+	  m.vals[n*nFields*nnz + d1*nnz + 0*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 1*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 2*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 3*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 4*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 5*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 6*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 7*nFields + d2] = 0;
+	} 
+      }
+    }
+  }
+
+  // z= lz - dz
+  for (int d1=0; d1<nFields; d1++){
+    for (int i=0; i<nx; i++){
+      for (int j=0; j<ny; j++){
+	n = (nz-2)*(nx*ny) + j*nx + i;
+	for (int d2=0; d2<nFields; d2++) {
+	  m.vals[n*nFields*nnz + d1*nnz + 19*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 20*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 21*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 22*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 23*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 24*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 25*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 26*nFields + d2] = 0;
+	} 
+      }
+    }
+  }
+
+  // y= 0 + dy
+  for (int d1=0; d1<nFields; d1++){
+    for (int i=0; i<nx; i++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + 0*nx + i;
+	for (int d2=0; d2<nFields; d2++) {
+	  m.vals[n*nFields*nnz + d1*nnz +  0*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  1*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  2*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  9*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 10*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 11*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 18*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 19*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 20*nFields + d2] = 0;
+	} 
+      }
+    }
+  }
+
+  // y= ly - dy
+  for (int d1=0; d1<nFields; d1++){
+    for (int i=0; i<nx; i++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + (ny-2)*nx + i;
+	for (int d2=0; d2<nFields; d2++) {
+	  m.vals[n*nFields*nnz + d1*nnz +  6*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  7*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  8*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 15*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 16*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 17*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 24*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 25*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 26*nFields + d2] = 0;
+	} 
+      }
+    }
+  }
+
+  // x= 0 + dy
+  for (int d1=0; d1<nFields; d1++){
+    for (int j=0; j<ny; j++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + j*nx + 0;
+	for (int d2=0; d2<nFields; d2++) {
+	  m.vals[n*nFields*nnz + d1*nnz +  0*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  3*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  6*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  9*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 12*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 15*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 18*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 21*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 24*nFields + d2] = 0;
+	} 
+      }
+    }
+  }
+
+  // x= lx - dx
+  for (int d1=0; d1<nFields; d1++){
+    for (int j=0; j<ny; j++){
+      for (int k=0; k<nz; k++){
+	n = k*(nx*ny) + j*nx + nx - 1;
+	for (int d2=0; d2<nFields; d2++) {
+	  m.vals[n*nFields*nnz + d1*nnz +  2*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  5*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz +  8*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 11*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 14*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 17*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 20*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 23*nFields + d2] = 0;
+	  m.vals[n*nFields*nnz + d1*nnz + 26*nFields + d2] = 0;
+	} 
+      }
+    }
+  }
+
+}
+
 void ell_init_2D (ell_matrix &m, int nFields, int nx, int ny)
 {
   int nn = nx*ny;

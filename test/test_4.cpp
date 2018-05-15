@@ -45,7 +45,8 @@ int main (int argc, char *argv[])
     Problem micro (dim, size, cg_its, cg_tol);
 
     micro.setDisp(eps);
-    micro.Assembly_b();
+    double norm = micro.Assembly_b();
+    cout << "Residual norm = " << norm << endl;
     micro.Assembly_A();
     micro.solve();
 
