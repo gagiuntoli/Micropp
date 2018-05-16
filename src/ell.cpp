@@ -221,7 +221,7 @@ int ell_solve_cgpd_struct (ell_solver *solver, ell_matrix * m, int nFields, int 
     for (int i=0; i<m->nrow; i++)
       err += r[i] * r[i];
     err = sqrt(err); if (err < solver->min_tol) break;
-    cout << "it = " << its << " cg_err = " << err << endl;
+    //cout << "it = " << its << " cg_err = " << err << endl;
 
     for (int i=0 ; i<m->nrow; i++)
       z[i] = k[i] * r[i];
@@ -254,7 +254,7 @@ int ell_solve_cgpd_struct (ell_solver *solver, ell_matrix * m, int nFields, int 
     its ++;
 
   } while (its < solver->max_its);
-  cout << "cg_err = " << err << endl;
+  // cout << "it = " << its << " cg_err = " << err << endl;
 
   solver->err = err;
   solver->its = its;

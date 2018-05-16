@@ -2,6 +2,8 @@
 #include <iostream>
 #include "micro.h"
 
+#define nod_index(i,j,k) ((k)*nx*ny + (j)*nx + (i))
+
 using namespace std;
 
 void Problem::setDisp (double *eps)
@@ -62,7 +64,7 @@ void Problem::setDisp (double *eps)
     // z = 0
     for (int i=0; i<nx; i++) {
       for (int j=0; j<ny; j++) {
-	int n = j*nx + i;
+	int n = nod_index(i,j,0);
 	double xcoor = i*dx;
 	double ycoor = j*dy;
 	double zcoor = 0.0;
@@ -77,7 +79,7 @@ void Problem::setDisp (double *eps)
     // z = lx
     for (int i=0; i<nx; i++) {
       for (int j=0; j<ny; j++) {
-	int n = (nz-1)*nx*ny + j*nx + i;
+	int n = nod_index(i,j,nz-1);
 	double xcoor = i*dx;
 	double ycoor = j*dy;
 	double zcoor = lz;
@@ -93,7 +95,7 @@ void Problem::setDisp (double *eps)
     // y = 0
     for (int i=0; i<nx; i++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + 0*nx + i;
+	int n = nod_index(i,0,k);
 	double xcoor = i*dx;
 	double ycoor = 0.0;
 	double zcoor = k*dz;
@@ -109,7 +111,7 @@ void Problem::setDisp (double *eps)
     // y = ly
     for (int i=0; i<nx; i++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + (ny-1)*nx + i;
+	int n = nod_index(i,ny-1,k);
 	double xcoor = i*dx;
 	double ycoor = ly;
 	double zcoor = k*dz;
@@ -125,7 +127,7 @@ void Problem::setDisp (double *eps)
     // x=0
     for (int j=1; j<ny-1; j++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + j*nx + 0;
+	int n = nod_index(0,j,k);
 	double xcoor = 0.0;
 	double ycoor = j*dy;
 	double zcoor = k*dz;
@@ -141,7 +143,7 @@ void Problem::setDisp (double *eps)
     // x=lx
     for (int j=1; j<ny-1; j++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + j*nx + nx - 1;
+	int n = nod_index(nx-1,j,k);
 	double xcoor = lx;
 	double ycoor = j*dy;
 	double zcoor = k*dz;
@@ -155,8 +157,6 @@ void Problem::setDisp (double *eps)
     }
 
   }
-  //    for (int i=0; i<nn; i++)
-  //      cout << u[i*dim] << " " << u[i*dim+1] << endl;
 }
 
 double Problem::Assembly_b (void)
@@ -228,17 +228,15 @@ double Problem::Assembly_b (void)
 	  n6 = n2 + nx*ny;
 	  n7 = n3 + nx*ny;
 
-	  for (int i=0; i<npe; i++) {
-	    for (int d=0; d<dim; d++) {
-	      index[0*dim + d] = n0*dim + d;
-	      index[1*dim + d] = n1*dim + d;
-	      index[2*dim + d] = n2*dim + d;
-	      index[3*dim + d] = n3*dim + d;
-	      index[4*dim + d] = n4*dim + d;
-	      index[5*dim + d] = n5*dim + d;
-	      index[6*dim + d] = n6*dim + d;
-	      index[7*dim + d] = n7*dim + d;
-	    }
+	  for (int d=0; d<dim; d++) {
+	    index[0*dim + d] = n0*dim + d;
+	    index[1*dim + d] = n1*dim + d;
+	    index[2*dim + d] = n2*dim + d;
+	    index[3*dim + d] = n3*dim + d;
+	    index[4*dim + d] = n4*dim + d;
+	    index[5*dim + d] = n5*dim + d;
+	    index[6*dim + d] = n6*dim + d;
+	    index[7*dim + d] = n7*dim + d;
 	  }
 
 	  getElemental_b (ex, ey, ez, be);
@@ -254,7 +252,7 @@ double Problem::Assembly_b (void)
     // z=0
     for (int i=0; i<nx; i++) {
       for (int j=0; j<ny; j++) {
-	int n = j*nx + i;
+	int n = nod_index(i,j,0);
 	for (int d=0; d<dim; d++)
 	  b[n*dim+d] = 0.0;
       }
@@ -262,7 +260,7 @@ double Problem::Assembly_b (void)
     // z = lx
     for (int i=0; i<nx; i++) {
       for (int j=0; j<ny; j++) {
-	int n = (nz-1)*nx*ny + j*nx + i;
+	int n = nod_index(i,j,nz-1);
 	for (int d=0; d<dim; d++)
 	  b[n*dim+d] = 0.0;
       }
@@ -270,7 +268,7 @@ double Problem::Assembly_b (void)
     // y = 0
     for (int i=0; i<nx; i++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + 0*nx + i;
+	int n = nod_index(i,0,k);
 	for (int d=0; d<dim; d++)
 	  b[n*dim+d] = 0.0;
       }
@@ -278,7 +276,7 @@ double Problem::Assembly_b (void)
     // y = ly
     for (int i=0; i<nx; i++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + (ny-1)*nx + i;
+	int n = nod_index(i,ny-1,k);
 	for (int d=0; d<dim; d++)
 	  b[n*dim+d] = 0.0;
       }
@@ -286,7 +284,7 @@ double Problem::Assembly_b (void)
     // x=0
     for (int j=1; j<ny-1; j++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + j*nx + 0;
+	int n = nod_index(0,j,k);
 	for (int d=0; d<dim; d++)
 	  b[n*dim+d] = 0.0;
       }
@@ -294,14 +292,11 @@ double Problem::Assembly_b (void)
     // x=lx
     for (int j=1; j<ny-1; j++) {
       for (int k=1; k<nz-1; k++) {
-	int n = k*nx*ny + j*nx + nx - 1;
+	int n = nod_index(nx-1,j,k);
 	for (int d=0; d<dim; d++)
 	  b[n*dim+d] = 0.0;
       }
     }
-
-//    for (int i=0; i<nn; i++)
-//      cout << b[i*dim] << " " << b[i*dim + 1] << " " << b[i*dim + 2] << endl;
 
   }
 
@@ -344,7 +339,7 @@ void Problem::Assembly_A (void)
     }
     ell_set_bc_3D (A, dim, nx, ny, nz);
   }
-//  ell_print (&A);
+  //  ell_print (&A);
 }
 
 void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
@@ -420,12 +415,12 @@ void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
     E  = 1.0e7;
   }
 
-  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu      ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
-  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu      ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
-  ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu)  ; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
-  ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0       ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
-  ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0       ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
-  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0       ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
+  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu    ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
+  ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu); ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
+  ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0     ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
+  ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0     ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
+  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0     ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
 
   for (int i=0; i<nvoi; i++)
     for (int j=0; j<nvoi; j++)
@@ -558,11 +553,9 @@ void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
     getStress (ex, ey, ez, gp, stress_gp);
 
     double wg = (1/8.0)*dx*dy*dz;
-    for (int i=0; i<npe*dim; i++) {
-      for (int j=0; j<nvoi; j++) {
+    for (int i=0; i<npe*dim; i++)
+      for (int j=0; j<nvoi; j++)
 	be[i] += bmat[j][i] * stress_gp[j] * wg;
-      }
-    }
 
   } // gp loop
 }
@@ -761,41 +754,13 @@ void Problem::getStrain (int ex, int ey, int ez, int gp, double *strain_gp)
   double elem_disp[3*8];
   getElemDisp (ex, ey, ez, elem_disp);
 
-  double dsh[8][3], bmat[6][3*8], cxb[6][3*8];
-
-  double xg[8][3] = {
-    {-0.577350269189626, -0.577350269189626, -0.577350269189626},
-    {+0.577350269189626, -0.577350269189626, -0.577350269189626},
-    {+0.577350269189626, +0.577350269189626, -0.577350269189626},
-    {-0.577350269189626, +0.577350269189626, -0.577350269189626},
-    {-0.577350269189626, -0.577350269189626, +0.577350269189626},
-    {+0.577350269189626, -0.577350269189626, +0.577350269189626},
-    {+0.577350269189626, +0.577350269189626, +0.577350269189626},
-    {-0.577350269189626, +0.577350269189626, +0.577350269189626}};
-
-  dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dz;
-  dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dz;
-  dsh[2][0]= +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1]= +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2]= -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dz;
-  dsh[3][0]= -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1]= +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2]= -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dz;
-  dsh[4][0]= -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1]= -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2]= +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dz;
-  dsh[5][0]= +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1]= -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2]= +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dz;
-  dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dz;
-  dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dz;
-
-  for (int i=0; i<8; i++) {
-    bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
-    bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1]; bmat[1][i*dim+2] = 0        ;
-    bmat[2][i*dim] = 0        ; bmat[2][i*dim+1] = 0        ; bmat[2][i*dim+2] = dsh[i][2];
-    bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim+1] = dsh[i][0]; bmat[3][i*dim+2] = 0        ;
-    bmat[4][i*dim] = 0        ; bmat[4][i*dim+1] = dsh[i][2]; bmat[4][i*dim+2] = dsh[i][1];
-    bmat[5][i*dim] = dsh[i][2]; bmat[5][i*dim+1] = 0        ; bmat[5][i*dim+2] = dsh[i][0];
-  }
+  double bmat[6][3*8];
+  calc_bmat_3D (gp, bmat);
 
   for (int v=0; v<nvoi; v++) {
     strain_gp[v] = 0.0;
-    for (int i=0; i<npe*dim; i++) {
+    for (int i=0; i<npe*dim; i++)
       strain_gp[v] += bmat[v][i] * elem_disp[i];
-    }
   }
 
 }
@@ -820,10 +785,10 @@ void Problem::getElemDisp (int e, double *elem_disp)
 
 void Problem::getElemDisp (int ex, int ey, int ez, double *elem_disp)
 {
-  int n0 = ez*(nx*ny) + ey*nx + ex;
-  int n1 = ez*(nx*ny) + ey*nx + ex + 1;
-  int n2 = ez*(nx*ny) + ey*nx + ex + 1;
-  int n3 = ez*(nx*ny) + ey*nx + ex;
+  int n0 = ez*(nx*ny) + ey*nx     + ex;
+  int n1 = ez*(nx*ny) + ey*nx     + ex + 1;
+  int n2 = ez*(nx*ny) + (ey+1)*nx + ex + 1;
+  int n3 = ez*(nx*ny) + (ey+1)*nx + ex;
   int n4 = n0 + nx*ny;
   int n5 = n1 + nx*ny;
   int n6 = n2 + nx*ny;
