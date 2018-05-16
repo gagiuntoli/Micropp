@@ -219,10 +219,10 @@ double Problem::Assembly_b (void)
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ez=0; ez<nz-1; ez++) {
 
-	  n0 = ez*(nx*ny) + ey*nx + ex;
-	  n1 = ez*(nx*ny) + ey*nx + ex + 1;
-	  n2 = ez*(nx*ny) + ey*nx + ex + 1;
-	  n3 = ez*(nx*ny) + ey*nx + ex;
+	  n0 = ez*(nx*ny) + ey*nx     + ex;
+	  n1 = ez*(nx*ny) + ey*nx     + ex + 1;
+	  n2 = ez*(nx*ny) + (ey+1)*nx + ex + 1;
+	  n3 = ez*(nx*ny) + (ey+1)*nx + ex;
 	  n4 = n0 + nx*ny;
 	  n5 = n1 + nx*ny;
 	  n6 = n2 + nx*ny;
@@ -300,14 +300,13 @@ double Problem::Assembly_b (void)
       }
     }
 
-    for (int i=0; i<nn; i++)
-      cout << b[i*dim] << " " << b[i*dim + 1] << " " << b[i*dim + 2] << endl;
+//    for (int i=0; i<nn; i++)
+//      cout << b[i*dim] << " " << b[i*dim + 1] << " " << b[i*dim + 2] << endl;
 
   }
 
-  for (int i=0 ; i<nn*dim; i++) {
+  for (int i=0 ; i<nn*dim; i++)
     b[i] = -b[i];
-  }
 
   double norm = 0.0;
   for (int i=0; i<nn*dim; i++)
@@ -343,7 +342,6 @@ void Problem::Assembly_A (void)
 	}
       }
     }
-
     ell_set_bc_3D (A, dim, nx, ny, nz);
   }
 //  ell_print (&A);
@@ -556,14 +554,14 @@ void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
 
   for (int gp=0; gp<8; gp++) {
 
-    dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[2][0]= +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1]= +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2]= -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
-    dsh[3][0]= -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1]= +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2]= -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
-    dsh[4][0]= -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1]= -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2]= +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[5][0]= +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1]= -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2]= +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dy;
-    dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dy;
-    dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dy;
+    dsh[0][0]= -(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[0][1]= -(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[0][2]= -(1-xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+    dsh[1][0]= +(1-xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[1][1]= -(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[1][2]= -(1+xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+    dsh[2][0]= +(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[2][1]= +(1+xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[2][2]= -(1+xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+    dsh[3][0]= -(1+xg[gp][1])*(1-xg[gp][2])/8*2/dx;  dsh[3][1]= +(1-xg[gp][0])*(1-xg[gp][2])/8*2/dy;  dsh[3][2]= -(1-xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+    dsh[4][0]= -(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[4][1]= -(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[4][2]= +(1-xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+    dsh[5][0]= +(1-xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[5][1]= -(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[5][2]= +(1+xg[gp][0])*(1-xg[gp][1])/8*2/dz;
+    dsh[6][0]= +(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[6][1]= +(1+xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[6][2]= +(1+xg[gp][0])*(1+xg[gp][1])/8*2/dz;
+    dsh[7][0]= -(1+xg[gp][1])*(1+xg[gp][2])/8*2/dx;  dsh[7][1]= +(1-xg[gp][0])*(1+xg[gp][2])/8*2/dy;  dsh[7][2]= +(1-xg[gp][0])*(1+xg[gp][1])/8*2/dz;
 
     for (int i=0; i<8; i++) {
       bmat[0][i*dim] = dsh[i][0]; bmat[0][i*dim+1] = 0        ; bmat[0][i*dim+2] = 0        ;
@@ -821,21 +819,19 @@ void Problem::getStrain (int ex, int ey, int ez, int gp, double *strain_gp)
 
 void Problem::getElemDisp (int e, double *elem_disp)
 {
-  if (dim == 2) {
-    int xfactor = e%(nx-1);
-    int yfactor = e/(ny-1);
+  int xfactor = e%(nx-1);
+  int yfactor = e/(ny-1);
 
-    int n0 = yfactor     * nx + xfactor     ;
-    int n1 = yfactor     * nx + xfactor + 1 ;
-    int n2 = (yfactor+1) * nx + xfactor + 1 ;
-    int n3 = (yfactor+1) * nx + xfactor     ;
+  int n0 = yfactor     * nx + xfactor     ;
+  int n1 = yfactor     * nx + xfactor + 1 ;
+  int n2 = (yfactor+1) * nx + xfactor + 1 ;
+  int n3 = (yfactor+1) * nx + xfactor     ;
 
-    for (int d=0; d<dim; d++) {
-      elem_disp[0*dim + d] = u[n0*dim + d];
-      elem_disp[1*dim + d] = u[n1*dim + d];
-      elem_disp[2*dim + d] = u[n2*dim + d];
-      elem_disp[3*dim + d] = u[n3*dim + d];
-    }
+  for (int d=0; d<dim; d++) {
+    elem_disp[0*dim + d] = u[n0*dim + d];
+    elem_disp[1*dim + d] = u[n1*dim + d];
+    elem_disp[2*dim + d] = u[n2*dim + d];
+    elem_disp[3*dim + d] = u[n3*dim + d];
   }
 }
 

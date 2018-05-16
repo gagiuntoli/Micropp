@@ -356,10 +356,10 @@ void ell_add_3D (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields,
   int cols_row_6[8] = { 0, 1, 4, 3, 9,10,13,12};
   int cols_row_7[8] = { 1, 2, 5, 4,10,11,14,13};
 
-  int n0 = ez*(nx*ny) + ey*nx + ex;
-  int n1 = ez*(nx*ny) + ey*nx + ex + 1;
-  int n2 = ez*(nx*ny) + ey*nx + ex + 1;
-  int n3 = ez*(nx*ny) + ey*nx + ex;
+  int n0 = ez*(nx*ny) + ey*nx     + ex;
+  int n1 = ez*(nx*ny) + ey*nx     + ex + 1;
+  int n2 = ez*(nx*ny) + (ey+1)*nx + ex + 1;
+  int n3 = ez*(nx*ny) + (ey+1)*nx + ex;
   int n4 = n0 + nx*ny;
   int n5 = n1 + nx*ny;
   int n6 = n2 + nx*ny;

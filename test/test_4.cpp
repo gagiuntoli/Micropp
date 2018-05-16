@@ -50,6 +50,12 @@ int main (int argc, char *argv[])
     micro.Assembly_A();
     micro.solve();
 
+    for (int i=0; i<micro.nn*dim; i++)
+      micro.u[i] = micro.u[i] + micro.du[i];
+
+    norm = micro.Assembly_b();
+    cout << "Residual norm = " << norm << endl;
+
     micro.writeVtu (1, 2);
 
   } catch (int &e) {
