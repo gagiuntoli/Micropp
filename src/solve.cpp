@@ -22,11 +22,8 @@ void Problem::newtonRaphson (void)
   do {
 
     tol = Assembly_b();
-
-    if (flag_print_newton == true)
-      cout << "NewRap It =" << its << " Tol = " << tol << endl;
-
     if (tol < NewRap_Tol) break;
+    //cout << "NewRap It =" << its << " Tol = " << tol << endl;
 
     Assembly_A();
 
@@ -38,24 +35,14 @@ void Problem::newtonRaphson (void)
     } else if (dim == 3) {
       ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
     }
+    //cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 
-    if (flag_print_solver == true)
-      cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
-
-    // u = u + du
     for (int i=0; i<nn*dim; i++)
       u[i] = u[i] + du[i];
-
-    if (flag_print_u == true)
-      for (int i=0; i<nn; i++)
-	cout << setw(5) << u[i*dim] << " " << u[i*dim+1] << endl;
-
-    if (flag_print_du == true)
-      for (int i=0; i<nn; i++)
-	cout << setw(5) << setprecision(4) <<  du[i*dim] << " " << du[i*dim+1] << endl;
 
     its++;
 
   } while (its<NewRap_Its && tol>NewRap_Tol);
+  //cout << "NewRap It =" << its << " Tol = " << tol << endl;
 
 }
