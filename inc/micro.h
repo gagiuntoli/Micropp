@@ -77,6 +77,8 @@ class Problem {
     int getElemType (int e);
     int getElemType (int ex, int ey, int ez);
 
+    void calc_bmat_3D (int gp, double bmat[6][3*8]);
+
     void calcDistributions (void);
     void calcAverageStress (void);
     void calcAverageStrain (void);

@@ -557,7 +557,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, double (&be)[3*8])
     calc_bmat_3D (gp, bmat);
     getStress (ex, ey, ez, gp, stress_gp);
 
-    double wg = 0.25*dx*dy;
+    double wg = (1/8.0)*dx*dy*dz;
     for (int i=0; i<npe*dim; i++) {
       for (int j=0; j<nvoi; j++) {
 	be[i] += bmat[j][i] * stress_gp[j] * wg;
