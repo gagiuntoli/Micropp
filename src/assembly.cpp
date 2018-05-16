@@ -621,33 +621,73 @@ void Problem::calcAverageStrain (void)
 
 void Problem::calcDistributions (void)
 {
-  for (int e=0; e<nelem; e++) {
+  if (dim == 2) {
+    for (int e=0; e<nelem; e++) {
 
-    double strain_aux[6];
-    double stress_aux[6];
-    for (int i=0; i<nvoi; i++) {
-      strain_aux[i] = 0.0;
-      stress_aux[i] = 0.0;
-    }
-
-    for (int gp=0; gp<4; gp++) {
-
-      double stress_gp[6], strain_gp[6];
-      double wg = 0.25*dx*dy;
-
-      getStress (e, gp, stress_gp);
-      getStrain (e, gp, strain_gp);
-      for (int v=0; v<nvoi; v++) {
-	strain_aux[v] += strain_gp[v] * wg;
-	stress_aux[v] += stress_gp[v] * wg;
+      double strain_aux[6];
+      double stress_aux[6];
+      for (int i=0; i<nvoi; i++) {
+	strain_aux[i] = 0.0;
+	stress_aux[i] = 0.0;
       }
 
+      for (int gp=0; gp<4; gp++) {
+
+	double stress_gp[6], strain_gp[6];
+	double wg = 0.25*dx*dy;
+
+	getStress (e, gp, stress_gp);
+	getStrain (e, gp, strain_gp);
+	for (int v=0; v<nvoi; v++) {
+	  strain_aux[v] += strain_gp[v] * wg;
+	  stress_aux[v] += stress_gp[v] * wg;
+	}
+
+      }
+      double vol = dx*dy;
+      for (int v=0; v<nvoi; v++) {
+	strain[e*nvoi + v] = strain_aux[v] / vol;
+	stress[e*nvoi + v] = stress_aux[v] / vol;
+      }
     }
-    double vol = dx*dy;
-    for (int v=0; v<nvoi; v++) {
-      strain[e*nvoi + v] = strain_aux[v] / vol;
-      stress[e*nvoi + v] = stress_aux[v] / vol;
+
+  } else if (dim == 3) {
+
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ez=0; ez<nz-1; ez++) {
+
+	  double strain_aux[6];
+	  double stress_aux[6];
+	  for (int i=0; i<nvoi; i++) {
+	    strain_aux[i] = 0.0;
+	    stress_aux[i] = 0.0;
+	  }
+
+	  for (int gp=0; gp<8; gp++) {
+
+	    double stress_gp[6], strain_gp[6];
+	    double wg = (1/8.0)*dx*dy*dz;
+
+	    getStress (ex, ey, ez, gp, stress_gp);
+	    getStrain (ex, ey, ez, gp, strain_gp);
+	    for (int v=0; v<nvoi; v++) {
+	      strain_aux[v] += strain_gp[v] * wg;
+	      stress_aux[v] += stress_gp[v] * wg;
+	    }
+
+	  }
+
+	  double vol = dx*dy;
+          int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+	  for (int v=0; v<nvoi; v++) {
+	    strain[e*nvoi + v] = strain_aux[v] / vol;
+	    stress[e*nvoi + v] = stress_aux[v] / vol;
+	  }
+	}
+      }
     }
+
   }
 }
 

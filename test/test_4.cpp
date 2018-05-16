@@ -65,6 +65,7 @@ int main (int argc, char *argv[])
     norm = micro.Assembly_b();
     cout << "Residual norm = " << norm << endl;
 
+    micro.calcDistributions();
     micro.writeVtu (1, 2);
 
   } catch (int &e) {
