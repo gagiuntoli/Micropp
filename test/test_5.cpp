@@ -44,26 +44,8 @@ int main (int argc, char *argv[])
     double start, end, t_lap;
     Problem micro (dim, size, cg_its, cg_tol);
 
-    start = clock();
     micro.setDisp(eps);
-    double norm = micro.Assembly_b();
-    cout << "Residual norm = " << norm << endl;
-    micro.Assembly_A();
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cout << "time assembly : " << t_lap << endl;
-
-    start = clock();
-    micro.solve();
-    end = clock();
-    t_lap = double(end - start) / CLOCKS_PER_SEC;
-    cout << "time solve : " << t_lap << endl;
-
-    for (int i=0; i<micro.nn*dim; i++)
-      micro.u[i] = micro.u[i] + micro.du[i];
-
-    norm = micro.Assembly_b();
-    cout << "Residual norm = " << norm << endl;
+    micro.newtonRaphson ();
 
     micro.writeVtu (1, 2);
 
