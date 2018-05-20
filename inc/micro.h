@@ -1,5 +1,16 @@
 #include <vector>
+#include <list>
 #include "ell.h"
+
+struct micro_gauss_point_t {
+  int micro_gp;
+  double *int_vars;
+};
+
+struct macro_gauss_point {
+  int macro_gp;
+  std::list<micro_gauss_point_t> micro_gauss_points;
+};
 
 class Problem {
 
@@ -13,6 +24,8 @@ class Problem {
     double lx, ly, lz, dx, dy, dz;
     int nelem;
     int size_tot;
+
+    int micro_type;
 
     double *strain; // average strain on each element
     double *stress; // average stress on each element
