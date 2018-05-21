@@ -68,14 +68,17 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
 
 Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params)
 {
-  lx = 1.0; ly = 1.0; lz = 1.0;
-
   this->micro_type = micro_type;
 
   int nParams;
   if (micro_type == 0) {
     // mat 1 = matrix
     // mat 2 = sphere
+    numMaterials = 2;
+    nParams = 4;
+  } else if (micro_type == 1) {
+    // mat 1 = layer 1
+    // mat 2 = layer 2
     numMaterials = 2;
     nParams = 4;
   }
@@ -201,8 +204,8 @@ int Problem::getElemType (int ex, int ey, int ez)
   if (micro_type == 0) {
     // esfera en matriz
     double x1 = ex*dx + dx/2;
-    double y1 = ey*dx + dy/2;
-    double z1 = ez*dx + dz/2;
+    double y1 = ey*dy + dy/2;
+    double z1 = ez*dz + dz/2;
     double x2 = lx/2;
     double y2 = ly/2;
     double z2 = lz/2;
@@ -213,6 +216,11 @@ int Problem::getElemType (int ex, int ey, int ez)
       return 0;
 
   } else if (micro_type == 1) {
-
+    double y = ey*dy + dy/2;
+    double espesor = micro_params[3];
+    if (y < espesor)
+      return 1;
+    else 
+      return 0;
   }
 }

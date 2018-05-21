@@ -418,6 +418,13 @@ void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
       nu = material_list[1].nu;
     }
   } else if (micro_type == 1) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
   }
 
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
@@ -739,8 +746,8 @@ void Problem::calcDistributions (void)
 
 	  }
 
-	  double vol = dx*dy;
-          int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+	  double vol = dx*dy*dz;
+          int e = glo_elem3D(ex,ey,ez);
 	  for (int v=0; v<nvoi; v++) {
 	    strain[e*nvoi + v] = strain_aux[v] / vol;
 	    stress[e*nvoi + v] = stress_aux[v] / vol;
@@ -797,6 +804,13 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
       nu = material_list[1].nu;
     }
   } else if (micro_type == 1) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
   }
 
   double strain_gp[6];

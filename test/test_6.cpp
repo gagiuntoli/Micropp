@@ -30,7 +30,7 @@ int main (int argc, char *argv[])
     int nx = vm["nx"].as<int>();
     int ny = vm["ny"].as<int>();
     int nz = vm["nz"].as<int>();
-    double eps[6] = {0.005, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double eps1[6] = {0.005, 0.0, 0.0, 0.0, 0.0, 0.0};
 
     int size[3];
     size[0] = nx;
@@ -55,20 +55,67 @@ int main (int argc, char *argv[])
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
 
-    Problem micro (dim, size, micro_type, micro_params, types, params);
+    Problem micro1 (dim, size, micro_type, micro_params, types, params);
 
-    micro.setDisp(eps);
-    micro.newtonRaphson ();
+    micro1.setDisp(eps1);
+    micro1.newtonRaphson ();
 
-    micro.calcAverageStress();
-    cout << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
+    micro1.calcAverageStress();
+    cout 
+      << "Average stress = " 
+      << micro1.stress_ave[0] << " " << micro1.stress_ave[1] << " " << micro1.stress_ave[2] << " " 
+      << micro1.stress_ave[3] << " " << micro1.stress_ave[4] << " " << micro1.stress_ave[5] 
+      << endl;
 
-    micro.calcAverageStrain();
-    cout << "Average strain = " << micro.strain_ave[0] << " " << micro.strain_ave[1] << " " << micro.strain_ave[2] << endl;
+    micro1.calcAverageStrain();
+    cout 
+      << "Average strain = " 
+      << micro1.strain_ave[0] << " " << micro1.strain_ave[1] << " " << micro1.strain_ave[2] << " " 
+      << micro1.strain_ave[3] << " " << micro1.strain_ave[4] << " " << micro1.strain_ave[5]
+      << endl;
 
-    micro.calcDistributions();
+    micro1.calcDistributions();
 
-    micro.writeVtu (1, 2);
+    micro1.writeVtu (1, 2);
+
+    double eps2[6] = {0.0, 0.0, 0.0, 0.005, 0.0, 0.0};
+    micro_type = 1; // 2 materiales matriz y fibra (3D 2 capas planas)
+    micro_params[0] = 1.0; // lx
+    micro_params[1] = 1.0; // ly
+    micro_params[2] = 1.0; // lz
+    micro_params[3] = 0.2; // espesor de la capa 0
+
+    types[0] = 0;
+    types[1] = 0;
+
+    params[0*MAX_MAT_PARAM + 0] = 1.0e6;
+    params[0*MAX_MAT_PARAM + 1] = 0.3;
+
+    params[1*MAX_MAT_PARAM + 0] = 1.0e7;
+    params[1*MAX_MAT_PARAM + 1] = 0.3;
+
+    Problem micro2 (dim, size, micro_type, micro_params, types, params);
+
+    micro2.setDisp(eps2);
+    micro2.newtonRaphson ();
+
+    micro2.calcAverageStress();
+    cout 
+      << "Average stress = " 
+      << micro2.stress_ave[0] << " " << micro2.stress_ave[1] << " " << micro2.stress_ave[2] << " " 
+      << micro2.stress_ave[3] << " " << micro2.stress_ave[4] << " " << micro2.stress_ave[5] 
+      << endl;
+
+    micro2.calcAverageStrain();
+    cout 
+      << "Average strain = " 
+      << micro2.strain_ave[0] << " " << micro2.strain_ave[1] << " " << micro2.strain_ave[2] << " " 
+      << micro2.strain_ave[3] << " " << micro2.strain_ave[4] << " " << micro2.strain_ave[5]
+      << endl;
+
+    micro2.calcDistributions();
+
+    micro2.writeVtu (2, 2);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;
