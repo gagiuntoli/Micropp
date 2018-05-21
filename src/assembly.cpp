@@ -162,7 +162,6 @@ void Problem::setDisp (double *eps)
 double Problem::Assembly_b (void)
 {
   int index[3*8];
-  double be[3*8];
   int n0, n1, n2, n3, n4, n5, n6, n7;
   int e;
 
@@ -171,26 +170,28 @@ double Problem::Assembly_b (void)
 
   if (dim == 2) {
 
-    for (int e=0; e<nelem; e++) {
+    double be[2*4];
 
-      int xfactor = e%(nx-1);
-      int yfactor = e/(ny-1);
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
 
-      n0 = yfactor     * nx + xfactor     ;
-      n1 = yfactor     * nx + xfactor + 1 ;
-      n2 = (yfactor+1) * nx + xfactor + 1 ;
-      n3 = (yfactor+1) * nx + xfactor     ;
-      index[0] = n0*dim; index[1] = n0*dim + 1;
-      index[2] = n1*dim; index[3] = n1*dim + 1;
-      index[4] = n2*dim; index[5] = n2*dim + 1;
-      index[6] = n3*dim; index[7] = n3*dim + 1;
+	n0 = ey     * nx + ex     ;
+	n1 = ey     * nx + ex + 1 ;
+	n2 = (ey+1) * nx + ex + 1 ;
+	n3 = (ey+1) * nx + ex     ;
 
-      getElemental_b (e, be);
+	index[0] = n0*dim; index[1] = n0*dim + 1;
+	index[2] = n1*dim; index[3] = n1*dim + 1;
+	index[4] = n2*dim; index[5] = n2*dim + 1;
+	index[6] = n3*dim; index[7] = n3*dim + 1;
 
-      for (int i=0; i<npe*dim; i++) {
-	b[index[i]] += be[i]; // assembly
-      }
-    } 
+	getElemental_b (ex, ey, be);
+
+	for (int i=0; i<npe*dim; i++)
+	  b[index[i]] += be[i]; // assembly
+
+      } 
+    }
 
     // boundary conditions
     // y = 0
@@ -215,6 +216,7 @@ double Problem::Assembly_b (void)
 
   } else if (dim == 3) {
 
+    double be[3*8];
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ez=0; ez<nz-1; ez++) {
@@ -319,9 +321,9 @@ void Problem::Assembly_A (void)
 
   if (dim == 2) {
 
+    double Ae[2*4*2*4];
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
-	double Ae[2*4*2*4];
 	getElemental_A (ex, ey, Ae);
 	ell_add_struct (A, ex, ey, Ae, dim, nx, ny);
       }
@@ -330,10 +332,10 @@ void Problem::Assembly_A (void)
 
   } else if (dim == 3) {
 
+    double Ae[3*8*3*8];
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ez=0; ez<nz-1; ez++) {
-	  double Ae[3*8*3*8];
 	  getElemental_A (ex, ey, ez, Ae);
 	  ell_add_struct (A, ex, ey, ez, Ae, dim, nx, ny, nz);
 	}
@@ -514,27 +516,10 @@ void Problem::calc_bmat_3D (int gp, double bmat[6][3*8]) {
   }
 
 }
-    
 
-double Problem::distance (int e)
+void Problem::getElemental_b (int ex, int ey, double (&be)[2*4])
 {
-  int xfactor = e%(nx-1);
-  int yfactor = e/(ny-1);
-  double xdis = pow(xfactor*dx + dx/2 - lx/2,2);
-  double ydis = pow(yfactor*dy + dy/2 - ly/2,2);
-  return sqrt(xdis + ydis);
-}
-
-double Problem::distance (int ex, int ey, int ez)
-{
-  double xdis = pow(ex*dx + dx/2 - lx/2,2);
-  double ydis = pow(ey*dy + dy/2 - ly/2,2);
-  return sqrt(xdis + ydis);
-}
-
-void Problem::getElemental_b (int e, double (&be)[3*8])
-{
-  double dsh[4][2], bmat[3][8], cxb[3][8], stress_gp[6];
+  double dsh[4][2], bmat[3][2*4], cxb[3][8], stress_gp[6];
   double xg[4][2] = {
     {-0.577350269189626, -0.577350269189626},
     {+0.577350269189626, -0.577350269189626},
@@ -557,7 +542,7 @@ void Problem::getElemental_b (int e, double (&be)[3*8])
       bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim+1] = dsh[i][0];
     }
 
-    getStress (e, gp, stress_gp);
+    getStress (ex, ey, gp, stress_gp);
 
     double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++) {
@@ -596,24 +581,26 @@ void Problem::calcAverageStress (void)
 
   if (dim == 2) {
 
-    for (int e=0; e<nelem; e++) {
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
 
-      double stress_aux[6];
-      for (int i=0; i<nvoi; i++)
-	stress_aux[i] = 0.0;
+	double stress_aux[3];
+	for (int i=0; i<nvoi; i++)
+	  stress_aux[i] = 0.0;
 
-      for (int gp=0; gp<4; gp++) {
+	for (int gp=0; gp<4; gp++) {
 
-	double stress_gp[6];
-	double wg = 0.25*dx*dy;
+	  double stress_gp[6];
+	  double wg = 0.25*dx*dy;
 
-	getStress (e, gp, stress_gp);
+	  getStress (ex, ey, gp, stress_gp);
+	  for (int v=0; v<nvoi; v++)
+	    stress_aux[v] += stress_gp[v] * wg;
+
+	}
 	for (int v=0; v<nvoi; v++)
-	  stress_aux[v] += stress_gp[v] * wg;
-
+	  stress_ave[v] += stress_aux[v];
       }
-      for (int v=0; v<nvoi; v++)
-	stress_ave[v] += stress_aux[v];
     }
 
   } else if (dim == 3) {
@@ -654,26 +641,26 @@ void Problem::calcAverageStrain (void)
 
   if (dim == 2) {
 
-    for (int e=0; e<nelem; e++) {
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
 
-      double strain_aux[6];
-      for (int i=0; i<nvoi; i++)
-	strain_aux[i] = 0.0;
+	double strain_aux[3];
+	for (int i=0; i<nvoi; i++)
+	  strain_aux[i] = 0.0;
 
-      for (int gp=0; gp<4; gp++) {
+	for (int gp=0; gp<4; gp++) {
+	  double strain_gp[6];
+	  double wg = 0.25*dx*dy;
+	  getStrain (ex, ey, gp, strain_gp);
+	  for (int v=0; v<nvoi; v++)
+	    strain_aux[v] += strain_gp[v] * wg;
+	}
 
-	double strain_gp[6];
-	double wg = 0.25*dx*dy;
-
-	getStrain (e, gp, strain_gp);
 	for (int v=0; v<nvoi; v++)
-	  strain_aux[v] += strain_gp[v] * wg;
-
+	  strain_ave[v] += strain_aux[v];
       }
-
-      for (int v=0; v<nvoi; v++)
-	strain_ave[v] += strain_aux[v];
     }
+
 
   } else if (dim == 3) {
 
@@ -707,32 +694,36 @@ void Problem::calcAverageStrain (void)
 void Problem::calcDistributions (void)
 {
   if (dim == 2) {
-    for (int e=0; e<nelem; e++) {
 
-      double strain_aux[6];
-      double stress_aux[6];
-      for (int i=0; i<nvoi; i++) {
-	strain_aux[i] = 0.0;
-	stress_aux[i] = 0.0;
-      }
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
 
-      for (int gp=0; gp<4; gp++) {
-
-	double stress_gp[6], strain_gp[6];
-	double wg = 0.25*dx*dy;
-
-	getStress (e, gp, stress_gp);
-	getStrain (e, gp, strain_gp);
-	for (int v=0; v<nvoi; v++) {
-	  strain_aux[v] += strain_gp[v] * wg;
-	  stress_aux[v] += stress_gp[v] * wg;
+	double strain_aux[3];
+	double stress_aux[3];
+	for (int i=0; i<nvoi; i++) {
+	  strain_aux[i] = 0.0;
+	  stress_aux[i] = 0.0;
 	}
 
-      }
-      double vol = dx*dy;
-      for (int v=0; v<nvoi; v++) {
-	strain[e*nvoi + v] = strain_aux[v] / vol;
-	stress[e*nvoi + v] = stress_aux[v] / vol;
+	for (int gp=0; gp<4; gp++) {
+
+	  double stress_gp[3], strain_gp[3];
+	  double wg = 0.25*dx*dy;
+
+	  getStress (ex, ey, gp, stress_gp);
+	  getStrain (ex, ey, gp, strain_gp);
+	  for (int v=0; v<nvoi; v++) {
+	    strain_aux[v] += strain_gp[v] * wg;
+	    stress_aux[v] += stress_gp[v] * wg;
+	  }
+
+	}
+	double vol = dx*dy;
+	int e = glo_elem3D(ex,ey,0);
+	for (int v=0; v<nvoi; v++) {
+	  strain[e*nvoi + v] = strain_aux[v] / vol;
+	  stress[e*nvoi + v] = stress_aux[v] / vol;
+	}
       }
     }
 
@@ -776,19 +767,34 @@ void Problem::calcDistributions (void)
   }
 }
 
-void Problem::getStress (int e, int gp, double *stress_gp)
+void Problem::getStress (int ex, int ey, int gp, double *stress_gp)
 {
   double strain_gp[3];
-  getStrain (e, gp, strain_gp);
+  getStrain (ex, ey, gp, strain_gp);
 
-  double nu = 0.3, E;
+  double nu, E;
   double ctan[3][3];
 
-  if (elem_type[e] == 0) {
-    E  = 1.0e6;
-  } else {
-    E  = 1.0e7;
+  int e = glo_elem3D(ex,ey,0);
+
+  if (micro_type == 0) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
+  } else if (micro_type == 1) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
   }
+
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
   ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;
@@ -853,10 +859,10 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
 
 }
 
-void Problem::getStrain (int e, int gp, double *strain_gp)
+void Problem::getStrain (int ex, int ey, int gp, double *strain_gp)
 {
-  double elem_disp[3*8];
-  getElemDisp (e, elem_disp);
+  double elem_disp[2*4];
+  getElemDisp (ex, ey, elem_disp);
 
   double xg[4][2] = {
     {-0.577350269189626, -0.577350269189626},
@@ -902,15 +908,12 @@ void Problem::getStrain (int ex, int ey, int ez, int gp, double *strain_gp)
 
 }
 
-void Problem::getElemDisp (int e, double *elem_disp)
+void Problem::getElemDisp (int ex, int ey, double *elem_disp)
 {
-  int xfactor = e%(nx-1);
-  int yfactor = e/(ny-1);
-
-  int n0 = yfactor     * nx + xfactor     ;
-  int n1 = yfactor     * nx + xfactor + 1 ;
-  int n2 = (yfactor+1) * nx + xfactor + 1 ;
-  int n3 = (yfactor+1) * nx + xfactor     ;
+  int n0 = ey * nx     + ex;
+  int n1 = ey * nx     + ex + 1;
+  int n2 = (ey+1) * nx + ex + 1;
+  int n3 = (ey+1) * nx + ex;
 
   for (int d=0; d<dim; d++) {
     elem_disp[0*dim + d] = u[n0*dim + d];

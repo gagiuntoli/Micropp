@@ -61,7 +61,6 @@ class Problem {
     double *du;
     double *b;
 
-    Problem (int dim, int size[3], int cg_its, double cg_tol);
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
 
@@ -79,25 +78,22 @@ class Problem {
     void getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4]);
     void getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
 
-    double distance (int e);
-    double distance (int ex, int ey, int ez);
-
-    void getElemental_b (int e, double (&be)[3*8]);
+    void getElemental_b (int ex, int ey, double (&be)[2*4]);
     void getElemental_b (int ex, int ey, int ez, double (&be)[3*8]);
 
-    void getStrain (int e, int gp, double *strain_gp);
+    void getStrain (int ex, int ey, int gp, double *strain_gp);
     void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
 
-    void getStress (int e, int gp, double *stress_gp);
+    void getStress (int ex, int ey, int gp, double *stress_gp);
     void getStress (int ex, int ey, int ez, int gp, double *stress_gp);
 
     void getStress_mat1 (double *int_vars, double *strain, double *stress);
     void getStress_mat2 (double *int_vars, double *strain, double *stress);
 
-    void getElemDisp (int e, double *elem_disp);
+    void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);
 
-    int getElemType (int e);
+    int getElemType (int ex, int ey);
     int getElemType (int ex, int ey, int ez);
 
     void calc_bmat_3D (int gp, double bmat[6][3*8]);

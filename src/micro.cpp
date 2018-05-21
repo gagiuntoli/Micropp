@@ -2,63 +2,6 @@
 #include <iostream>
 #include "micro.h"
 
-Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
-{
-  lx = 1.0; ly = 1.0; lz = 1.0;
-
-  solver.max_its = cg_its;
-  solver.min_tol = cg_tol;
-  this->dim = dim;
-  if (dim == 2) {
-    nx = size[0];
-    ny = size[1];
-    nvoi = 3;
-    nn = nx * ny;
-    npe = 4;
-  } else if (dim == 3) {
-    nx = size[0];
-    ny = size[1];
-    nz = size[2];
-    nvoi = 6;
-    nn = nx * ny * nz;
-    npe = 8;
-  }
-
-  dx = lx/(nx-1);
-  dy = ly/(ny-1);
-  if (dim == 2) {
-    nelem = (nx-1) * (ny-1);
-  } else if (dim == 3) {
-    dz = lz/(nz-1);
-    nelem = (nx-1) * (ny-1) * (nz-1);
-  }
-
-  b  = (double*)malloc(nn*dim*sizeof(double));
-  du = (double*)malloc(nn*dim*sizeof(double));
-  u  = (double*)malloc(nn*dim*sizeof(double));
-  stress = (double*)malloc(nelem*nvoi*sizeof(double));
-  strain = (double*)malloc(nelem*nvoi*sizeof(double));
-  elem_type = (int*)malloc(nelem*sizeof(int));
-//  int_vars  = (double*)malloc(nn*dim*sizeof(double));
-
-  for (int i=0; i<nn*dim; i++)
-    u[i] = 0.0;
-
-  for (int e=0; e<nelem; e++)
-    elem_type[e] = getElemType(e);
-
-  NewRap_Its = 3;
-  NewRap_Tol = 1.0e-5;
-
-  if (dim == 2) {
-    ell_init_2D (A, dim, nx, ny);
-  } else if (dim == 3) {
-    ell_init_3D (A, dim, nx, ny, nz);
-  }
-
-  return;
-}
-
 Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params)
 {
   this->micro_type = micro_type;
@@ -139,13 +82,16 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   strain = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_type = (int*)malloc(nelem*sizeof(int));
 
-
   for (int i=0; i<nn*dim; i++)
     u[i] = 0.0;
 
   if (dim == 2) {
-    for (int e=0; e<nelem; e++)
-      elem_type[e] = getElemType(e);
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	int e = glo_elem3D(ex,ey,0);
+	elem_type[e] = getElemType(ex,ey);
+      }
+    }
   } else {
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
@@ -180,16 +126,28 @@ Problem::~Problem (void)
   free(elem_type);
 }
 
-int Problem::getElemType (int e)
+int Problem::getElemType (int ex, int ey)
 {
-  if (distance(e) < 0.2) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-  return -1;
+  if (micro_type == 0) {
+    // esfera en matriz
+    double x1 = ex*dx + dx/2;
+    double y1 = ey*dy + dy/2;
+    double x2 = lx/2;
+    double y2 = ly/2;
+    double rad = micro_params[3];
+    if ( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) < rad*rad )
+      return 1;
+    else 
+      return 0;
 
+  } else if (micro_type == 1) {
+    double y = ey*dy + dy/2;
+    double espesor = micro_params[3];
+    if (y < espesor)
+      return 1;
+    else 
+      return 0;
+  }
 }
 
 int Problem::getElemType (int ex, int ey, int ez)

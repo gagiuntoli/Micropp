@@ -8,9 +8,9 @@ static Problem* micro = NULL;
 
 extern "C"
 {
-  void micro_construct_(int* dim, int* size, int *cg_its, double *cg_tol)
+  void micro_construct_(int *dim, int size[3], int *micro_type, double *micro_params, int *mat_types, double *params)
   {
-    micro = new Problem(*dim, size, *cg_its, *cg_tol); 
+    micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
   }
 
   void micro_loc_hom_stress_(double *MacroStrain, double *MacroStress)
