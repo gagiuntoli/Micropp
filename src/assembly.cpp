@@ -570,24 +570,53 @@ void Problem::calcAverageStress (void)
   for (int v=0; v<nvoi; v++)
     stress_ave[v] = 0.0;
 
-  for (int e=0; e<nelem; e++) {
+  if (dim == 2) {
 
-    double stress_aux[6];
-    for (int i=0; i<nvoi; i++)
-      stress_aux[i] = 0.0;
+    for (int e=0; e<nelem; e++) {
 
-    for (int gp=0; gp<4; gp++) {
+      double stress_aux[6];
+      for (int i=0; i<nvoi; i++)
+	stress_aux[i] = 0.0;
 
-      double stress_gp[6];
-      double wg = 0.25*dx*dy;
+      for (int gp=0; gp<4; gp++) {
 
-      getStress (e, gp, stress_gp);
+	double stress_gp[6];
+	double wg = 0.25*dx*dy;
+
+	getStress (e, gp, stress_gp);
+	for (int v=0; v<nvoi; v++)
+	  stress_aux[v] += stress_gp[v] * wg;
+
+      }
       for (int v=0; v<nvoi; v++)
-	stress_aux[v] += stress_gp[v] * wg;
-
+	stress_ave[v] += stress_aux[v];
     }
-    for (int v=0; v<nvoi; v++)
-      stress_ave[v] += stress_aux[v];
+
+  } else if (dim == 3) {
+
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ez=0; ez<nz-1; ez++) {
+
+	  double stress_aux[6];
+	  for (int i=0; i<nvoi; i++)
+	    stress_aux[i] = 0.0;
+
+	  for (int gp=0; gp<8; gp++) {
+
+	    double stress_gp[6];
+	    double wg = (1/8.0)*dx*dy*dz;
+
+	    getStress (ex, ey, ez, gp, stress_gp);
+	    for (int v=0; v<nvoi; v++)
+	      stress_aux[v] += stress_gp[v] * wg;
+
+	  }
+	  for (int v=0; v<nvoi; v++)
+	    stress_ave[v] += stress_aux[v];
+	}
+      }
+    }
   }
 
   for (int v=0; v<nvoi; v++)
@@ -599,25 +628,52 @@ void Problem::calcAverageStrain (void)
   for (int v=0; v<nvoi; v++)
     strain_ave[v] = 0.0;
 
-  for (int e=0; e<nelem; e++) {
+  if (dim == 2) {
 
-    double strain_aux[6];
-    for (int i=0; i<nvoi; i++)
-      strain_aux[i] = 0.0;
+    for (int e=0; e<nelem; e++) {
 
-    for (int gp=0; gp<4; gp++) {
+      double strain_aux[6];
+      for (int i=0; i<nvoi; i++)
+	strain_aux[i] = 0.0;
 
-      double strain_gp[6];
-      double wg = 0.25*dx*dy;
+      for (int gp=0; gp<4; gp++) {
 
-      getStrain (e, gp, strain_gp);
+	double strain_gp[6];
+	double wg = 0.25*dx*dy;
+
+	getStrain (e, gp, strain_gp);
+	for (int v=0; v<nvoi; v++)
+	  strain_aux[v] += strain_gp[v] * wg;
+
+      }
+
       for (int v=0; v<nvoi; v++)
-	strain_aux[v] += strain_gp[v] * wg;
-
+	strain_ave[v] += strain_aux[v];
     }
 
-    for (int v=0; v<nvoi; v++)
-      strain_ave[v] += strain_aux[v];
+  } else if (dim == 3) {
+
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ez=0; ez<nz-1; ez++) {
+
+	  double strain_aux[6];
+	  for (int i=0; i<nvoi; i++)
+	    strain_aux[i] = 0.0;
+
+	  for (int gp=0; gp<8; gp++) {
+	    double strain_gp[6];
+	    double wg = (1/8.0)*dx*dy*dz;
+	    getStrain (ex, ey, ez, gp, strain_gp);
+	    for (int v=0; v<nvoi; v++)
+	      strain_aux[v] += strain_gp[v] * wg;
+	  }
+
+	  for (int v=0; v<nvoi; v++)
+	    strain_ave[v] += strain_aux[v];
+	}
+      }
+    }
   }
 
   for (int v=0; v<nvoi; v++)
