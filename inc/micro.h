@@ -6,6 +6,8 @@
 #define MAX_MATS      10
 #define MAX_GP_VARS   10
 
+#define glo_elem3D(ex,ey,ez) ((ez)*(nx-1)*(ny-1) + (ey)*(nx-1) + (ex))
+
 struct micro_gauss_point_t {
   int micro_gp;
   double *int_vars;
@@ -68,7 +70,7 @@ class Problem {
     bool flag_print_wrapper;
 
     Problem (int dim, int size[3], int cg_its, double cg_tol);
-    Problem (int dim, int size[3], int micro_type, double *micro_params, int numMaterials, int *mat_types, double *params);
+    Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
 
     void loc_hom_Stress (double *MacroStrain, double *MacroStress);

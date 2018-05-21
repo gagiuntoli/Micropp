@@ -38,8 +38,11 @@ int main (int argc, char *argv[])
     size[2] = nz;
 
     int micro_type = 0; // 2 materiales matriz y fibra (3D esfera en matriz)
-    double micro_params[1]; 
-    micro_params[0] = 0.2; // radio de la esfera
+    double micro_params[4]; 
+    micro_params[0] = 1.0; // lx
+    micro_params[1] = 1.0; // ly
+    micro_params[2] = 1.0; // lz
+    micro_params[3] = 0.2; // radio de la esfera
 
     int types[2]; // dos materiales lineales (type = 0)
     types[0] = 0;
@@ -52,12 +55,13 @@ int main (int argc, char *argv[])
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
 
-    Problem micro (dim, size, micro_type, micro_params, 2, types, params);
+    Problem micro (dim, size, micro_type, micro_params, types, params);
 
-//    micro.setDisp(eps);
-//    micro.newtonRaphson ();
+    micro.setDisp(eps);
+    micro.newtonRaphson ();
 
-//    micro.writeVtu (1, 2);
+    micro.calcDistributions();
+    micro.writeVtu (1, 2);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

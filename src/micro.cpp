@@ -66,9 +66,48 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   return;
 }
 
-Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, int numMaterials, int *mat_types, double *params)
+Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params)
 {
   lx = 1.0; ly = 1.0; lz = 1.0;
+
+  this->micro_type = micro_type;
+
+  int nParams;
+  if (micro_type == 0) {
+    // mat 1 = matrix
+    // mat 2 = sphere
+    numMaterials = 2;
+    nParams = 4;
+  }
+
+  for (int i=0; i<nParams; i++) {
+    this->micro_params[i] = micro_params[i];
+  }
+  lx = micro_params[0];
+  ly = micro_params[1];
+  lz = micro_params[2];
+
+  for (int i=0; i<numMaterials; i++) {
+    if (mat_types[i] == 0) {
+      // lineal
+      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
+      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
+      material_list[i].plasticity = false;
+      material_list[i].damage     = false;
+    } else if (mat_types[i] == 1) {
+      // lineal con plasticidad
+      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
+      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
+      material_list[i].plasticity = true;
+      material_list[i].damage     = false;
+    } else if (mat_types[i] == 2) {
+      // lineal con daño
+      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
+      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
+      material_list[i].plasticity = false;
+      material_list[i].damage     = true;
+    }
+  }
 
   solver.max_its = 1000;
   solver.min_tol = 1.0e-8;
@@ -104,45 +143,23 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   strain = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_type = (int*)malloc(nelem*sizeof(int));
 
-  this->micro_type = micro_type;
-  this->numMaterials = numMaterials;
-
-  int nParams;
-  if (micro_type == 0) {
-   nParams = 1;
-  }
-  for (int i=0; i<nParams; i++) {
-    this->micro_params[i] = micro_params[i];
-  }
-
-  for (int i=0; i<numMaterials; i++) {
-    if (mat_types[i] == 0) {
-      // el lineal
-      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
-      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
-      material_list[i].plasticity = false;
-      material_list[i].damage     = false;
-    } else if (mat_types[i] == 1) {
-      // el lineal con plasticidad
-      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
-      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
-      material_list[i].plasticity = true;
-      material_list[i].damage     = false;
-    } else if (mat_types[i] == 2) {
-      // el lineal con plasticidad
-      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
-      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
-      material_list[i].plasticity = false;
-      material_list[i].damage     = true;
-    }
-
-  }
 
   for (int i=0; i<nn*dim; i++)
     u[i] = 0.0;
 
-  for (int e=0; e<nelem; e++)
-    elem_type[e] = getElemType(e);
+  if (dim == 2) {
+    for (int e=0; e<nelem; e++)
+      elem_type[e] = getElemType(e);
+  } else {
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	for (int ez=0; ez<nz-1; ez++) {
+	  int e = glo_elem3D(ex,ey,ez);
+	  elem_type[e] = getElemType(ex,ey,ez);
+	}
+      }
+    }
+  }
 
   NewRap_Its = 3;
   NewRap_Tol = 1.0e-5;
@@ -181,12 +198,21 @@ int Problem::getElemType (int e)
 
 int Problem::getElemType (int ex, int ey, int ez)
 {
-  if (distance(ex, ey, ez) < 0.2) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-  return -1;
+  if (micro_type == 0) {
+    // esfera en matriz
+    double x1 = ex*dx + dx/2;
+    double y1 = ey*dx + dy/2;
+    double z1 = ez*dx + dz/2;
+    double x2 = lx/2;
+    double y2 = ly/2;
+    double z2 = lz/2;
+    double rad = micro_params[3];
+    if ( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1) < rad*rad )
+      return 1;
+    else 
+      return 0;
 
+  } else if (micro_type == 1) {
+
+  }
 }
