@@ -47,13 +47,6 @@ Problem::Problem (int dim, int size[3], int cg_its, double cg_tol)
   for (int e=0; e<nelem; e++)
     elem_type[e] = getElemType(e);
 
-  flag_print_A = false;
-  flag_print_b = false;
-  flag_print_u = false;
-  flag_print_du = false;
-  flag_print_newton = false;
-  flag_print_solver = false;
-
   NewRap_Its = 3;
   NewRap_Tol = 1.0e-5;
 

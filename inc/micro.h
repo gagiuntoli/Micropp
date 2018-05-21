@@ -61,14 +61,6 @@ class Problem {
     double *du;
     double *b;
 
-    bool flag_print_A;
-    bool flag_print_b;
-    bool flag_print_u;
-    bool flag_print_du;
-    bool flag_print_newton;
-    bool flag_print_solver;
-    bool flag_print_wrapper;
-
     Problem (int dim, int size[3], int cg_its, double cg_tol);
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);

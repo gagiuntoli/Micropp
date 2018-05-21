@@ -11,11 +11,6 @@ int main (int argc, char *argv[])
 
   try {
 
-    bool flag_print_A=false;
-    bool flag_print_b=false;
-    bool flag_print_u=false;
-    bool flag_print_du=false;
-
     options_description desc{"Options"};
     desc.add_options()
       ("help,h", "Help screen")
@@ -25,10 +20,6 @@ int main (int argc, char *argv[])
       ("nz", value<int>()->default_value(1) , "Num of Nodes in Z dir")
       ("cg_its", value<int>()->default_value(1000)    , "Max Number of iterations (CG)")
       ("cg_tol", value<double>()->default_value(1e-8) , "Minimun Tolerance (CG)")
-      ("print_A", bool_switch(&flag_print_A), "Print ELL Matrix")
-      ("print_b", bool_switch(&flag_print_b), "Print RHS b")
-      ("print_u", bool_switch(&flag_print_u), "Print Solution u")
-      ("print_du", bool_switch(&flag_print_du), "Print Increment du")
       ("dim", value<int>()->default_value(2), "Dimension");
 
     variables_map vm;
@@ -54,13 +45,6 @@ int main (int argc, char *argv[])
     double start, end, t_lap;
     Problem micro (dim, size, cg_its, cg_tol);
 
-    micro.flag_print_A = flag_print_A;
-    micro.flag_print_b = flag_print_b;
-    micro.flag_print_u = flag_print_u;
-    micro.flag_print_du = flag_print_du;
-
-    for (int i=0; i<2; i++) {
-
     // test localization and homogenization of stress
     double stress_mac[6];
     start = clock();
@@ -83,7 +67,6 @@ int main (int argc, char *argv[])
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time calc MacroCtan: " << t_lap << endl;
-    }
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;
