@@ -76,7 +76,7 @@ class Problem {
     void solve (void);
     void newtonRaphson (void);
 
-    void getElemental_A (int e, double (&Ae)[3*8*3*8]);
+    void getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4]);
     void getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
 
     double distance (int e);

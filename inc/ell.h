@@ -35,8 +35,8 @@ void ell_free (ell_matrix &m);
 
 void ell_mvp_2D (ell_matrix *m, double *x, double *y);
 
-void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny);
-void ell_add_3D (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz);
+void ell_add_struct (ell_matrix &m, int ex, int ey, double *Ae, int nFields, int nx, int ny);
+void ell_add_struct (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz);
 
 void ell_init_2D (ell_matrix &m, int nFields, int nx, int ny);
 

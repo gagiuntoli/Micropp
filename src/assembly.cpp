@@ -314,17 +314,18 @@ double Problem::Assembly_b (void)
 void Problem::Assembly_A (void)
 {
   int index[8];
-  double Ae[3*8*3*8];
 
   ell_set_zero_mat(&A);
 
   if (dim == 2) {
 
-    for (int e=0; e<nelem; e++) {
-      getElemental_A (e, Ae);
-      ell_add_2D (A, e, Ae, dim, nx, ny);
+    for (int ex=0; ex<nx-1; ex++) {
+      for (int ey=0; ey<ny-1; ey++) {
+	double Ae[2*4*2*4];
+	getElemental_A (ex, ey, Ae);
+	ell_add_struct (A, ex, ey, Ae, dim, nx, ny);
+      }
     }
-
     ell_set_bc_2D (A, dim, nx, ny);
 
   } else if (dim == 3) {
@@ -332,8 +333,9 @@ void Problem::Assembly_A (void)
     for (int ex=0; ex<nx-1; ex++) {
       for (int ey=0; ey<ny-1; ey++) {
 	for (int ez=0; ez<nz-1; ez++) {
+	  double Ae[3*8*3*8];
 	  getElemental_A (ex, ey, ez, Ae);
-	  ell_add_3D (A, ex, ey, ez, Ae, dim, nx, ny, nz);
+	  ell_add_struct (A, ex, ey, ez, Ae, dim, nx, ny, nz);
 	}
       }
     }
@@ -342,17 +344,32 @@ void Problem::Assembly_A (void)
   //  ell_print (&A);
 }
 
-void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
+void Problem::getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4])
 {
   
-  double nu = 0.3, E;
+  double nu, E;
   double ctan[3][3];
 
-  if (elem_type[e] == 0) {
-    E  = 1.0e6;
-  } else {
-    E  = 1.0e7;
+  int e = glo_elem3D(ex,ey,0);
+
+  if (micro_type == 0) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
+  } else if (micro_type == 1) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
   }
+
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
   ctan[2][0]=0     ; ctan[2][1]=0     ; ctan[2][2]=(1-2*nu)/2;

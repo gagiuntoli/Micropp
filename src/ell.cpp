@@ -293,7 +293,7 @@ int ell_print (ell_matrix * m)
   return 0;
 }
 
-void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny)
+void ell_add_struct (ell_matrix &m, int ex, int ey, double *Ae, int nFields, int nx, int ny)
 {
   // assembly Ae in 2D structured grid representation
   // nFields : number of scalar components on each node
@@ -305,13 +305,10 @@ void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny)
   int cols_row_2[4] = {0,1,4,3};
   int cols_row_3[4] = {1,2,5,4};
 
-  int xfactor = e%(nx-1);
-  int yfactor = e/(ny-1);
-
-  int n0 = yfactor     * nx + xfactor     ;
-  int n1 = yfactor     * nx + xfactor + 1 ;
-  int n2 = (yfactor+1) * nx + xfactor + 1 ;
-  int n3 = (yfactor+1) * nx + xfactor     ;
+  int n0 = ey * nx     + ex;
+  int n1 = ey * nx     + ex + 1;
+  int n2 = (ey+1) * nx + ex + 1;
+  int n3 = (ey+1) * nx + ex;
 
   for (int i=0; i<nFields; i++) {
     for (int n=0; n<npe; n++) {
@@ -326,7 +323,7 @@ void ell_add_2D (ell_matrix &m, int e, double *Ae, int nFields, int nx, int ny)
 
 }
 
-void ell_add_3D (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz)
+void ell_add_struct (ell_matrix &m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz)
 {
   // assembly Ae in 3D structured grid representation
   // nFields : number of scalar components on each node
