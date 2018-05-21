@@ -404,15 +404,20 @@ void Problem::getElemental_A (int e, double (&Ae)[3*8*3*8])
 
 void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
 {
-  double nu = 0.3, E;
+  double nu, E;
   double ctan[6][6];
 
-  int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+  int e = glo_elem3D(ex,ey,ez);
 
-  if (elem_type[e] == 0) {
-    E  = 1.0e6;
-  } else {
-    E  = 1.0e7;
+  if (micro_type == 0) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
+  } else if (micro_type == 1) {
   }
 
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
@@ -725,16 +730,21 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
   double nu = 0.3, E;
   double ctan[6][6];
 
-  int e = ez*(nx-1)*(ny-1) + ey*(nx-1) + ex;
+  int e = glo_elem3D(ex,ey,ez);
+
+  if (micro_type == 0) {
+    if (elem_type[e] == 0) {
+      E  = material_list[0].E;
+      nu = material_list[0].nu;
+    } else {
+      E  = material_list[1].E;
+      nu = material_list[1].nu;
+    }
+  } else if (micro_type == 1) {
+  }
 
   double strain_gp[6];
   getStrain (ex, ey, ez, gp, strain_gp);
-
-  if (elem_type[e] == 0) {
-    E  = 1.0e6;
-  } else {
-    E  = 1.0e7;
-  }
 
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu      ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu      ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
