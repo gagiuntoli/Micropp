@@ -87,9 +87,6 @@ class Problem {
     void getStress (int ex, int ey, int gp, double *stress_gp);
     void getStress (int ex, int ey, int ez, int gp, double *stress_gp);
 
-    void getStress_mat1 (double *int_vars, double *strain, double *stress);
-    void getStress_mat2 (double *int_vars, double *strain, double *stress);
-
     void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);
 

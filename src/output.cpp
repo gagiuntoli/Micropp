@@ -70,8 +70,8 @@ void Problem::writeVtu (int time_step, int elem)
   if (dim == 2) {
     for (int j=0; j<ny; j++) {
       for (int i=0; i<nx; i++) {
-	x = j * dx;
-	y = i * dy;
+	x = i * dx;
+	y = j * dy;
 	file << x << " " << y << " "  << "0.0" << endl;
       }
     }
