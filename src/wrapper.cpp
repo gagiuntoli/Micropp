@@ -13,18 +13,18 @@ extern "C"
     micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
   }
 
-  void micro_loc_hom_stress_(double *MacroStrain, double *MacroStress)
+  void micro_loc_hom_stress_(int *macroGp_id, double *MacroStrain, double *MacroStress)
   {
-    micro->loc_hom_Stress(MacroStrain, MacroStress); 
+    micro->loc_hom_Stress(*macroGp_id, MacroStrain, MacroStress); 
   }
 
-  void micro_loc_hom_ctan_(double *MacroStrain, double *MacroCtan)
+  void micro_loc_hom_ctan_(int *macroGp_id, double *MacroStrain, double *MacroCtan)
   {
-    micro->loc_hom_Ctan(MacroStrain, MacroCtan); 
+    micro->loc_hom_Ctan(*macroGp_id, MacroStrain, MacroCtan); 
   }
 
-  void micro_output_(int *time_step, int *elem, int *macro_gp_global, double *MacroStrain)
+  void micro_output_(int *time_step, int *elem, int *macroGp_id, double *MacroStrain)
   {
-    micro->output (*time_step, *elem, *macro_gp_global, MacroStrain);
+    micro->output (*time_step, *elem, *macroGp_id, MacroStrain);
   }
 } 

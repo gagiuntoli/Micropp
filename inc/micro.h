@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 #include <list>
 #include "ell.h"
 
@@ -8,14 +9,11 @@
 
 #define glo_elem3D(ex,ey,ez) ((ez)*(nx-1)*(ny-1) + (ey)*(nx-1) + (ex))
 
-struct micro_gauss_point_t {
-  int micro_gp;
-  double *int_vars;
-};
+using namespace std;
 
-struct macro_gauss_point_t {
-  int macro_gp;
-  std::list<micro_gauss_point_t> micro_gauss_points;
+struct MacroGp_t {
+  int id;
+  double *int_vars;
 };
 
 struct material_t {
@@ -42,7 +40,7 @@ class Problem {
     double micro_params[5];
     int numMaterials;
     material_t material_list[MAX_MATS];
-    std::list<macro_gauss_point_t> macro_gauss_points;
+    std::list<MacroGp_t> MacroGp_list;
 
     double *strain; // average strain on each element
     double *stress; // average stress on each element
@@ -64,8 +62,8 @@ class Problem {
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
 
-    void loc_hom_Stress (double *MacroStrain, double *MacroStress);
-    void loc_hom_Ctan   (double *MacroStrain, double *MacroCtan);
+    void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
+    void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
 
     void setDisp (double *eps);
 

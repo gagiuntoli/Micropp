@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
     // test localization and homogenization of stress
     double stress_mac[6];
     start = clock();
-    micro.loc_hom_Stress(eps, stress_mac);
+    micro.loc_hom_Stress(1, eps, stress_mac);
     cout << "The average stress for loc-hom is : " << stress_mac[0] << " " << stress_mac[1] << " " << stress_mac[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
     // test MacroCtan calculation
     double MacroCtan[81];
     start = clock();
-    micro.loc_hom_Ctan (eps, MacroCtan);
+    micro.loc_hom_Ctan (1, eps, MacroCtan);
     cout << "MacroCtan: " << endl;
     for (int i=0; i<micro.nvoi; i++){
       for (int j=0; j<micro.nvoi; j++)

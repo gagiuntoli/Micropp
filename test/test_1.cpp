@@ -109,7 +109,7 @@ int main (int argc, char *argv[])
     // test localization and homogenization
     double stress_mac[6];
     start = clock();
-    micro.loc_hom_Stress(eps, stress_mac);
+    micro.loc_hom_Stress(1, eps, stress_mac);
     cout << "The average stress for loc-hom is : " << stress_mac[0] << " " << stress_mac[1] << " " << stress_mac[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;

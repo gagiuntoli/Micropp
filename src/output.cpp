@@ -6,17 +6,26 @@
 
 using namespace std;
 
-void Problem::output (int time_step, int elem, int macro_gp_global, double *MacroStrain)
+void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStrain)
 {
+  double *int_vars;
+
+  // search for the macro gauss point
+  std::list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+     int_vars = it->int_vars;
+     break;
+    }
+  }
+  if (it ==  MacroGp_list.end()) {
+    cout << "output.cpp : Error the macro_id " << macroGp_id << " was not found in the list for plotting." << endl; 
+  }
+
   double MacroStress[6];
-
-  // searchs for macro_gp_global
-  // ... future
-
-  loc_hom_Stress(MacroStrain, MacroStress);
+  loc_hom_Stress(macroGp_id, MacroStrain, MacroStress);
   calcDistributions();
 
-  // plots the strain, stress, and displacement fields stored now
   writeVtu(time_step, elem);
 }
 
@@ -98,7 +107,7 @@ void Problem::writeVtu (int time_step, int elem)
 	int n1 = ey*nx     + ex + 1;
 	int n2 = (ey+1)*nx + ex + 1;
 	int n3 = (ey+1)*nx + ex;
-	file<<n0<<" "<<n1<<" "<<n2<<" "<<n3<<" "<<endl;
+	file << n0 << " " << n1 << " " << n2 << " " << n3 << " " << endl;
       }
     }
   } else if (dim == 3) {
