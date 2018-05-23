@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
       << endl;
 
     micro1.calcDistributions(NULL);
-    micro1.writeVtu (1, 2);
+    micro1.writeVtu (1, 2, NULL);
 
     double eps2[6] = {0.0, 0.0, 0.0, 0.005, 0.0, 0.0};
     micro_type = 1; // 2 materiales matriz y fibra (3D 2 capas planas)
@@ -119,7 +119,7 @@ int main (int argc, char *argv[])
       << endl;
 
     micro2.calcDistributions(NULL);
-    micro2.writeVtu (2, 2);
+    micro2.writeVtu (2, 2, NULL);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

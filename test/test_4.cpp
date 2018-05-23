@@ -85,7 +85,7 @@ int main (int argc, char *argv[])
     cout << "Residual norm = " << norm << endl;
 
     micro.calcDistributions(NULL);
-    micro.writeVtu (1, 2);
+    micro.writeVtu (1, 2, NULL);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

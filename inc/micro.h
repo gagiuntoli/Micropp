@@ -99,7 +99,7 @@ class Problem {
     void calcAverageStress (double *int_vars, double stress_ave[6]);
     void calcAverageStrain (double strain_ave[6]);
 
-    void writeVtu (int time_step, int elem) ;
+    void writeVtu (int time_step, int elem, double *int_vars);
     void output (int time_step, int elem, int macro_gp_global, double *MacroStrain);
 
 };

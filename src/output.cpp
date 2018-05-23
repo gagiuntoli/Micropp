@@ -26,46 +26,16 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
   loc_hom_Stress(macroGp_id, MacroStrain, MacroStress);
   calcDistributions(int_vars);
 
-  writeVtu(time_step, elem);
+  writeVtu(time_step, elem, int_vars);
 }
 
-void Problem::writeVtu (int time_step, int elem)
+void Problem::writeVtu (int time_step, int elem, double *int_vars)
 {
-  std::stringstream fname_pvtu_s, fname_vtu_s;;
-  fname_pvtu_s << "micropp_" << elem << "_" << time_step << ".pvtu";
+  std::stringstream fname_vtu_s;
   fname_vtu_s  << "micropp_" << elem << "_" << time_step << ".vtu";
-  std::string fname_pvtu = fname_pvtu_s.str();
   std::string fname_vtu  = fname_vtu_s.str();
 
   ofstream file;
-  file.open (fname_pvtu);
-
-  file 
-    << "<?xml version=\"1.0\"?>" << endl
-    << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl
-    << "<PUnstructuredGrid GhostLevel=\"0\">" << endl
-    << "<PPoints>"  << endl
-    << "<PDataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\"/>"   << endl
-    << "</PPoints>" << endl
-    << "<PCells>"   << endl
-    << "<PDataArray type=\"Int32\" Name=\"connectivity\" NumberOfComponents=\"1\"/>" << endl
-    << "<PDataArray type=\"Int32\" Name=\"offsets\"      NumberOfComponents=\"1\"/>" << endl
-    << "<PDataArray type=\"UInt8\" Name=\"types\"        NumberOfComponents=\"1\"/>" << endl
-    << "</PCells>"  << endl
-    << "<PPointData Vectors=\"displ\">" << endl
-    << "<PDataArray type=\"Float64\" Name=\"displ\"    NumberOfComponents=\"3\" />"  << endl
-    << "<PDataArray type=\"Float64\" Name=\"residual\" NumberOfComponents=\"3\" />"  << endl
-    << "</PPointData>" << endl
-    << "<PCellData>"   << endl
-    << "<PDataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"" << 6 << "\"/>" << endl
-    << "<PDataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"" << 6 << "\"/>"    << endl
-    << "<PDataArray type=\"Int32\"   Name=\"elem_type\" NumberOfComponents=\"1\"/>"  << endl
-    << "</PCellData>"  << endl
-    << "<Piece Source=\"" << fname_vtu << "\"/>" << endl
-    << "</PUnstructuredGrid>" << endl
-    << "</VTKFile>" << endl;
-  file.close();
-
   file.open (fname_vtu);
   file
       << "<?xml version=\"1.0\"?>" << endl
