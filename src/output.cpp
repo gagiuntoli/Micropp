@@ -167,19 +167,19 @@ void Problem::writeVtu (int time_step, int elem, double *int_vars)
   }
   file << endl << "</DataArray>" << endl;
 
-  file << "<DataArray type=\"Int32\" Name=\"plasticity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+  file << "<DataArray type=\"Float64\" Name=\"plasticity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     double plasticity = 0.0;
     if (int_vars != NULL) {
       if (dim == 3) {
 	for (int gp=0; gp<8; gp++) {
 	  plasticity += sqrt( \
-	        int_vars[intvar_ix(e,gp) + 0] * int_vars[intvar_ix(e,gp) + 0]  + \
-	        int_vars[intvar_ix(e,gp) + 1] * int_vars[intvar_ix(e,gp) + 1]  + \
-	        int_vars[intvar_ix(e,gp) + 2] * int_vars[intvar_ix(e,gp) + 2]  + \
-	      2*int_vars[intvar_ix(e,gp) + 3] * int_vars[intvar_ix(e,gp) + 3]  + \
-	      2*int_vars[intvar_ix(e,gp) + 4] * int_vars[intvar_ix(e,gp) + 4]  + \
-	      2*int_vars[intvar_ix(e,gp) + 5] * int_vars[intvar_ix(e,gp) + 5]);
+	        int_vars[intvar_ix(e, gp, 0)] * int_vars[intvar_ix(e, gp, 0)]  + \
+	        int_vars[intvar_ix(e, gp, 1)] * int_vars[intvar_ix(e, gp, 1)]  + \
+	        int_vars[intvar_ix(e, gp, 2)] * int_vars[intvar_ix(e, gp, 2)]  + \
+	      2*int_vars[intvar_ix(e, gp, 3)] * int_vars[intvar_ix(e, gp, 3)]  + \
+	      2*int_vars[intvar_ix(e, gp, 4)] * int_vars[intvar_ix(e, gp, 4)]  + \
+	      2*int_vars[intvar_ix(e, gp, 5)] * int_vars[intvar_ix(e, gp, 5)]);
 	}
       }
     }
@@ -187,13 +187,13 @@ void Problem::writeVtu (int time_step, int elem, double *int_vars)
   }
   file << endl << "</DataArray>" << endl;
 
-  file << "<DataArray type=\"Int32\" Name=\"hardening\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+  file << "<DataArray type=\"Float64\" Name=\"hardening\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     double hardening = 0.0;
     if (int_vars != NULL) {
       if (dim == 3) {
 	for (int gp=0; gp<8; gp++) {
-	  hardening += int_vars[intvar_ix(e,gp) + 6];
+	  hardening += int_vars[intvar_ix(e, gp, 6)];
 	}
       }
     }

@@ -14,7 +14,7 @@ void Problem::solve (void)
   }
 }
 
-void Problem::newtonRaphson (double *int_vars)
+void Problem::newtonRaphson (double **int_vars)
 {
   int its = 0;
   double tol;

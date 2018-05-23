@@ -159,7 +159,7 @@ void Problem::setDisp (double *eps)
   }
 }
 
-double Problem::Assembly_b (double *int_vars)
+double Problem::Assembly_b (double **int_vars)
 {
   int index[3*8];
   int n0, n1, n2, n3, n4, n5, n6, n7;
@@ -497,7 +497,7 @@ void Problem::calc_bmat_3D (int gp, double bmat[6][3*8]) {
 
 }
 
-void Problem::getElemental_b (int ex, int ey, double *int_vars, double (&be)[2*4])
+void Problem::getElemental_b (int ex, int ey, double **int_vars, double (&be)[2*4])
 {
   double dsh[4][2], bmat[3][2*4], cxb[3][8], stress_gp[6];
   double xg[4][2] = {
@@ -522,7 +522,7 @@ void Problem::getElemental_b (int ex, int ey, double *int_vars, double (&be)[2*4
       bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim+1] = dsh[i][0];
     }
 
-    getStress (ex, ey, gp, &int_vars, stress_gp);
+    getStress (ex, ey, gp, int_vars, stress_gp);
 
     double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++) {
@@ -534,7 +534,7 @@ void Problem::getElemental_b (int ex, int ey, double *int_vars, double (&be)[2*4
   } // gp loop
 }
 
-void Problem::getElemental_b (int ex, int ey, int ez, double *int_vars, double (&be)[3*8])
+void Problem::getElemental_b (int ex, int ey, int ez, double **int_vars, double (&be)[3*8])
 {
   double bmat[6][3*8], cxb[6][3*8], stress_gp[6];
 
@@ -544,7 +544,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, double *int_vars, double (
   for (int gp=0; gp<8; gp++) {
 
     calc_bmat_3D (gp, bmat);
-    getStress (ex, ey, ez, gp, &int_vars, stress_gp);
+    getStress (ex, ey, ez, gp, int_vars, stress_gp);
 
     double wg = (1/8.0)*dx*dy*dz;
     for (int i=0; i<npe*dim; i++)
@@ -813,8 +813,8 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
       alpha_1 = 0.0;
     } else {
       for (int i=0; i<6; i++)
-	eps_p_1[i] = (*int_vars)[intvar_ix(e,gp) + i];
-      alpha_1 = (*int_vars)[intvar_ix(e,gp) + 6];
+	eps_p_1[i] = (*int_vars)[intvar_ix(e, gp, i)];
+      alpha_1 = (*int_vars)[intvar_ix(e, gp, 6)];
     }
 
     for (int i=0; i<6; i++)
@@ -875,6 +875,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i];
+      alpha = alpha_1;
     }
 
     //sig_2   = K * tr(eps) * 1 + s_trial - 2*mu*dl*normal;
@@ -887,8 +888,8 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 
     if (*int_vars != NULL) {
       for (int i=0; i<6; i++)
-	(*int_vars)[intvar_ix(e,gp) + i] = eps_p[i];
-      (*int_vars)[intvar_ix(e,gp) + 6] = alpha;
+	(*int_vars)[intvar_ix(e, gp, i)] = eps_p[i];
+      (*int_vars)[intvar_ix(e, gp, 6)] = alpha;
     }
 
   } else {
