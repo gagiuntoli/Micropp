@@ -19,6 +19,8 @@ struct MacroGp_t {
 struct material_t {
   double E;
   double nu;
+  double k;
+  double mu;
   bool plasticity;
   bool damage;
 };
@@ -27,10 +29,7 @@ class Problem {
 
   public:
 
-    int npe;
-    int dim;
-    int nvoi;
-
+    int dim, npe, nvoi;
     int nx, ny, nz, nn; 
     double lx, ly, lz, dx, dy, dz;
     int nelem;
@@ -55,9 +54,7 @@ class Problem {
 
     ell_matrix A;
     ell_solver solver;
-    double *u;
-    double *du;
-    double *b;
+    double *u, *du, *b;
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
@@ -90,6 +87,7 @@ class Problem {
 
     int getElemType (int ex, int ey);
     int getElemType (int ex, int ey, int ez);
+    void getMaterial (int e, material_t &material);
 
     void calc_bmat_3D (int gp, double bmat[6][3*8]);
 

@@ -351,26 +351,16 @@ void Problem::getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4])
   
   double nu, E;
   double ctan[3][3];
+  bool plasticity;
 
   int e = glo_elem3D(ex,ey,0);
 
-  if (micro_type == 0) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  } else if (micro_type == 1) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  }
+  material_t material;
+  getMaterial(e, material);
+
+  E  = material.E;
+  nu = material.nu;
+  plasticity = material.plasticity;
 
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
@@ -425,26 +415,16 @@ void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
 {
   double nu, E;
   double ctan[6][6];
+  bool plasticity;
 
   int e = glo_elem3D(ex,ey,ez);
 
-  if (micro_type == 0) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  } else if (micro_type == 1) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  }
+  material_t material;
+  getMaterial(e, material);
+
+  E  = material.E;
+  nu = material.nu;
+  plasticity = material.plasticity;
 
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu    ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
@@ -774,26 +754,16 @@ void Problem::getStress (int ex, int ey, int gp, double *stress_gp)
 
   double nu, E;
   double ctan[3][3];
+  bool plasticity;
 
   int e = glo_elem3D(ex,ey,0);
 
-  if (micro_type == 0) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  } else if (micro_type == 1) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  }
+  material_t material;
+  getMaterial(e, material);
+
+  E  = material.E;
+  nu = material.nu;
+  plasticity = material.plasticity;
 
   ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=0;
   ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=0;
@@ -813,50 +783,70 @@ void Problem::getStress (int ex, int ey, int gp, double *stress_gp)
 
 void Problem::getStress (int ex, int ey, int ez, int gp, double *stress_gp)
 {
-  double nu = 0.3, E;
+  double nu, E;
   double ctan[6][6];
+  bool plasticity;
 
   int e = glo_elem3D(ex,ey,ez);
 
-  if (micro_type == 0) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  } else if (micro_type == 1) {
-    if (elem_type[e] == 0) {
-      E  = material_list[0].E;
-      nu = material_list[0].nu;
-    } else {
-      E  = material_list[1].E;
-      nu = material_list[1].nu;
-    }
-  }
+  material_t material;
+  getMaterial(e, material);
+
+  E  = material.E;
+  nu = material.nu;
+  plasticity = material.plasticity;
 
   double strain_gp[6];
   getStrain (ex, ey, ez, gp, strain_gp);
 
-  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu      ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
-  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu      ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
-  ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu)  ; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
-  ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0       ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
-  ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0       ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
-  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0       ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+  if (plasticity == true) {
 
-  for (int i=0; i<nvoi; i++)
-    for (int j=0; j<nvoi; j++)
-      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+  } else {
 
-  for (int i=0; i<nvoi; i++) {
-    stress_gp[i] = 0.0;
-    for (int j=0; j<nvoi; j++) {
-      stress_gp[i] += ctan[i][j] * strain_gp[j];
+    ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu      ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
+    ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu      ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
+    ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu)  ; ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
+    ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0       ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
+    ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0       ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
+    ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0       ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+
+    for (int i=0; i<nvoi; i++)
+      for (int j=0; j<nvoi; j++)
+	ctan[i][j] *= E/((1+nu)*(1-2*nu));
+
+    for (int i=0; i<nvoi; i++) {
+      stress_gp[i] = 0.0;
+      for (int j=0; j<nvoi; j++) {
+	stress_gp[i] += ctan[i][j] * strain_gp[j];
+      }
     }
   }
 
+}
+
+void Problem::getMaterial (int e, material_t &material) {
+
+  if (micro_type == 0) {
+    if (elem_type[e] == 0) {
+      material.E  = material_list[0].E;
+      material.nu = material_list[0].nu;
+      material.plasticity = material_list[0].plasticity;
+    } else {
+      material.E  = material_list[1].E;
+      material.nu = material_list[1].nu;
+      material.plasticity = material_list[1].plasticity;
+    }
+  } else if (micro_type == 1) {
+    if (elem_type[e] == 0) {
+      material.E  = material_list[0].E;
+      material.nu = material_list[0].nu;
+      material.plasticity = material_list[0].plasticity;
+    } else {
+      material.E  = material_list[1].E;
+      material.nu = material_list[1].nu;
+      material.plasticity = material_list[0].plasticity;
+    }
+  }
 }
 
 void Problem::getStrain (int ex, int ey, int gp, double *strain_gp)

@@ -27,22 +27,18 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   lz = micro_params[2];
 
   for (int i=0; i<numMaterials; i++) {
+    material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
+    material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
     if (mat_types[i] == 0) {
       // lineal
-      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
-      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
       material_list[i].plasticity = false;
       material_list[i].damage     = false;
     } else if (mat_types[i] == 1) {
-      // lineal con plasticidad
-      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
-      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
+      // con plasticidad
       material_list[i].plasticity = true;
       material_list[i].damage     = false;
     } else if (mat_types[i] == 2) {
-      // lineal con daño
-      material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
-      material_list[i].nu = params[i*MAX_MAT_PARAM + 1];
+      // con daño
       material_list[i].plasticity = false;
       material_list[i].damage     = true;
     }

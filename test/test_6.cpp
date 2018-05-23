@@ -44,9 +44,9 @@ int main (int argc, char *argv[])
     micro_params[2] = 1.0; // lz
     micro_params[3] = 0.2; // radio de la esfera
 
-    int types[2]; // dos materiales lineales (type = 0)
-    types[0] = 0;
-    types[1] = 0;
+    int mat_types[2]; // dos materiales lineales (type = 0)
+    mat_types[0] = 0;
+    mat_types[1] = 0;
 
     double params[2*MAX_MAT_PARAM];
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
@@ -55,7 +55,7 @@ int main (int argc, char *argv[])
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
 
-    Problem micro1 (dim, size, micro_type, micro_params, types, params);
+    Problem micro1 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro1.setDisp(eps1);
     micro1.newtonRaphson ();
@@ -85,8 +85,8 @@ int main (int argc, char *argv[])
     micro_params[2] = 1.0; // lz
     micro_params[3] = 0.2; // espesor de la capa 0
 
-    types[0] = 0;
-    types[1] = 0;
+    mat_types[0] = 0;
+    mat_types[1] = 0;
 
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
     params[0*MAX_MAT_PARAM + 1] = 0.3;
@@ -94,7 +94,7 @@ int main (int argc, char *argv[])
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
 
-    Problem micro2 (dim, size, micro_type, micro_params, types, params);
+    Problem micro2 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro2.setDisp(eps2);
     micro2.newtonRaphson ();
