@@ -9,6 +9,7 @@
 #define INT_VARS_GP   7  // eps_p_1, alpha_1
 
 #define glo_elem3D(ex,ey,ez) ((ez)*(nx-1)*(ny-1) + (ey)*(nx-1) + (ex))
+#define intvar_ix(e,gp) ((e)*8*INT_VARS_GP)
 
 using namespace std;
 
@@ -18,10 +19,15 @@ struct MacroGp_t {
 };
 
 struct material_t {
+  // normal
   double E;
   double nu;
+  // plasticity
   double k;
   double mu;
+  double K_alpha; 
+  double Sy;
+  // flags
   bool plasticity;
   bool damage;
 };
@@ -80,8 +86,8 @@ class Problem {
     void getStrain (int ex, int ey, int gp, double *strain_gp);
     void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
 
-    void getStress (int ex, int ey, int gp, double *int_vars, double *stress_gp);
-    void getStress (int ex, int ey, int ez, int gp, double *int_vars, double *stress_gp);
+    void getStress (int ex, int ey, int gp, double **int_vars, double *stress_gp);
+    void getStress (int ex, int ey, int ez, int gp, double **int_vars, double *stress_gp);
 
     void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);
