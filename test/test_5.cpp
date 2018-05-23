@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
     Problem micro1 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro1.setDisp(eps1);
-    micro1.newtonRaphson(NULL);
+    micro1.newtonRaphson(NULL, false);
 
     double stress_ave[6];
     micro1.calcAverageStress(NULL, stress_ave);
@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
     Problem micro2 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro2.setDisp(eps2);
-    micro2.newtonRaphson(NULL);
+    micro2.newtonRaphson(NULL, false);
 
     micro2.calcAverageStress(NULL, stress_ave);
     cout 

@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
     double eps[3] = {0.005, 0.0, 0.0};
     micro.setDisp(eps);
     micro.Assembly_A();
-    micro.Assembly_b(NULL);
+    micro.Assembly_b(NULL, false);
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time assembly : " << t_lap << endl;
@@ -80,7 +80,7 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time solve : " << t_lap << endl;
 
-    micro.newtonRaphson(NULL);
+    micro.newtonRaphson(NULL, false);
 
     // calc average
     start = clock();

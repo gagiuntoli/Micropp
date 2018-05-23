@@ -3,6 +3,7 @@
 void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *MacroStress)
 {
   double **int_vars;
+  bool write_int_vars = false;
 
   // search for the macro gauss point, if not found just create and insert
   std::list<MacroGp_t>::iterator it;
@@ -22,8 +23,9 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
     int_vars = &macroGp_new.int_vars;
   }
 
+  write_int_vars = true;
   setDisp(MacroStrain);
-  newtonRaphson(int_vars);
+  newtonRaphson(int_vars, write_int_vars);
 
   double stress_ave[6];
   calcAverageStress(*int_vars, stress_ave);
@@ -44,10 +46,6 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
     }
   }
   if (it ==  MacroGp_list.end()) {
-    MacroGp_t macroGp_new;
-    macroGp_new.id = macroGp_id;
-    macroGp_new.int_vars = NULL;
-    MacroGp_list.push_back(macroGp_new);
     int_vars = NULL;
   }
 
@@ -56,8 +54,9 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   // calculate Stress_0 
 
+  double write_int_vars = false;
   setDisp(MacroStrain);
-  newtonRaphson(int_vars);
+  newtonRaphson(int_vars, write_int_vars);
 
   double stress_ave[6];
   calcAverageStress(*int_vars, stress_ave);
@@ -74,7 +73,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
     Strain_pert[i] += delta_Strain; // we pertubate only one direction
 
     setDisp(Strain_pert);
-    newtonRaphson(int_vars);
+    newtonRaphson(int_vars, write_int_vars);
     calcAverageStress(*int_vars, stress_ave);
     for (int v=0; v<nvoi; v++)
       MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;

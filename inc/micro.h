@@ -69,22 +69,22 @@ class Problem {
     void setDisp (double *eps);
 
     void Assembly_A (void);
-    double Assembly_b (double **int_vars);
+    double Assembly_b (double **int_vars, bool write_int_vars);
 
     void solve (void);
-    void newtonRaphson (double **int_vars);
+    void newtonRaphson (double **int_vars, bool write_int_vars);
 
     void getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4]);
     void getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
 
-    void getElemental_b (int ex, int ey, double **int_vars, double (&be)[2*4]);
-    void getElemental_b (int ex, int ey, int ez, double **int_vars, double (&be)[3*8]);
+    void getElemental_b (int ex, int ey, double **int_vars, bool write_int_vars, double (&be)[2*4]);
+    void getElemental_b (int ex, int ey, int ez, double **int_vars, bool write_int_vars, double (&be)[3*8]);
 
     void getStrain (int ex, int ey, int gp, double *strain_gp);
     void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
 
-    void getStress (int ex, int ey, int gp, double **int_vars, double *stress_gp);
-    void getStress (int ex, int ey, int ez, int gp, double **int_vars, double *stress_gp);
+    void getStress (int ex, int ey, int gp, double **int_vars, bool write_int_vars, double *stress_gp);
+    void getStress (int ex, int ey, int ez, int gp, double **int_vars, bool write_int_vars, double *stress_gp);
 
     void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);

@@ -159,7 +159,7 @@ void Problem::setDisp (double *eps)
   }
 }
 
-double Problem::Assembly_b (double **int_vars)
+double Problem::Assembly_b (double **int_vars, bool write_int_vars)
 {
   int index[3*8];
   int n0, n1, n2, n3, n4, n5, n6, n7;
@@ -185,7 +185,7 @@ double Problem::Assembly_b (double **int_vars)
 	index[4] = n2*dim; index[5] = n2*dim + 1;
 	index[6] = n3*dim; index[7] = n3*dim + 1;
 
-	getElemental_b (ex, ey, int_vars, be);
+	getElemental_b (ex, ey, int_vars, write_int_vars, be);
 
 	for (int i=0; i<npe*dim; i++)
 	  b[index[i]] += be[i]; // assembly
@@ -241,7 +241,7 @@ double Problem::Assembly_b (double **int_vars)
 	    index[7*dim + d] = n7*dim + d;
 	  }
 
-	  getElemental_b (ex, ey, ez, int_vars, be);
+	  getElemental_b (ex, ey, ez, int_vars, write_int_vars, be);
 
 	  for (int i=0; i<npe*dim; i++)
 	    b[index[i]] += be[i];
@@ -497,7 +497,7 @@ void Problem::calc_bmat_3D (int gp, double bmat[6][3*8]) {
 
 }
 
-void Problem::getElemental_b (int ex, int ey, double **int_vars, double (&be)[2*4])
+void Problem::getElemental_b (int ex, int ey, double **int_vars, bool write_int_vars, double (&be)[2*4])
 {
   double dsh[4][2], bmat[3][2*4], cxb[3][8], stress_gp[6];
   double xg[4][2] = {
@@ -522,7 +522,7 @@ void Problem::getElemental_b (int ex, int ey, double **int_vars, double (&be)[2*
       bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim+1] = dsh[i][0];
     }
 
-    getStress (ex, ey, gp, int_vars, stress_gp);
+    getStress (ex, ey, gp, int_vars, write_int_vars, stress_gp);
 
     double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++) {
@@ -534,7 +534,7 @@ void Problem::getElemental_b (int ex, int ey, double **int_vars, double (&be)[2*
   } // gp loop
 }
 
-void Problem::getElemental_b (int ex, int ey, int ez, double **int_vars, double (&be)[3*8])
+void Problem::getElemental_b (int ex, int ey, int ez, double **int_vars, bool write_int_vars, double (&be)[3*8])
 {
   double bmat[6][3*8], cxb[6][3*8], stress_gp[6];
 
@@ -544,7 +544,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, double **int_vars, double 
   for (int gp=0; gp<8; gp++) {
 
     calc_bmat_3D (gp, bmat);
-    getStress (ex, ey, ez, gp, int_vars, stress_gp);
+    getStress (ex, ey, ez, gp, int_vars, write_int_vars, stress_gp);
 
     double wg = (1/8.0)*dx*dy*dz;
     for (int i=0; i<npe*dim; i++)
@@ -573,7 +573,8 @@ void Problem::calcAverageStress (double *int_vars, double stress_ave[6])
 	  double stress_gp[6];
 	  double wg = 0.25*dx*dy;
 
-	  getStress (ex, ey, gp, &int_vars, stress_gp);
+	  bool write_int_vars = false;
+	  getStress (ex, ey, gp, &int_vars, write_int_vars, stress_gp);
 	  for (int v=0; v<nvoi; v++)
 	    stress_aux[v] += stress_gp[v] * wg;
 
@@ -598,7 +599,8 @@ void Problem::calcAverageStress (double *int_vars, double stress_ave[6])
 	    double stress_gp[6];
 	    double wg = (1/8.0)*dx*dy*dz;
 
-	    getStress (ex, ey, ez, gp, &int_vars, stress_gp);
+	    bool write_int_vars = false;
+	    getStress (ex, ey, ez, gp, &int_vars, write_int_vars, stress_gp);
 	    for (int v=0; v<nvoi; v++)
 	      stress_aux[v] += stress_gp[v] * wg;
 
@@ -690,7 +692,8 @@ void Problem::calcDistributions (double *int_vars)
 	  double stress_gp[3], strain_gp[3];
 	  double wg = 0.25*dx*dy;
 
-	  getStress (ex, ey, gp, &int_vars, stress_gp);
+	  bool write_int_vars = false;
+	  getStress (ex, ey, gp, &int_vars, write_int_vars, stress_gp);
 	  getStrain (ex, ey, gp, strain_gp);
 	  for (int v=0; v<nvoi; v++) {
 	    strain_aux[v] += strain_gp[v] * wg;
@@ -725,7 +728,8 @@ void Problem::calcDistributions (double *int_vars)
 	    double stress_gp[6], strain_gp[6];
 	    double wg = (1/8.0)*dx*dy*dz;
 
-	    getStress (ex, ey, ez, gp, &int_vars, stress_gp);
+	    bool write_int_vars = false;
+	    getStress (ex, ey, ez, gp, &int_vars, write_int_vars, stress_gp);
 	    getStrain (ex, ey, ez, gp, strain_gp);
 	    for (int v=0; v<nvoi; v++) {
 	      strain_aux[v] += strain_gp[v] * wg;
@@ -747,7 +751,7 @@ void Problem::calcDistributions (double *int_vars)
   }
 }
 
-void Problem::getStress (int ex, int ey, int gp, double **int_vars, double *stress_gp)
+void Problem::getStress (int ex, int ey, int gp, double **int_vars, bool write_int_vars, double *stress_gp)
 {
   double strain_gp[3];
   getStrain (ex, ey, gp, strain_gp);
@@ -781,7 +785,7 @@ void Problem::getStress (int ex, int ey, int gp, double **int_vars, double *stre
 
 }
 
-void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, double *stress_gp)
+void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, bool write_int_vars, double *stress_gp)
 {
   double nu, E;
   double ctan[6][6];
@@ -844,8 +848,9 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 
       // cout << "LINEAR = NO" << endl;
 
-      if (*int_vars == NULL)
-	*int_vars = (double*)malloc(nelem * 8 * INT_VARS_GP * sizeof(double));
+      if (write_int_vars == true)
+	if (*int_vars == NULL)
+	  *int_vars = (double*)malloc(nelem * 8 * INT_VARS_GP * sizeof(double));
 
       for (int i=0; i<6; i++)
 	normal[i] = sig_dev_trial[i] / sig_dev_trial_norm ;
@@ -886,11 +891,12 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
     for (int i=0; i<6; i++)
       stress_gp[i] -= 2 * material.mu * dl * normal[i];
 
-    if (*int_vars != NULL) {
-      for (int i=0; i<6; i++)
-	(*int_vars)[intvar_ix(e, gp, i)] = eps_p[i];
-      (*int_vars)[intvar_ix(e, gp, 6)] = alpha;
-    }
+    if (write_int_vars == true)
+      if (*int_vars != NULL) {
+	for (int i=0; i<6; i++)
+	  (*int_vars)[intvar_ix(e, gp, i)] = eps_p[i];
+	(*int_vars)[intvar_ix(e, gp, 6)] = alpha;
+      }
 
   } else {
 
