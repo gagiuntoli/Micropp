@@ -850,7 +850,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
       for (int i=0; i<6; i++)
 	normal[i] = sig_dev_trial[i] / sig_dev_trial_norm ;
 
-      cout << "sig_dev_trial_norm = " << sig_dev_trial_norm << endl;
+      // cout << "sig_dev_trial_norm = " << sig_dev_trial_norm << endl;
 
       int its = 0;
       double g, dg;
@@ -862,7 +862,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 	dl -= g/dg;
 	alpha += sqrt(2.0/3) * dl;
 	its ++;
-	cout << "g = " << g << endl;
+	// cout << "g = " << g << endl;
       } while (fabs(g)>1.0 && its<4);
 
       for (int i=0; i<6; i++)

@@ -8,13 +8,13 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   std::list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
-     cout << "The macro_id "<< macroGp_id << " was found in the list" << endl; 
+     cout << "Macro GP = "<< macroGp_id << " found. (loc_hom_Stress)" << endl; 
      int_vars = it->int_vars;
      break;
     }
   }
   if (it ==  MacroGp_list.end()) {
-    cout << "The macro_id "<< macroGp_id << " was NOT found in the list, inserting..." << endl; 
+    cout << "Macro GP = "<< macroGp_id << " NOT found, inserting GP... (loc_hom_Stress)" << endl; 
     MacroGp_t macroGp_new;
     macroGp_new.id = macroGp_id;
     macroGp_new.int_vars = NULL;

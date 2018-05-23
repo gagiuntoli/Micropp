@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cmath>
 #include "micro.h"
 
 using namespace std;
@@ -14,6 +15,7 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
   std::list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
+     cout << "Macro GP = " << macroGp_id << " found. (output)" << endl;
      int_vars = it->int_vars;
      break;
     }
@@ -162,6 +164,40 @@ void Problem::writeVtu (int time_step, int elem, double *int_vars)
   file << "<DataArray type=\"Int32\" Name=\"elem_type\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     file << elem_type[e] << " ";
+  }
+  file << endl << "</DataArray>" << endl;
+
+  file << "<DataArray type=\"Int32\" Name=\"plasticity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+  for (int e=0; e<nelem; e++) {
+    double plasticity = 0.0;
+    if (int_vars != NULL) {
+      if (dim == 3) {
+	for (int gp=0; gp<8; gp++) {
+	  plasticity += sqrt( \
+	        int_vars[intvar_ix(e,gp) + 0] * int_vars[intvar_ix(e,gp) + 0]  + \
+	        int_vars[intvar_ix(e,gp) + 1] * int_vars[intvar_ix(e,gp) + 1]  + \
+	        int_vars[intvar_ix(e,gp) + 2] * int_vars[intvar_ix(e,gp) + 2]  + \
+	      2*int_vars[intvar_ix(e,gp) + 3] * int_vars[intvar_ix(e,gp) + 3]  + \
+	      2*int_vars[intvar_ix(e,gp) + 4] * int_vars[intvar_ix(e,gp) + 4]  + \
+	      2*int_vars[intvar_ix(e,gp) + 5] * int_vars[intvar_ix(e,gp) + 5]);
+	}
+      }
+    }
+    file << plasticity/8 << " ";
+  }
+  file << endl << "</DataArray>" << endl;
+
+  file << "<DataArray type=\"Int32\" Name=\"hardening\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+  for (int e=0; e<nelem; e++) {
+    double hardening = 0.0;
+    if (int_vars != NULL) {
+      if (dim == 3) {
+	for (int gp=0; gp<8; gp++) {
+	  hardening += int_vars[intvar_ix(e,gp) + 6];
+	}
+      }
+    }
+    file << hardening/8 << " ";
   }
   file << endl << "</DataArray>" << endl;
 
