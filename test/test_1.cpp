@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
     double eps[3] = {0.005, 0.0, 0.0};
     micro.setDisp(eps);
     micro.Assembly_A();
-    micro.Assembly_b();
+    micro.Assembly_b(NULL);
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time assembly : " << t_lap << endl;
@@ -80,11 +80,11 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time solve : " << t_lap << endl;
 
-    micro.newtonRaphson();
+    micro.newtonRaphson(NULL);
 
     // calc average
     start = clock();
-    micro.calcAverageStress();
+    micro.calcAverageStress(NULL);
     cout << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
@@ -100,7 +100,7 @@ int main (int argc, char *argv[])
 
     // writting
     start = clock();
-    micro.calcDistributions();
+    micro.calcDistributions(NULL);
     micro.writeVtu(3, 4);
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;

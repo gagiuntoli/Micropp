@@ -64,7 +64,7 @@ int main (int argc, char *argv[])
     double start, end, t_lap;
 
     micro.setDisp(eps);
-    micro.newtonRaphson ();
+    micro.newtonRaphson(NULL);
 
     micro.writeVtu (1, 2);
 

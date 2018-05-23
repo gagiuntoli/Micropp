@@ -14,14 +14,14 @@ void Problem::solve (void)
   }
 }
 
-void Problem::newtonRaphson (void)
+void Problem::newtonRaphson (double *int_vars)
 {
   int its = 0;
   double tol;
 
   do {
 
-    tol = Assembly_b();
+    tol = Assembly_b(int_vars);
     if (tol < NewRap_Tol) break;
     //cout << "NewRap It =" << its << " Tol = " << tol << endl;
 

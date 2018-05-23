@@ -65,7 +65,7 @@ int main (int argc, char *argv[])
 
     start = clock();
     micro.setDisp(eps);
-    double norm = micro.Assembly_b();
+    double norm = micro.Assembly_b(NULL);
     cout << "Residual norm = " << norm << endl;
     micro.Assembly_A();
     end = clock();
@@ -81,10 +81,10 @@ int main (int argc, char *argv[])
     for (int i=0; i<micro.nn*dim; i++)
       micro.u[i] = micro.u[i] + micro.du[i];
 
-    norm = micro.Assembly_b();
+    norm = micro.Assembly_b(NULL);
     cout << "Residual norm = " << norm << endl;
 
-    micro.calcDistributions();
+    micro.calcDistributions(NULL);
     micro.writeVtu (1, 2);
 
   } catch (int &e) {

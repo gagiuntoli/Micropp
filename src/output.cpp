@@ -24,7 +24,7 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
 
   double MacroStress[6];
   loc_hom_Stress(macroGp_id, MacroStrain, MacroStress);
-  calcDistributions();
+  calcDistributions(int_vars);
 
   writeVtu(time_step, elem);
 }

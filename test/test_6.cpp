@@ -58,9 +58,9 @@ int main (int argc, char *argv[])
     Problem micro1 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro1.setDisp(eps1);
-    micro1.newtonRaphson ();
+    micro1.newtonRaphson(NULL);
 
-    micro1.calcAverageStress();
+    micro1.calcAverageStress(NULL);
     cout 
       << "Average stress = " 
       << micro1.stress_ave[0] << " " << micro1.stress_ave[1] << " " << micro1.stress_ave[2] << " " 
@@ -74,7 +74,7 @@ int main (int argc, char *argv[])
       << micro1.strain_ave[3] << " " << micro1.strain_ave[4] << " " << micro1.strain_ave[5]
       << endl;
 
-    micro1.calcDistributions();
+    micro1.calcDistributions(NULL);
 
     micro1.writeVtu (1, 2);
 
@@ -97,9 +97,9 @@ int main (int argc, char *argv[])
     Problem micro2 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro2.setDisp(eps2);
-    micro2.newtonRaphson ();
+    micro2.newtonRaphson(NULL);
 
-    micro2.calcAverageStress();
+    micro2.calcAverageStress(NULL);
     cout 
       << "Average stress = " 
       << micro2.stress_ave[0] << " " << micro2.stress_ave[1] << " " << micro2.stress_ave[2] << " " 
@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
       << micro2.strain_ave[3] << " " << micro2.strain_ave[4] << " " << micro2.strain_ave[5]
       << endl;
 
-    micro2.calcDistributions();
+    micro2.calcDistributions(NULL);
 
     micro2.writeVtu (2, 2);
 

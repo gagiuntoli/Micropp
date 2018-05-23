@@ -6,6 +6,7 @@
 #define MAX_MAT_PARAM 10
 #define MAX_MATS      10
 #define MAX_GP_VARS   10
+#define INT_VARS_GP   7  // eps_p_1, alpha_1
 
 #define glo_elem3D(ex,ey,ez) ((ez)*(nx-1)*(ny-1) + (ey)*(nx-1) + (ex))
 
@@ -65,22 +66,22 @@ class Problem {
     void setDisp (double *eps);
 
     void Assembly_A (void);
-    double Assembly_b (void);
+    double Assembly_b (double *int_vars);
 
     void solve (void);
-    void newtonRaphson (void);
+    void newtonRaphson (double *int_vars);
 
     void getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4]);
     void getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
 
-    void getElemental_b (int ex, int ey, double (&be)[2*4]);
-    void getElemental_b (int ex, int ey, int ez, double (&be)[3*8]);
+    void getElemental_b (int ex, int ey,double *int_vars, double (&be)[2*4]);
+    void getElemental_b (int ex, int ey, int ez,double *int_vars, double (&be)[3*8]);
 
     void getStrain (int ex, int ey, int gp, double *strain_gp);
     void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
 
-    void getStress (int ex, int ey, int gp, double *stress_gp);
-    void getStress (int ex, int ey, int ez, int gp, double *stress_gp);
+    void getStress (int ex, int ey, int gp, double *int_vars, double *stress_gp);
+    void getStress (int ex, int ey, int ez, int gp, double *int_vars, double *stress_gp);
 
     void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);
@@ -91,8 +92,8 @@ class Problem {
 
     void calc_bmat_3D (int gp, double bmat[6][3*8]);
 
-    void calcDistributions (void);
-    void calcAverageStress (void);
+    void calcDistributions (double *int_vars);
+    void calcAverageStress (double *int_vars);
     void calcAverageStrain (void);
 
     void writeVtu (int time_step, int elem) ;
