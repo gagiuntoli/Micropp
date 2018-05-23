@@ -45,18 +45,18 @@ int main (int argc, char *argv[])
     micro_params[3] = 0.2; // radio de la esfera
 
     int mat_types[2]; // dos materiales lineales (type = 0)
-    mat_types[0] = 0;
+    mat_types[0] = 1;
     mat_types[1] = 0;
 
     double params[2*MAX_MAT_PARAM];
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
     params[0*MAX_MAT_PARAM + 1] = 0.3;
-    params[0*MAX_MAT_PARAM + 2] = 5.0e5;
+    params[0*MAX_MAT_PARAM + 2] = 1.0e4;
     params[0*MAX_MAT_PARAM + 3] = 1.0e2;
 
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
-    params[1*MAX_MAT_PARAM + 2] = 5.0e5;
+    params[1*MAX_MAT_PARAM + 2] = 1.0e4;
     params[1*MAX_MAT_PARAM + 3] = 1.0e2;
 
     Problem micro1 (dim, size, micro_type, micro_params, mat_types, params);
@@ -81,7 +81,6 @@ int main (int argc, char *argv[])
       << endl;
 
     micro1.calcDistributions(NULL);
-
     micro1.writeVtu (1, 2);
 
     double eps2[6] = {0.0, 0.0, 0.0, 0.005, 0.0, 0.0};
@@ -120,7 +119,6 @@ int main (int argc, char *argv[])
       << endl;
 
     micro2.calcDistributions(NULL);
-
     micro2.writeVtu (2, 2);
 
   } catch (int &e) {
