@@ -554,7 +554,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, double *int_vars, double (
   } // gp loop
 }
 
-void Problem::calcAverageStress (double *int_vars)
+void Problem::calcAverageStress (double *int_vars, double stress_ave[6])
 {
   for (int v=0; v<nvoi; v++)
     stress_ave[v] = 0.0;
@@ -614,7 +614,7 @@ void Problem::calcAverageStress (double *int_vars)
     stress_ave[v] /= (lx*ly);
 }
 
-void Problem::calcAverageStrain (void)
+void Problem::calcAverageStrain (double strain_ave[6])
 {
   for (int v=0; v<nvoi; v++)
     strain_ave[v] = 0.0;

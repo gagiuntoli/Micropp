@@ -56,9 +56,6 @@ class Problem {
     int NewRap_Its;
     double NewRap_Tol;
 
-    double stress_ave[6];
-    double strain_ave[6];
-
     ell_matrix A;
     ell_solver solver;
     double *u, *du, *b;
@@ -99,8 +96,8 @@ class Problem {
     void calc_bmat_3D (int gp, double bmat[6][3*8]);
 
     void calcDistributions (double *int_vars);
-    void calcAverageStress (double *int_vars);
-    void calcAverageStrain (void);
+    void calcAverageStress (double *int_vars, double stress_ave[6]);
+    void calcAverageStrain (double strain_ave[6]);
 
     void writeVtu (int time_step, int elem) ;
     void output (int time_step, int elem, int macro_gp_global, double *MacroStrain);

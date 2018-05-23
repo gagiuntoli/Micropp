@@ -66,6 +66,14 @@ int main (int argc, char *argv[])
     micro.setDisp(eps);
     micro.newtonRaphson(NULL);
 
+    double stress_ave[6];
+    micro.calcAverageStress(NULL, stress_ave);
+    cout 
+      << "Average stress = " 
+      << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
+      << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
+      << endl;
+
     micro.writeVtu (1, 2);
 
   } catch (int &e) {

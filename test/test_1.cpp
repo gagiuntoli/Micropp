@@ -84,16 +84,18 @@ int main (int argc, char *argv[])
 
     // calc average
     start = clock();
-    micro.calcAverageStress(NULL);
-    cout << "Average stress = " << micro.stress_ave[0] << " " << micro.stress_ave[1] << " " << micro.stress_ave[2] << endl;
+    double stress_ave[6];
+    micro.calcAverageStress(NULL, stress_ave);
+    cout << "Average stress = " << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time Averaging Stress: " << t_lap << endl;
 
     // calc average
     start = clock();
-    micro.calcAverageStrain();
-    cout << "Average strain = " << micro.strain_ave[0] << " " << micro.strain_ave[1] << " " << micro.strain_ave[2] << endl;
+    double strain_ave[6];
+    micro.calcAverageStrain(strain_ave);
+    cout << "Average strain = " << strain_ave[0] << " " << strain_ave[1] << " " << strain_ave[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time Averaging Strain : " << t_lap << endl;

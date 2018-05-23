@@ -51,27 +51,33 @@ int main (int argc, char *argv[])
     double params[2*MAX_MAT_PARAM];
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
     params[0*MAX_MAT_PARAM + 1] = 0.3;
+    params[0*MAX_MAT_PARAM + 2] = 5.0e5;
+    params[0*MAX_MAT_PARAM + 3] = 1.0e2;
 
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
+    params[1*MAX_MAT_PARAM + 2] = 5.0e5;
+    params[1*MAX_MAT_PARAM + 3] = 1.0e2;
 
     Problem micro1 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro1.setDisp(eps1);
     micro1.newtonRaphson(NULL);
 
-    micro1.calcAverageStress(NULL);
+    double stress_ave[6];
+    micro1.calcAverageStress(NULL, stress_ave);
     cout 
       << "Average stress = " 
-      << micro1.stress_ave[0] << " " << micro1.stress_ave[1] << " " << micro1.stress_ave[2] << " " 
-      << micro1.stress_ave[3] << " " << micro1.stress_ave[4] << " " << micro1.stress_ave[5] 
+      << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
+      << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
       << endl;
 
-    micro1.calcAverageStrain();
+    double strain_ave[6];
+    micro1.calcAverageStrain(strain_ave);
     cout 
       << "Average strain = " 
-      << micro1.strain_ave[0] << " " << micro1.strain_ave[1] << " " << micro1.strain_ave[2] << " " 
-      << micro1.strain_ave[3] << " " << micro1.strain_ave[4] << " " << micro1.strain_ave[5]
+      << strain_ave[0] << " " << strain_ave[1] << " " << strain_ave[2] << " " 
+      << strain_ave[3] << " " << strain_ave[4] << " " << strain_ave[5]
       << endl;
 
     micro1.calcDistributions(NULL);
@@ -99,18 +105,18 @@ int main (int argc, char *argv[])
     micro2.setDisp(eps2);
     micro2.newtonRaphson(NULL);
 
-    micro2.calcAverageStress(NULL);
+    micro2.calcAverageStress(NULL, stress_ave);
     cout 
       << "Average stress = " 
-      << micro2.stress_ave[0] << " " << micro2.stress_ave[1] << " " << micro2.stress_ave[2] << " " 
-      << micro2.stress_ave[3] << " " << micro2.stress_ave[4] << " " << micro2.stress_ave[5] 
+      << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
+      << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
       << endl;
 
-    micro2.calcAverageStrain();
+    micro2.calcAverageStrain(strain_ave);
     cout 
       << "Average strain = " 
-      << micro2.strain_ave[0] << " " << micro2.strain_ave[1] << " " << micro2.strain_ave[2] << " " 
-      << micro2.strain_ave[3] << " " << micro2.strain_ave[4] << " " << micro2.strain_ave[5]
+      << strain_ave[0] << " " << strain_ave[1] << " " << strain_ave[2] << " " 
+      << strain_ave[3] << " " << strain_ave[4] << " " << strain_ave[5]
       << endl;
 
     micro2.calcDistributions(NULL);

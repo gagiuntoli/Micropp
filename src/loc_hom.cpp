@@ -24,7 +24,9 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 
   setDisp(MacroStrain);
   newtonRaphson(int_vars);
-  calcAverageStress(int_vars);
+
+  double stress_ave[6];
+  calcAverageStress(int_vars, stress_ave);
   for (int v=0; v<nvoi; v++)
     MacroStress[v] = stress_ave[v];
 }
@@ -56,7 +58,9 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   setDisp(MacroStrain);
   newtonRaphson(int_vars);
-  calcAverageStress(int_vars);
+
+  double stress_ave[6];
+  calcAverageStress(int_vars, stress_ave);
   for (int v=0; v<nvoi; v++)
     Stress_0[v] = stress_ave[v];
 
@@ -71,7 +75,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
     setDisp(Strain_pert);
     newtonRaphson(int_vars);
-    calcAverageStress(int_vars);
+    calcAverageStress(int_vars, stress_ave);
     for (int v=0; v<nvoi; v++)
       MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
 
