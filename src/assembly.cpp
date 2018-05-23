@@ -772,9 +772,9 @@ void Problem::getStress (int ex, int ey, int gp, double **int_vars, double *stre
     for (int j=0; j<nvoi; j++)
       ctan[i][j] *= E/((1+nu)*(1-2*nu));
 
-  for (int i=0; i<nvoi; i++) {
+  for (int i=0; i<3; i++) {
     stress_gp[i] = 0.0;
-    for (int j=0; j<nvoi; j++) {
+    for (int j=0; j<3; j++) {
       stress_gp[i] += ctan[i][j] * strain_gp[j];
     }
   }
@@ -900,13 +900,13 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
     ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0       ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
     ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0       ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
 
-    for (int i=0; i<nvoi; i++)
-      for (int j=0; j<nvoi; j++)
+    for (int i=0; i<6; i++)
+      for (int j=0; j<6; j++)
 	ctan[i][j] *= E/((1+nu)*(1-2*nu));
 
-    for (int i=0; i<nvoi; i++) {
+    for (int i=0; i<6; i++) {
       stress_gp[i] = 0.0;
-      for (int j=0; j<nvoi; j++) {
+      for (int j=0; j<6; j++) {
 	stress_gp[i] += ctan[i][j] * strain_gp[j];
       }
     }

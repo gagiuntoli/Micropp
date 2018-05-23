@@ -33,8 +33,8 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
     material_list[i].K_alpha = params[i*MAX_MAT_PARAM + 3];
 
     double Lambda = (material_list[i].nu * material_list[i].E)/((1+material_list[i].nu)*(1-2*material_list[i].nu));
-    material_list[i].k  = material_list[i].E /(1-2*material_list[i].nu);
-    material_list[i].mu = (3/2) * (material_list[i].k - Lambda);
+    material_list[i].k  = material_list[i].E /(3*(1-2*material_list[i].nu));
+    material_list[i].mu = (3.0/2) * (material_list[i].k - Lambda);
 
     if (mat_types[i] == 0) {
       // lineal
