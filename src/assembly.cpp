@@ -830,11 +830,10 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
     for (int i=0; i<6; i++) 
       sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
 
-
     sig_dev_trial_norm = sqrt( \
-	sig_dev_trial[0]*sig_dev_trial[0] + \
-	sig_dev_trial[1]*sig_dev_trial[1] + \
-	sig_dev_trial[2]*sig_dev_trial[2] + \
+	  sig_dev_trial[0]*sig_dev_trial[0] + \
+	  sig_dev_trial[1]*sig_dev_trial[1] + \
+	  sig_dev_trial[2]*sig_dev_trial[2] + \
 	2*sig_dev_trial[3]*sig_dev_trial[3] + \
 	2*sig_dev_trial[4]*sig_dev_trial[4] + \
 	2*sig_dev_trial[5]*sig_dev_trial[5]);
@@ -843,13 +842,15 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 
     if (f_trial > 0) {
 
-      cout << "LINEAR = NO" << endl;
+      // cout << "LINEAR = NO" << endl;
 
       if (*int_vars == NULL)
 	*int_vars = (double*)malloc(nelem * 8 * INT_VARS_GP * sizeof(double));
 
       for (int i=0; i<6; i++)
 	normal[i] = sig_dev_trial[i] / sig_dev_trial_norm ;
+
+      cout << "sig_dev_trial_norm = " << sig_dev_trial_norm << endl;
 
       int its = 0;
       double g, dg;
@@ -870,11 +871,10 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
     }
     else {
 
-      cout << "LINEAR = YES" << endl;
+      // cout << "LINEAR = YES" << endl;
 
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i];
-
     }
 
     //sig_2   = K * tr(eps) * 1 + s_trial - 2*mu*dl*normal;
@@ -890,7 +890,6 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 	(*int_vars)[intvar_ix(e,gp) + i] = eps_p[i];
       (*int_vars)[intvar_ix(e,gp) + 6] = alpha;
     }
-
 
   } else {
 
@@ -915,29 +914,29 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double **int_vars, doub
 
 }
 
-void Problem::getMaterial (int e, material_t &material) {
-
+void Problem::getMaterial (int e, material_t &material)
+{
+  int mat_num;
   if (micro_type == 0) {
     if (elem_type[e] == 0) {
-      material.E  = material_list[0].E;
-      material.nu = material_list[0].nu;
-      material.plasticity = material_list[0].plasticity;
+      mat_num = 0;
     } else {
-      material.E  = material_list[1].E;
-      material.nu = material_list[1].nu;
-      material.plasticity = material_list[1].plasticity;
+      mat_num = 1;
     }
   } else if (micro_type == 1) {
     if (elem_type[e] == 0) {
-      material.E  = material_list[0].E;
-      material.nu = material_list[0].nu;
-      material.plasticity = material_list[0].plasticity;
+      mat_num = 0;
     } else {
-      material.E  = material_list[1].E;
-      material.nu = material_list[1].nu;
-      material.plasticity = material_list[0].plasticity;
+      mat_num = 1;
     }
   }
+  material.E          = material_list[mat_num].E;
+  material.nu         = material_list[mat_num].nu;
+  material.Sy         = material_list[mat_num].Sy;
+  material.K_alpha    = material_list[mat_num].K_alpha;
+  material.mu         = material_list[mat_num].mu;
+  material.k          = material_list[mat_num].k;
+  material.plasticity = material_list[mat_num].plasticity;
 }
 
 void Problem::getStrain (int ex, int ey, int gp, double *strain_gp)
