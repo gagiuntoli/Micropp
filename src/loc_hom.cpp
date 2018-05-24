@@ -10,10 +10,17 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
      cout << "Macro GP = "<< macroGp_id << " found. (loc_hom_Stress)" << endl; 
-     vars_old = it->int_vars;
+     if (it->int_vars != NULL) {
+       vars_old = it->int_vars;
+     }
+     else {
+       for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	 vars_dum_1[i] = 0.0;
+       vars_old = vars_dum_1;
+       allocate = true;
+     }
      break;
     }
-    allocate = false;
   }
   if (it ==  MacroGp_list.end()) {
     cout << "Macro GP = "<< macroGp_id << " NOT found, inserting GP... (loc_hom_Stress)" << endl; 

@@ -9,14 +9,21 @@ using namespace std;
 
 void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStrain)
 {
-  double *int_vars;
+  double *vars_old;
 
   // search for the macro gauss point
   std::list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
      cout << "Macro GP = " << macroGp_id << " found. (output)" << endl;
-     int_vars = it->int_vars;
+     if (it->int_vars != NULL) {
+       vars_old = it->int_vars;
+     }
+     else {
+       for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	 vars_dum_1[i] = 0.0;
+       vars_old = vars_dum_1;
+     }
      break;
     }
   }
@@ -26,12 +33,12 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
 
   double MacroStress[6];
   loc_hom_Stress(macroGp_id, MacroStrain, MacroStress);
-  calcDistributions(int_vars);
+  calcDistributions(vars_old);
 
-  writeVtu(time_step, elem, int_vars);
+  writeVtu(time_step, elem, vars_old);
 }
 
-void Problem::writeVtu (int time_step, int elem, double *int_vars)
+void Problem::writeVtu (int time_step, int elem, double *vars_old)
 {
   std::stringstream fname_vtu_s;
   fname_vtu_s  << "micropp_" << elem << "_" << time_step << ".vtu";
@@ -170,16 +177,16 @@ void Problem::writeVtu (int time_step, int elem, double *int_vars)
   file << "<DataArray type=\"Float64\" Name=\"plasticity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     double plasticity = 0.0;
-    if (int_vars != NULL) {
+    if (vars_old != NULL) {
       if (dim == 3) {
 	for (int gp=0; gp<8; gp++) {
 	  plasticity += sqrt( \
-	        int_vars[intvar_ix(e, gp, 0)] * int_vars[intvar_ix(e, gp, 0)]  + \
-	        int_vars[intvar_ix(e, gp, 1)] * int_vars[intvar_ix(e, gp, 1)]  + \
-	        int_vars[intvar_ix(e, gp, 2)] * int_vars[intvar_ix(e, gp, 2)]  + \
-	      2*int_vars[intvar_ix(e, gp, 3)] * int_vars[intvar_ix(e, gp, 3)]  + \
-	      2*int_vars[intvar_ix(e, gp, 4)] * int_vars[intvar_ix(e, gp, 4)]  + \
-	      2*int_vars[intvar_ix(e, gp, 5)] * int_vars[intvar_ix(e, gp, 5)]);
+	        vars_old[intvar_ix(e, gp, 0)] * vars_old[intvar_ix(e, gp, 0)]  + \
+	        vars_old[intvar_ix(e, gp, 1)] * vars_old[intvar_ix(e, gp, 1)]  + \
+	        vars_old[intvar_ix(e, gp, 2)] * vars_old[intvar_ix(e, gp, 2)]  + \
+	      2*vars_old[intvar_ix(e, gp, 3)] * vars_old[intvar_ix(e, gp, 3)]  + \
+	      2*vars_old[intvar_ix(e, gp, 4)] * vars_old[intvar_ix(e, gp, 4)]  + \
+	      2*vars_old[intvar_ix(e, gp, 5)] * vars_old[intvar_ix(e, gp, 5)]);
 	}
       }
     }
@@ -190,10 +197,10 @@ void Problem::writeVtu (int time_step, int elem, double *int_vars)
   file << "<DataArray type=\"Float64\" Name=\"hardening\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     double hardening = 0.0;
-    if (int_vars != NULL) {
+    if (vars_old != NULL) {
       if (dim == 3) {
 	for (int gp=0; gp<8; gp++) {
-	  hardening += int_vars[intvar_ix(e, gp, 6)];
+	  hardening += vars_old[intvar_ix(e, gp, 6)];
 	}
       }
     }
