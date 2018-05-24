@@ -36,7 +36,7 @@ void Problem::newtonRaphson (double *vars_old, double *vars_new, bool *non_linea
     } else if (dim == 3) {
       ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
     }
-    cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
+    //cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 
     for (int i=0; i<nn*dim; i++)
       u[i] = u[i] + du[i];

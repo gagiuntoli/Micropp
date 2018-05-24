@@ -426,16 +426,20 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
   nu = material.nu;
   plasticity = material.plasticity;
 
-  ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
-  ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu    ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
-  ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu); ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
-  ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0     ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
-  ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0     ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
-  ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0     ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+  if (plasticity == false) {
 
-  for (int i=0; i<nvoi; i++)
-    for (int j=0; j<nvoi; j++)
-      ctan[i][j] *= E/((1+nu)*(1-2*nu));
+    ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
+    ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu    ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
+    ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu); ctan[2][3]=0         ; ctan[2][4]=0         ; ctan[2][5]=0         ;
+    ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0     ; ctan[3][3]=(1-2*nu)/2; ctan[3][4]=0         ; ctan[3][5]=0         ;
+    ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0     ; ctan[4][3]=0         ; ctan[4][4]=(1-2*nu)/2; ctan[4][5]=0         ;
+    ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0     ; ctan[5][3]=0         ; ctan[5][4]=0         ; ctan[5][5]=(1-2*nu)/2;
+
+    for (int i=0; i<nvoi; i++)
+      for (int j=0; j<nvoi; j++)
+	ctan[i][j] *= E/((1+nu)*(1-2*nu));
+
+  }
 
   double bmat[6][3*8], cxb[6][3*8];
 
@@ -443,6 +447,28 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
     Ae[i] = 0.0;
 
   for (int gp=0; gp<8; gp++) {
+
+    if (plasticity == true) {
+
+      bool non_linear_flag;
+      double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 0.0001;
+      getStrain (ex, ey, ez, gp, strain_0);
+      getStress (ex, ey, ez, gp, strain_0, vars_old, vars_dum_3, &non_linear_flag, stress_0);
+
+      for (int i=0; i<6; i++) {
+
+	for (int j=0; j<6; j++)
+	  strain_pert[j] = strain_0[j];
+	strain_pert[i] += deps;
+
+	getStress (ex, ey, ez, gp, strain_pert, vars_old, vars_dum_3, &non_linear_flag, stress_pert);
+
+	for (int j=0; j<6; j++)
+	  ctan[j][i] = (stress_pert[j] - stress_0[j]) / deps;
+
+      }
+
+    } 
 
     calc_bmat_3D (gp, bmat);
 
@@ -522,7 +548,9 @@ void Problem::getElemental_b (int ex, int ey, double *vars_old, double *vars_new
       bmat[2][i*dim] = dsh[i][1]; bmat[2][i*dim+1] = dsh[i][0];
     }
 
-    getStress (ex, ey, gp, vars_old, vars_new, non_linear_flag, stress_gp);
+    double strain_gp[3];
+    getStrain (ex, ey, gp, strain_gp);
+    getStress (ex, ey, gp, strain_gp, vars_old, vars_new, non_linear_flag, stress_gp);
 
     double wg = 0.25*dx*dy;
     for (int i=0; i<npe*dim; i++) {
@@ -544,7 +572,10 @@ void Problem::getElemental_b (int ex, int ey, int ez, double *vars_old, double *
   for (int gp=0; gp<8; gp++) {
 
     calc_bmat_3D (gp, bmat);
-    getStress (ex, ey, ez, gp, vars_old, vars_new, non_linear_flag, stress_gp);
+
+    double strain_gp[6];
+    getStrain (ex, ey, ez, gp, strain_gp);
+    getStress (ex, ey, ez, gp, strain_gp, vars_old, vars_new, non_linear_flag, stress_gp);
 
     double wg = (1/8.0)*dx*dy*dz;
     for (int i=0; i<npe*dim; i++)
@@ -575,7 +606,9 @@ void Problem::calcAverageStress (double *vars_old, double stress_ave[6])
 	  double stress_gp[6];
 	  double wg = 0.25*dx*dy;
 
-	  getStress (ex, ey, gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
+	  double strain_gp[3];
+	  getStrain (ex, ey, gp, strain_gp);
+	  getStress (ex, ey, gp, strain_gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
 	  for (int v=0; v<nvoi; v++)
 	    stress_aux[v] += stress_gp[v] * wg;
 
@@ -600,7 +633,9 @@ void Problem::calcAverageStress (double *vars_old, double stress_ave[6])
 	    double stress_gp[6];
 	    double wg = (1/8.0)*dx*dy*dz;
 
-	    getStress (ex, ey, ez, gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
+	    double strain_gp[6];
+	    getStrain (ex, ey, ez, gp, strain_gp);
+	    getStress (ex, ey, ez, gp, strain_gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
 	    for (int v=0; v<nvoi; v++)
 	      stress_aux[v] += stress_gp[v] * wg;
 
@@ -694,9 +729,8 @@ void Problem::calcDistributions (double *vars_old)
 	  double stress_gp[3], strain_gp[3];
 	  double wg = 0.25*dx*dy;
 
-	  bool write_int_vars = false;
-	  getStress (ex, ey, gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
 	  getStrain (ex, ey, gp, strain_gp);
+	  getStress (ex, ey, gp, strain_gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
 	  for (int v=0; v<nvoi; v++) {
 	    strain_aux[v] += strain_gp[v] * wg;
 	    stress_aux[v] += stress_gp[v] * wg;
@@ -730,9 +764,8 @@ void Problem::calcDistributions (double *vars_old)
 	    double stress_gp[6], strain_gp[6];
 	    double wg = (1/8.0)*dx*dy*dz;
 
-	    bool write_int_vars = false;
-	    getStress (ex, ey, ez, gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
 	    getStrain (ex, ey, ez, gp, strain_gp);
+	    getStress (ex, ey, ez, gp, strain_gp, vars_old, vars_dum_3, &non_linear_flag, stress_gp);
 	    for (int v=0; v<nvoi; v++) {
 	      strain_aux[v] += strain_gp[v] * wg;
 	      stress_aux[v] += stress_gp[v] * wg;
@@ -753,11 +786,8 @@ void Problem::calcDistributions (double *vars_old)
   }
 }
 
-void Problem::getStress (int ex, int ey, int gp, double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp)
+void Problem::getStress (int ex, int ey, int gp, double strain_gp[3], double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp)
 {
-  double strain_gp[3];
-  getStrain (ex, ey, gp, strain_gp);
-
   double nu, E;
   double ctan[3][3];
   bool plasticity;
@@ -787,7 +817,7 @@ void Problem::getStress (int ex, int ey, int gp, double *vars_old, double *vars_
 
 }
 
-void Problem::getStress (int ex, int ey, int ez, int gp, double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp)
+void Problem::getStress (int ex, int ey, int ez, int gp, double strain_gp[6], double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp)
 {
   *non_linear_flag = false;
 
@@ -803,9 +833,6 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double *vars_old, doubl
   E  = material.E;
   nu = material.nu;
   plasticity = material.plasticity;
-
-  double strain_gp[6];
-  getStrain (ex, ey, ez, gp, strain_gp);
 
   if (plasticity == true) {
 

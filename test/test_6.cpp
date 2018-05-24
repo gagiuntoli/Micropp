@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
 
     for (int t=0; t<time_steps; t++) {
 
-      eps[0] = t*1.0/time_steps * 0.1;
+      eps[0] = t*1.0/time_steps * 0.001;
       micro.loc_hom_Stress (1, eps, stress_ave);
 
       cout 
