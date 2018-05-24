@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
 
     Problem micro (dim, size, micro_type, micro_params, mat_types, params);
 
-    int time_steps = 10;
+    int time_steps = 4;
     double stress_ave[6];
 
     for (int t=0; t<time_steps; t++) {

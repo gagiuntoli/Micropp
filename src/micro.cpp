@@ -84,6 +84,9 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   stress = (double*)malloc(nelem*nvoi*sizeof(double));
   strain = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_type = (int*)malloc(nelem*sizeof(int));
+  vars_dum_1 = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
+  vars_dum_2 = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
+  vars_dum_3 = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
 
   for (int i=0; i<nn*dim; i++)
     u[i] = 0.0;
@@ -127,6 +130,9 @@ Problem::~Problem (void)
   free(stress);
   free(strain);
   free(elem_type);
+  free(vars_dum_1);
+  free(vars_dum_2);
+  free(vars_dum_3);
 }
 
 int Problem::getElemType (int ex, int ey)

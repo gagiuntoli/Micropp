@@ -14,18 +14,19 @@ void Problem::solve (void)
   }
 }
 
-void Problem::newtonRaphson (double **int_vars, bool write_int_vars)
+void Problem::newtonRaphson (double *vars_old, double *vars_new, bool *non_linear_flag)
 {
   int its = 0;
   double tol;
 
   do {
 
-    tol = Assembly_b(int_vars, write_int_vars);
-    if (tol < NewRap_Tol) break;
-    //cout << "NewRap It =" << its << " Tol = " << tol << endl;
+    tol = Assembly_b(vars_old, vars_new, non_linear_flag);
 
-    Assembly_A();
+    if (tol < NewRap_Tol) break;
+    cout << "NewRap It =" << its << " Tol = " << tol << endl;
+
+    Assembly_A(vars_old);
 
     for (int i=0; i<nn*dim; i++)
       du[i] = 0.0;
@@ -35,7 +36,7 @@ void Problem::newtonRaphson (double **int_vars, bool write_int_vars)
     } else if (dim == 3) {
       ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
     }
-    //cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
+    cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 
     for (int i=0; i<nn*dim; i++)
       u[i] = u[i] + du[i];
@@ -43,6 +44,6 @@ void Problem::newtonRaphson (double **int_vars, bool write_int_vars)
     its++;
 
   } while (its<NewRap_Its && tol>NewRap_Tol);
-  //cout << "NewRap It =" << its << " Tol = " << tol << endl;
+  cout << "NewRap It =" << its << " Tol = " << tol << endl;
 
 }

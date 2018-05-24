@@ -7,6 +7,7 @@
 #define MAX_MATS      10
 #define MAX_GP_VARS   10
 #define INT_VARS_GP   7  // eps_p_1, alpha_1
+#define VARS_AT_GP    7  // eps_p_1, alpha_1
 
 #define glo_elem3D(ex,ey,ez) ((ez)*(nx-1)*(ny-1) + (ey)*(nx-1) + (ex))
 #define intvar_ix(e,gp,var) ((e)*8*INT_VARS_GP + (gp)*INT_VARS_GP + (var))
@@ -51,7 +52,7 @@ class Problem {
     double *strain; // average strain on each element
     double *stress; // average stress on each element
     int *elem_type; // number that is changes depending on the element type
-    double* int_vars; // internal variables at each Gauss point
+    double *vars_dum_1, *vars_dum_2, *vars_dum_3; 
 
     int NewRap_Its;
     double NewRap_Tol;
@@ -66,25 +67,25 @@ class Problem {
     void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
     void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
 
+    void solve (void);
+    void newtonRaphson (double *vars_old, double *vars_new, bool *non_linear_flag);
+
     void setDisp (double *eps);
 
-    void Assembly_A (void);
-    double Assembly_b (double **int_vars, bool write_int_vars);
+    void Assembly_A (double *vars_old);
+    double Assembly_b (double *vars_old, double *vars_new, bool *non_linear_flag);
 
-    void solve (void);
-    void newtonRaphson (double **int_vars, bool write_int_vars);
+    void getElemental_A (int ex, int ey, double *vars_old, double (&Ae)[2*4*2*4]);
+    void getElemental_A (int ex, int ey, int ez, double *vars_old, double (&Ae)[3*8*3*8]);
 
-    void getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4]);
-    void getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
-
-    void getElemental_b (int ex, int ey, double **int_vars, bool write_int_vars, double (&be)[2*4]);
-    void getElemental_b (int ex, int ey, int ez, double **int_vars, bool write_int_vars, double (&be)[3*8]);
+    void getElemental_b (int ex, int ey, double *vars_old, double *vars_new, bool *non_linear_flag, double (&be)[2*4]);
+    void getElemental_b (int ex, int ey, int ez, double *vars_old, double *vars_new, bool *non_linear_flag, double (&be)[3*8]);
 
     void getStrain (int ex, int ey, int gp, double *strain_gp);
     void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
 
-    void getStress (int ex, int ey, int gp, double **int_vars, bool write_int_vars, double *stress_gp);
-    void getStress (int ex, int ey, int ez, int gp, double **int_vars, bool write_int_vars, double *stress_gp);
+    void getStress (int ex, int ey, int gp, double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp);
+    void getStress (int ex, int ey, int ez, int gp, double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp);
 
     void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);
@@ -95,8 +96,8 @@ class Problem {
 
     void calc_bmat_3D (int gp, double bmat[6][3*8]);
 
-    void calcDistributions (double *int_vars);
-    void calcAverageStress (double *int_vars, double stress_ave[6]);
+    void calcDistributions (double *vars_old);
+    void calcAverageStress (double *vars_old, double stress_ave[6]);
     void calcAverageStrain (double strain_ave[6]);
 
     void writeVtu (int time_step, int elem, double *int_vars);
