@@ -14,14 +14,14 @@ void Problem::solve (void)
   }
 }
 
-void Problem::newtonRaphson (double *vars_old, double *vars_new, bool *non_linear_flag)
+void Problem::newtonRaphson (double *vars_old, double *vars_new, bool *non_linear)
 {
   int its = 0;
   double tol;
 
   do {
 
-    tol = Assembly_b(vars_old, vars_new, non_linear_flag);
+    tol = Assembly_b(vars_old, vars_new, non_linear);
 
     if (tol < NewRap_Tol) break;
     cout << "NewRap It =" << its << " Tol = " << tol << endl;

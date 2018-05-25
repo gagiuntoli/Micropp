@@ -52,7 +52,7 @@ int main (int argc, char *argv[])
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
     params[0*MAX_MAT_PARAM + 1] = 0.3;
     params[0*MAX_MAT_PARAM + 2] = 1.0e4;
-    params[0*MAX_MAT_PARAM + 3] = 1.0e2;
+    params[0*MAX_MAT_PARAM + 3] = 1.0e4;
 
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
@@ -61,12 +61,14 @@ int main (int argc, char *argv[])
 
     Problem micro (dim, size, micro_type, micro_params, mat_types, params);
 
-    int time_steps = 4;
+    int time_steps = 10;
     double stress_ave[6];
 
     for (int t=0; t<time_steps; t++) {
 
-      eps[0] = t*1.0/time_steps * 0.001;
+      cout << "Time step = " << t << endl;
+
+      eps[0] = t*1.0/time_steps * 0.002;
       micro.loc_hom_Stress (1, eps, stress_ave);
 
       cout 

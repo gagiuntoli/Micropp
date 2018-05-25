@@ -27,6 +27,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
     MacroGp_t macroGp_new;
     macroGp_new.id = macroGp_id;
     macroGp_new.int_vars = NULL;
+
     MacroGp_list.push_back(macroGp_new);
 
     for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
@@ -40,10 +41,12 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 
   setDisp(MacroStrain);
 
-  bool non_linear_flag = false;
-  newtonRaphson(vars_old, vars_new, &non_linear_flag);
+  bool non_linear = false;
+  newtonRaphson(vars_old, vars_new, &non_linear);
 
-  if (non_linear_flag == true) {
+  if (non_linear == true) {
+
+    cout << "Non linear behavior detected" << endl;
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->id == macroGp_id) {
 
@@ -91,10 +94,10 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   // calculate Stress_0 
 
-  bool non_linear_flag;
+  bool non_linear;
 
   setDisp(MacroStrain);
-  newtonRaphson(vars_old, vars_new, &non_linear_flag);
+  newtonRaphson(vars_old, vars_new, &non_linear);
 
   double stress_ave[6];
   calcAverageStress(vars_old, stress_ave);
@@ -111,7 +114,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
     Strain_pert[i] += delta_Strain; // we pertubate only one direction
 
     setDisp(Strain_pert);
-    newtonRaphson(vars_old, vars_new, &non_linear_flag);
+    newtonRaphson(vars_old, vars_new, &non_linear);
 
     calcAverageStress(vars_old, stress_ave);
     for (int v=0; v<nvoi; v++)
