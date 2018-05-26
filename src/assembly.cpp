@@ -420,6 +420,9 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
   double nu, E;
   double ctan[6][6];
   bool plasticity;
+  bool ctan_secant = false;
+  bool ctan_pert   = false;
+  bool ctan_exact  = true;
 
   int e = glo_elem3D(ex,ey,ez);
 
@@ -430,7 +433,7 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
   nu = material.nu;
   plasticity = material.plasticity;
 
-  if (plasticity == false) {
+  if (ctan_secant == false) {
 
     ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0         ; ctan[0][4]=0         ; ctan[0][5]=0         ;
     ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu    ; ctan[1][3]=0         ; ctan[1][4]=0         ; ctan[1][5]=0         ;
@@ -454,10 +457,7 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
 
     if (plasticity == true) {
 
-      bool secant = false;
-      bool exact = true;
-
-      if (secant == true) {
+      if (ctan_secant == true) {
 
 	bool non_linear;
 	double stress_pert[6], strain_pert[6], strain_0[6], deps = 0.00001;
@@ -476,89 +476,88 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
 	    
 	}
 
-      } else if (exact == true) {
+      } else if (ctan_exact == true) {
 
-	double strain_gp[6];
-	getStrain (ex, ey, ez, gp, strain_gp);
+//	double strain_gp[6];
+//	getStrain (ex, ey, ez, gp, strain_gp);
+//
+//	double eps_dev[6];
+//	double eps_p_dev_1[6], eps_p_1[6], eps_p[6];
+//	double normal[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+//	double alpha_1, alpha, dl=0.0;
+//	double sig_dev_trial[6], sig_dev_trial_norm;
+//
+//	for (int i=0; i<6; i++)
+//	  eps_p_1[i] = vars_old[intvar_ix(e, gp, i)];
+//	alpha_1 = vars_old[intvar_ix(e, gp, 6)];
+//
+//	for (int i=0; i<6; i++)
+//	  eps_p_dev_1[i] = eps_p_1[i];
+//	for (int i=0; i<3; i++)
+//	  eps_p_dev_1[i] -= (1/3.0) * (eps_p_1[0] + eps_p_1[1] + eps_p_1[2]);
+//
+//	for (int i=0; i<6; i++)
+//	  eps_dev[i] = strain_gp[i];
+//	for (int i=0; i<3; i++)
+//	  eps_dev[i] -= (1/3.0) * (strain_gp[0] + strain_gp[1] + strain_gp[2]);
+//
+//	for (int i=0; i<6; i++) 
+//	  sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
+//
+//	sig_dev_trial_norm = sqrt( \
+//	    sig_dev_trial[0]*sig_dev_trial[0] + \
+//	    sig_dev_trial[1]*sig_dev_trial[1] + \
+//	    sig_dev_trial[2]*sig_dev_trial[2] + \
+//	    2*sig_dev_trial[3]*sig_dev_trial[3] + \
+//	    2*sig_dev_trial[4]*sig_dev_trial[4] + \
+//	    2*sig_dev_trial[5]*sig_dev_trial[5]);
+//
+//	double f_trial = sig_dev_trial_norm - (material.Sy + material.K_alpha * alpha_1);
+//
+//	if (f_trial > 0) {
+//
+//	  //cout << "LINEAR = NO" << endl;
+//
+//	  for (int i=0; i<6; i++)
+//	    normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
+//
+//	  int its = 0;
+//	  double g, dg;
+//	  alpha = alpha_1;
+//
+//	  do {
+//	    g   = sig_dev_trial_norm  - sqrt(2.0/3) * (material.Sy + material.K_alpha * alpha) - 2 * material.mu * dl;
+//	    dg  = - 2*material.mu;
+//	    dl -= g/dg;
+//	    alpha += sqrt(2.0/3) * dl;
+//	    its ++;
+//	    // cout << "g = " << g << endl;
+//	  } while (fabs(g)>1.0 && its<4);
+//
+//	}
+//	double theta_1 = 1 - 2*material.mu*dl / sig_dev_trial_norm;
+//	double theta_2 = 1 / (1 + material.K_alpha) - (1 - theta_1);
+//
+//	for (int i=0; i<6; i++)
+//	  for (int j=0; j<6; j++)
+//	    ctan[i][j] = 0.0;
+//
+//	for (int i=0; i<3; i++)
+//	  for (int j=0; j<3; j++)
+//	    ctan[i][j] = material.k;
+//
+//	for (int i=0; i<6; i++)
+//	  for (int j=0; j<6; j++)
+//	    ctan[i][j] -= 2 * material.mu * theta_2 * normal[i] * normal[j];
+//
+//	for (int i=0; i<3; i++)
+//	  for (int j=0; j<3; j++)
+//	    ctan[i][j] -= 2 * material.mu * theta_1 * (1.0/3);
+//
+//	for (int i=0; i<3; i++)
+//	    ctan[i][i] += 2 * material.mu * theta_1;
 
-	double eps_dev[6];
-	double eps_p_dev_1[6], eps_p_1[6], eps_p[6];
-	double normal[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-	double alpha_1, alpha, dl=0.0;
-	double sig_dev_trial[6], sig_dev_trial_norm;
-
-	for (int i=0; i<6; i++)
-	  eps_p_1[i] = vars_old[intvar_ix(e, gp, i)];
-	alpha_1 = vars_old[intvar_ix(e, gp, 6)];
-
-	for (int i=0; i<6; i++)
-	  eps_p_dev_1[i] = eps_p_1[i];
-	for (int i=0; i<3; i++)
-	  eps_p_dev_1[i] -= (1/3.0) * (eps_p_1[0] + eps_p_1[1] + eps_p_1[2]);
-
-	for (int i=0; i<6; i++)
-	  eps_dev[i] = strain_gp[i];
-	for (int i=0; i<3; i++)
-	  eps_dev[i] -= (1/3.0) * (strain_gp[0] + strain_gp[1] + strain_gp[2]);
-
-	for (int i=0; i<6; i++) 
-	  sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
-
-	sig_dev_trial_norm = sqrt( \
-	    sig_dev_trial[0]*sig_dev_trial[0] + \
-	    sig_dev_trial[1]*sig_dev_trial[1] + \
-	    sig_dev_trial[2]*sig_dev_trial[2] + \
-	    2*sig_dev_trial[3]*sig_dev_trial[3] + \
-	    2*sig_dev_trial[4]*sig_dev_trial[4] + \
-	    2*sig_dev_trial[5]*sig_dev_trial[5]);
-
-	double f_trial = sig_dev_trial_norm - (material.Sy + material.K_alpha * alpha_1);
-
-	if (f_trial > 0) {
-
-	  //cout << "LINEAR = NO" << endl;
-
-	  for (int i=0; i<6; i++)
-	    normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
-
-	  int its = 0;
-	  double g, dg;
-	  alpha = alpha_1;
-
-	  do {
-	    g   = sig_dev_trial_norm  - sqrt(2.0/3) * (material.Sy + material.K_alpha * alpha) - 2 * material.mu * dl;
-	    dg  = - 2*material.mu;
-	    dl -= g/dg;
-	    alpha += sqrt(2.0/3) * dl;
-	    its ++;
-	    // cout << "g = " << g << endl;
-	  } while (fabs(g)>1.0 && its<4);
-
-	}
-	double theta_1 = 1 - 2*material.mu*dl / sig_dev_trial_norm;
-	double theta_2 = 1 / (1 + material.K_alpha) - (1 - theta_1);
-
-	for (int i=0; i<6; i++)
-	  for (int j=0; j<6; j++)
-	    ctan[i][j] = 0.0;
-
-	for (int i=0; i<3; i++)
-	  for (int j=0; j<3; j++)
-	    ctan[i][j] = material.k;
-
-	for (int i=0; i<6; i++)
-	  for (int j=0; j<6; j++)
-	    ctan[i][j] -= 2 * material.mu * theta_2 * normal[i] * normal[j];
-
-	for (int i=0; i<3; i++)
-	  for (int j=0; j<3; j++)
-	    ctan[i][j] -= 2 * material.mu * theta_1 * (1.0/3);
-
-	for (int i=0; i<3; i++)
-	    ctan[i][i] += 2 * material.mu * theta_1;
-
-
-      } else {
+      } else if (ctan_pert == true) {
 
 	bool non_linear;
 	double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 0.00001;
@@ -984,7 +983,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double strain_gp[6], do
 
     if (f_trial > 0) {
 
-      //cout << "LINEAR = NO" << endl;
+      cout << "LINEAR = NO" << endl;
       *non_linear = true;
 
       for (int i=0; i<6; i++)

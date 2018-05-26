@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
     double params[2*MAX_MAT_PARAM];
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
     params[0*MAX_MAT_PARAM + 1] = 0.3;
-    params[0*MAX_MAT_PARAM + 2] = 1.0e4;
+    params[0*MAX_MAT_PARAM + 2] = 1.0e9;
     params[0*MAX_MAT_PARAM + 3] = 1.0e4;
 
     params[1*MAX_MAT_PARAM + 0] = 1.0e7;
@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 
       cout << "Time step = " << t << endl;
 
-      eps[0] = t*1.0/time_steps * 0.002;
+      eps[0] = t*1.0/time_steps * 0.00001;
       micro.loc_hom_Stress (1, eps, stress_ave);
 
       cout 
