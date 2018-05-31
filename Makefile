@@ -4,12 +4,12 @@ FC=gfortran
 CFLAGS= -c -std=c++11
 FFLAGS= -c
 
-ifeq ($(DEBUG),1)
- FFLAGS += -g 
- CFLAGS += -g
-else
+ifeq ($(OPT),1)
  FFLAGS += -O3
  CFLAGS += -O3
+else
+ FFLAGS += -g 
+ CFLAGS += -g
 endif
 
 #LFLAGS= -L/apps/BOOST/1.67.0/lib -lboost_program_options
