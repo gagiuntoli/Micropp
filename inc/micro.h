@@ -26,6 +26,7 @@ struct material_t {
   // plasticity
   double k;
   double mu;
+  double lambda;
   double K_alpha; 
   double Sy;
   // flags
