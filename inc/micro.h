@@ -87,6 +87,7 @@ class Problem {
 
     void getStress (int ex, int ey, int gp, double strain_gp[3], double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp);
     void getStress (int ex, int ey, int ez, int gp, double strain_gp[3], double *vars_old, double *vars_new, bool *non_linear_flag, double *stress_gp);
+    void getDeviatoric (double tensor[6], double tensor_dev[6]);
 
     void getElemDisp (int ex, int ey, double *elem_disp);
     void getElemDisp (int ex, int ey, int ez, double *elem_disp);

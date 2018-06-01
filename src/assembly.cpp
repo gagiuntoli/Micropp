@@ -854,7 +854,16 @@ void Problem::getStress (int ex, int ey, int gp, double strain_gp[3], double *va
 
 }
 
-void Problem::getStress (int ex, int ey, int ez, int gp, double strain_gp[6], double *vars_old, double *vars_new, bool *non_linear, double *stress_gp)
+void Problem::getDeviatoric (double tensor[6], double tensor_dev[6])
+{
+    for (int i=0; i<6; i++)
+      tensor_dev[i] = tensor[i];
+    for (int i=0; i<3; i++)
+      tensor_dev[i] -= (1/3.0) * (tensor[0] + tensor[1] + tensor[2]);
+
+}
+
+void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], double *vars_old, double *vars_new, bool *non_linear, double *stress_gp)
 {
   *non_linear = false;
 
@@ -881,19 +890,13 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double strain_gp[6], do
     double alpha_1, alpha, dl=0.0;
     double sig_dev_trial[6], sig_dev_trial_norm;
 
+    // charge old values from internal variables
     for (int i=0; i<6; i++)
       eps_p_1[i] = vars_old[intvar_ix(e, gp, i)];
     alpha_1 = vars_old[intvar_ix(e, gp, 6)];
 
-    for (int i=0; i<6; i++)
-      eps_p_dev_1[i] = eps_p_1[i];
-    for (int i=0; i<3; i++)
-      eps_p_dev_1[i] -= (1/3.0) * (eps_p_1[0] + eps_p_1[1] + eps_p_1[2]);
-
-    for (int i=0; i<6; i++)
-      eps_dev[i] = strain_gp[i];
-    for (int i=0; i<3; i++)
-      eps_dev[i] -= (1/3.0) * (strain_gp[0] + strain_gp[1] + strain_gp[2]);
+    getDeviatoric (eps_p_1, eps_p_dev_1);
+    getDeviatoric (eps, eps_dev);
 
     for (int i=0; i<3; i++) 
       sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
@@ -943,23 +946,15 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double strain_gp[6], do
       alpha = alpha_1;
     }
 
-    //sig_2   = K * tr(eps) * 1 + s_trial - 2*mu*dl*normal;
-//    for (int i=0; i<6; i++)
-//      stress_gp[i] = sig_dev_trial[i];
-//    for (int i=0; i<3; i++)
-//      stress_gp[i] += material.lambda * (strain_gp[0] + strain_gp[1] + strain_gp[2]);
+    //sig_2 = s_trial + K * tr(eps) * 1 - 2*mu*dl*normal;
+    for (int i=0; i<6; i++)
+      stress_gp[i] = sig_dev_trial[i];
+    for (int i=0; i<3; i++)
+      stress_gp[i] += material.k * (eps[0] + eps[1] + eps[2]);
 //    for (int i=0; i<6; i++)
 //      stress_gp[i] -= 2 * material.mu * dl * normal[i];
-    for (int i=0; i<3; i++) {
-      stress_gp[i] = 0.0;
-      for (int j=0; j<3; j++) {
-	stress_gp[i] += lambda*strain_gp[j];
-      }
-      stress_gp[i] += 2*mu*strain_gp[i];
-    }
-    for (int i=3; i<6; i++) {
-      stress_gp[i] = mu*strain_gp[i];
-    }
+/*
+    */
 
     for (int i=0; i<6; i++)
       vars_new[intvar_ix(e, gp, i)] = eps_p[i];
@@ -967,23 +962,14 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double strain_gp[6], do
 
   } else {
 
-    ctan[0][0]=(1-nu); ctan[0][1]=nu    ; ctan[0][2]=nu    ; ctan[0][3]=0          ; ctan[0][4]=0          ; ctan[0][5]=0          ;
-    ctan[1][0]=nu    ; ctan[1][1]=(1-nu); ctan[1][2]=nu    ; ctan[1][3]=0          ; ctan[1][4]=0          ; ctan[1][5]=0          ;
-    ctan[2][0]=nu    ; ctan[2][1]=nu    ; ctan[2][2]=(1-nu); ctan[2][3]=0          ; ctan[2][4]=0          ; ctan[2][5]=0          ;
-    ctan[3][0]=0     ; ctan[3][1]=0     ; ctan[3][2]=0     ; ctan[3][3]=(1-2*nu)/2 ; ctan[3][4]=0          ; ctan[3][5]=0          ;
-    ctan[4][0]=0     ; ctan[4][1]=0     ; ctan[4][2]=0     ; ctan[4][3]=0          ; ctan[4][4]=(1-2*nu)/2 ; ctan[4][5]=0          ;
-    ctan[5][0]=0     ; ctan[5][1]=0     ; ctan[5][2]=0     ; ctan[5][3]=0          ; ctan[5][4]=0          ; ctan[5][5]=(1-2*nu)/2 ;
-
-    for (int i=0; i<6; i++)
-      for (int j=0; j<6; j++)
-	ctan[i][j] *= E/((1+nu)*(1-2*nu));
-
-    for (int i=0; i<6; i++) {
+    for (int i=0; i<3; i++) {
       stress_gp[i] = 0.0;
-      for (int j=0; j<6; j++) {
-	stress_gp[i] += ctan[i][j] * strain_gp[j];
-      }
+      for (int j=0; j<3; j++)
+	stress_gp[i] += lambda*eps[j];
+      stress_gp[i] += 2*mu*eps[i];
     }
+    for (int i=3; i<6; i++)
+      stress_gp[i] = mu*eps[i];
   }
 
 }
