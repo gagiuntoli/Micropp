@@ -417,7 +417,6 @@ void Problem::getElemental_A (int ex, int ey, double *vars_old, double (&Ae)[2*4
 
 void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (&Ae)[3*8*3*8])
 {
-  bool plasticity;
   bool ctan_secant = false;
   bool ctan_pert   = false;
   bool ctan_exact  = true;
@@ -429,7 +428,6 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
 
   double mu = material.mu;
   double lambda = material.lambda;
-  plasticity = material.plasticity;
 
   /*
      C = lambda * (1x1) + 2 mu I 
@@ -448,15 +446,15 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
 
   for (int gp=0; gp<8; gp++) {
 
-    if (plasticity == true) {
+    if (material.plasticity == true) {
 
       if (ctan_secant == true) {
 
 	bool non_linear;
 	double stress_pert[6], strain_pert[6], strain_0[6], deps = 0.00001;
 
+	getStrain (ex, ey, ez, gp, strain_0);
 	for (int i=0; i<6; i++) {
-	  getStrain (ex, ey, ez, gp, strain_0);
 	  for (int j=0; j<6; j++) strain_pert[j] = 0.0;
 	  strain_pert[i] = strain_0[i];
 	  getStress (ex, ey, ez, gp, strain_pert, vars_old, vars_dum_3, &non_linear, stress_pert);
@@ -467,19 +465,10 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
 
 //	double theta_1 = 1 - 2*material.mu*dl / sig_dev_trial_norm;
 //	double theta_2 = 1 / (1 + material.K_alpha) - (1 - theta_1);
-//
-//	for (int i=0; i<6; i++)
-//	  for (int j=0; j<6; j++)
-//	    ctan[i][j] = 0.0;
-//
-//	for (int i=0; i<3; i++)
-//	  for (int j=0; j<3; j++)
-//	    ctan[i][j] = material.k;
-//
 //	for (int i=0; i<6; i++)
 //	  for (int j=0; j<6; j++)
 //	    ctan[i][j] -= 2 * material.mu * theta_2 * normal[i] * normal[j];
-//
+
 //	for (int i=0; i<3; i++)
 //	  for (int j=0; j<3; j++)
 //	    ctan[i][j] -= 2 * material.mu * theta_1 * (1.0/3);
@@ -867,22 +856,13 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], double *
 {
   *non_linear = false;
 
-  double nu, E, lambda, mu;
   double ctan[6][6];
-  bool plasticity;
-
   int e = glo_elem3D(ex,ey,ez);
 
   material_t material;
   getMaterial(e, material);
 
-  E  = material.E;
-  nu = material.nu;
-  lambda = material.lambda;
-  mu = material.mu;
-  plasticity = material.plasticity;
-
-  if (plasticity == true) {
+  if (material.plasticity == true) {
 
     double eps_dev[6];
     double eps_p_dev_1[6], eps_p_1[6], eps_p[6];
@@ -915,7 +895,6 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], double *
 
     if (f_trial > 0) {
 
-      cout << "LINEAR = NO" << endl;
       *non_linear = true;
 
       for (int i=0; i<6; i++)
@@ -937,10 +916,8 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], double *
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i] + dl*normal[i];
 
-    }
-    else {
+    } else {
 
-      // cout << "LINEAR = YES" << endl;
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i];
       alpha = alpha_1;
@@ -951,10 +928,8 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], double *
       stress_gp[i] = sig_dev_trial[i];
     for (int i=0; i<3; i++)
       stress_gp[i] += material.k * (eps[0] + eps[1] + eps[2]);
-//    for (int i=0; i<6; i++)
-//      stress_gp[i] -= 2 * material.mu * dl * normal[i];
-/*
-    */
+    for (int i=0; i<6; i++)
+      stress_gp[i] -= 2 * material.mu * dl * normal[i];
 
     for (int i=0; i<6; i++)
       vars_new[intvar_ix(e, gp, i)] = eps_p[i];
@@ -965,11 +940,12 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], double *
     for (int i=0; i<3; i++) {
       stress_gp[i] = 0.0;
       for (int j=0; j<3; j++)
-	stress_gp[i] += lambda*eps[j];
-      stress_gp[i] += 2*mu*eps[i];
+	stress_gp[i] += material.lambda*eps[j];
+      stress_gp[i] += 2*material.mu*eps[i];
     }
     for (int i=3; i<6; i++)
-      stress_gp[i] = mu*eps[i];
+      stress_gp[i] = material.mu*eps[i];
+
   }
 
 }
