@@ -418,8 +418,8 @@ void Problem::getElemental_A (int ex, int ey, double *vars_old, double (&Ae)[2*4
 void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (&Ae)[3*8*3*8])
 {
   bool ctan_secant = false;
-  bool ctan_pert   = false;
-  bool ctan_exact  = true;
+  bool ctan_pert   = true;
+  bool ctan_exact  = false;
 
   int e = glo_elem3D(ex,ey,ez);
 
@@ -451,14 +451,23 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
       if (ctan_secant == true) {
 
 	bool non_linear;
-	double stress_pert[6], strain_pert[6], strain_0[6], deps = 0.00001;
+	double stress_pert[6], strain_pert[6], strain_0[6], d_strain = 1.0e-8;
 
 	getStrain (ex, ey, ez, gp, strain_0);
 	for (int i=0; i<6; i++) {
-	  for (int j=0; j<6; j++) strain_pert[j] = 0.0;
-	  strain_pert[i] = strain_0[i];
+
+	  for (int j=0; j<6; j++)
+	    strain_pert[j] = 0.0;
+
+	  if (fabs(strain_0[i]) > 1.0e-7)
+	    strain_pert[i] = strain_0[i];
+	  else
+	    strain_pert[i] = d_strain;
+
 	  getStress (ex, ey, ez, gp, strain_pert, vars_old, vars_dum_3, &non_linear, stress_pert);
-	  for (int j=0; j<6; j++) ctan[j][i] = stress_pert[j] / strain_pert[i];
+
+	  for (int j=0; j<6; j++)
+	    ctan[j][i] = stress_pert[j] / strain_pert[i];
 	}
 
       } else if (ctan_exact == true) {
@@ -479,15 +488,20 @@ void Problem::getElemental_A (int ex, int ey, int ez, double *vars_old, double (
       } else if (ctan_pert == true) {
 
 	bool non_linear;
-	double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 0.00001;
+	double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 1.0e-8;
 	getStrain (ex, ey, ez, gp, strain_0);
 	getStress (ex, ey, ez, gp, strain_0, vars_old, vars_dum_3, &non_linear, stress_0);
 
-	for (int i=0; i<6; i++) {
-	  for (int j=0; j<6; j++) strain_pert[j] = strain_0[j];
+	for (int i=0; i<6; i++)
+	{
+	  for (int j=0; j<6; j++)
+	    strain_pert[j] = strain_0[j];
+
 	  strain_pert[i] += deps;
 	  getStress (ex, ey, ez, gp, strain_pert, vars_old, vars_dum_3, &non_linear, stress_pert);
-	  for (int j=0; j<6; j++) ctan[j][i] = (stress_pert[j] - stress_0[j]) / deps;
+
+	  for (int j=0; j<6; j++)
+	    ctan[j][i] = (stress_pert[j] - stress_0[j]) / deps;
 	}
 
       } 
