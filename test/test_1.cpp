@@ -69,8 +69,8 @@ int main (int argc, char *argv[])
     bool non_linear;
 
     micro.setDisp(eps);
-    micro.Assembly_A(NULL);
-    micro.Assembly_b(NULL, NULL, &non_linear);
+    micro.Assembly_A();
+    micro.Assembly_b(&non_linear);
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time assembly : " << t_lap << endl;
@@ -82,12 +82,12 @@ int main (int argc, char *argv[])
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time solve : " << t_lap << endl;
 
-    micro.newtonRaphson(NULL, NULL, &non_linear);
+    micro.newtonRaphson(&non_linear);
 
     // calc average
     start = clock();
     double stress_ave[6];
-    micro.calcAverageStress(NULL, stress_ave);
+    micro.calcAverageStress(stress_ave);
     cout << "Average stress = " << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << endl;
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
@@ -104,8 +104,8 @@ int main (int argc, char *argv[])
 
     // writting
     start = clock();
-    micro.calcDistributions(NULL);
-    micro.writeVtu(3, 4, NULL);
+    micro.calcDistributions();
+    micro.writeVtu(3, 4);
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "Time Writing  : " << t_lap << endl;

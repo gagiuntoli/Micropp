@@ -84,9 +84,8 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   stress = (double*)malloc(nelem*nvoi*sizeof(double));
   strain = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_type = (int*)malloc(nelem*sizeof(int));
-  vars_dum_1 = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
-  vars_dum_2 = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
-  vars_dum_3 = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
+  vars_old = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
+  vars_new = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
 
   for (int i=0; i<nn*dim; i++)
     u[i] = 0.0;
@@ -112,13 +111,11 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   NewRap_Its = 3;
   NewRap_Tol = 1.0e-5;
 
-  if (dim == 2) {
+  if (dim == 2)
     ell_init_2D (A, dim, nx, ny);
-  } else if (dim == 3) {
+  else if (dim == 3)
     ell_init_3D (A, dim, nx, ny, nz);
-  }
 
-  return;
 }
 
 Problem::~Problem (void)
@@ -130,9 +127,7 @@ Problem::~Problem (void)
   free(stress);
   free(strain);
   free(elem_type);
-  free(vars_dum_1);
-  free(vars_dum_2);
-  free(vars_dum_3);
+  free(vars_old);
 }
 
 int Problem::getElemType (int ex, int ey)

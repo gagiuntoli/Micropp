@@ -33,7 +33,7 @@ program main_wrap
   strain(1) = 0.005
   strain(2) = 0.0
   strain(3) = 0.0
-  call micro_loc_hom_stress(69,strain, stress) 
+  call micro_loc_hom_stress(69, strain, stress) 
   WRITE(*,'(F12.2,F12.2,F12.2,A)') stress(1), stress(2), stress(3)
 
   call micro_loc_hom_ctan(69,strain, ctan) 

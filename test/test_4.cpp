@@ -66,9 +66,9 @@ int main (int argc, char *argv[])
     start = clock();
     micro.setDisp(eps);
     bool non_linear;
-    double norm = micro.Assembly_b(NULL, NULL, &non_linear);
+    double norm = micro.Assembly_b(&non_linear);
     cout << "Residual norm = " << norm << endl;
-    micro.Assembly_A(NULL);
+    micro.Assembly_A();
     end = clock();
     t_lap = double(end - start) / CLOCKS_PER_SEC;
     cout << "time assembly : " << t_lap << endl;
@@ -82,11 +82,11 @@ int main (int argc, char *argv[])
     for (int i=0; i<micro.nn*dim; i++)
       micro.u[i] = micro.u[i] + micro.du[i];
 
-    norm = micro.Assembly_b(NULL, NULL, &non_linear);
+    norm = micro.Assembly_b(&non_linear);
     cout << "Residual norm = " << norm << endl;
 
-    micro.calcDistributions(NULL);
-    micro.writeVtu (1, 2, NULL);
+    micro.calcDistributions();
+    micro.writeVtu (1, 2);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

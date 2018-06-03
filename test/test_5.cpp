@@ -63,10 +63,10 @@ int main (int argc, char *argv[])
 
     bool non_linear;
     micro1.setDisp(eps1);
-    micro1.newtonRaphson(NULL, NULL, &non_linear);
+    micro1.newtonRaphson(&non_linear);
 
     double stress_ave[6];
-    micro1.calcAverageStress(NULL, stress_ave);
+    micro1.calcAverageStress(stress_ave);
     cout 
       << "Average stress = " 
       << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
@@ -81,8 +81,8 @@ int main (int argc, char *argv[])
       << strain_ave[3] << " " << strain_ave[4] << " " << strain_ave[5]
       << endl;
 
-    micro1.calcDistributions(NULL);
-    micro1.writeVtu (1, 2, NULL);
+    micro1.calcDistributions();
+    micro1.writeVtu (1, 2);
 
     double eps2[6] = {0.0, 0.0, 0.0, 0.005, 0.0, 0.0};
     micro_type = 1; // 2 materiales matriz y fibra (3D 2 capas planas)
@@ -103,9 +103,9 @@ int main (int argc, char *argv[])
     Problem micro2 (dim, size, micro_type, micro_params, mat_types, params);
 
     micro2.setDisp(eps2);
-    micro2.newtonRaphson(NULL, NULL, &non_linear);
+    micro2.newtonRaphson(&non_linear);
 
-    micro2.calcAverageStress(NULL, stress_ave);
+    micro2.calcAverageStress(stress_ave);
     cout 
       << "Average stress = " 
       << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
@@ -119,8 +119,8 @@ int main (int argc, char *argv[])
       << strain_ave[3] << " " << strain_ave[4] << " " << strain_ave[5]
       << endl;
 
-    micro2.calcDistributions(NULL);
-    micro2.writeVtu (2, 2, NULL);
+    micro2.calcDistributions();
+    micro2.writeVtu (2, 2);
 
   } catch (int &e) {
     cerr << "Error : " << e << endl;

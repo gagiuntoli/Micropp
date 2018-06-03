@@ -74,7 +74,7 @@ int main (int argc, char *argv[])
     cout << "Time calc MacroStress: " << t_lap << endl;
 
     // test MacroCtan calculation
-    double MacroCtan[81];
+    double MacroCtan[36];
     start = clock();
     micro.loc_hom_Ctan (1, eps, MacroCtan);
     cout << "MacroCtan: " << endl;

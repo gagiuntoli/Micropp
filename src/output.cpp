@@ -9,22 +9,23 @@ using namespace std;
 
 void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStrain)
 {
-  double *vars_old;
-
   // search for the macro gauss point
   std::list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
-     cout << "Macro GP = " << macroGp_id << " found. (output)" << endl;
-     if (it->int_vars != NULL) {
-       vars_old = it->int_vars;
-     }
-     else {
-       for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
-	 vars_dum_1[i] = 0.0;
-       vars_old = vars_dum_1;
-     }
-     break;
+  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++)
+  {
+    if (it->id == macroGp_id)
+    {
+      // cout << "Macro GP = " << macroGp_id << " found. (output)" << endl;
+      if (it->int_vars != NULL) {
+	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	  vars_old[i] = it->int_vars[i];
+      }
+      else
+      {
+	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	  vars_old[i] = 0.0;
+      }
+      break;
     }
   }
   if (it ==  MacroGp_list.end()) {
@@ -33,12 +34,12 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
 
   double MacroStress[6];
   loc_hom_Stress(macroGp_id, MacroStrain, MacroStress);
-  calcDistributions(vars_old);
+  calcDistributions();
 
-  writeVtu(time_step, elem, vars_old);
+  writeVtu(time_step, elem);
 }
 
-void Problem::writeVtu (int time_step, int elem, double *vars_old)
+void Problem::writeVtu (int time_step, int elem)
 {
   std::stringstream fname_vtu_s;
   fname_vtu_s  << "micropp_" << elem << "_" << time_step << ".vtu";
