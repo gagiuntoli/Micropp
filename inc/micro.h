@@ -55,11 +55,7 @@ class Problem {
     int *elem_type; // number that is changes depending on the element type
     double *vars_old, *vars_new; 
 
-    int NewRap_Its;
-    double NewRap_Tol;
-
     ell_matrix A;
-    ell_solver solver;
     double *u, *du, *b;
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);

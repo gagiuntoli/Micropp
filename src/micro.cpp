@@ -51,8 +51,6 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
     }
   }
 
-  solver.max_its = 1000;
-  solver.min_tol = 1.0e-8;
   this->dim = dim;
   if (dim == 2) {
     nx = size[0];
@@ -108,9 +106,6 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
     }
   }
 
-  NewRap_Its = 3;
-  NewRap_Tol = 1.0e-5;
-
   if (dim == 2)
     ell_init_2D (A, dim, nx, ny);
   else if (dim == 3)
@@ -139,7 +134,7 @@ int Problem::getElemType (int ex, int ey)
     double x2 = lx/2;
     double y2 = ly/2;
     double rad = micro_params[3];
-    if ( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) < rad*rad )
+    if ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) < rad*rad)
       return 1;
     else 
       return 0;
