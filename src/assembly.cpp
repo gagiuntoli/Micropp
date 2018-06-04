@@ -9,13 +9,8 @@ using namespace std;
 void Problem::setDisp (double *eps)
 {
 
-  if (dim == 2) {
-
-    /* dim 2 
-       | eps(0)    eps(2)/2 |
-       | eps(2)/2  eps(1)   |
-     */
-
+  if (dim == 2)
+  {
     // y = 0
     for (int i=0; i<nx; i++) {
       double xcoor = i*dx;
@@ -54,12 +49,6 @@ void Problem::setDisp (double *eps)
     }
 
   } else if (dim == 3) {
-
-    /* dim 3
-       | eps(0)    eps(3)/2  eps(4)/2 |
-       | eps(3)/2  eps(1)    eps(5)/2 |
-       | eps(4)/2  eps(5)/2  eps(2)   |
-     */
 
     // z = 0
     for (int i=0; i<nx; i++) {
@@ -418,50 +407,50 @@ void Problem::getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4])
 
 void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
 {
-  bool ctan_secant = false;
-  bool ctan_pert   = false;
-  bool ctan_exact  = true;
-
   int e = glo_elem3D(ex,ey,ez);
-
   material_t material;
   getMaterial(e, material);
-
-  double mu = material.mu;
-  double lambda = material.lambda;
+  double ctan[6][6];
 
   /*
      C = lambda * (1x1) + 2 mu I 
      last 3 components are without the 2 because we use eps = {e11 e22 e33 2*e12 2*e13 2*e23}
    */
-  double ctan[6][6];
-  ctan[0][0]=lambda+2*mu; ctan[0][1]=lambda     ; ctan[0][2]=lambda     ; ctan[0][3]=0   ; ctan[0][4]=0   ; ctan[0][5]=0;
-  ctan[1][0]=lambda     ; ctan[1][1]=lambda+2*mu; ctan[1][2]=lambda     ; ctan[1][3]=0   ; ctan[1][4]=0   ; ctan[1][5]=0;
-  ctan[2][0]=lambda     ; ctan[2][1]=lambda     ; ctan[2][2]=lambda+2*mu; ctan[2][3]=0   ; ctan[2][4]=0   ; ctan[2][5]=0;
-  ctan[3][0]=0          ; ctan[3][1]=0          ; ctan[3][2]=0          ; ctan[3][3]=mu  ; ctan[3][4]=0   ; ctan[3][5]=0;
-  ctan[4][0]=0          ; ctan[4][1]=0          ; ctan[4][2]=0          ; ctan[4][3]=0   ; ctan[4][4]=mu  ; ctan[4][5]=0;
-  ctan[5][0]=0          ; ctan[5][1]=0          ; ctan[5][2]=0          ; ctan[5][3]=0   ; ctan[5][4]=0   ; ctan[5][5]=mu;
 
   for (int i=0; i<npe*dim*npe*dim; i++) 
     Ae[i] = 0.0;
 
-  for (int gp=0; gp<8; gp++) {
+  for (int gp=0; gp<8; gp++)
+  {
+    if (material.plasticity == true)
+    {
+      bool ctan_secant = false;
+      bool ctan_pert   = true;
+      bool ctan_exact  = false;
 
-    if (material.plasticity == true) {
-
-      if (ctan_secant == true) {
-
+      if (ctan_secant == true)
 	getCtanPlasSecant (ex, ey, ez, gp, ctan);
-
-      } else if (ctan_exact == true) {
-
+      else if (ctan_exact == true)
 	getCtanPlasExact (ex, ey, ez, gp, ctan);
-
-      } else if (ctan_pert == true) {
-
+      else if (ctan_pert == true)
 	getCtanPlasPert (ex, ey, ez, gp, ctan);
 
-      } 
+    } else {
+
+      for (int i=0; i<6; i++)
+	for (int j=0; j<6; j++)
+	  ctan[i][j] = 0.0;
+
+      for (int i=0; i<3; i++)
+	for (int j=0; j<3; j++)
+	  ctan[i][j] += material.lambda;
+
+      for (int i=0; i<3; i++)
+	ctan[i][i] += 2*material.mu;
+
+      for (int i=3; i<6; i++)
+	ctan[i][i] += material.mu;
+
     }
 
     double bmat[6][3*8], cxb[6][3*8];
@@ -517,23 +506,19 @@ void Problem::getCtanPlasExact (int ex, int ey, int ez, int gp, double ctan[6][6
   material_t material;
   getMaterial(e, material);
 
-  for (int i=0; i<3; i++)
-    for (int j=3; j<6; j++)
-      ctan[i][j] = 0.0;
-
-  for (int i=3; i<6; i++)
-    for (int j=0; j<3; j++)
+  for (int i=0; i<6; i++)
+    for (int j=0; j<6; j++)
       ctan[i][j] = 0.0;
 
   for (int i=0; i<3; i++)
     for (int j=0; j<3; j++)
-      ctan[i][j] = material.lambda;
+      ctan[i][j] += material.lambda;
 
   for (int i=0; i<3; i++)
     ctan[i][i] += 2*material.mu;
 
   for (int i=3; i<6; i++)
-    ctan[i][i] = material.mu;
+    ctan[i][i] += material.mu;
 
 //  double theta_1 = 1 - 2*material.mu*dl / sig_dev_trial_norm;
 //  double theta_2 = 1 / (1 + material.K_alpha) - (1 - theta_1);
@@ -914,12 +899,11 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
   double ctan[6][6];
   int e = glo_elem3D(ex,ey,ez);
-
   material_t material;
   getMaterial(e, material);
 
-  if (material.plasticity == true) {
-
+  if (material.plasticity == true)
+  {
     double eps_dev[6];
     double eps_p_dev_1[6], eps_p_1[6], eps_p[6];
     double normal[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -949,8 +933,8 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
     double f_trial = sig_dev_trial_norm - (material.Sy + material.K_alpha * alpha_1);
 
-    if (f_trial > 0) {
-
+    if (f_trial > 0)
+    {
       *non_linear = true;
 
       for (int i=0; i<6; i++)
@@ -966,8 +950,8 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 	dl -= g/dg;
 	alpha += sqrt(2.0/3) * dl;
 	its ++;
-	// cout << "g = " << g << endl;
-      } while (fabs(g)>1.0 && its<4);
+	//cout << "g = " << g << endl;
+      } while (fabs(g)>1.0e-1 && its<100000);
 
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i] + dl*normal[i];
