@@ -156,7 +156,7 @@ void Problem::writeVtu (int time_step, int elem)
   file << "<DataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     for (int v=0; v<nvoi; v++)
-      file << strain[e*nvoi + v] << " ";
+      file << elem_strain[e*nvoi + v] << " ";
     file << endl;
   }
   file << "</DataArray>";
@@ -164,7 +164,7 @@ void Problem::writeVtu (int time_step, int elem)
   file << "<DataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
   for (int e=0; e<nelem; e++) {
     for (int v=0; v<nvoi; v++)
-      file << stress[e*nvoi + v] << " ";
+      file << elem_stress[e*nvoi + v] << " ";
     file << endl;
   }
   file << "</DataArray>";

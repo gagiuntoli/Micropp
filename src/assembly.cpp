@@ -805,8 +805,8 @@ void Problem::calcDistributions (void)
 	double vol = dx*dy;
 	int e = glo_elem3D(ex,ey,0);
 	for (int v=0; v<nvoi; v++) {
-	  strain[e*nvoi + v] = strain_aux[v] / vol;
-	  stress[e*nvoi + v] = stress_aux[v] / vol;
+	  elem_strain[e*nvoi + v] = strain_aux[v] / vol;
+	  elem_stress[e*nvoi + v] = stress_aux[v] / vol;
 	}
       }
     }
@@ -841,8 +841,8 @@ void Problem::calcDistributions (void)
 	  double vol = dx*dy*dz;
           int e = glo_elem3D(ex,ey,ez);
 	  for (int v=0; v<nvoi; v++) {
-	    strain[e*nvoi + v] = strain_aux[v] / vol;
-	    stress[e*nvoi + v] = stress_aux[v] / vol;
+	    elem_strain[e*nvoi + v] = strain_aux[v] / vol;
+	    elem_stress[e*nvoi + v] = stress_aux[v] / vol;
 	  }
 	}
       }
@@ -951,7 +951,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 	alpha += sqrt(2.0/3) * dl;
 	its ++;
 	//cout << "g = " << g << endl;
-      } while ((fabs(g) > 1.0e-1) && (its < 100000));
+      } while ((fabs(g) > 1.0e-2) && (its < 100000));
 
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i] + dl*normal[i];

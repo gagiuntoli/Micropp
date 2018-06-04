@@ -50,8 +50,8 @@ class Problem {
     material_t material_list[MAX_MATS];
     std::list<MacroGp_t> MacroGp_list;
 
-    double *strain; // average strain on each element
-    double *stress; // average stress on each element
+    double *elem_strain; // average strain on each element
+    double *elem_stress; // average stress on each element
     int *elem_type; // number that is changes depending on the element type
     double *vars_old, *vars_new; 
 

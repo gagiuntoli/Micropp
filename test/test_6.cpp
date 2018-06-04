@@ -8,9 +8,9 @@ int main (int argc, char *argv[])
 {
 
   int dim = 3;
-  int nx = 30;
-  int ny = 30;
-  int nz = 30;
+  int nx = 10;
+  int ny = 10;
+  int nz = 10;
   double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   int size[3];
@@ -18,15 +18,15 @@ int main (int argc, char *argv[])
   size[1] = ny;
   size[2] = nz;
 
-  int micro_type = 0; // 2 materiales matriz y fibra (3D esfera en matriz)
+  int micro_type = 1; // 2 materiales matriz y fibra (3D esfera en matriz)
   double micro_params[4]; 
   micro_params[0] = 1.0; // lx
   micro_params[1] = 1.0; // ly
   micro_params[2] = 1.0; // lz
-  micro_params[3] = 0.2; // radio de la esfera
+  micro_params[3] = 0.5; // radio de la esfera
 
   int mat_types[2]; // dos materiales lineales (type = 0)
-  mat_types[0] = 1;
+  mat_types[0] = 0;
   mat_types[1] = 1;
 
   double params[2*MAX_MAT_PARAM];
@@ -51,13 +51,13 @@ int main (int argc, char *argv[])
     cout << "Time step = " << t << endl;
 
     if ((0 <= t) && (t<45))
-      eps[0] += d_eps;
+      eps[1] += d_eps;
     else
-      eps[0] -= d_eps;
+      eps[1] -= d_eps;
 
     micro.loc_hom_Stress (1, eps, stress_ave);
 
-    cout << "e11 = " << eps[0] << endl;
+    cout << "e11 = " << eps[1] << endl;
     cout 
       << "Average stress = " 
       << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 

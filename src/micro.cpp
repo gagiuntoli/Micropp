@@ -79,8 +79,8 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   b  = (double*)malloc(nn*dim*sizeof(double));
   du = (double*)malloc(nn*dim*sizeof(double));
   u  = (double*)malloc(nn*dim*sizeof(double));
-  stress = (double*)malloc(nelem*nvoi*sizeof(double));
-  strain = (double*)malloc(nelem*nvoi*sizeof(double));
+  elem_stress = (double*)malloc(nelem*nvoi*sizeof(double));
+  elem_strain = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_type = (int*)malloc(nelem*sizeof(int));
   vars_old = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
   vars_new = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
@@ -119,8 +119,8 @@ Problem::~Problem (void)
   free(b);
   free(du);
   free(u);
-  free(stress);
-  free(strain);
+  free(elem_stress);
+  free(elem_strain);
   free(elem_type);
   free(vars_old);
 }
@@ -160,7 +160,7 @@ int Problem::getElemType (int ex, int ey, int ez)
     double y2 = ly/2;
     double z2 = lz/2;
     double rad = micro_params[3];
-    if ( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1) < rad*rad )
+    if ((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1) < rad*rad)
       return 1;
     else 
       return 0;
