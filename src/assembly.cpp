@@ -951,7 +951,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 	alpha += sqrt(2.0/3) * dl;
 	its ++;
 	//cout << "g = " << g << endl;
-      } while (fabs(g)>1.0e-1 && its<100000);
+      } while ((fabs(g) > 1.0e-1) && (its < 100000));
 
       for (int i=0; i<6; i++)
 	eps_p[i] = eps_p_1[i] + dl*normal[i];
