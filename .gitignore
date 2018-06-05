@@ -25,6 +25,8 @@ pics
 plot_output.sh
 compile_opt.sh
 compile_debug.sh
+extract_data.py
 !scripts/plot_output.sh
 !scripts/compile_opt.sh
 !scripts/compile_debug.sh
+!scripts/extract_data.py
