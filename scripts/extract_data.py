@@ -3,11 +3,11 @@ import numpy as np
 import scipy as sc
 import scipy
 import vtk
-import vtk2numpy as vn
+#import vtk2numpy as vn
 import os
 import sys
 
-file_in = "micropp_1_20.vtu"
+file_in = "micropp_1_2.vtu"
 print "check for file "+file_in,
 try:
   f = open(file_in,'rb')
@@ -19,16 +19,23 @@ except IOError:
 VTU  = XMLUnstructuredGridReader(FileName=file_in)
 KEYs = VTU.GetPointDataInformation().keys(); print KEYs;
 KEYs = VTU.GetCellDataInformation().keys(); print KEYs;
-SLICE = Slice(Input=VTU)
-SLICE.SliceType.Origin = [1,0,0]
-SLICE.SliceType.Normal = [1,0,0]
 
-print "Slice Origin : ", SLICE.SliceType.Origin
-print "Slice Normal : ", SLICE.SliceType.Normal
+slice1 = Slice(Input=VTU)
+slice1.SliceType = 'Plane'
+slice1.SliceOffsetValues = [0.0]
+slice1.SliceType.Origin = [1.0, 0.0, 0.0]
+slice1.SliceType.Normal = [1.0, 0.0, 0.0]
 
-Result = IntegrateVariables(SLICE, FieldData="stress")
+IntegrateVariables1 = IntegrateVariables(Input=slice1)
+DataSliceFile = paraview.servermanager.Fetch(IntegrateVariables1)
 
-print Result
+numCells = DataSliceFile.GetNumberOfCells()
+U1 = [ ]
+for x in range(numCells):
+  U1.append(DataSliceFile.GetCellData().GetArray('stress').GetValue(x))
+print U1
+
+#print IntegrateVariables1
 
 #n_pvtu_files = 6
 #displ_x = np.zeros( (n_pvtu_files,1) )
