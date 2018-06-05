@@ -24,5 +24,7 @@ tuvieja
 pics
 plot_output.sh
 compile_opt.sh
+compile_debug.sh
 !scripts/plot_output.sh
 !scripts/compile_opt.sh
+!scripts/compile_debug.sh
