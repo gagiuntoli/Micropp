@@ -22,3 +22,7 @@ test_5
 test_6
 tuvieja
 pics
+plot_output.sh
+compile_opt.sh
+!scripts/plot_output.sh
+!scripts/compile_opt.sh
