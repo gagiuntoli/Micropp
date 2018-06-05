@@ -3,6 +3,8 @@
 void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *MacroStress)
 {
   bool allocate = false;
+  bool filter = true;
+  double tol_filter = 1.0e-5;
 
   // search for the macro gauss point, if not found just create and insert
   std::list<MacroGp_t>::iterator it;
@@ -66,12 +68,20 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   double stress_ave[6];
   calcAverageStress(stress_ave);
   for (int v=0; v<nvoi; v++)
+  {
     MacroStress[v] = stress_ave[v];
 
+    if (filter == true)
+      if (stress_ave[v] < tol_filter)
+	MacroStress[v] = 0.0;
+  }
 }
 
 void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan)
 {
+  bool filter = true;
+  double tol_filter = 1.0e-2;
+
   // search for the macro gauss point, if not found just create and insert
   std::list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++)
@@ -120,8 +130,15 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
     newtonRaphson(&non_linear);
 
     calcAverageStress(stress_ave);
+
     for (int v=0; v<nvoi; v++)
+    {
       MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
+
+      if (filter == true)
+	if (MacroCtan[v*nvoi + i] < tol_filter)
+	  MacroCtan[v*nvoi + i] = 0.0;
+    }
   }
 
 }

@@ -50,14 +50,18 @@ int main (int argc, char *argv[])
 
     int types[2]; // dos materiales lineales (type = 0)
     types[0] = 0;
-    types[1] = 0;
+    types[1] = 1;
 
     double params[2*MAX_MAT_PARAM];
     params[0*MAX_MAT_PARAM + 0] = 1.0e6;
     params[0*MAX_MAT_PARAM + 1] = 0.3;
+    params[0*MAX_MAT_PARAM + 2] = 1.0e4;
+    params[0*MAX_MAT_PARAM + 3] = 0.0e-1;
 
-    params[1*MAX_MAT_PARAM + 0] = 1.0e7;
+    params[1*MAX_MAT_PARAM + 0] = 1.0e6;
     params[1*MAX_MAT_PARAM + 1] = 0.3;
+    params[1*MAX_MAT_PARAM + 2] = 1.0e4;
+    params[1*MAX_MAT_PARAM + 3] = 0.0e-1;
 
     Problem micro (dim, size, micro_type, micro_params, types, params);
 

@@ -582,8 +582,8 @@ void Problem::calc_bmat_3D (int gp, double bmat[6][3*8]) {
     bmat[1][i*dim] = 0        ; bmat[1][i*dim+1] = dsh[i][1]; bmat[1][i*dim+2] = 0        ;
     bmat[2][i*dim] = 0        ; bmat[2][i*dim+1] = 0        ; bmat[2][i*dim+2] = dsh[i][2];
     bmat[3][i*dim] = dsh[i][1]; bmat[3][i*dim+1] = dsh[i][0]; bmat[3][i*dim+2] = 0        ;
-    bmat[4][i*dim] = 0        ; bmat[4][i*dim+1] = dsh[i][2]; bmat[4][i*dim+2] = dsh[i][1];
-    bmat[5][i*dim] = dsh[i][2]; bmat[5][i*dim+1] = 0        ; bmat[5][i*dim+2] = dsh[i][0];
+    bmat[4][i*dim] = dsh[i][2]; bmat[4][i*dim+1] = 0        ; bmat[4][i*dim+2] = dsh[i][0];
+    bmat[5][i*dim] = 0        ; bmat[5][i*dim+1] = dsh[i][2]; bmat[5][i*dim+2] = dsh[i][1];
   }
 
 }

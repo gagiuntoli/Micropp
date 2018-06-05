@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <ctime>
 #include "micro.h"
 
@@ -43,7 +44,7 @@ int main (int argc, char *argv[])
   Problem micro (dim, size, micro_type, micro_params, mat_types, params);
 
   int time_steps = 100;
-  double stress_ave[6];
+  double stress_ave[6], ctan_ave[36];
   double d_eps = 0.001;
 
   for (int t=0; t<time_steps; t++) {
@@ -63,6 +64,15 @@ int main (int argc, char *argv[])
       << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
       << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
       << endl;
+
+    micro.loc_hom_Ctan (1, eps, ctan_ave);
+
+    cout <<"Average Ctan = " << endl;
+    for (int i=0; i<6; i++) {
+      for (int j=0; j<6; j++)
+	cout << setw (8) << std::setprecision(3) << ctan_ave[i*6 + j] << " ";
+      cout << endl;
+    }
 
     micro.output (t, 1, 1, eps);
   }
