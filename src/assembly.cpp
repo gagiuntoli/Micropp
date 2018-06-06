@@ -521,7 +521,7 @@ void Problem::getCtanPlasExact (int ex, int ey, int ez, int gp, double ctan[6][6
     ctan[i][i] += material.mu;
 
 //  double theta_1 = 1 - 2*material.mu*dl / sig_dev_trial_norm;
-//  double theta_2 = 1 / (1 + material.K_alpha) - (1 - theta_1);
+//  double theta_2 = 1 / (1 + material.Ka) - (1 - theta_1);
 //  for (int i=0; i<6; i++)
 //    for (int j=0; j<6; j++)
 //      ctan[i][j] -= 2 * material.mu * theta_2 * normal[i] * normal[j];
@@ -931,9 +931,11 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
 }
 
+#define MAX_TOL_G 1.0e0
+#define MAX_ITS_G 100
+
 void Problem::plasticStep(
-    material_t &material,
-    double eps[6], double eps_p_1[6], 
+    material_t &material, double eps[6], double eps_p_1[6], 
     double alpha_1, double eps_p[6], double *alpha, bool *non_linear, double stress[6])
 {
 
@@ -959,7 +961,7 @@ void Problem::plasticStep(
       2*sig_dev_trial[4]*sig_dev_trial[4] + \
       2*sig_dev_trial[5]*sig_dev_trial[5]);
 
-  double f_trial = sig_dev_trial_norm - (material.Sy + material.K_alpha * alpha_1);
+  double f_trial = sig_dev_trial_norm - (material.Sy + material.Ka * alpha_1);
 
   if (f_trial > 0)
   {
@@ -973,13 +975,17 @@ void Problem::plasticStep(
     *alpha = alpha_1;
 
     do {
-      g   = sig_dev_trial_norm  - sqrt(2.0/3) * (material.Sy + material.K_alpha * (*alpha)) - 2 * material.mu * dl;
-      dg  = - 2*material.mu;
+      g   = sig_dev_trial_norm  - (material.Sy + material.Ka * (*alpha)) - 2 * material.mu * dl;
+      dg  = - 2 * material.mu * (1 + material.Ka/(3*material.mu));
       dl -= g/dg;
-      *alpha += sqrt(2.0/3) * dl;
+      *alpha += dl;
       its ++;
       //cout << "g = " << g << endl;
-    } while ((fabs(g) > 1.0e-2) && (its < 100000));
+    } while ((fabs(g) > MAX_TOL_G) && (its < MAX_ITS_G));
+      //cout << "its = " << its << endl;
+
+    if (fabs(g) > MAX_TOL_G) 
+      cout << "MICRO : plasticity not converged g = " << g << endl;
 
     for (int i=0; i<6; i++)
       eps_p[i] = eps_p_1[i] + dl*normal[i];
@@ -1019,7 +1025,7 @@ void Problem::getMaterial (int e, material_t &material)
   material.E          = material_list[mat_num].E;
   material.nu         = material_list[mat_num].nu;
   material.Sy         = material_list[mat_num].Sy;
-  material.K_alpha    = material_list[mat_num].K_alpha;
+  material.Ka         = material_list[mat_num].Ka;
   material.mu         = material_list[mat_num].mu;
   material.k          = material_list[mat_num].k;
   material.lambda     = material_list[mat_num].lambda;
