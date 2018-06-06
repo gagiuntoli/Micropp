@@ -1,91 +1,45 @@
 from paraview.simple import *
 import numpy as np
-import scipy as sc
-import scipy
-import vtk
-#import vtk2numpy as vn
-import os
-import sys
 
-file_in = "micropp_1_2.vtu"
-print "check for file "+file_in,
-try:
-  f = open(file_in,'rb')
-  print " ok"
-except IOError:
-  print " error, not found"
-  sys.exit()
+n_pvtu_files = 99;
+displ_y = np.zeros((n_pvtu_files,1))
+force_y = np.zeros((n_pvtu_files,1))
+alldata = np.zeros((n_pvtu_files,2))
 
-VTU  = XMLUnstructuredGridReader(FileName=file_in)
-KEYs = VTU.GetPointDataInformation().keys(); print KEYs;
-KEYs = VTU.GetCellDataInformation().keys(); print KEYs;
+for i in range(1, n_pvtu_files):
+#for i in range(54, 55):
 
-slice1 = Slice(Input=VTU)
-slice1.SliceType = 'Plane'
-slice1.SliceOffsetValues = [0.0]
-slice1.SliceType.Origin = [1.0, 0.0, 0.0]
-slice1.SliceType.Normal = [1.0, 0.0, 0.0]
+    file_in = "micropp_1_"+str(i)+".vtu"
+    try:
+      f = open(file_in,'rb')
+    except IOError:
+      print " error, not found"
+      sys.exit()
+    
+    VTU  = XMLUnstructuredGridReader(FileName=file_in)
+    KEYs = VTU.GetPointDataInformation().keys(); print KEYs;
+    KEYs = VTU.GetCellDataInformation().keys(); print KEYs;
+    
+    slice1 = Slice(Input=VTU)
+    slice1.SliceType = 'Plane'
+    slice1.SliceOffsetValues = [0.0]
+    slice1.SliceType.Origin = [0.0, 0.999, 0.0]
+    slice1.SliceType.Normal = [0.0, 1.0  , 0.0]
+    
+    IntegrateVariables1 = IntegrateVariables(Input=slice1)
+    DataSliceFile = paraview.servermanager.Fetch(IntegrateVariables1)
+    #print DataSliceFile 
+    
+    area       = DataSliceFile.GetCellData().GetArray('Area').GetValue(0)
+    sigyy_wall = DataSliceFile.GetCellData().GetArray('stress').GetValue(1)
+    displ_y[i] = DataSliceFile.GetPointData().GetArray('displ').GetValue(1)
+    force_y[i] = sigyy_wall*area
+    print area, sigyy_wall, displ_y[i], force_y[i]
 
-IntegrateVariables1 = IntegrateVariables(Input=slice1)
-DataSliceFile = paraview.servermanager.Fetch(IntegrateVariables1)
+#----------
 
-numCells = DataSliceFile.GetNumberOfCells()
-U1 = [ ]
-for x in range(numCells):
-  U1.append(DataSliceFile.GetCellData().GetArray('stress').GetValue(x))
-print U1
+for i in range(0,n_pvtu_files):
+    alldata[i] = [displ_y[i], force_y[i]]
 
-#print IntegrateVariables1
-
-#n_pvtu_files = 6
-#displ_x = np.zeros( (n_pvtu_files,1) )
-#displ_y = np.zeros( (n_pvtu_files,1) )
-#force_x = np.zeros( (n_pvtu_files,1) )
-#force_y = np.zeros( (n_pvtu_files,1) )
-#file_matrix = np.zeros((n_pvtu_files,4))
-#
-#j = 0
-#output_names = ["direct.dat", "homog_us.dat", "homog_tp.dat", "homog_ts.dat"]
-#
-#for result_path in ["direct", "homog/us", "homog/tp", "homog/ts"]: 
-#
-#    for force_path in ["force_x", "force_y"]: 
-#    
-#      for i in range(0,n_pvtu_files):
-#      
-#        file_in = result_path+"/"+force_path+"/macro_t_"+str(i)+".pvtu"
-#        print "check for file "+file_in,
-#        try:
-#           f = open(file_in,'rb')
-#           print " ok"
-#        except IOError:
-#          print " error, not found"
-#          sys.exit()
-#      
-#        PVTU  = XMLPartitionedUnstructuredGridReader(FileName=file_in)
-#        KEYs  = PVTU.GetPointDataInformation().keys()
-#        KEYs  = PVTU.GetCellDataInformation().keys()
-#      
-#        PlotOverLine1 = PlotOverLine(Input=PVTU, guiName="PlotOverLine1", Source="High Resolution Line Source")
-#        PlotOverLine1.Source.Point1 = [30.0, 00.0, 0.0]
-#        PlotOverLine1.Source.Point2 = [30.0, 30.0, 0.0]
-#        PlotOverLine1.Source.Resolution = 1000
-#        PlotOverLine1.UpdatePipeline()
-#      
-#        stress_pvtu = vn.getPtsData(PlotOverLine1, "stress")
-#        displ_pvtu = vn.getPtsData(PlotOverLine1, "displ")
-#        leng_pvtu = vn.getPtsData(PlotOverLine1, "arc_length")
-#    
-#        if force_path == "force_x":
-#           force_x[i] = np.trapz(stress_pvtu[:,0],leng_pvtu);
-#           displ_x[i] = displ_pvtu[0,0]
-#        elif force_path == "force_y":
-#           force_y[i] = np.trapz(stress_pvtu[:,2],leng_pvtu);
-#           displ_y[i] = displ_pvtu[0,1]
-#
-#
-#    for i in range(0,n_pvtu_files):
-#      file_matrix[i] = [ displ_x[i], displ_y[i], force_x[i], abs(force_y[i]) ]
-#    
-#    np.savetxt(output_names[j], file_matrix)
-#    j=j+1
+file_out = "f_vs_d.dat"
+np.savetxt(file_out, alldata)
