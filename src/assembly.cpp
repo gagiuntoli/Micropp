@@ -931,9 +931,6 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
 }
 
-#define MAX_TOL_G 1.0e-1
-#define MAX_ITS_G 100
-
 void Problem::plasticStep(
     material_t &material, double eps[6], double eps_p_1[6], 
     double alpha_1, double eps_p[6], double *alpha, bool *non_linear, double stress[6])
@@ -965,27 +962,14 @@ void Problem::plasticStep(
 
   if (f_trial > 0)
   {
+    // linear hardening K(alpha) = Sy + Ka * alpha
     *non_linear = true;
 
     for (int i=0; i<6; i++)
       normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
 
-    int its = 0;
-    double g, dg;
-    *alpha = alpha_1;
-
-    do {
-      g   = sig_dev_trial_norm  - (material.Sy + material.Ka * (*alpha)) - 2 * material.mu * dl;
-      dg  = - 2 * material.mu * (1 + material.Ka/(3*material.mu));
-      dl -= g/dg;
-      *alpha += dl;
-      its ++;
-      //cout << "g = " << g << endl;
-    } while ((fabs(g) > MAX_TOL_G) && (its < MAX_ITS_G));
-
-    if (fabs(g) > MAX_TOL_G) 
-      cout << "MICRO : plasticity not converged g = " << g << endl;
-
+    dl = f_trial/(2*material.mu);
+    *alpha += dl;
     for (int i=0; i<6; i++)
       eps_p[i] = eps_p_1[i] + dl*normal[i];
 
