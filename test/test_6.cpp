@@ -9,9 +9,9 @@ int main (int argc, char *argv[])
 {
 
   int dim = 3;
-  int nx = 15;
-  int ny = 15;
-  int nz = 15;
+  int nx = 10;
+  int ny = 10;
+  int nz = 10;
   double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   int size[3];
@@ -24,17 +24,17 @@ int main (int argc, char *argv[])
   micro_params[0] = 1.0; // lx
   micro_params[1] = 1.0; // ly
   micro_params[2] = 1.0; // lz
-  micro_params[3] = 0.5; // radio de la esfera
+  micro_params[3] = 0.1; // radio de la esfera
 
   int mat_types[2]; // dos materiales lineales (type = 0)
   mat_types[0] = 1;
   mat_types[1] = 0;
 
   double params[2*MAX_MAT_PARAM];
-  params[0*MAX_MAT_PARAM + 0] = 1.0e6;
-  params[0*MAX_MAT_PARAM + 1] = 0.3;
-  params[0*MAX_MAT_PARAM + 2] = 0.9e4;
-  params[0*MAX_MAT_PARAM + 3] = 2.0e5;
+  params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
+  params[0*MAX_MAT_PARAM + 1] = 0.3;   // nu
+  params[0*MAX_MAT_PARAM + 2] = 1.0e4; // Sy
+  params[0*MAX_MAT_PARAM + 3] = 1.0e1; // Ka
 
   params[1*MAX_MAT_PARAM + 0] = 1.0e6;
   params[1*MAX_MAT_PARAM + 1] = 0.3;
@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
 
   Problem micro (dim, size, micro_type, micro_params, mat_types, params);
 
-  int time_steps = 50;
+  int time_steps = 250;
   double stress_ave[6], ctan_ave[36];
   double d_eps = 0.001;
 
@@ -51,16 +51,16 @@ int main (int argc, char *argv[])
 
     cout << "Time step = " << t << endl;
 
-    if ((0 <= t) && (t<20))
-      eps[0] += d_eps;
-    else if ((20 <= t) && (t<60))
-      eps[0] -= d_eps;
-    else if ((60 <= t) && (t<110))
-      eps[0] += d_eps;
-    else if ((110 <= t) && (t<180))
-      eps[0] -= d_eps;
+    if (t<30)
+      eps[1] += d_eps;
+    else if (t<100)
+      eps[1] -= d_eps;
+    else if (t<200)
+      eps[1] += d_eps;
+    else if (t<250)
+      eps[1] -= d_eps;
     else
-      eps[0] += d_eps;
+      eps[1] += d_eps;
 
     micro.loc_hom_Stress (1, eps, stress_ave);
 

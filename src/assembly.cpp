@@ -931,7 +931,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
 }
 
-#define MAX_TOL_G 1.0e0
+#define MAX_TOL_G 1.0e-1
 #define MAX_ITS_G 100
 
 void Problem::plasticStep(
@@ -982,7 +982,6 @@ void Problem::plasticStep(
       its ++;
       //cout << "g = " << g << endl;
     } while ((fabs(g) > MAX_TOL_G) && (its < MAX_ITS_G));
-      //cout << "its = " << its << endl;
 
     if (fabs(g) > MAX_TOL_G) 
       cout << "MICRO : plasticity not converged g = " << g << endl;

@@ -72,7 +72,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
     MacroStress[v] = stress_ave[v];
 
     if (filter == true)
-      if (stress_ave[v] < tol_filter)
+      if (fabs(stress_ave[v]) < tol_filter)
 	MacroStress[v] = 0.0;
   }
 }
@@ -136,7 +136,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
       MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
 
       if (filter == true)
-	if (MacroCtan[v*nvoi + i] < tol_filter)
+	if (fabs(MacroCtan[v*nvoi + i]) < tol_filter)
 	  MacroCtan[v*nvoi + i] = 0.0;
     }
   }

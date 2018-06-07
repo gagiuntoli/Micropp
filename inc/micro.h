@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <list>
+#include <cmath>
 #include "ell.h"
 
 #define MAX_MAT_PARAM 10
