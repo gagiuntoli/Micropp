@@ -33,8 +33,8 @@ int main (int argc, char *argv[])
   double params[2*MAX_MAT_PARAM];
   params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
   params[0*MAX_MAT_PARAM + 1] = 0.3;   // nu
-  params[0*MAX_MAT_PARAM + 2] = 1.0e4; // Sy
-  params[0*MAX_MAT_PARAM + 3] = 1.0e1; // Ka
+  params[0*MAX_MAT_PARAM + 2] = 5.0e4; // Sy
+  params[0*MAX_MAT_PARAM + 3] = 5.0e4; // Ka
 
   params[1*MAX_MAT_PARAM + 0] = 1.0e6;
   params[1*MAX_MAT_PARAM + 1] = 0.3;
@@ -43,9 +43,9 @@ int main (int argc, char *argv[])
 
   Problem micro (dim, size, micro_type, micro_params, mat_types, params);
 
-  int time_steps = 250;
+  int time_steps = 130;
   double stress_ave[6], ctan_ave[36];
-  double d_eps = 0.001;
+  double d_eps = 0.01;
 
   for (int t=0; t<time_steps; t++) {
 
@@ -53,9 +53,9 @@ int main (int argc, char *argv[])
 
     if (t<30)
       eps[1] += d_eps;
-    else if (t<100)
+    else if (t<80)
       eps[1] -= d_eps;
-    else if (t<200)
+    else if (t<130)
       eps[1] += d_eps;
     else if (t<250)
       eps[1] -= d_eps;
