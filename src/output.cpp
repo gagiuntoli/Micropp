@@ -11,29 +11,27 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
 {
   // search for the macro gauss point
   std::list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++)
-  {
-    if (it->id == macroGp_id)
-    {
+  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
       // cout << "Macro GP = " << macroGp_id << " found. (output)" << endl;
       if (it->int_vars != NULL) {
 	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
 	  vars_old[i] = it->int_vars[i];
-      }
-      else
-      {
+      } else {
 	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
 	  vars_old[i] = 0.0;
       }
       break;
     }
   }
-  if (it ==  MacroGp_list.end()) {
+  if (it ==  MacroGp_list.end())
     cout << "output.cpp : Error the macro_id " << macroGp_id << " was not found in the list for plotting." << endl; 
-  }
 
   double MacroStress[6];
-  loc_hom_Stress(macroGp_id, MacroStrain, MacroStress);
+  bool non_linear;
+  setDisp(MacroStrain);
+  newtonRaphson(&non_linear);
+
   calcDistributions();
 
   writeVtu(time_step, elem);
@@ -135,7 +133,7 @@ void Problem::writeVtu (int time_step, int elem)
   for (int n=0; n<nn; n++) {
     if (dim == 2) {
       file<<u[n*dim+0]<<" "<<u[n*dim + 1]<<" 0.0"<<endl;
-    } else if(dim == 3) {
+    } else if (dim == 3) {
       file<<u[n*dim+0]<<" "<<u[n*dim + 1]<<" "<<u[n*dim + 2]<<endl;
     }
   }
@@ -144,7 +142,7 @@ void Problem::writeVtu (int time_step, int elem)
   for (int n=0; n<nn; n++) {
     if (dim == 2) {
       file<<b[n*dim+0]<<" "<<b[n*dim + 1]<<" 0.0"<<endl;
-    } else if(dim == 3) {
+    } else if (dim == 3) {
       file<<b[n*dim+0]<<" "<<b[n*dim + 1]<<" "<<b[n*dim + 2]<<endl;
     }
   }

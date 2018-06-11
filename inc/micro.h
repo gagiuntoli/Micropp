@@ -50,6 +50,7 @@ class Problem {
     int numMaterials;
     material_t material_list[MAX_MATS];
     std::list<MacroGp_t> MacroGp_list;
+    double CtanLinear[6][6];
 
     double *elem_strain; // average strain on each element
     double *elem_stress; // average stress on each element
@@ -61,9 +62,11 @@ class Problem {
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
+    void calcCtanLinear (void);
 
     void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
     void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
+    bool LinearCriteria (double *MacroStrain);
 
     void solve (void);
     void newtonRaphson (bool *non_linear_flag);

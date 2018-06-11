@@ -112,6 +112,9 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   else if (dim == 3)
     ell_init_3D (A, dim, nx, ny, nz);
 
+  cout << "calculating Ctan (linear) ...";
+  calcCtanLinear ();
+  cout << "done." << endl;
 }
 
 Problem::~Problem (void)
@@ -124,6 +127,17 @@ Problem::~Problem (void)
   free(elem_strain);
   free(elem_type);
   free(vars_old);
+}
+
+void Problem::calcCtanLinear (void)
+{
+  double MacroStrain[6], MacroStress[6], Ctan[36];
+  for (int v=0; v<nvoi; v++) 
+    MacroStrain[v] = 0.0;
+  loc_hom_Ctan (-1, MacroStrain, Ctan);
+  for (int i=0; i<nvoi; i++) 
+    for (int j=0; j<nvoi; j++) 
+      CtanLinear[i][j] = Ctan[i*nvoi + j];
 }
 
 int Problem::getElemType (int ex, int ey)
