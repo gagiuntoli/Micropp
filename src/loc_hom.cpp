@@ -141,7 +141,34 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
   }
 }
 
+void Problem::calcCtanLinear (void)
+{
+  double stress_ave[6], Strain_pert[6];
+  double delta_Strain = 0.00001;
+  bool non_linear;
+  bool filter = true;
+  double tol_filter = 1.0e-2;
+
+  for (int i=0; i<nvoi; i++) {
+    for (int v=0; v<nvoi; v++)
+      Strain_pert[v] = 0.0;
+    Strain_pert[i] += delta_Strain; // we pertubate only one direction
+
+    setDisp(Strain_pert);
+    newtonRaphson(&non_linear);
+    calcAverageStress(stress_ave);
+
+    for (int v=0; v<nvoi; v++) {
+      CtanLinear[v][i] = stress_ave[v] / delta_Strain;
+      if (filter == true)
+	if (fabs(CtanLinear[v][i]) < tol_filter)
+	  CtanLinear[v][i] = 0.0;
+    }
+  }
+}
+
+
 bool Problem::LinearCriteria (double *MacroStrain)
 {
-  return false;
+  return true;
 }
