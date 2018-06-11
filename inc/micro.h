@@ -67,6 +67,8 @@ class Problem {
     void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
     void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
     bool LinearCriteria (double *MacroStrain);
+    double Invariant_I1 (double *tensor);
+    double Invariant_I2 (double *tensor);
 
     void solve (void);
     void newtonRaphson (bool *non_linear_flag);

@@ -114,7 +114,6 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
 
   cout << "calculating Ctan (linear) ...";
   calcCtanLinear ();
-  cout << "done." << endl;
 }
 
 Problem::~Problem (void)

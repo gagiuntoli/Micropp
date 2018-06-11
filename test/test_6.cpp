@@ -24,7 +24,7 @@ int main (int argc, char *argv[])
   micro_params[0] = 1.0; // lx
   micro_params[1] = 1.0; // ly
   micro_params[2] = 1.0; // lz
-  micro_params[3] = 0.1; // radio de la esfera
+  micro_params[3] = 0.1; // grosor capa de abajo
 
   int mat_types[2]; // dos materiales lineales (type = 0)
   mat_types[0] = 1;
@@ -46,21 +46,22 @@ int main (int argc, char *argv[])
   int time_steps = 130;
   double stress_ave[6], ctan_ave[36];
   double d_eps = 0.01;
+  int strain_comp = 1;
 
   for (int t=0; t<time_steps; t++) {
 
     cout << "Time step = " << t << endl;
 
     if (t<30)
-      eps[1] += d_eps;
+      eps[strain_comp] += d_eps;
     else if (t<80)
-      eps[1] -= d_eps;
+      eps[strain_comp] -= d_eps;
     else if (t<130)
-      eps[1] += d_eps;
+      eps[strain_comp] += d_eps;
     else if (t<250)
-      eps[1] -= d_eps;
+      eps[strain_comp] -= d_eps;
     else
-      eps[1] += d_eps;
+      eps[strain_comp] += d_eps;
 
     micro.loc_hom_Stress (1, eps, stress_ave);
 
@@ -70,6 +71,9 @@ int main (int argc, char *argv[])
       << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
       << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
       << endl;
+
+    cout << "I1 = " << micro.Invariant_I1(eps) << endl;
+    cout << "I2 = " << micro.Invariant_I2(eps) << endl;
 
 //    micro.loc_hom_Ctan (1, eps, ctan_ave);
 //

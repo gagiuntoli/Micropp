@@ -167,8 +167,31 @@ void Problem::calcCtanLinear (void)
   }
 }
 
-
 bool Problem::LinearCriteria (double *MacroStrain)
 {
-  return true;
+  double I1, I1_max = 1.e-2;
+  double I2, I2_max = 1.e-2;
+  I1 = Invariant_I1(MacroStrain);
+  I2 = Invariant_I2(MacroStrain);
+
+  if ((fabs(I1) < I1_max) && (fabs(I2) < I2_max)) {
+    cout << "linear criteria" << endl;
+    return false;
+  } else 
+    return false;
 }
+
+double Problem::Invariant_I1 (double *tensor)
+{
+  if (dim == 2)
+    return tensor[0] + tensor[1];
+  if (dim == 3)
+    return tensor[0] + tensor[1] + tensor[2];
+}
+
+double Problem::Invariant_I2 (double *tensor)
+{
+  if (dim == 3)
+    return tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
+}
+
