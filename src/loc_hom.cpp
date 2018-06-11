@@ -84,50 +84,59 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
   bool filter = true;
   double tol_filter = 1.0e-2;
 
-  // search for the macro gauss point, if not found just create and insert
-  std::list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-    if (it->int_vars != NULL) {
-      for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
-	vars_old[i] = it->int_vars[i];
-    } else {
+  if (LinearCriteria(MacroStrain) == true) {
+
+      for (int i=0; i<nvoi; i++)
+	for (int j=0; j<nvoi; j++)
+	  MacroCtan[i*nvoi + j] = CtanLinear[i][j];
+
+  } else {
+
+    // search for the macro gauss point, if not found just create and insert
+    std::list<MacroGp_t>::iterator it;
+    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+      if (it->int_vars != NULL) {
+	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	  vars_old[i] = it->int_vars[i];
+      } else {
+	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	  vars_old[i] = 0.0;
+      }
+    }
+
+    if (it ==  MacroGp_list.end()) {
       for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
 	vars_old[i] = 0.0;
     }
-  }
 
-  if (it ==  MacroGp_list.end()) {
-    for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
-      vars_old[i] = 0.0;
-  }
+    double Strain_pert[6], Stress_0[6];
+    double delta_Strain = 0.00001;
+    bool non_linear;
 
-  double Strain_pert[6], Stress_0[6];
-  double delta_Strain = 0.00001;
-  bool non_linear;
-
-  setDisp(MacroStrain); // calculate Stress_0 
-  newtonRaphson(&non_linear);
-
-  double stress_ave[6];
-  calcAverageStress(stress_ave);
-  for (int v=0; v<nvoi; v++)
-    Stress_0[v] = stress_ave[v];
-
-  // calculate Stress_1 .. 2 .. 3 , we calc directly MacroCtan
-
-  for (int i=0; i<nvoi; i++) {
-    for (int v=0; v<nvoi; v++)
-      Strain_pert[v] = MacroStrain[v];
-    Strain_pert[i] += delta_Strain; // we pertubate only one direction
-
-    setDisp(Strain_pert);
+    setDisp(MacroStrain); // calculate Stress_0 
     newtonRaphson(&non_linear);
+
+    double stress_ave[6];
     calcAverageStress(stress_ave);
-    for (int v=0; v<nvoi; v++) {
-      MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
-      if (filter == true)
-	if (fabs(MacroCtan[v*nvoi + i]) < tol_filter)
-	  MacroCtan[v*nvoi + i] = 0.0;
+    for (int v=0; v<nvoi; v++)
+      Stress_0[v] = stress_ave[v];
+
+    // calculate Stress_1 .. 2 .. 3 , we calc directly MacroCtan
+
+    for (int i=0; i<nvoi; i++) {
+      for (int v=0; v<nvoi; v++)
+	Strain_pert[v] = MacroStrain[v];
+      Strain_pert[i] += delta_Strain; // we pertubate only one direction
+
+      setDisp(Strain_pert);
+      newtonRaphson(&non_linear);
+      calcAverageStress(stress_ave);
+      for (int v=0; v<nvoi; v++) {
+	MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
+	if (filter == true)
+	  if (fabs(MacroCtan[v*nvoi + i]) < tol_filter)
+	    MacroCtan[v*nvoi + i] = 0.0;
+      }
     }
   }
 }
