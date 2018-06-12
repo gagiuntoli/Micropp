@@ -60,19 +60,20 @@ class Problem {
     ell_matrix A;
     double *u, *du, *b;
 
-    double NR_norm;
-    int NR_its;
-
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
     void calcCtanLinear (void);
 
+    int LinCriteria;
     void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
     void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
     bool LinearCriteria (double *MacroStrain);
     double Invariant_I1 (double *tensor);
     double Invariant_I2 (double *tensor);
+    void getParams_LinCriteria (int *LinCriteria) {*LinCriteria = this->LinCriteria;};
 
+    double NR_norm;
+    int NR_its;
     void solve (void);
     void newtonRaphson (bool *non_linear_flag);
     void getParams_NR (int *NR_its, double *NR_norm) {*NR_its = this->NR_its; *NR_norm = this->NR_norm;};

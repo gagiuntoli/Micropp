@@ -38,7 +38,6 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   double stress_ave[6];
 
   if (LinearCriteria(MacroStrain) == true) {
-    // Here we are almost sure (if the non linear criteria is right) that the Gauss point is linear
 
     for (int i=0; i<nvoi; i++) {
       MacroStress[i] = 0.0;
@@ -65,7 +64,6 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   }
 
   if (non_linear == true) {
-    //cout << "Non linear behavior detected" << endl;
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->id == macroGp_id) {
 	if (allocate == true)
@@ -92,7 +90,6 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   } else {
 
-    // search for the macro gauss point, if not found just create and insert
     std::list<MacroGp_t>::iterator it;
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->int_vars != NULL) {
@@ -112,21 +109,15 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
     double Strain_pert[6], Stress_0[6];
     double delta_Strain = 0.00001;
     bool non_linear;
-
-    setDisp(MacroStrain); // calculate Stress_0 
+    setDisp(MacroStrain);
     newtonRaphson(&non_linear);
+    calcAverageStress(Stress_0);
 
     double stress_ave[6];
-    calcAverageStress(stress_ave);
-    for (int v=0; v<nvoi; v++)
-      Stress_0[v] = stress_ave[v];
-
-    // calculate Stress_1 .. 2 .. 3 , we calc directly MacroCtan
-
     for (int i=0; i<nvoi; i++) {
       for (int v=0; v<nvoi; v++)
 	Strain_pert[v] = MacroStrain[v];
-      Strain_pert[i] += delta_Strain; // we pertubate only one direction
+      Strain_pert[i] += delta_Strain;
 
       setDisp(Strain_pert);
       newtonRaphson(&non_linear);
@@ -170,7 +161,7 @@ void Problem::calcCtanLinear (void)
 bool Problem::LinearCriteria (double *MacroStrain)
 {
   double I1, I1_max = 500000;
-  double I2, I2_max = 270000;
+  double I2, I2_max = 150000;
   double MacroStress[6];
 
   for (int i=0; i<nvoi; i++) {
@@ -184,10 +175,10 @@ bool Problem::LinearCriteria (double *MacroStrain)
 
   cout << "I1 =" << I1 << " I2 =" << I2 << endl;
   if ((fabs(I1) < I1_max) && (fabs(I2) < I2_max)) {
-    cout << "Linear Criteria ON" << endl;
+    LinCriteria = 1;
     return true;
   } else {
-    cout << "Linear Criteria OFF" << endl;
+    LinCriteria = 0;
     return false;
   }
 }

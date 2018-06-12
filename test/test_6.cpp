@@ -65,9 +65,12 @@ int main (int argc, char *argv[])
 
     double NR_norm;
     int NR_its;
+    int LinCriteria;
     micro.loc_hom_Stress (1, eps, stress_ave);
     micro.getParams_NR (&NR_its, &NR_norm);
+    micro.getParams_LinCriteria (&LinCriteria);
     cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << endl;
+    cout << "LinCriteria = " << LinCriteria << endl;
 
     cout << "e11 = " << eps[strain_comp] << endl;
     cout 
@@ -76,6 +79,7 @@ int main (int argc, char *argv[])
       << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
       << endl;
 
+    cout << endl;
 //    micro.loc_hom_Ctan (1, eps, ctan_ave);
 //
 //    cout <<"Average Ctan = " << endl;
