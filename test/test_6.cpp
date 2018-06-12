@@ -43,10 +43,10 @@ int main (int argc, char *argv[])
 
   Problem micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
-  int time_steps = 20;
+  int time_steps = 80;
   double stress_ave[6], ctan_ave[36];
   double d_eps = 0.01;
-  int strain_comp = 1;
+  int strain_comp = 2;
 
   for (int t=0; t<time_steps; t++) {
 

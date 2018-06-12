@@ -17,6 +17,7 @@ using namespace std;
 
 struct MacroGp_t {
   int id;
+  bool non_linear;
   double *int_vars;
 };
 

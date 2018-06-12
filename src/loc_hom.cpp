@@ -5,12 +5,14 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   bool allocate = false;
   bool filter = true;
   double tol_filter = 1.0e-5;
+  bool non_linear_history = false;
 
   // search for the macro gauss point, if not found just create and insert
   std::list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
       //cout << "Macro GP = "<< macroGp_id << " found. (loc_hom_Stress)" << endl; 
+      non_linear_history = it->non_linear;
       if (it->int_vars != NULL) {
 	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
 	  vars_old[i] = it->int_vars[i];
@@ -27,6 +29,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
     //cout << "Macro GP = "<< macroGp_id << " NOT found, inserting GP... (loc_hom_Stress)" << endl; 
     MacroGp_t macroGp_new;
     macroGp_new.id = macroGp_id;
+    macroGp_new.non_linear = non_linear_history;
     macroGp_new.int_vars = NULL;
     MacroGp_list.push_back(macroGp_new);
     for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
@@ -36,7 +39,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 
   bool non_linear = false;
 
-  if (LinearCriteria(MacroStrain) == true) {
+  if ((LinearCriteria(MacroStrain) == true) && (non_linear_history == false)) {
 
     for (int i=0; i<nvoi; i++) {
       MacroStress[i] = 0.0;
@@ -66,6 +69,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   if (non_linear == true) {
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->id == macroGp_id) {
+	it->non_linear = true;
 	if (allocate == true)
 	  it->int_vars = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
 	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
@@ -161,7 +165,7 @@ void Problem::calcCtanLinear (void)
 bool Problem::LinearCriteria (double *MacroStrain)
 {
   double I1, I1_max = 500000;
-  double I2, I2_max = 100000;
+  double I2, I2_max = 80000;
   double MacroStress[6];
 
   for (int i=0; i<nvoi; i++) {
