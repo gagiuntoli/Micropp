@@ -177,7 +177,6 @@ bool Problem::LinearCriteria (double *MacroStrain)
   I1 = Invariant_I1(MacroStress);
   I2 = Invariant_I2(MacroStress);
 
-  cout << "I1 =" << I1 << " I2 =" << I2 << endl;
   if ((fabs(I1) < I1_max) && (fabs(I2) < I2_max)) {
     LinCriteria = 1;
     return true;
