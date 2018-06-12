@@ -112,7 +112,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   else if (dim == 3)
     ell_init_3D (A, dim, nx, ny, nz);
 
-  cout << "calculating Ctan (linear) ...";
+  cout << "calculating Ctan (linear) ..." << endl;
   calcCtanLinear ();
 }
 

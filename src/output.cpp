@@ -33,7 +33,6 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
   newtonRaphson(&non_linear);
 
   calcDistributions();
-
   writeVtu(time_step, elem);
 }
 

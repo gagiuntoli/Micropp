@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
 
   Problem micro (dim, size, micro_type, micro_params, mat_types, params);
 
-  int time_steps = 130;
+  int time_steps = 20;
   double stress_ave[6], ctan_ave[36];
   double d_eps = 0.01;
   int strain_comp = 1;
@@ -63,17 +63,18 @@ int main (int argc, char *argv[])
     else
       eps[strain_comp] += d_eps;
 
+    double NR_norm;
+    int NR_its;
     micro.loc_hom_Stress (1, eps, stress_ave);
+    micro.getParams_NR (&NR_its, &NR_norm);
+    cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << endl;
 
-    cout << "e11 = " << eps[0] << endl;
+    cout << "e11 = " << eps[strain_comp] << endl;
     cout 
       << "Average stress = " 
       << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
       << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
       << endl;
-
-    cout << "I1 = " << micro.Invariant_I1(eps) << endl;
-    cout << "I2 = " << micro.Invariant_I2(eps) << endl;
 
 //    micro.loc_hom_Ctan (1, eps, ctan_ave);
 //

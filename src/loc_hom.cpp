@@ -169,16 +169,27 @@ void Problem::calcCtanLinear (void)
 
 bool Problem::LinearCriteria (double *MacroStrain)
 {
-  double I1, I1_max = 1.e-2;
-  double I2, I2_max = 1.e-2;
-  I1 = Invariant_I1(MacroStrain);
-  I2 = Invariant_I2(MacroStrain);
+  double I1, I1_max = 500000;
+  double I2, I2_max = 270000;
+  double MacroStress[6];
 
+  for (int i=0; i<nvoi; i++) {
+    MacroStress[i] = 0.0;
+    for (int j=0; j<nvoi; j++)
+      MacroStress[i] += CtanLinear[i][j] * MacroStrain[j];
+  }
+
+  I1 = Invariant_I1(MacroStress);
+  I2 = Invariant_I2(MacroStress);
+
+  cout << "I1 =" << I1 << " I2 =" << I2 << endl;
   if ((fabs(I1) < I1_max) && (fabs(I2) < I2_max)) {
-    cout << "linear criteria" << endl;
+    cout << "Linear Criteria ON" << endl;
+    return true;
+  } else {
+    cout << "Linear Criteria OFF" << endl;
     return false;
-  } else 
-    return false;
+  }
 }
 
 double Problem::Invariant_I1 (double *tensor)
@@ -191,7 +202,9 @@ double Problem::Invariant_I1 (double *tensor)
 
 double Problem::Invariant_I2 (double *tensor)
 {
+  double J2;
   if (dim == 3)
-    return tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
+    J2 = tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
+  return sqrt(J2);
 }
 

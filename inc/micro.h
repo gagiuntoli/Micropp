@@ -21,16 +21,16 @@ struct MacroGp_t {
 };
 
 struct material_t {
-  // normal
+
   double E;
   double nu;
-  // plasticity
+
   double k;
   double mu;
   double lambda;
   double Ka; 
   double Sy;
-  // flags
+
   bool plasticity;
   bool damage;
 };
@@ -52,13 +52,16 @@ class Problem {
     std::list<MacroGp_t> MacroGp_list;
     double CtanLinear[6][6];
 
-    double *elem_strain; // average strain on each element
-    double *elem_stress; // average stress on each element
-    int *elem_type; // number that is changes depending on the element type
+    double *elem_strain;
+    double *elem_stress;
+    int *elem_type;
     double *vars_old, *vars_new; 
 
     ell_matrix A;
     double *u, *du, *b;
+
+    double NR_norm;
+    int NR_its;
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
@@ -72,6 +75,7 @@ class Problem {
 
     void solve (void);
     void newtonRaphson (bool *non_linear_flag);
+    void getParams_NR (int *NR_its, double *NR_norm) {*NR_its = this->NR_its; *NR_norm = this->NR_norm;};
 
     void setDisp (double *eps);
 

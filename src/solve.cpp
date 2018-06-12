@@ -48,6 +48,7 @@ void Problem::newtonRaphson (bool *non_linear)
     its++;
 
   } while ((its < NR_MAX_ITS) && (tol > NR_MAX_TOL));
-  cout << "NEWTON-R ITS = " << its << " TOL = " << tol << endl;
 
+  NR_norm = tol;
+  NR_its = its;
 }
