@@ -73,10 +73,11 @@ class Problem {
     void getParams_LinCriteria (int *LinCriteria) {*LinCriteria = this->LinCriteria;};
 
     double NR_norm;
-    int NR_its;
+    int NR_its, NR_non_linear;
     void solve (void);
     void newtonRaphson (bool *non_linear_flag);
-    void getParams_NR (int *NR_its, double *NR_norm) {*NR_its = this->NR_its; *NR_norm = this->NR_norm;};
+    void getParams_NR (int *NR_its, double *NR_norm, int *NR_non_linear ) 
+    {*NR_its = this->NR_its; *NR_norm = this->NR_norm; *NR_non_linear = this->NR_non_linear;};
 
     void setDisp (double *eps);
 

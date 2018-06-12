@@ -51,4 +51,5 @@ void Problem::newtonRaphson (bool *non_linear)
 
   NR_norm = tol;
   NR_its = its;
+  NR_non_linear = (*non_linear == true) ? 1:0;
 }

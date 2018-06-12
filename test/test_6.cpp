@@ -30,18 +30,18 @@ int main (int argc, char *argv[])
   mat_types[0] = 1;
   mat_types[1] = 0;
 
-  double params[2*MAX_MAT_PARAM];
-  params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
-  params[0*MAX_MAT_PARAM + 1] = 0.3;   // nu
-  params[0*MAX_MAT_PARAM + 2] = 5.0e4; // Sy
-  params[0*MAX_MAT_PARAM + 3] = 5.0e4; // Ka
+  double mat_params[2*MAX_MAT_PARAM];
+  mat_params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
+  mat_params[0*MAX_MAT_PARAM + 1] = 0.3;   // nu
+  mat_params[0*MAX_MAT_PARAM + 2] = 5.0e4; // Sy
+  mat_params[0*MAX_MAT_PARAM + 3] = 5.0e4; // Ka
 
-  params[1*MAX_MAT_PARAM + 0] = 1.0e6;
-  params[1*MAX_MAT_PARAM + 1] = 0.3;
-  params[1*MAX_MAT_PARAM + 2] = 1.0e4;
-  params[1*MAX_MAT_PARAM + 3] = 0.0e-1;
+  mat_params[1*MAX_MAT_PARAM + 0] = 1.0e6;
+  mat_params[1*MAX_MAT_PARAM + 1] = 0.3;
+  mat_params[1*MAX_MAT_PARAM + 2] = 1.0e4;
+  mat_params[1*MAX_MAT_PARAM + 3] = 0.0e-1;
 
-  Problem micro (dim, size, micro_type, micro_params, mat_types, params);
+  Problem micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
   int time_steps = 20;
   double stress_ave[6], ctan_ave[36];
@@ -64,12 +64,12 @@ int main (int argc, char *argv[])
       eps[strain_comp] += d_eps;
 
     double NR_norm;
-    int NR_its;
+    int NR_its, NR_non_linear;
     int LinCriteria;
     micro.loc_hom_Stress (1, eps, stress_ave);
-    micro.getParams_NR (&NR_its, &NR_norm);
+    micro.getParams_NR (&NR_its, &NR_norm, &NR_non_linear);
     micro.getParams_LinCriteria (&LinCriteria);
-    cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << endl;
+    cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << " NON_LINEAR = " << NR_non_linear  << endl;
     cout << "LinCriteria = " << LinCriteria << endl;
 
     cout << "e11 = " << eps[strain_comp] << endl;

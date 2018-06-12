@@ -19,7 +19,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 	  vars_old[i] = 0.0;
 	allocate = true;
       }
-     break;
+      break;
     }
   }
 
@@ -35,7 +35,6 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   }
 
   bool non_linear = false;
-  double stress_ave[6];
 
   if (LinearCriteria(MacroStrain) == true) {
 
@@ -52,13 +51,14 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
       vars_new[i] = vars_old[i];
 
   } else {
+
     setDisp(MacroStrain);
     newtonRaphson(&non_linear);
-    calcAverageStress(stress_ave);
+    calcAverageStress(MacroStress);
+
     for (int v=0; v<nvoi; v++) {
-      MacroStress[v] = stress_ave[v];
       if (filter == true)
-	if (fabs(stress_ave[v]) < tol_filter)
+	if (fabs(MacroStress[v]) < tol_filter)
 	  MacroStress[v] = 0.0;
     }
   }
@@ -143,7 +143,7 @@ void Problem::calcCtanLinear (void)
   for (int i=0; i<nvoi; i++) {
     for (int v=0; v<nvoi; v++)
       Strain_pert[v] = 0.0;
-    Strain_pert[i] += delta_Strain; // we pertubate only one direction
+    Strain_pert[i] += delta_Strain;
 
     setDisp(Strain_pert);
     newtonRaphson(&non_linear);
@@ -161,7 +161,7 @@ void Problem::calcCtanLinear (void)
 bool Problem::LinearCriteria (double *MacroStrain)
 {
   double I1, I1_max = 500000;
-  double I2, I2_max = 150000;
+  double I2, I2_max = 100000;
   double MacroStress[6];
 
   for (int i=0; i<nvoi; i++) {
