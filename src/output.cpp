@@ -9,16 +9,14 @@ using namespace std;
 
 void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStrain)
 {
-  // search for the macro gauss point
-  std::list<MacroGp_t>::iterator it;
+  list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
-      // cout << "Macro GP = " << macroGp_id << " found. (output)" << endl;
       if (it->int_vars != NULL) {
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = it->int_vars[i];
       } else {
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = 0.0;
       }
       break;

@@ -77,14 +77,16 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
     nelem = (nx-1) * (ny-1) * (nz-1);
   }
 
+  num_int_vars = nelem * 8 * NUM_VAR_GP;
+
   b  = (double*)malloc(nn*dim*sizeof(double));
   du = (double*)malloc(nn*dim*sizeof(double));
   u  = (double*)malloc(nn*dim*sizeof(double));
   elem_stress = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_strain = (double*)malloc(nelem*nvoi*sizeof(double));
   elem_type = (int*)malloc(nelem*sizeof(int));
-  vars_old = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
-  vars_new = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
+  vars_old = (double*)malloc(num_int_vars*sizeof(double));
+  vars_new = (double*)malloc(num_int_vars*sizeof(double));
 
   for (int i=0; i<nn*dim; i++)
     u[i] = 0.0;
@@ -126,6 +128,12 @@ Problem::~Problem (void)
   free(elem_strain);
   free(elem_type);
   free(vars_old);
+
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    free(it->int_vars);
+    free(it->int_vars_aux);
+  }
 }
 
 int Problem::getElemType (int ex, int ey)

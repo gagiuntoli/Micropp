@@ -8,7 +8,7 @@
 #define MAX_MATS      10
 #define MAX_GP_VARS   10
 #define INT_VARS_GP   7  // eps_p_1, alpha_1
-#define VARS_AT_GP    7  // eps_p_1, alpha_1
+#define NUM_VAR_GP    7  // eps_p_1, alpha_1
 
 #define glo_elem3D(ex,ey,ez) ((ez)*(nx-1)*(ny-1) + (ey)*(nx-1) + (ex))
 #define intvar_ix(e,gp,var) ((e)*8*INT_VARS_GP + (gp)*INT_VARS_GP + (var))
@@ -19,6 +19,7 @@ struct MacroGp_t {
   int id;
   bool non_linear;
   double *int_vars;
+  double *int_vars_aux;
 };
 
 struct material_t {
@@ -56,6 +57,7 @@ class Problem {
     double *elem_strain;
     double *elem_stress;
     int *elem_type;
+    int num_int_vars;
     double *vars_old, *vars_new; 
 
     ell_matrix A;
@@ -72,6 +74,7 @@ class Problem {
     double Invariant_I1 (double *tensor);
     double Invariant_I2 (double *tensor);
     void getParams_LinCriteria (int *LinCriteria) {*LinCriteria = this->LinCriteria;};
+    void updateIntVars (void);
 
     double NR_norm;
     int NR_its, NR_non_linear;

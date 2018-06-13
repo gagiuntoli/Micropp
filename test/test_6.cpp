@@ -67,6 +67,7 @@ int main (int argc, char *argv[])
     int NR_its, NR_non_linear;
     int LinCriteria;
     micro.loc_hom_Stress (1, eps, stress_ave);
+    micro.updateIntVars();
     micro.getParams_NR (&NR_its, &NR_norm, &NR_non_linear);
     micro.getParams_LinCriteria (&LinCriteria);
     cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << " NON_LINEAR = " << NR_non_linear  << endl;

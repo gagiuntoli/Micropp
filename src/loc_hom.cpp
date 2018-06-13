@@ -2,39 +2,38 @@
 
 void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *MacroStress)
 {
-  bool allocate = false;
+  bool not_allocated_yet = false;
   bool filter = true;
   double tol_filter = 1.0e-5;
   bool non_linear_history = false;
 
   // search for the macro gauss point, if not found just create and insert
-  std::list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
     if (it->id == macroGp_id) {
-      //cout << "Macro GP = "<< macroGp_id << " found. (loc_hom_Stress)" << endl; 
       non_linear_history = it->non_linear;
       if (it->int_vars != NULL) {
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = it->int_vars[i];
       } else {
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = 0.0;
-	allocate = true;
+	not_allocated_yet = true;
       }
       break;
     }
   }
 
   if (it ==  MacroGp_list.end()) {
-    //cout << "Macro GP = "<< macroGp_id << " NOT found, inserting GP... (loc_hom_Stress)" << endl; 
     MacroGp_t macroGp_new;
     macroGp_new.id = macroGp_id;
     macroGp_new.non_linear = non_linear_history;
     macroGp_new.int_vars = NULL;
+    macroGp_new.int_vars_aux = NULL;
     MacroGp_list.push_back(macroGp_new);
-    for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+    for (int i=0; i<num_int_vars; i++)
       vars_old[i] = 0.0;
-    allocate = true;
+    not_allocated_yet = true;
   }
 
   bool non_linear = false;
@@ -49,8 +48,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 	if (fabs(MacroStress[i]) < tol_filter)
 	  MacroStress[i] = 0.0;
     }
-
-    for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+    for (int i=0; i<num_int_vars; i++)
       vars_new[i] = vars_old[i];
 
   } else {
@@ -70,15 +68,27 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->id == macroGp_id) {
 	it->non_linear = true;
-	if (allocate == true)
-	  it->int_vars = (double*)malloc(nelem*8*VARS_AT_GP*sizeof(double));
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
-	  it->int_vars[i] = vars_new[i];
+	if (not_allocated_yet == true) {
+	  it->int_vars = (double*)malloc(num_int_vars*sizeof(double));
+	  it->int_vars_aux = (double*)malloc(num_int_vars*sizeof(double));
+	}
+	for (int i=0; i<num_int_vars; i++)
+	  it->int_vars_aux[i] = vars_new[i];
 	break;
       }
     }
   }
+}
 
+void Problem::updateIntVars (void)
+{
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->int_vars != NULL) {
+      for (int i=0; i<num_int_vars; i++)
+	it->int_vars[i] = it->int_vars_aux[i];
+    }
+  }
 }
 
 void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan)
@@ -94,19 +104,19 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   } else {
 
-    std::list<MacroGp_t>::iterator it;
+    list<MacroGp_t>::iterator it;
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->int_vars != NULL) {
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = it->int_vars[i];
       } else {
-	for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = 0.0;
       }
     }
 
     if (it ==  MacroGp_list.end()) {
-      for (int i=0; i<(nelem*8*VARS_AT_GP); i++)
+      for (int i=0; i<num_int_vars; i++)
 	vars_old[i] = 0.0;
     }
 
@@ -162,10 +172,10 @@ void Problem::calcCtanLinear (void)
   }
 }
 
+#define I2_MAX 80000
+
 bool Problem::LinearCriteria (double *MacroStrain)
 {
-  double I1, I1_max = 500000;
-  double I2, I2_max = 80000;
   double MacroStress[6];
 
   for (int i=0; i<nvoi; i++) {
@@ -174,10 +184,9 @@ bool Problem::LinearCriteria (double *MacroStrain)
       MacroStress[i] += CtanLinear[i][j] * MacroStrain[j];
   }
 
-  I1 = Invariant_I1(MacroStress);
-  I2 = Invariant_I2(MacroStress);
+  double I2 = Invariant_I2(MacroStress);
 
-  if ((fabs(I1) < I1_max) && (fabs(I2) < I2_max)) {
+  if (fabs(I2) < I2_MAX) {
     LinCriteria = 1;
     return true;
   } else {
