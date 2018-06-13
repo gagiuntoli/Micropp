@@ -27,4 +27,9 @@ extern "C"
   {
     micro->output (*time_step, *elem, *macroGp_id, MacroStrain);
   }
+
+  void micro_update_int_vars_(void)
+  {
+    micro->updateIntVars ();
+  }
 } 
