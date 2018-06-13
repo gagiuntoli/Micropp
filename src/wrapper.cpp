@@ -37,4 +37,9 @@ extern "C"
   {
     micro->getNonLinearFlag (*macroGp_id, non_linear);
   }
+
+  void micro_get_params_nr_(int *NR_its, double *NR_norm, int *NR_non_linear)
+  {
+    micro->getParams_NR (NR_its, NR_norm, NR_non_linear);
+  }
 } 
