@@ -32,4 +32,9 @@ extern "C"
   {
     micro->updateIntVars ();
   }
+
+  void micro_get_non_linear_flag_(int *macroGp_id, int *non_linear)
+  {
+    micro->getNonLinearFlag (*macroGp_id, non_linear);
+  }
 } 

@@ -27,7 +27,8 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   if (it ==  MacroGp_list.end()) {
     MacroGp_t macroGp_new;
     macroGp_new.id = macroGp_id;
-    macroGp_new.non_linear = non_linear_history;
+    macroGp_new.non_linear = false;
+    macroGp_new.non_linear_aux = false;
     macroGp_new.int_vars = NULL;
     macroGp_new.int_vars_aux = NULL;
     MacroGp_list.push_back(macroGp_new);
@@ -67,7 +68,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   if (non_linear == true) {
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       if (it->id == macroGp_id) {
-	it->non_linear = true;
+	it->non_linear_aux = true;
 	if (not_allocated_yet == true) {
 	  it->int_vars = (double*)malloc(num_int_vars*sizeof(double));
 	  it->int_vars_aux = (double*)malloc(num_int_vars*sizeof(double));
@@ -84,9 +85,23 @@ void Problem::updateIntVars (void)
 {
   list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    it->non_linear = it->non_linear_aux;
     if (it->int_vars != NULL) {
       for (int i=0; i<num_int_vars; i++)
 	it->int_vars[i] = it->int_vars_aux[i];
+    }
+  }
+}
+
+void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
+{
+  *non_linear = 0;
+
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+      *non_linear = (it->non_linear == true) ? 1:0;
+      break;
     }
   }
 }
@@ -115,7 +130,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
       }
     }
 
-    if (it ==  MacroGp_list.end()) {
+    if (it == MacroGp_list.end()) {
       for (int i=0; i<num_int_vars; i++)
 	vars_old[i] = 0.0;
     }

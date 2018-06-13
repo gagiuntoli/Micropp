@@ -72,6 +72,9 @@ int main (int argc, char *argv[])
     micro.getParams_LinCriteria (&LinCriteria);
     cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << " NON_LINEAR = " << NR_non_linear  << endl;
     cout << "LinCriteria = " << LinCriteria << endl;
+    int non_linear = 0;
+    micro.getNonLinearFlag (1, &non_linear);
+    cout << "non linear Gp 1 = " << non_linear << endl;
 
     cout << "e11 = " << eps[strain_comp] << endl;
     cout 
