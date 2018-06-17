@@ -81,37 +81,29 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   }
 }
 
-void Problem::updateIntVars (void)
-{
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    it->non_linear = it->non_linear_aux;
-    if (it->int_vars != NULL) {
-      for (int i=0; i<num_int_vars; i++)
-	it->int_vars[i] = it->int_vars_aux[i];
-    }
-  }
-}
-
-void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
-{
-  *non_linear = 0;
-
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
-      *non_linear = (it->non_linear == true) ? 1:0;
-      break;
-    }
-  }
-}
-
 void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan)
 {
   bool filter = true;
   double tol_filter = 1.0e-2;
+  bool non_linear_history = false;
 
-  if (LinearCriteria(MacroStrain) == true) {
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+      non_linear_history = it->non_linear;
+      if (it->int_vars != NULL) {
+	for (int i=0; i<num_int_vars; i++)
+	  vars_old[i] = it->int_vars[i];
+      }
+      break;
+    }
+  }
+  if (it ==  MacroGp_list.end()) {
+    for (int i=0; i<num_int_vars; i++)
+      vars_old[i] = 0.0;
+  }
+
+  if ((LinearCriteria(MacroStrain) == true) && (non_linear_history == false)) {
 
       for (int i=0; i<nvoi; i++)
 	for (int j=0; j<nvoi; j++)
@@ -119,24 +111,8 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   } else {
 
-    list<MacroGp_t>::iterator it;
-    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-      if (it->int_vars != NULL) {
-	for (int i=0; i<num_int_vars; i++)
-	  vars_old[i] = it->int_vars[i];
-      } else {
-	for (int i=0; i<num_int_vars; i++)
-	  vars_old[i] = 0.0;
-      }
-    }
-
-    if (it == MacroGp_list.end()) {
-      for (int i=0; i<num_int_vars; i++)
-	vars_old[i] = 0.0;
-    }
-
     double Strain_pert[6], Stress_0[6];
-    double delta_Strain = 0.00001;
+    double delta_Strain = 1.0e-10;
     bool non_linear;
     setDisp(MacroStrain);
     newtonRaphson(&non_linear);
@@ -144,8 +120,9 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
     double stress_ave[6];
     for (int i=0; i<nvoi; i++) {
-      for (int v=0; v<nvoi; v++)
+      for (int v=0; v<nvoi; v++) {
 	Strain_pert[v] = MacroStrain[v];
+      }
       Strain_pert[i] += delta_Strain;
 
       setDisp(Strain_pert);
@@ -164,7 +141,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 void Problem::calcCtanLinear (void)
 {
   double stress_ave[6], Strain_pert[6];
-  double delta_Strain = 0.00001;
+  double delta_Strain = 1.0e-8;
   bool non_linear;
   bool filter = true;
   double tol_filter = 1.0e-2;
@@ -187,7 +164,33 @@ void Problem::calcCtanLinear (void)
   }
 }
 
-#define I2_MAX 80000
+void Problem::updateIntVars (void)
+{
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    it->non_linear = it->non_linear_aux;
+    if (it->int_vars != NULL) {
+      for (int i=0; i<num_int_vars; i++)
+	it->int_vars[i] = it->int_vars_aux[i];
+    }
+    //cout << "Updating GP = " << it->id << " NL = " << it->non_linear << endl;
+  }
+}
+
+void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
+{
+  *non_linear = 0;
+
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+      *non_linear = (it->non_linear == true) ? 1:0;
+      break;
+    }
+  }
+}
+
+#define INV_MAX 10000
 
 bool Problem::LinearCriteria (double *MacroStrain)
 {
@@ -199,9 +202,17 @@ bool Problem::LinearCriteria (double *MacroStrain)
       MacroStress[i] += CtanLinear[i][j] * MacroStrain[j];
   }
 
-  double I2 = Invariant_I2(MacroStress);
+  double Inv = Invariant_I1(MacroStress);
+//  cout << " Inv = " << Inv << endl;
+//  cout << " Stress = " 
+//  << MacroStress[0] << " "
+//  << MacroStress[1] << " " 
+//  << MacroStress[2] << " "  
+//  << MacroStress[3] << " " 
+//  << MacroStress[4] << " " 
+//  << MacroStress[5] << endl;
 
-  if (fabs(I2) < I2_MAX) {
+  if (fabs(Inv) < INV_MAX) {
     LinCriteria = 1;
     return true;
   } else {
@@ -220,9 +231,7 @@ double Problem::Invariant_I1 (double *tensor)
 
 double Problem::Invariant_I2 (double *tensor)
 {
-  double J2;
   if (dim == 3)
-    J2 = tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
-  return sqrt(J2);
+    return tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
 }
 
