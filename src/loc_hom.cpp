@@ -120,9 +120,8 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
     double stress_ave[6];
     for (int i=0; i<nvoi; i++) {
-      for (int v=0; v<nvoi; v++) {
+      for (int v=0; v<nvoi; v++)
 	Strain_pert[v] = MacroStrain[v];
-      }
       Strain_pert[i] += delta_Strain;
 
       setDisp(Strain_pert);
@@ -160,32 +159,6 @@ void Problem::calcCtanLinear (void)
       if (filter == true)
 	if (fabs(CtanLinear[v][i]) < tol_filter)
 	  CtanLinear[v][i] = 0.0;
-    }
-  }
-}
-
-void Problem::updateIntVars (void)
-{
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    it->non_linear = it->non_linear_aux;
-    if (it->int_vars != NULL) {
-      for (int i=0; i<num_int_vars; i++)
-	it->int_vars[i] = it->int_vars_aux[i];
-    }
-    //cout << "Updating GP = " << it->id << " NL = " << it->non_linear << endl;
-  }
-}
-
-void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
-{
-  *non_linear = 0;
-
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
-      *non_linear = (it->non_linear == true) ? 1:0;
-      break;
     }
   }
 }
