@@ -103,7 +103,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
       vars_old[i] = 0.0;
   }
 
-  if ((LinearCriteria(MacroStrain) == true) && (non_linear_history == false)) {
+  if (LinearCriteria(MacroStrain) == true) {
 
       for (int i=0; i<nvoi; i++)
 	for (int j=0; j<nvoi; j++)
