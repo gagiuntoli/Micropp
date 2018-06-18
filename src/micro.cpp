@@ -136,6 +136,44 @@ Problem::~Problem (void)
   }
 }
 
+void Problem::getIntVars (int macroGp_id, int n, int *int_vars)
+{
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+      for (int i=0; i<n; i++)
+	int_vars[i] = it->int_vars[i];
+    }
+  }
+}
+
+void Problem::updateIntVars (void)
+{
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    it->non_linear = it->non_linear_aux;
+    if (it->int_vars != NULL) {
+      for (int i=0; i<num_int_vars; i++)
+	it->int_vars[i] = it->int_vars_aux[i];
+    }
+    //cout << "Updating GP = " << it->id << " NL = " << it->non_linear << endl;
+  }
+}
+
+void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
+{
+  *non_linear = 0;
+
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+      *non_linear = (it->non_linear == true) ? 1:0;
+      break;
+    }
+  }
+}
+
+
 int Problem::getElemType (int ex, int ey)
 {
   if (micro_type == 0) {

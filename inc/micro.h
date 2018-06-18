@@ -85,6 +85,7 @@ class Problem {
     void getParams_NR (int *NR_its, double *NR_norm, int *NR_non_linear ) 
     {*NR_its = this->NR_its; *NR_norm = this->NR_norm; *NR_non_linear = this->NR_non_linear;};
     void getNonLinearFlag (int macroGp_id, int *non_linear);
+    void getIntVars (int macroGp_id, int n, int *int_vars);
 
     void setDisp (double *eps);
 

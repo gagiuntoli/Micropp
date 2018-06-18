@@ -42,4 +42,9 @@ extern "C"
   {
     micro->getParams_NR (NR_its, NR_norm, NR_non_linear);
   }
+
+  void micro_get_int_vars_(int *macroGp_id, int *n, int *int_vars)
+  {
+    micro->getIntVars (*macroGp_id, *n, int_vars);
+  }
 } 
