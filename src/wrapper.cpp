@@ -42,6 +42,16 @@ extern "C"
     micro->loc_hom_Ctan(*macroGp_id, MacroStrain, MacroCtan); 
   }
 
+  void micro_loc_hom_ctan_linear_(double *Ctan)
+  {
+    micro->loc_hom_Ctan_Linear (Ctan);
+  }
+
+  void micro_loc_hom_stress_linear_(double *strain, double *stress)
+  {
+    micro->loc_hom_Stress_Linear (strain, stress);
+  }
+
   void micro_output_(int *time_step, int *elem, int *macroGp_id, double *MacroStrain)
   {
     micro->output (*time_step, *elem, *macroGp_id, MacroStrain);
@@ -86,4 +96,5 @@ extern "C"
   {
     micro->getCtanStatic (*MacroGp_id, Ctan);
   }
+
 } 

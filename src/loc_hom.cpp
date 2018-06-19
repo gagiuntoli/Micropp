@@ -19,6 +19,22 @@
 
 #include "micro.h"
 
+void Problem::loc_hom_Ctan_Linear (double *Ctan)
+{
+  for (int i=0; i<nvoi; i++)
+    for (int j=0; j<nvoi; j++)
+      Ctan[i*nvoi + j] = CtanLinear[i][j];
+}
+
+void Problem::loc_hom_Stress_Linear (double *Strain, double *Stress)
+{
+  for (int i=0; i<nvoi; i++) {
+    Stress[i] = 0.0;
+    for (int j=0; j<nvoi; j++)
+      Stress[i] += CtanLinear[i][j]*Strain[j];
+  }
+}
+
 void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *MacroStress)
 {
   bool not_allocated_yet = false;

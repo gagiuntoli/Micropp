@@ -195,7 +195,6 @@ void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
   }
 }
 
-
 int Problem::getElemType (int ex, int ey)
 {
   if (micro_type == 0) {

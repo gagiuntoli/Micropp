@@ -95,6 +95,8 @@ class Problem {
     int LinCriteria;
     void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
     void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
+    void loc_hom_Ctan_Linear (double *Ctan);
+    void loc_hom_Stress_Linear (double *Strain, double *Stress);
     bool LinearCriteria (double *MacroStrain);
     double Invariant_I1 (double *tensor);
     double Invariant_I2 (double *tensor);
