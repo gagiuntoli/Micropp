@@ -2,12 +2,16 @@
 % \usepackage[pdftex]{graphicx}
 % \usepackage[dvips]{graphicx}
 %\usepackage{amsmath}
-%\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 %\usepackage{array}
 %\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 %\usepackage{fixltx2e}
 %\usepackage{stfloats}
 %\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
 
 \hyphenation{op-tical net-works semi-conduc-tor}
 
@@ -40,8 +44,104 @@ The Voigth convention used here is the same as in Ref.~\cite{simo}.
 \epsilon = \left[\epsilon_{11} \quad \epsilon_{22} \quad \epsilon_{33} \quad \epsilon_{12} \quad \epsilon_{13} \quad \epsilon_{23} \right]^T
 \end{equation}
 
-\subsubsection{Subsubsection Heading Here}
-Subsubsection text here.
+\subsubsection{Plasticity Model}
+MicroPP has a J2 plasticity model with isotropic hardening.
+\begin {equation}
+\left\{
+\begin{array}{ll}
+\epsilon_{n+1}^{e,\text{trial}} = \epsilon_{n+1} - \epsilon_{n}^{p} \\[5pt]
+\sigma_{n+1}^{\text{trial}} = \mathrm{C} : \epsilon_{n+1}^{e,\text{trial}} \\[5pt]
+\mathbf{q}_{n+1}^{\text{trial}} = \mathbf{q}_{n} \\[5pt]
+f_{n+1}^{\text{trial}} = f (\sigma_{n+1}^{\text{trial}}, \mathbf{q}_{n+1}^{\text{trial}})\\
+\end{array}
+\right.
+\end {equation}
+
+\begin {equation}
+\left\{
+\begin{array}{ll}
+\epsilon_{n+1}^{p} = \epsilon_{n}^{p} - \Delta \gamma  \mathbf{n}_{n+1} \\[5pt]
+\alpha_{n+1} = \alpha_{n} + \sqrt{\frac{2}{3}} \Delta \gamma
+\end{array}
+\right.
+\end {equation}
+
+\begin {equation}
+s_{n+1}^{\text{trial}} = s_{n+1} + 2 \mu e_{n+1}
+\end {equation}
+
+\begin {equation}
+\mathbf{n}_{n+1} = \frac{s_{n+1}^{\text{trial}}}{|| s_{n+1}^{\text{trial}} ||}
+\end {equation}
+
+\begin {equation}
+f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sigma_{Y} + K_{a} \alpha_{n} )
+\end {equation}
+
+\begin {equation}
+\Delta \gamma = \frac{f_{n+1}^{\text{trial}}}{2\mu(1+K_{a})}
+\end {equation}
+
+1. Compute trial elastic stress
+\begin {equation}
+\left\{
+\begin{array}{ll}
+e_{n+1} = \epsilon_{n+1} - \frac{1}{3} \text{tr}( \epsilon_{n+1} ) \\[5pt]
+s_{n+1}^{\text{trial}} = 2\mu( e_{n+1} - e_{n+1}^{p} ) \\[5pt]
+\end{array}
+\right.
+\end {equation}
+
+2. Check yield condition
+
+\begin {equation}
+f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sigma_{Y} + K_{a} \alpha_{n} )
+\end {equation}
+
+3. If $f_{n+1}^{\text{trial}} < 0$ then set
+\begin {equation}
+(\cdot)_{n+1} = (\cdot)_{n+1}^{\text{trial}} \text{ and exit.}
+\end {equation}
+
+\begin {equation}
+\Delta \gamma = \frac{f_{n+1}^{\text{trial}}}{2\mu(1+K_{a})}
+\end {equation}
+
+4. Compute
+\begin {equation}
+\mathbf{n}_{n+1} = \frac{s_{n+1}^{\text{trial}}}{|| s_{n+1}^{\text{trial}} ||}
+\end {equation}
+
+\begin {equation}
+\Delta \gamma = \frac{f_{n+1}^{\text{trial}}}{2\mu(1+K_{a})}
+\end {equation}
+
+5. Update variables
+\begin {equation}
+\left\{
+\begin{array}{ll}
+\epsilon_{n+1}^{p} = \epsilon_{n}^{p} - \Delta \gamma  \mathbf{n}_{n+1} \\[5pt]
+\alpha_{n+1} = \alpha_{n} + \sqrt{\frac{2}{3}} \Delta \gamma \\[5pt]
+\sigma_{n+1} = k \, \text{tr} (\epsilon_{n+1}) + s_{n+1}^{\text{trial}} - 2 \mu \Delta \gamma \mathbf{n}_{n+1} 
+\end{array}
+\right.
+\end {equation}
+
+\begin{algorithm}
+\caption{Algorithm caption}
+\label{alg:algorithm-label}
+\begin{algorithmic}
+ \STATE $ \epsilon^{0} = \epsilon $
+ \STATE $ \sigma^{0} = g(\epsilon^{0})$
+ \FOR {$i=1\dots6$}
+     \STATE $ \epsilon^{*} = \epsilon $
+     \STATE $ \epsilon^{*}(i) = \epsilon^{*}(i) + \delta\epsilon $
+     \STATE $ \sigma^{*} = g(\epsilon^{*})$
+     \STATE $ \mathrm{C} (i, :) = ( \sigma^* - \sigma^0 ) / \delta\epsilon $
+ \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
 
 \section{Conclusion}
 The conclusion goes here.
