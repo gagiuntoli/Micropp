@@ -39,6 +39,8 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 	  vars_old[i] = 0.0;
 	not_allocated_yet = true;
       }
+      for (int i=0; i<nvoi; i++)
+	it->MacroStrain[i] = MacroStrain[i];
       break;
     }
   }
@@ -229,3 +231,58 @@ double Problem::Invariant_I2 (double *tensor)
     return tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
 }
 
+void Problem::updateCtanStatic (void)
+{
+  bool filter = true;
+  double tol_filter = 1.0e-2;
+
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+
+    if (LinearCriteria(it->MacroStrain) == true) {
+
+      for (int i=0; i<nvoi; i++)
+	for (int j=0; j<nvoi; j++)
+	  it->CtanStatic[i*nvoi + j] = CtanLinear[i][j];
+
+    } else {
+
+      double Strain_pert[6], Stress_0[6];
+      double delta_Strain = 1.0e-10;
+      bool non_linear;
+      setDisp(it->MacroStrain);
+      newtonRaphson(&non_linear);
+      calcAverageStress(Stress_0);
+
+      double stress_ave[6];
+      for (int i=0; i<nvoi; i++) {
+	for (int v=0; v<nvoi; v++)
+	  Strain_pert[v] = it->MacroStrain[v];
+	Strain_pert[i] += delta_Strain;
+
+	setDisp(Strain_pert);
+	newtonRaphson(&non_linear);
+	calcAverageStress(stress_ave);
+	for (int v=0; v<nvoi; v++) {
+	  it->CtanStatic[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
+	  if (filter == true)
+	    if (fabs(it->CtanStatic[v*nvoi + i]) < tol_filter)
+	      it->CtanStatic[v*nvoi + i] = 0.0;
+	}
+      }
+    }
+    break;
+  }
+}
+
+void Problem::getCtanStatic (int macroGp_id, double *Ctan)
+{
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == macroGp_id) {
+      for (int i=0; i<nvoi*nvoi; i++)
+	Ctan[i] = it->CtanStatic[i];
+      break;
+    }
+  }
+}

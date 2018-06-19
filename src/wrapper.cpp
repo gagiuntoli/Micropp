@@ -76,4 +76,14 @@ extern "C"
   {
     micro->getMaxInvariant (invariant_max);
   }
+
+  void micro_update_ctan_static_(void)
+  {
+    micro->updateCtanStatic ();
+  }
+
+  void micro_get_ctan_static_(int *MacroGp_id, double *Ctan)
+  {
+    micro->getCtanStatic (*MacroGp_id, Ctan);
+  }
 } 
