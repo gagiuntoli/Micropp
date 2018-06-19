@@ -52,6 +52,9 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
     macroGp_new.non_linear_aux = false;
     macroGp_new.int_vars = NULL;
     macroGp_new.int_vars_aux = NULL;
+    for (int i=0; i<nvoi; i++)
+      for (int j=0; j<nvoi; j++)
+	macroGp_new.CtanStatic[i*nvoi + j] = CtanLinear[i][j];
     MacroGp_list.push_back(macroGp_new);
     for (int i=0; i<num_int_vars; i++)
       vars_old[i] = 0.0;
