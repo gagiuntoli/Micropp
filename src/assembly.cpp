@@ -979,6 +979,8 @@ void Problem::plasticStep(
 
   double f_trial = sig_dev_trial_norm - (material.Sy + material.Ka * alpha_1);
 
+  if (f_trial > FtrialMax) FtrialMax = f_trial;
+
   if (f_trial > 0)
   {
     // linear hardening K(alpha) = Sy + Ka * alpha

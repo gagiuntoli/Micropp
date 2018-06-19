@@ -66,4 +66,14 @@ extern "C"
   {
     micro->getIntVars (*macroGp_id, *n, int_vars);
   }
+
+  void micro_get_max_ftrial_(double *ftrial_max)
+  {
+    micro->getMaxFtrial (ftrial_max);
+  }
+
+  void micro_get_max_invariant_(double *invariant_max)
+  {
+    micro->getMaxInvariant (invariant_max);
+  }
 } 

@@ -204,6 +204,8 @@ bool Problem::LinearCriteria (double *MacroStrain)
 //  << MacroStress[4] << " " 
 //  << MacroStress[5] << endl;
 
+  if (fabs(Inv) > InvariantMax) InvariantMax = fabs(Inv);
+
   if (fabs(Inv) < INV_MAX) {
     LinCriteria = 1;
     return true;

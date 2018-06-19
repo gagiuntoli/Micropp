@@ -135,6 +135,9 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
 
   cout << "calculating Ctan (linear) ..." << endl;
   calcCtanLinear ();
+
+  FtrialMax    = -1.0e10;
+  InvariantMax = -1.0e10;
 }
 
 Problem::~Problem (void)
