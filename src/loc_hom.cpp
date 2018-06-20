@@ -35,7 +35,7 @@ void Problem::loc_hom_Stress_Linear (double *Strain, double *Stress)
   }
 }
 
-void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *MacroStress)
+void Problem::loc_hom_Stress (int Gauss_ID, double *MacroStrain, double *MacroStress)
 {
   bool not_allocated_yet = false;
   bool filter = true;
@@ -45,7 +45,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   // search for the macro gauss point, if not found just create and insert
   list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
+    if (it->id == Gauss_ID) {
       non_linear_history = it->non_linear;
       if (it->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
@@ -63,7 +63,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 
   if (it ==  MacroGp_list.end()) {
     MacroGp_t macroGp_new;
-    macroGp_new.id = macroGp_id;
+    macroGp_new.id = Gauss_ID;
     macroGp_new.non_linear = false;
     macroGp_new.non_linear_aux = false;
     macroGp_new.int_vars = NULL;
@@ -107,7 +107,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
 
   if (non_linear == true) {
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-      if (it->id == macroGp_id) {
+      if (it->id == Gauss_ID) {
 	it->non_linear_aux = true;
 	if (not_allocated_yet == true) {
 	  it->int_vars = (double*)malloc(num_int_vars*sizeof(double));
@@ -121,7 +121,7 @@ void Problem::loc_hom_Stress (int macroGp_id, double *MacroStrain, double *Macro
   }
 }
 
-void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan)
+void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan)
 {
   bool filter = true;
   double tol_filter = 1.0e-2;
@@ -129,7 +129,7 @@ void Problem::loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCt
 
   list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
+    if (it->id == Gauss_ID) {
       non_linear_history = it->non_linear;
       if (it->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
@@ -294,11 +294,11 @@ void Problem::updateCtanStatic (void)
   }
 }
 
-void Problem::getCtanStatic (int macroGp_id, double *Ctan)
+void Problem::getCtanStatic (int Gauss_ID, double *Ctan)
 {
   list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
+    if (it->id == Gauss_ID) {
       for (int i=0; i<nvoi*nvoi; i++)
 	Ctan[i] = it->CtanStatic[i];
       break;
@@ -308,16 +308,130 @@ void Problem::getCtanStatic (int macroGp_id, double *Ctan)
 
 void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
 {
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == Gauss_ID) {
+      for (int i=0; i<nvoi; i++)
+	it->MacroStrain[i] = MacroStrain[i];
+      break;
+    }
+  }
+  if (it ==  MacroGp_list.end()) {
+
+    MacroGp_t macroGp_new;
+
+    macroGp_new.id             = Gauss_ID;
+    macroGp_new.non_linear     = false;
+    macroGp_new.non_linear_aux = false;
+    macroGp_new.int_vars       = NULL;
+    macroGp_new.int_vars_aux   = NULL;
+
+    MacroGp_list.push_back(macroGp_new);
+  }
 }
 
 void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
 {
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == Gauss_ID) {
+      for (int i=0; i<nvoi; i++)
+	MacroStress[i] = it->MacroStress[i];
+      break;
+    }
+  }
 }
 
 void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
 {
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->id == Gauss_ID) {
+      for (int i=0; i<nvoi*nvoi; i++)
+	MacroCtan[i] = it->MacroCtan[i];
+      break;
+    }
+  }
 }
 
 void Problem::localizeHomogenize(void)
 {
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+    if (it->non_linear == false) {
+      for (int i=0; i<num_int_vars; i++)
+	vars_old[i] = 0.0;
+    } else {
+      for (int i=0; i<num_int_vars; i++)
+	vars_old[i] = it->int_vars[i];
+    }
+
+    if ((LinearCriteria(it->MacroStrain) == true) && (it->non_linear == false)) {
+
+      // S = CL : E
+      for (int i=0; i<nvoi; i++) {
+	it->MacroStress[i] = 0.0;
+	for (int j=0; j<nvoi; j++)
+	  it->MacroStress[i] += CtanLinear[i][j] * it->MacroStrain[j];
+      }
+      // C = CL
+      for (int i=0; i<nvoi; i++) {
+	for (int j=0; j<nvoi; j++)
+	  it->MacroCtan[i*nvoi + j] = CtanLinear[i][j];
+      }
+      it->non_linear_aux = false;
+
+    } else {
+
+      // CALCULATE S (FEM)
+      // HERE IS ONLY OPORTUNITY TO DETECT THE NON_LINEAR
+      setDisp(it->MacroStrain);
+      newtonRaphson(&it->non_linear_aux); 
+      calcAverageStress(it->MacroStress);
+
+      // CALCULATE C (FEM)
+      // HERE WE DONT DETECT NON LINEARITY
+      double Strain_1[6], Stress_0[6], Stress_1[6], dEps = 1.0e-10;
+      bool non_linear_dummy;
+      setDisp(it->MacroStrain);
+      newtonRaphson(&non_linear_dummy);
+      calcAverageStress(Stress_0);
+
+      for (int i=0; i<nvoi; i++) {
+	for (int v=0; v<nvoi; v++)
+	  Strain_1[v] = it->MacroStrain[v];
+	Strain_1[i] += dEps;
+
+	setDisp(Strain_1);
+	newtonRaphson(&non_linear_dummy);
+	calcAverageStress(Stress_1);
+	for (int v=0; v<nvoi; v++)
+	  it->MacroCtan[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / dEps;
+      }
+
+    }
+  }
+}
+
+void Problem::updateInternalVariables (void)
+{
+  list<MacroGp_t>::iterator it;
+  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+
+    if (it->non_linear_aux == true) {
+
+      if(it->non_linear == false) {
+	it->non_linear = true;
+	it->int_vars = (double *) malloc (num_int_vars * sizeof(double));
+      }
+
+      // WE ONLY NEED TO FILL <vars_new>
+      bool non_linear_dummy;
+      setDisp(it->MacroStrain);
+      newtonRaphson(&non_linear_dummy);
+
+      for (int i=0; i<num_int_vars; i++)
+	it->int_vars[i] = vars_new[i];
+    }
+  }
 }

@@ -112,6 +112,11 @@ extern "C"
     micro->getMacroCtan(*Gauss_ID, MacroCtan);
   }
 
+  void micropp_update_internal_variables_(void)
+  {
+    micro->updateInternalVariables ();
+  }
+
   void micropp_update_int_vars_(void)
   {
     micro->updateIntVars ();

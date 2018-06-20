@@ -40,8 +40,10 @@ struct MacroGp_t {
   bool non_linear_aux;
   double *int_vars;
   double *int_vars_aux;
-  double MacroStrain[6];
   double CtanStatic[36];
+  double MacroStrain[6];
+  double MacroStress[6];
+  double MacroCtan[36];
 };
 
 struct material_t {
@@ -108,6 +110,7 @@ class Problem {
     void getMacroStress(int Gauss_ID, double *MacroStress);
     void getMacroCtan(int Gauss_ID, double *MacroCtan);
     void localizeHomogenize(void);
+    void updateInternalVariables (void);
 
     double NR_norm;
     int NR_its, NR_non_linear;
