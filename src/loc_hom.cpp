@@ -151,24 +151,24 @@ void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan
 
   } else {
 
-    double Strain_pert[6], Stress_0[6];
+    double Strain_1[6], Stress_0[6];
     double delta_Strain = 1.0e-10;
     bool non_linear;
     setDisp(MacroStrain);
     newtonRaphson(&non_linear);
     calcAverageStress(Stress_0);
 
-    double stress_ave[6];
+    double Stress_1[6];
     for (int i=0; i<nvoi; i++) {
       for (int v=0; v<nvoi; v++)
-	Strain_pert[v] = MacroStrain[v];
-      Strain_pert[i] += delta_Strain;
+	Strain_1[v] = MacroStrain[v];
+      Strain_1[i] += delta_Strain;
 
-      setDisp(Strain_pert);
+      setDisp(Strain_1);
       newtonRaphson(&non_linear);
-      calcAverageStress(stress_ave);
+      calcAverageStress(Stress_1);
       for (int v=0; v<nvoi; v++) {
-	MacroCtan[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
+	MacroCtan[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / delta_Strain;
 	if (filter == true)
 	  if (fabs(MacroCtan[v*nvoi + i]) < tol_filter)
 	    MacroCtan[v*nvoi + i] = 0.0;
@@ -179,7 +179,7 @@ void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan
 
 void Problem::calcCtanLinear (void)
 {
-  double stress_ave[6], Strain_pert[6];
+  double Stress_1[6], Strain_1[6];
   double delta_Strain = 1.0e-8;
   bool non_linear;
   bool filter = true;
@@ -187,23 +187,22 @@ void Problem::calcCtanLinear (void)
 
   for (int i=0; i<nvoi; i++) {
     for (int v=0; v<nvoi; v++)
-      Strain_pert[v] = 0.0;
-    Strain_pert[i] += delta_Strain;
+      Strain_1[v] = 0.0;
+    Strain_1[i] += delta_Strain;
 
-    setDisp(Strain_pert);
+    setDisp(Strain_1);
     newtonRaphson(&non_linear);
-    calcAverageStress(stress_ave);
+    calcAverageStress(Stress_1);
 
     for (int v=0; v<nvoi; v++) {
-      CtanLinear[v][i] = stress_ave[v] / delta_Strain;
-      if (filter == true)
-	if (fabs(CtanLinear[v][i]) < tol_filter)
-	  CtanLinear[v][i] = 0.0;
+      CtanLinear[v][i] = Stress_1[v] / delta_Strain;
+      if ((filter == true) && (fabs(CtanLinear[v][i]) < tol_filter))
+	CtanLinear[v][i] = 0.0;
     }
   }
 }
 
-#define INV_MAX 10000
+#define INV_MAX 175000
 
 bool Problem::LinearCriteria (double *MacroStrain)
 {
@@ -211,19 +210,11 @@ bool Problem::LinearCriteria (double *MacroStrain)
 
   for (int i=0; i<nvoi; i++) {
     MacroStress[i] = 0.0;
-    for (int j=0; j<nvoi; j++)
+    for (int j=0; j<nvoi; j++) {
       MacroStress[i] += CtanLinear[i][j] * MacroStrain[j];
+    }
   }
-
   double Inv = Invariant_I1(MacroStress);
-//  cout << " Inv = " << Inv << endl;
-//  cout << " Stress = " 
-//  << MacroStress[0] << " "
-//  << MacroStress[1] << " " 
-//  << MacroStress[2] << " "  
-//  << MacroStress[3] << " " 
-//  << MacroStress[4] << " " 
-//  << MacroStress[5] << endl;
 
   if (fabs(Inv) > InvariantMax) InvariantMax = fabs(Inv);
 
@@ -266,24 +257,24 @@ void Problem::updateCtanStatic (void)
 
     } else {
 
-      double Strain_pert[6], Stress_0[6];
+      double Strain_1[6], Stress_0[6];
       double delta_Strain = 1.0e-10;
       bool non_linear;
       setDisp(it->MacroStrain);
       newtonRaphson(&non_linear);
       calcAverageStress(Stress_0);
 
-      double stress_ave[6];
+      double Stress_1[6];
       for (int i=0; i<nvoi; i++) {
 	for (int v=0; v<nvoi; v++)
-	  Strain_pert[v] = it->MacroStrain[v];
-	Strain_pert[i] += delta_Strain;
+	  Strain_1[v] = it->MacroStrain[v];
+	Strain_1[i] += delta_Strain;
 
-	setDisp(Strain_pert);
+	setDisp(Strain_1);
 	newtonRaphson(&non_linear);
-	calcAverageStress(stress_ave);
+	calcAverageStress(Stress_1);
 	for (int v=0; v<nvoi; v++) {
-	  it->CtanStatic[v*nvoi + i] = (stress_ave[v] - Stress_0[v]) / delta_Strain;
+	  it->CtanStatic[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / delta_Strain;
 	  if (filter == true)
 	    if (fabs(it->CtanStatic[v*nvoi + i]) < tol_filter)
 	      it->CtanStatic[v*nvoi + i] = 0.0;
@@ -318,15 +309,17 @@ void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
   }
   if (it ==  MacroGp_list.end()) {
 
-    MacroGp_t macroGp_new;
+    MacroGp_t GaussPoint;
 
-    macroGp_new.id             = Gauss_ID;
-    macroGp_new.non_linear     = false;
-    macroGp_new.non_linear_aux = false;
-    macroGp_new.int_vars       = NULL;
-    macroGp_new.int_vars_aux   = NULL;
+    GaussPoint.id             = Gauss_ID;
+    GaussPoint.non_linear     = false;
+    GaussPoint.non_linear_aux = false;
+    GaussPoint.int_vars       = NULL;
+    GaussPoint.int_vars_aux   = NULL;
+    for (int i=0; i<nvoi; i++)
+      GaussPoint.MacroStrain[i] = MacroStrain[i];
 
-    MacroGp_list.push_back(macroGp_new);
+    MacroGp_list.push_back(GaussPoint);
   }
 }
 
