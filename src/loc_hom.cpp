@@ -305,3 +305,19 @@ void Problem::getCtanStatic (int macroGp_id, double *Ctan)
     }
   }
 }
+
+void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
+{
+}
+
+void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
+{
+}
+
+void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
+{
+}
+
+void Problem::localizeHomogenize(void)
+{
+}

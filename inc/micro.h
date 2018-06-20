@@ -104,6 +104,11 @@ class Problem {
     void updateCtanStatic (void);
     void getCtanStatic (int MacroGp_id, double *Ctan);
 
+    void setMacroStrain(int Gauss_ID, double *MacroStrain);
+    void getMacroStress(int Gauss_ID, double *MacroStress);
+    void getMacroCtan(int Gauss_ID, double *MacroCtan);
+    void localizeHomogenize(void);
+
     double NR_norm;
     int NR_its, NR_non_linear;
     void solve (void);

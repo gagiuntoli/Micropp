@@ -57,11 +57,6 @@ extern "C"
     micro->output (*time_step, *elem, *Gauss_ID, MacroStrain);
   }
 
-  void micropp_update_int_vars_(void)
-  {
-    micro->updateIntVars ();
-  }
-
   void micropp_get_non_linear_flag_(int *Gauss_ID, int *non_linear)
   {
     micro->getNonLinearFlag (*Gauss_ID, non_linear);
@@ -92,9 +87,34 @@ extern "C"
     micro->updateCtanStatic ();
   }
 
-  void micropp_get_ctan_static_(int *MacroGp_id, double *Ctan)
+  void micropp_get_ctan_static_(int *Gauss_ID, double *Ctan)
   {
-    micro->getCtanStatic (*MacroGp_id, Ctan);
+    micro->getCtanStatic (*Gauss_ID, Ctan);
+  }
+
+  void micropp_set_macro_strain_(int *Gauss_ID, double *MacroStrain)
+  {
+    micro->setMacroStrain (*Gauss_ID, MacroStrain);
+  }
+
+  void micropp_localize_homomogenize_(void)
+  {
+    micro->localizeHomogenize();
+  }
+
+  void micropp_get_macro_stress_(int *Gauss_ID, double *MacroStress)
+  {
+    micro->getMacroStress(*Gauss_ID, MacroStress);
+  }
+
+  void micropp_get_macro_ctan_(int *Gauss_ID, double *MacroCtan)
+  {
+    micro->getMacroCtan(*Gauss_ID, MacroCtan);
+  }
+
+  void micropp_update_int_vars_(void)
+  {
+    micro->updateIntVars ();
   }
 
 } 
