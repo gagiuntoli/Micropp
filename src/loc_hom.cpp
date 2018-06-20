@@ -1,5 +1,5 @@
 /*
- *  MicroPP : finite element library to solve microstructure problems for composite materials.
+ *  MicroPP : finite element library to solve microstructural problems for composite materials.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *  

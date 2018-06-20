@@ -63,52 +63,54 @@ int main (int argc, char *argv[])
   Problem micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
   int time_steps = 80;
-  double stress_ave[6], ctan_ave[36];
+  double MacroStress[6], MacroCtan[36];
   double d_eps = 0.01;
-  int strain_comp = 2;
+  int Strain_Direction = 2;
 
   for (int t=0; t<time_steps; t++) {
 
     cout << "Time step = " << t << endl;
 
     if (t<30)
-      eps[strain_comp] += d_eps;
+      eps[Strain_Direction] += d_eps;
     else if (t<80)
-      eps[strain_comp] -= d_eps;
+      eps[Strain_Direction] -= d_eps;
     else if (t<130)
-      eps[strain_comp] += d_eps;
+      eps[Strain_Direction] += d_eps;
     else if (t<250)
-      eps[strain_comp] -= d_eps;
+      eps[Strain_Direction] -= d_eps;
     else
-      eps[strain_comp] += d_eps;
+      eps[Strain_Direction] += d_eps;
 
     double NR_norm;
     int NR_its, NR_non_linear;
     int LinCriteria;
-    micro.loc_hom_Stress (1, eps, stress_ave);
-    micro.updateIntVars();
-    micro.getParams_NR (&NR_its, &NR_norm, &NR_non_linear);
-    micro.getParams_LinCriteria (&LinCriteria);
-    cout << "NEWTON-R ITS = " << NR_its << " TOL = " << NR_norm << " NON_LINEAR = " << NR_non_linear  << endl;
-    cout << "LinCriteria = " << LinCriteria << endl;
+
+    micro.setMacroStrain (1, eps);
+    micro.localizeHomogenize();
+
+    micro.getMacroStress(1, MacroStress);
+
+    micro.updateInternalVariables ();
+
     int non_linear = 0;
     micro.getNonLinearFlag (1, &non_linear);
     cout << "non linear Gp 1 = " << non_linear << endl;
 
-    cout << "e11 = " << eps[strain_comp] << endl;
+    cout << "eps = " << eps[Strain_Direction] << endl;
     cout 
-      << "Average stress = " 
-      << stress_ave[0] << " " << stress_ave[1] << " " << stress_ave[2] << " " 
-      << stress_ave[3] << " " << stress_ave[4] << " " << stress_ave[5] 
+      << "MacroStress = " 
+      << MacroStress[0] << " " << MacroStress[1] << " " << MacroStress[2] << " " 
+      << MacroStress[3] << " " << MacroStress[4] << " " << MacroStress[5] 
       << endl;
 
     cout << endl;
-//    micro.loc_hom_Ctan (1, eps, ctan_ave);
+//    micro.loc_hom_Ctan (1, eps, MacroCtan);
 //
 //    cout <<"Average Ctan = " << endl;
 //    for (int i=0; i<6; i++) {
 //      for (int j=0; j<6; j++)
-//	cout << setw (8) << std::setprecision(3) << ctan_ave[i*6 + j] << " ";
+//	cout << setw (8) << std::setprecision(3) << MacroCtan[i*6 + j] << " ";
 //      cout << endl;
 //    }
 
