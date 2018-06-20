@@ -89,6 +89,7 @@ class Problem {
     double *u, *du, *b;
 
     double FtrialMax;
+    double INV_MAX;
     double InvariantMax;
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);

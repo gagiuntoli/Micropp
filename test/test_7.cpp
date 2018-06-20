@@ -40,11 +40,12 @@ int main (int argc, char *argv[])
   size[2] = nz;
 
   int micro_type = 1; // 2 materiales matriz y fibra (3D esfera en matriz)
-  double micro_params[4]; 
+  double micro_params[5]; 
   micro_params[0] = 1.0; // lx
   micro_params[1] = 1.0; // ly
   micro_params[2] = 1.0; // lz
   micro_params[3] = 0.1; // grosor capa de abajo
+  micro_params[4] = 175000; // INV_MAX
 
   int mat_types[2]; // dos materiales lineales (type = 0)
   mat_types[0] = 1;

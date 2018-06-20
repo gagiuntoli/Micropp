@@ -31,20 +31,22 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
     // mat 1 = matrix
     // mat 2 = sphere
     numMaterials = 2;
-    nParams = 4;
+    nParams = 5;
   } else if (micro_type == 1) {
     // mat 1 = layer 1
     // mat 2 = layer 2
     numMaterials = 2;
-    nParams = 4;
+    nParams = 5;
   }
 
   for (int i=0; i<nParams; i++) {
     this->micro_params[i] = micro_params[i];
   }
-  lx = micro_params[0];
-  ly = micro_params[1];
-  lz = micro_params[2];
+  lx = this->micro_params[0];
+  ly = this->micro_params[1];
+  lz = this->micro_params[2];
+
+  INV_MAX = this->micro_params[4];  
 
   for (int i=0; i<numMaterials; i++)
   {

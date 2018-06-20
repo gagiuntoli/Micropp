@@ -203,8 +203,6 @@ void Problem::calcCtanLinear (void)
   }
 }
 
-#define INV_MAX 175000
-
 bool Problem::LinearCriteria (double *MacroStrain)
 {
   double MacroStress[6];
