@@ -177,6 +177,6 @@ class Problem {
     void output (int time_step, int Gauss_ID, double *MacroStrain);
     void writeVtu (int time_step, int elem);
     void writeConvergenceFile (void);
-    bool convergence_file_header;
+    bool output_files_header;
 
 };

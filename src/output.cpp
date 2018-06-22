@@ -232,32 +232,50 @@ void Problem::writeConvergenceFile (void)
   list<MacroGp_t>::iterator it;
 
   ofstream file;
-  file.open ("micropp_convergence.dat", std::ios_base::app);
 
-  if (convergence_file_header == false) {
-    convergence_file_header = true;
+  if (output_files_header == false) {
+    output_files_header = true;
+
+    file.open ("micropp_convergence.dat", std::ios_base::app);
     file << "GaussPointID : ";
     for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
       file << it->id << " ";
     }
     file << endl;
+    file.close();
+
+    file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
+    file << "GaussPointID : ";
+    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+      file << it->id << " ";
+    }
+    file << endl;
+    file.close();
   }
 
+  file.open ("micropp_convergence.dat", std::ios_base::app);
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     file << scientific;
+    file << setw(14) << it->non_linear << " ";
     file << setw(14) << it->convergence.NR_Its_Stress << " ";
     file << setw(14) << it->convergence.NR_Err_Stress << " ";
     for (int i=0; i<nvoi; i++) {
       file << setw(14) << it->convergence.NR_Its_Ctan[i] << " ";
       file << setw(14) << it->convergence.NR_Err_Ctan[i] << " ";
     }
+    file << " | ";
+  }
+  file << endl;
+  file.close();
 
+  file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
+  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     for (int i=0; i<6; i++)
       file << setw(14) << it->MacroStrain[i] << " ";
     for (int i=0; i<6; i++)
       file << setw(14) << it->MacroStress[i] << " ";
-    file << " | " << endl;
+    file << " | ";
   }
-
+  file << endl;
   file.close();
 }
