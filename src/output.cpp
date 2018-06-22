@@ -26,11 +26,11 @@
 
 using namespace std;
 
-void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStrain)
+void Problem::output (int time_step, int Gauss_ID, double *MacroStrain)
 {
   list<MacroGp_t>::iterator it;
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
+    if (it->id == Gauss_ID) {
       if (it->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = it->int_vars[i];
@@ -41,8 +41,6 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
       break;
     }
   }
-  if (it ==  MacroGp_list.end())
-    cout << "output.cpp : Error the macro_id " << macroGp_id << " was not found in the list for plotting." << endl; 
 
   double MacroStress[6];
   bool non_linear;
@@ -50,13 +48,13 @@ void Problem::output (int time_step, int elem, int macroGp_id, double *MacroStra
   newtonRaphson(&non_linear);
 
   calcDistributions();
-  writeVtu(time_step, elem);
+  writeVtu(time_step, Gauss_ID);
 }
 
-void Problem::writeVtu (int time_step, int elem)
+void Problem::writeVtu (int time_step, int Gauss_ID)
 {
   std::stringstream fname_vtu_s;
-  fname_vtu_s  << "micropp_" << elem << "_" << time_step << ".vtu";
+  fname_vtu_s  << "micropp_" << Gauss_ID << "_" << time_step << ".vtu";
   std::string fname_vtu  = fname_vtu_s.str();
 
   ofstream file;

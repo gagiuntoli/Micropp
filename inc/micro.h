@@ -175,7 +175,7 @@ class Problem {
     void calcAverageStrain (double strain_ave[6]);
 
     void writeVtu (int time_step, int elem);
-    void output (int time_step, int elem, int macro_gp_global, double *MacroStrain);
+    void output (int time_step, int macro_gp_global, double *MacroStrain);
     void writeConvergenceFile (void);
     bool convergence_file_header;
 

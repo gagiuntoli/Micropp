@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
 //      cout << endl;
 //    }
 
-    micro.output (t, 1, 1, eps);
+    micro.output (t, 1, eps);
   }
 
   return 0;

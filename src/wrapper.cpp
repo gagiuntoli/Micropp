@@ -53,9 +53,9 @@ extern "C"
     micro->loc_hom_Stress_Linear (strain, stress);
   }
 
-  void micropp_output_(int *time_step, int *elem, int *Gauss_ID, double *MacroStrain)
+  void micropp_output_(int *time_step, int *Gauss_ID, double *MacroStrain)
   {
-    micro->output (*time_step, *elem, *Gauss_ID, MacroStrain);
+    micro->output (*time_step, *Gauss_ID, MacroStrain);
   }
 
   void micropp_get_non_linear_flag_(int *Gauss_ID, int *non_linear)
