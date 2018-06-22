@@ -141,6 +141,12 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
 
   FtrialMax    = -1.0e10;
   InvariantMax = -1.0e10;
+
+  convergence_file_header = false;
+
+  ofstream file;
+  file.open ("micropp_convergence.dat");
+  file.close ();
 }
 
 Problem::~Problem (void)

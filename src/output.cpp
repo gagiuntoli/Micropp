@@ -19,7 +19,6 @@
  */
 
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <sstream>
 #include <cmath>
@@ -226,6 +225,34 @@ void Problem::writeVtu (int time_step, int elem)
 
   file << "</CellData>" << endl;
   file << "</Piece>" << endl << "</UnstructuredGrid>" << endl << "</VTKFile>" << endl;
+
+  file.close();
+}
+
+void Problem::writeConvergenceFile (void)
+{
+  list<MacroGp_t>::iterator it;
+
+  ofstream file;
+  file.open ("micropp_convergence.dat", std::ios_base::app);
+
+  if (convergence_file_header == false) {
+    convergence_file_header = true;
+    file << "GaussPointID : ";
+    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+      file << it->id << " ";
+    }
+    file << endl;
+  }
+
+  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+    file << scientific;
+    for (int i=0; i<6; i++)
+      file << setw(14) << it->MacroStrain[i] << " ";
+    for (int i=0; i<6; i++)
+      file << setw(14) << it->MacroStress[i] << " ";
+    file << " | " << endl;
+  }
 
   file.close();
 }

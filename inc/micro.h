@@ -20,6 +20,8 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <list>
 #include <cmath>
 #include "ell.h"
@@ -166,5 +168,7 @@ class Problem {
 
     void writeVtu (int time_step, int elem);
     void output (int time_step, int elem, int macro_gp_global, double *MacroStrain);
+    void writeConvergenceFile (void);
+    bool convergence_file_header;
 
 };

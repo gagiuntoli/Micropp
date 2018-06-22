@@ -94,6 +94,7 @@ int main (int argc, char *argv[])
     micro.getMacroStress(1, MacroStress);
 
     micro.updateInternalVariables ();
+    micro.writeConvergenceFile ();
 
     int non_linear = 0;
     micro.getNonLinearFlag (1, &non_linear);
