@@ -174,8 +174,8 @@ class Problem {
     void calcAverageStress (double stress_ave[6]);
     void calcAverageStrain (double strain_ave[6]);
 
+    void output (int time_step, int Gauss_ID, double *MacroStrain);
     void writeVtu (int time_step, int elem);
-    void output (int time_step, int macro_gp_global, double *MacroStrain);
     void writeConvergenceFile (void);
     bool convergence_file_header;
 
