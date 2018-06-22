@@ -98,7 +98,7 @@ extern "C"
     micro->setMacroStrain (*Gauss_ID, MacroStrain);
   }
 
-  void micropp_localize_homomogenize_(void)
+  void micropp_localize_homogenize_(void)
   {
     micro->localizeHomogenize();
   }
