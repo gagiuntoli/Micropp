@@ -247,6 +247,13 @@ void Problem::writeConvergenceFile (void)
 
   for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
     file << scientific;
+    file << setw(14) << it->convergence.NR_Its_Stress << " ";
+    file << setw(14) << it->convergence.NR_Err_Stress << " ";
+    for (int i=0; i<nvoi; i++) {
+      file << setw(14) << it->convergence.NR_Its_Ctan[i] << " ";
+      file << setw(14) << it->convergence.NR_Err_Ctan[i] << " ";
+    }
+
     for (int i=0; i<6; i++)
       file << setw(14) << it->MacroStrain[i] << " ";
     for (int i=0; i<6; i++)

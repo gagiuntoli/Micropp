@@ -37,6 +37,13 @@
 
 using namespace std;
 
+struct convergence_t {
+  int NR_Its_Stress;
+  double NR_Err_Stress;
+  int NR_Its_Ctan[6];
+  double NR_Err_Ctan[6];
+};
+
 struct MacroGp_t {
   int id;
   bool non_linear;
@@ -47,6 +54,7 @@ struct MacroGp_t {
   double MacroStrain[6];
   double MacroStress[6];
   double MacroCtan[36];
+  convergence_t convergence;
 };
 
 struct material_t {

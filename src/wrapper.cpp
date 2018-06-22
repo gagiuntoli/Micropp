@@ -123,4 +123,8 @@ extern "C"
     micro->updateIntVars ();
   }
 
+  void micropp_write_convergence_file_(void)
+  {
+    micro->writeConvergenceFile ();
+  }
 } 

@@ -372,6 +372,12 @@ void Problem::localizeHomogenize(void)
 	  it->MacroCtan[i*nvoi + j] = CtanLinear[i][j];
       }
       it->non_linear_aux = false;
+      it->convergence.NR_Its_Stress = 0;
+      it->convergence.NR_Err_Stress = 0.0;
+      for (int i=0; i<nvoi; i++) {
+	it->convergence.NR_Its_Ctan[i] = 0;
+	it->convergence.NR_Err_Ctan[i] = 0.0;
+      }
 
     } else {
 
@@ -380,6 +386,9 @@ void Problem::localizeHomogenize(void)
       setDisp(it->MacroStrain);
       newtonRaphson(&it->non_linear_aux); 
       calcAverageStress(it->MacroStress);
+
+      it->convergence.NR_Its_Stress = NR_its;
+      it->convergence.NR_Err_Stress = NR_norm;
 
       // CALCULATE C (FEM)
       // HERE WE DONT DETECT NON LINEARITY
@@ -399,6 +408,9 @@ void Problem::localizeHomogenize(void)
 	calcAverageStress(Stress_1);
 	for (int v=0; v<nvoi; v++)
 	  it->MacroCtan[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / dEps;
+
+	it->convergence.NR_Its_Ctan[i] = NR_its;
+	it->convergence.NR_Err_Ctan[i] = NR_norm;
       }
 
     }
