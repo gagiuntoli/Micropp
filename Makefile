@@ -39,7 +39,7 @@ LFLAGS += -lboost_program_options
 #INC=/apps/BOOST/1.67.0/include
 #INC=
 
-all: build test_1 test_2 test_3 test_4 test_5 test_6 test_7
+all: build test_1 test_2 test_3 test_4 test_5 test_6 test_7 test_8
 
 lib: build/libmicropp.a
 
@@ -62,6 +62,9 @@ test_6: build/test_6.o build/libmicropp.a
 	$(CC) $< -o $@ $(LFLAGS) -L build -lmicropp 
 
 test_7: build/test_7.o build/libmicropp.a
+	$(CC) $< -o $@ -L build -lmicropp 
+
+test_8: build/test_8.o build/libmicropp.a
 	$(CC) $< -o $@ -L build -lmicropp 
 
 build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/micro.o build/ell.o build/loc_hom.o build/wrapper.o  
@@ -98,6 +101,9 @@ build/test_6.o: test/test_6.cpp inc/micro.h
 	$(CC) $(CFLAGS) $< -I ./inc $(INC)  -o $@
 
 build/test_7.o: test/test_7.cpp inc/micro.h
+	$(CC) $(CFLAGS) $< -I ./inc $(INC)  -o $@
+
+build/test_8.o: test/test_8.cpp inc/micro.h
 	$(CC) $(CFLAGS) $< -I ./inc $(INC)  -o $@
 
 build/solve.o: src/solve.cpp inc/micro.h

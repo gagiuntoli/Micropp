@@ -20,7 +20,33 @@ quickly. In some cases the assembly time can be less than 1% of the solver time.
 
 # Compile
 
-Be sure of having the `g++` compiler and `make`, then run:
+## Library and test examples
+Requirements : `boost` (for some examples only), `g++` and `make`.
+
+Debug version
+
 ```bash
-make
+make <test_1...8>
+```
+
+Optimized version
+
+```bash
+make <test_1...8> OPT=1
+```
+
+## Library only
+
+Requirements : `g++` and `make`.
+
+Debug version
+
+```bash
+make lib
+```
+
+Optimized version
+
+```bash
+make lib OPT=1
 ```
