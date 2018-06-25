@@ -163,7 +163,7 @@ Problem::~Problem (void)
   free(vars_old);
 
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     free(GaussPoint->int_vars);
     free(GaussPoint->int_vars_aux);
   }
@@ -172,7 +172,7 @@ Problem::~Problem (void)
 void Problem::getIntVars (int macroGp_id, int n, int *int_vars)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == macroGp_id) {
       for (int i=0; i<n; i++)
 	int_vars[i] = GaussPoint->int_vars[i];
@@ -183,7 +183,7 @@ void Problem::getIntVars (int macroGp_id, int n, int *int_vars)
 void Problem::updateIntVars (void)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     GaussPoint->non_linear = GaussPoint->non_linear_aux;
     if (GaussPoint->int_vars != NULL) {
       for (int i=0; i<num_int_vars; i++)
@@ -198,7 +198,7 @@ void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
   *non_linear = 0;
 
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == macroGp_id) {
       *non_linear = (GaussPoint->non_linear == true) ? 1:0;
       break;

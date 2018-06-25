@@ -86,7 +86,7 @@ class Problem {
     double micro_params[5];
     int numMaterials;
     material_t material_list[MAX_MATS];
-    std::list<GaussPoint_t> MacroGp_list;
+    std::list<GaussPoint_t> GaussPointList;
     double CtanLinear[6][6];
 
     double *elem_strain;

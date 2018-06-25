@@ -45,7 +45,7 @@ void Problem::loc_hom_Stress (int Gauss_ID, double *MacroStrain, double *MacroSt
 
   // search for the macro gauss point, if not found just create and insert
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       non_linear_history = GaussPoint->non_linear;
       if (GaussPoint->int_vars != NULL) {
@@ -62,17 +62,17 @@ void Problem::loc_hom_Stress (int Gauss_ID, double *MacroStrain, double *MacroSt
     }
   }
 
-  if (GaussPoint ==  MacroGp_list.end()) {
-    GaussPoint_t macroGp_new;
-    macroGp_new.id = Gauss_ID;
-    macroGp_new.non_linear = false;
-    macroGp_new.non_linear_aux = false;
-    macroGp_new.int_vars = NULL;
-    macroGp_new.int_vars_aux = NULL;
+  if (GaussPoint ==  GaussPointList.end()) {
+    GaussPoint_t NewGaussPoint;
+    NewGaussPoint.id = Gauss_ID;
+    NewGaussPoint.non_linear = false;
+    NewGaussPoint.non_linear_aux = false;
+    NewGaussPoint.int_vars = NULL;
+    NewGaussPoint.int_vars_aux = NULL;
     for (int i=0; i<nvoi; i++)
       for (int j=0; j<nvoi; j++)
-	macroGp_new.CtanStatic[i*nvoi + j] = CtanLinear[i][j];
-    MacroGp_list.push_back(macroGp_new);
+	NewGaussPoint.CtanStatic[i*nvoi + j] = CtanLinear[i][j];
+    GaussPointList.push_back(NewGaussPoint);
     for (int i=0; i<num_int_vars; i++)
       vars_old[i] = 0.0;
     not_allocated_yet = true;
@@ -107,7 +107,7 @@ void Problem::loc_hom_Stress (int Gauss_ID, double *MacroStrain, double *MacroSt
   }
 
   if (non_linear == true) {
-    for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+    for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
       if (GaussPoint->id == Gauss_ID) {
 	GaussPoint->non_linear_aux = true;
 	if (not_allocated_yet == true) {
@@ -129,7 +129,7 @@ void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan
   bool non_linear_history = false;
 
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       non_linear_history = GaussPoint->non_linear;
       if (GaussPoint->int_vars != NULL) {
@@ -139,7 +139,7 @@ void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan
       break;
     }
   }
-  if (GaussPoint ==  MacroGp_list.end()) {
+  if (GaussPoint ==  GaussPointList.end()) {
     for (int i=0; i<num_int_vars; i++)
       vars_old[i] = 0.0;
   }
@@ -246,7 +246,7 @@ void Problem::updateCtanStatic (void)
   double tol_filter = 1.0e-2;
 
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
 
     if (LinearCriteria(GaussPoint->MacroStrain) == true) {
 
@@ -287,7 +287,7 @@ void Problem::updateCtanStatic (void)
 void Problem::getCtanStatic (int Gauss_ID, double *Ctan)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi*nvoi; i++)
 	Ctan[i] = GaussPoint->CtanStatic[i];
@@ -299,14 +299,14 @@ void Problem::getCtanStatic (int Gauss_ID, double *Ctan)
 void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi; i++)
 	GaussPoint->MacroStrain[i] = MacroStrain[i];
       break;
     }
   }
-  if (GaussPoint ==  MacroGp_list.end()) {
+  if (GaussPoint ==  GaussPointList.end()) {
 
     GaussPoint_t GaussPoint;
 
@@ -318,14 +318,14 @@ void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
     for (int i=0; i<nvoi; i++)
       GaussPoint.MacroStrain[i] = MacroStrain[i];
 
-    MacroGp_list.push_back(GaussPoint);
+    GaussPointList.push_back(GaussPoint);
   }
 }
 
 void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi; i++)
 	MacroStress[i] = GaussPoint->MacroStress[i];
@@ -337,7 +337,7 @@ void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
 void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi*nvoi; i++)
 	MacroCtan[i] = GaussPoint->MacroCtan[i];
@@ -349,7 +349,7 @@ void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
 void Problem::localizeHomogenize(void)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->non_linear == false) {
       for (int i=0; i<num_int_vars; i++)
 	vars_old[i] = 0.0;
@@ -420,7 +420,7 @@ void Problem::localizeHomogenize(void)
 void Problem::updateInternalVariables (void)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
 
     if (GaussPoint->non_linear_aux == true) {
 

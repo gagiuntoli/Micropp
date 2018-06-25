@@ -29,7 +29,7 @@ using namespace std;
 void Problem::output (int time_step, int Gauss_ID, double *MacroStrain)
 {
   list<GaussPoint_t>::iterator GaussPoint;
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
     if (GaussPoint->id == Gauss_ID) {
       if (GaussPoint->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
@@ -238,7 +238,7 @@ void Problem::writeConvergenceFile (void)
 
     file.open ("micropp_convergence.dat", std::ios_base::app);
     file << "GaussPointID : ";
-    for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+    for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
       file << GaussPoint->id << " ";
     }
     file << endl;
@@ -246,7 +246,7 @@ void Problem::writeConvergenceFile (void)
 
     file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
     file << "GaussPointID : ";
-    for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+    for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
       file << GaussPoint->id << " ";
     }
     file << endl;
@@ -254,7 +254,7 @@ void Problem::writeConvergenceFile (void)
   }
 
   file.open ("micropp_convergence.dat", std::ios_base::app);
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
     file << scientific;
     file << setw(14) << GaussPoint->non_linear << " ";
     file << setw(14) << GaussPoint->convergence.NR_Its_Stress << " ";
@@ -269,7 +269,7 @@ void Problem::writeConvergenceFile (void)
   file.close();
 
   file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
-  for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+  for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
     for (int i=0; i<6; i++)
       file << setw(14) << GaussPoint->MacroStrain[i] << " ";
     for (int i=0; i<6; i++)
