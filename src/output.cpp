@@ -28,12 +28,12 @@ using namespace std;
 
 void Problem::output (int time_step, int Gauss_ID, double *MacroStrain)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
-      if (it->int_vars != NULL) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
+      if (GaussPoint->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
-	  vars_old[i] = it->int_vars[i];
+	  vars_old[i] = GaussPoint->int_vars[i];
       } else {
 	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = 0.0;
@@ -229,7 +229,7 @@ void Problem::writeVtu (int time_step, int Gauss_ID)
 
 void Problem::writeConvergenceFile (void)
 {
-  list<MacroGp_t>::iterator it;
+  list<GaussPoint_t>::iterator GaussPoint;
 
   ofstream file;
 
@@ -238,30 +238,30 @@ void Problem::writeConvergenceFile (void)
 
     file.open ("micropp_convergence.dat", std::ios_base::app);
     file << "GaussPointID : ";
-    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-      file << it->id << " ";
+    for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+      file << GaussPoint->id << " ";
     }
     file << endl;
     file.close();
 
     file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
     file << "GaussPointID : ";
-    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-      file << it->id << " ";
+    for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+      file << GaussPoint->id << " ";
     }
     file << endl;
     file.close();
   }
 
   file.open ("micropp_convergence.dat", std::ios_base::app);
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
     file << scientific;
-    file << setw(14) << it->non_linear << " ";
-    file << setw(14) << it->convergence.NR_Its_Stress << " ";
-    file << setw(14) << it->convergence.NR_Err_Stress << " ";
+    file << setw(14) << GaussPoint->non_linear << " ";
+    file << setw(14) << GaussPoint->convergence.NR_Its_Stress << " ";
+    file << setw(14) << GaussPoint->convergence.NR_Err_Stress << " ";
     for (int i=0; i<nvoi; i++) {
-      file << setw(14) << it->convergence.NR_Its_Ctan[i] << " ";
-      file << setw(14) << it->convergence.NR_Err_Ctan[i] << " ";
+      file << setw(14) << GaussPoint->convergence.NR_Its_Ctan[i] << " ";
+      file << setw(14) << GaussPoint->convergence.NR_Err_Ctan[i] << " ";
     }
     file << " | ";
   }
@@ -269,11 +269,11 @@ void Problem::writeConvergenceFile (void)
   file.close();
 
   file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
-  for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
     for (int i=0; i<6; i++)
-      file << setw(14) << it->MacroStrain[i] << " ";
+      file << setw(14) << GaussPoint->MacroStrain[i] << " ";
     for (int i=0; i<6; i++)
-      file << setw(14) << it->MacroStress[i] << " ";
+      file << setw(14) << GaussPoint->MacroStress[i] << " ";
     file << " | ";
   }
   file << endl;

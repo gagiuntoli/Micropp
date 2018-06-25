@@ -66,7 +66,6 @@ int main (int argc, char *argv[])
 
   Problem micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
-
   int time_steps = 10;
   double MacroStress[6], MacroCtan[36];
   double d_eps = 0.01;
@@ -97,14 +96,13 @@ int main (int argc, char *argv[])
       cout << "Gp = " << gp_ID << endl;
 
       micro.setMacroStrain (gp_ID, MacroStrain);
-      micro.localizeHomogenize();
-
-      micro.getMacroStress(1, MacroStress);
-
-      micro.updateInternalVariables ();
-      micro.writeConvergenceFile ();
 
     }
+    micro.localizeHomogenize();
+    micro.getMacroStress(1, MacroStress);
+
+    micro.updateInternalVariables ();
+    micro.writeConvergenceFile ();
   }
 
   return 0;

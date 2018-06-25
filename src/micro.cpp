@@ -162,34 +162,34 @@ Problem::~Problem (void)
   free(elem_type);
   free(vars_old);
 
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    free(it->int_vars);
-    free(it->int_vars_aux);
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    free(GaussPoint->int_vars);
+    free(GaussPoint->int_vars_aux);
   }
 }
 
 void Problem::getIntVars (int macroGp_id, int n, int *int_vars)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == macroGp_id) {
       for (int i=0; i<n; i++)
-	int_vars[i] = it->int_vars[i];
+	int_vars[i] = GaussPoint->int_vars[i];
     }
   }
 }
 
 void Problem::updateIntVars (void)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    it->non_linear = it->non_linear_aux;
-    if (it->int_vars != NULL) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    GaussPoint->non_linear = GaussPoint->non_linear_aux;
+    if (GaussPoint->int_vars != NULL) {
       for (int i=0; i<num_int_vars; i++)
-	it->int_vars[i] = it->int_vars_aux[i];
+	GaussPoint->int_vars[i] = GaussPoint->int_vars_aux[i];
     }
-    //cout << "Updating GP = " << it->id << " NL = " << it->non_linear << endl;
+    //cout << "Updating GP = " << GaussPoint->id << " NL = " << GaussPoint->non_linear << endl;
   }
 }
 
@@ -197,10 +197,10 @@ void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
 {
   *non_linear = 0;
 
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == macroGp_id) {
-      *non_linear = (it->non_linear == true) ? 1:0;
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == macroGp_id) {
+      *non_linear = (GaussPoint->non_linear == true) ? 1:0;
       break;
     }
   }

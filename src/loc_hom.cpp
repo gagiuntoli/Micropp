@@ -44,26 +44,26 @@ void Problem::loc_hom_Stress (int Gauss_ID, double *MacroStrain, double *MacroSt
   bool non_linear_history = false;
 
   // search for the macro gauss point, if not found just create and insert
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
-      non_linear_history = it->non_linear;
-      if (it->int_vars != NULL) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
+      non_linear_history = GaussPoint->non_linear;
+      if (GaussPoint->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
-	  vars_old[i] = it->int_vars[i];
+	  vars_old[i] = GaussPoint->int_vars[i];
       } else {
 	for (int i=0; i<num_int_vars; i++)
 	  vars_old[i] = 0.0;
 	not_allocated_yet = true;
       }
       for (int i=0; i<nvoi; i++)
-	it->MacroStrain[i] = MacroStrain[i];
+	GaussPoint->MacroStrain[i] = MacroStrain[i];
       break;
     }
   }
 
-  if (it ==  MacroGp_list.end()) {
-    MacroGp_t macroGp_new;
+  if (GaussPoint ==  MacroGp_list.end()) {
+    GaussPoint_t macroGp_new;
     macroGp_new.id = Gauss_ID;
     macroGp_new.non_linear = false;
     macroGp_new.non_linear_aux = false;
@@ -107,15 +107,15 @@ void Problem::loc_hom_Stress (int Gauss_ID, double *MacroStrain, double *MacroSt
   }
 
   if (non_linear == true) {
-    for (it=MacroGp_list.begin(); it !=  MacroGp_list.end(); it++) {
-      if (it->id == Gauss_ID) {
-	it->non_linear_aux = true;
+    for (GaussPoint=MacroGp_list.begin(); GaussPoint !=  MacroGp_list.end(); GaussPoint++) {
+      if (GaussPoint->id == Gauss_ID) {
+	GaussPoint->non_linear_aux = true;
 	if (not_allocated_yet == true) {
-	  it->int_vars = (double*)malloc(num_int_vars*sizeof(double));
-	  it->int_vars_aux = (double*)malloc(num_int_vars*sizeof(double));
+	  GaussPoint->int_vars = (double*)malloc(num_int_vars*sizeof(double));
+	  GaussPoint->int_vars_aux = (double*)malloc(num_int_vars*sizeof(double));
 	}
 	for (int i=0; i<num_int_vars; i++)
-	  it->int_vars_aux[i] = vars_new[i];
+	  GaussPoint->int_vars_aux[i] = vars_new[i];
 	break;
       }
     }
@@ -128,18 +128,18 @@ void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan
   double tol_filter = 1.0e-2;
   bool non_linear_history = false;
 
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
-      non_linear_history = it->non_linear;
-      if (it->int_vars != NULL) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
+      non_linear_history = GaussPoint->non_linear;
+      if (GaussPoint->int_vars != NULL) {
 	for (int i=0; i<num_int_vars; i++)
-	  vars_old[i] = it->int_vars[i];
+	  vars_old[i] = GaussPoint->int_vars[i];
       }
       break;
     }
   }
-  if (it ==  MacroGp_list.end()) {
+  if (GaussPoint ==  MacroGp_list.end()) {
     for (int i=0; i<num_int_vars; i++)
       vars_old[i] = 0.0;
   }
@@ -245,38 +245,38 @@ void Problem::updateCtanStatic (void)
   bool filter = true;
   double tol_filter = 1.0e-2;
 
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
 
-    if (LinearCriteria(it->MacroStrain) == true) {
+    if (LinearCriteria(GaussPoint->MacroStrain) == true) {
 
       for (int i=0; i<nvoi; i++)
 	for (int j=0; j<nvoi; j++)
-	  it->CtanStatic[i*nvoi + j] = CtanLinear[i][j];
+	  GaussPoint->CtanStatic[i*nvoi + j] = CtanLinear[i][j];
 
     } else {
 
       double Strain_1[6], Stress_0[6];
       double delta_Strain = 1.0e-10;
       bool non_linear;
-      setDisp(it->MacroStrain);
+      setDisp(GaussPoint->MacroStrain);
       newtonRaphson(&non_linear);
       calcAverageStress(Stress_0);
 
       double Stress_1[6];
       for (int i=0; i<nvoi; i++) {
 	for (int v=0; v<nvoi; v++)
-	  Strain_1[v] = it->MacroStrain[v];
+	  Strain_1[v] = GaussPoint->MacroStrain[v];
 	Strain_1[i] += delta_Strain;
 
 	setDisp(Strain_1);
 	newtonRaphson(&non_linear);
 	calcAverageStress(Stress_1);
 	for (int v=0; v<nvoi; v++) {
-	  it->CtanStatic[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / delta_Strain;
+	  GaussPoint->CtanStatic[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / delta_Strain;
 	  if (filter == true)
-	    if (fabs(it->CtanStatic[v*nvoi + i]) < tol_filter)
-	      it->CtanStatic[v*nvoi + i] = 0.0;
+	    if (fabs(GaussPoint->CtanStatic[v*nvoi + i]) < tol_filter)
+	      GaussPoint->CtanStatic[v*nvoi + i] = 0.0;
 	}
       }
     }
@@ -286,11 +286,11 @@ void Problem::updateCtanStatic (void)
 
 void Problem::getCtanStatic (int Gauss_ID, double *Ctan)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi*nvoi; i++)
-	Ctan[i] = it->CtanStatic[i];
+	Ctan[i] = GaussPoint->CtanStatic[i];
       break;
     }
   }
@@ -298,17 +298,17 @@ void Problem::getCtanStatic (int Gauss_ID, double *Ctan)
 
 void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi; i++)
-	it->MacroStrain[i] = MacroStrain[i];
+	GaussPoint->MacroStrain[i] = MacroStrain[i];
       break;
     }
   }
-  if (it ==  MacroGp_list.end()) {
+  if (GaussPoint ==  MacroGp_list.end()) {
 
-    MacroGp_t GaussPoint;
+    GaussPoint_t GaussPoint;
 
     GaussPoint.id             = Gauss_ID;
     GaussPoint.non_linear     = false;
@@ -324,11 +324,11 @@ void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
 
 void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi; i++)
-	MacroStress[i] = it->MacroStress[i];
+	MacroStress[i] = GaussPoint->MacroStress[i];
       break;
     }
   }
@@ -336,11 +336,11 @@ void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
 
 void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->id == Gauss_ID) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->id == Gauss_ID) {
       for (int i=0; i<nvoi*nvoi; i++)
-	MacroCtan[i] = it->MacroCtan[i];
+	MacroCtan[i] = GaussPoint->MacroCtan[i];
       break;
     }
   }
@@ -348,69 +348,69 @@ void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
 
 void Problem::localizeHomogenize(void)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
-    if (it->non_linear == false) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
+    if (GaussPoint->non_linear == false) {
       for (int i=0; i<num_int_vars; i++)
 	vars_old[i] = 0.0;
     } else {
       for (int i=0; i<num_int_vars; i++)
-	vars_old[i] = it->int_vars[i];
+	vars_old[i] = GaussPoint->int_vars[i];
     }
 
-    if ((LinearCriteria(it->MacroStrain) == true) && (it->non_linear == false)) {
+    if ((LinearCriteria(GaussPoint->MacroStrain) == true) && (GaussPoint->non_linear == false)) {
 
       // S = CL : E
       for (int i=0; i<nvoi; i++) {
-	it->MacroStress[i] = 0.0;
+	GaussPoint->MacroStress[i] = 0.0;
 	for (int j=0; j<nvoi; j++)
-	  it->MacroStress[i] += CtanLinear[i][j] * it->MacroStrain[j];
+	  GaussPoint->MacroStress[i] += CtanLinear[i][j] * GaussPoint->MacroStrain[j];
       }
       // C = CL
       for (int i=0; i<nvoi; i++) {
 	for (int j=0; j<nvoi; j++)
-	  it->MacroCtan[i*nvoi + j] = CtanLinear[i][j];
+	  GaussPoint->MacroCtan[i*nvoi + j] = CtanLinear[i][j];
       }
-      it->non_linear_aux = false;
-      it->convergence.NR_Its_Stress = 0;
-      it->convergence.NR_Err_Stress = 0.0;
+      GaussPoint->non_linear_aux = false;
+      GaussPoint->convergence.NR_Its_Stress = 0;
+      GaussPoint->convergence.NR_Err_Stress = 0.0;
       for (int i=0; i<nvoi; i++) {
-	it->convergence.NR_Its_Ctan[i] = 0;
-	it->convergence.NR_Err_Ctan[i] = 0.0;
+	GaussPoint->convergence.NR_Its_Ctan[i] = 0;
+	GaussPoint->convergence.NR_Err_Ctan[i] = 0.0;
       }
 
     } else {
 
       // CALCULATE S (FEM)
       // HERE IS ONLY OPORTUNITY TO DETECT THE NON_LINEAR
-      setDisp(it->MacroStrain);
-      newtonRaphson(&it->non_linear_aux); 
-      calcAverageStress(it->MacroStress);
+      setDisp(GaussPoint->MacroStrain);
+      newtonRaphson(&GaussPoint->non_linear_aux); 
+      calcAverageStress(GaussPoint->MacroStress);
 
-      it->convergence.NR_Its_Stress = NR_its;
-      it->convergence.NR_Err_Stress = NR_norm;
+      GaussPoint->convergence.NR_Its_Stress = NR_its;
+      GaussPoint->convergence.NR_Err_Stress = NR_norm;
 
       // CALCULATE C (FEM)
       // HERE WE DONT DETECT NON LINEARITY
       double Strain_1[6], Stress_0[6], Stress_1[6], dEps = 1.0e-10;
       bool non_linear_dummy;
-      setDisp(it->MacroStrain);
+      setDisp(GaussPoint->MacroStrain);
       newtonRaphson(&non_linear_dummy);
       calcAverageStress(Stress_0);
 
       for (int i=0; i<nvoi; i++) {
 	for (int v=0; v<nvoi; v++)
-	  Strain_1[v] = it->MacroStrain[v];
+	  Strain_1[v] = GaussPoint->MacroStrain[v];
 	Strain_1[i] += dEps;
 
 	setDisp(Strain_1);
 	newtonRaphson(&non_linear_dummy);
 	calcAverageStress(Stress_1);
 	for (int v=0; v<nvoi; v++)
-	  it->MacroCtan[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / dEps;
+	  GaussPoint->MacroCtan[v*nvoi + i] = (Stress_1[v] - Stress_0[v]) / dEps;
 
-	it->convergence.NR_Its_Ctan[i] = NR_its;
-	it->convergence.NR_Err_Ctan[i] = NR_norm;
+	GaussPoint->convergence.NR_Its_Ctan[i] = NR_its;
+	GaussPoint->convergence.NR_Err_Ctan[i] = NR_norm;
       }
 
     }
@@ -419,23 +419,23 @@ void Problem::localizeHomogenize(void)
 
 void Problem::updateInternalVariables (void)
 {
-  list<MacroGp_t>::iterator it;
-  for (it=MacroGp_list.begin(); it!=MacroGp_list.end(); it++) {
+  list<GaussPoint_t>::iterator GaussPoint;
+  for (GaussPoint=MacroGp_list.begin(); GaussPoint!=MacroGp_list.end(); GaussPoint++) {
 
-    if (it->non_linear_aux == true) {
+    if (GaussPoint->non_linear_aux == true) {
 
-      if(it->non_linear == false) {
-	it->non_linear = true;
-	it->int_vars = (double *) malloc (num_int_vars * sizeof(double));
+      if(GaussPoint->non_linear == false) {
+	GaussPoint->non_linear = true;
+	GaussPoint->int_vars = (double *) malloc (num_int_vars * sizeof(double));
       }
 
       // WE ONLY NEED TO FILL <vars_new>
       bool non_linear_dummy;
-      setDisp(it->MacroStrain);
+      setDisp(GaussPoint->MacroStrain);
       newtonRaphson(&non_linear_dummy);
 
       for (int i=0; i<num_int_vars; i++)
-	it->int_vars[i] = vars_new[i];
+	GaussPoint->int_vars[i] = vars_new[i];
     }
   }
 }

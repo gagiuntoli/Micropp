@@ -44,7 +44,7 @@ struct convergence_t {
   double NR_Err_Ctan[6];
 };
 
-struct MacroGp_t {
+struct GaussPoint_t {
   int id;
   bool non_linear;
   bool non_linear_aux;
@@ -86,7 +86,7 @@ class Problem {
     double micro_params[5];
     int numMaterials;
     material_t material_list[MAX_MATS];
-    std::list<MacroGp_t> MacroGp_list;
+    std::list<GaussPoint_t> MacroGp_list;
     double CtanLinear[6][6];
 
     double *elem_strain;
