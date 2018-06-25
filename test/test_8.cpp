@@ -98,8 +98,7 @@ int main (int argc, char *argv[])
       micro.setMacroStrain (gp_ID, MacroStrain);
 
     }
-    micro.localizeHomogenize();
-    micro.getMacroStress(1, MacroStress);
+    micro.localizeHomogenize ();
 
     micro.updateInternalVariables ();
     micro.writeConvergenceFile ();
