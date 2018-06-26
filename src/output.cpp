@@ -237,18 +237,23 @@ void Problem::writeConvergenceFile (void)
     output_files_header = true;
 
     file.open ("micropp_convergence.dat", std::ios_base::app);
-    file << "GaussPointID : ";
+    file << "#GaussPointID : ";
     for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
       file << GaussPoint->id << " ";
     }
     file << endl;
+    file << "# NL[1] I_reached[2] I_max[3] "
+      "NR_its_str[4] NR_tol_str[5] " 
+      "NR_its_ctan_col1[6] NR_tol_ctan_col1[7] ... NR_its_ctan_col1[16] NR_tol_ctan_col1[17]" << endl;
     file.close();
 
     file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
-    file << "GaussPointID : ";
+    file << "#GaussPointID : ";
     for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
       file << GaussPoint->id << " ";
     }
+    file << "# epsxx[1] epsyy[2] epszz[3] epsxy[4] epsxz[5] epsyz[6] " <<
+      "sigxx[1] sigyy[2] sigzz[3] sigxy[4] sigxz[5] sigyz[6]" << endl;
     file << endl;
     file.close();
   }
@@ -258,6 +263,7 @@ void Problem::writeConvergenceFile (void)
     file << scientific;
     file << setw(14) << GaussPoint->non_linear << " ";
     file << setw(14) << GaussPoint->convergence.I_reached << " ";
+    file << setw(14) << I_max << " ";
     file << setw(14) << GaussPoint->convergence.NR_Its_Stress << " ";
     file << setw(14) << GaussPoint->convergence.NR_Err_Stress << " ";
     for (int i=0; i<nvoi; i++) {
