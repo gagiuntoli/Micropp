@@ -229,7 +229,7 @@ void Problem::writeVtu (int time_step, int Gauss_ID)
 
 void Problem::writeConvergenceFile (void)
 {
-  list<GaussPoint_t>::iterator GaussPoint;
+  list <GaussPoint_t>::iterator GaussPoint;
 
   ofstream file;
 
@@ -257,6 +257,7 @@ void Problem::writeConvergenceFile (void)
   for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
     file << scientific;
     file << setw(14) << GaussPoint->non_linear << " ";
+    file << setw(14) << GaussPoint->convergence.I_reached << " ";
     file << setw(14) << GaussPoint->convergence.NR_Its_Stress << " ";
     file << setw(14) << GaussPoint->convergence.NR_Err_Stress << " ";
     for (int i=0; i<nvoi; i++) {

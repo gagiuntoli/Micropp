@@ -73,16 +73,6 @@ extern "C"
     micro->getIntVars (*Gauss_ID, *n, int_vars);
   }
 
-  void micropp_get_max_ftrial_(double *ftrial_max)
-  {
-    micro->getMaxFtrial (ftrial_max);
-  }
-
-  void micropp_get_max_invariant_(double *invariant_max)
-  {
-    micro->getMaxInvariant (invariant_max);
-  }
-
   void micropp_update_ctan_static_(void)
   {
     micro->updateCtanStatic ();

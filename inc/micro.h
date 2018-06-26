@@ -42,6 +42,7 @@ struct convergence_t {
   double NR_Err_Stress;
   int NR_Its_Ctan[6];
   double NR_Err_Ctan[6];
+  double I_reached, I_reached_aux;
 };
 
 struct GaussPoint_t {
@@ -98,9 +99,8 @@ class Problem {
     ell_matrix A;
     double *u, *du, *b;
 
-    double FtrialMax;
-    double INV_MAX;
-    double InvariantMax;
+    double I_max;
+    double I_reached;
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem (void);
@@ -134,8 +134,6 @@ class Problem {
     {*NR_its = this->NR_its; *NR_norm = this->NR_norm; *NR_non_linear = this->NR_non_linear;};
     void getNonLinearFlag (int macroGp_id, int *non_linear);
     void getIntVars (int macroGp_id, int n, int *int_vars);
-    void getMaxFtrial (double *FtrialMax) {*FtrialMax = this->FtrialMax;};
-    void getMaxInvariant (double *InvariantMax) {*InvariantMax = this->InvariantMax;};
 
     void setDisp (double *eps);
 

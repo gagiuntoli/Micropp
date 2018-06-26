@@ -215,9 +215,9 @@ bool Problem::LinearCriteria (double *MacroStrain)
   }
   double Inv = Invariant_I1(MacroStress);
 
-  if (fabs(Inv) > InvariantMax) InvariantMax = fabs(Inv);
+  if (fabs(Inv) > I_reached) I_reached = fabs(Inv);
 
-  if (fabs(Inv) < INV_MAX) {
+  if (fabs(Inv) < I_max) {
     LinCriteria = 1;
     return true;
   } else {
@@ -308,17 +308,19 @@ void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
   }
   if (GaussPoint ==  GaussPointList.end()) {
 
-    GaussPoint_t GaussPoint;
+    GaussPoint_t GaussPointNew;
 
-    GaussPoint.id             = Gauss_ID;
-    GaussPoint.non_linear     = false;
-    GaussPoint.non_linear_aux = false;
-    GaussPoint.int_vars       = NULL;
-    GaussPoint.int_vars_aux   = NULL;
+    GaussPointNew.id             = Gauss_ID;
+    GaussPointNew.non_linear     = false;
+    GaussPointNew.non_linear_aux = false;
+    GaussPointNew.int_vars       = NULL;
+    GaussPointNew.int_vars_aux   = NULL;
     for (int i=0; i<nvoi; i++)
-      GaussPoint.MacroStrain[i] = MacroStrain[i];
+      GaussPointNew.MacroStrain[i] = MacroStrain[i];
 
-    GaussPointList.push_back(GaussPoint);
+    GaussPointNew.convergence.I_reached = -1.0e10;
+
+    GaussPointList.push_back(GaussPointNew);
   }
 }
 
@@ -357,6 +359,8 @@ void Problem::localizeHomogenize(void)
       for (int i=0; i<num_int_vars; i++)
 	vars_old[i] = GaussPoint->int_vars[i];
     }
+
+    I_reached = GaussPoint->convergence.I_reached;
 
     if ((LinearCriteria(GaussPoint->MacroStrain) == true) && (GaussPoint->non_linear == false)) {
 
@@ -414,6 +418,8 @@ void Problem::localizeHomogenize(void)
       }
 
     }
+    
+    GaussPoint->convergence.I_reached_aux = I_reached;
   }
 }
 
@@ -421,6 +427,8 @@ void Problem::updateInternalVariables (void)
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
+
+    GaussPoint->convergence.I_reached = GaussPoint->convergence.I_reached_aux;
 
     if (GaussPoint->non_linear_aux == true) {
 

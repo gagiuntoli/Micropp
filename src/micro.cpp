@@ -46,7 +46,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   ly = this->micro_params[1];
   lz = this->micro_params[2];
 
-  INV_MAX = this->micro_params[4];  
+  I_max = this->micro_params[4];  
 
   for (int i=0; i<numMaterials; i++)
   {
@@ -138,9 +138,6 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
 
   cout << "calculating Ctan (linear) ..." << endl;
   calcCtanLinear ();
-
-  FtrialMax    = -1.0e10;
-  InvariantMax = -1.0e10;
 
   output_files_header = false;
 
