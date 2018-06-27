@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm *.dat *.pvtu *.vtu 
+rm -f *.dat *.pvtu *.vtu 
