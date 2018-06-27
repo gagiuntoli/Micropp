@@ -11,7 +11,18 @@ Code to localize and average strain and stress over a micro structure.
 5. Own ELL matrix routines with CG iterative solver (diagonal pre-conditioner).
 6. Different kinds of micro-structures
 
-# Main Advantages
+# Main Characteristics
+
+`MicroPP` can simulate different kind of microstructures in 2D and 3D 
+
+![alt text](pics/micro_sphere.png "Sphere")
+
+![alt text](pics/micro_layers.png "Layers")
+
+`MicroPP` has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the
+Barcelona Supercomputing center ([BSC](https://www.bsc.es/) to performed **FE2** calculations.
+
+![alt text](pics/beam_3d.png "Beam Solved with Alya coupled with MicroPP for simulating the microstructure.")
 
 1. ELL routines are optimized for the structured grid geometries in the fact that the assembly can be performed really
 quickly. In some cases the assembly time can be less than 1% of the solver time.
