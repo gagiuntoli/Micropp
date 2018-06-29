@@ -296,7 +296,7 @@ void Problem::getCtanStatic (int Gauss_ID, double *Ctan)
   }
 }
 
-void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
+void Problem::setMacroStrain(const int Gauss_ID, const double *MacroStrain)
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
@@ -324,7 +324,7 @@ void Problem::setMacroStrain(int Gauss_ID, double *MacroStrain)
   }
 }
 
-void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
+void Problem::getMacroStress(const int Gauss_ID, double *MacroStress)
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
@@ -336,7 +336,7 @@ void Problem::getMacroStress(int Gauss_ID, double *MacroStress)
   }
 }
 
-void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
+void Problem::getMacroCtan(const int Gauss_ID, double *MacroCtan)
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {

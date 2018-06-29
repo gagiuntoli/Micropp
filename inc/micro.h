@@ -123,9 +123,9 @@ class Problem {
     void updateCtanStatic ();
     void getCtanStatic (int MacroGp_id, double *Ctan);
 
-    void setMacroStrain(int Gauss_ID, double *MacroStrain);
-    void getMacroStress(int Gauss_ID, double *MacroStress);
-    void getMacroCtan(int Gauss_ID, double *MacroCtan);
+    void setMacroStrain(const int Gauss_ID, const double *MacroStrain);
+    void getMacroStress(const int Gauss_ID, double *MacroStress);
+    void getMacroCtan(const int Gauss_ID, double *MacroCtan);
     void localizeHomogenize();
     void updateInternalVariables();
 
