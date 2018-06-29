@@ -109,19 +109,12 @@ class Problem {
 
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
     ~Problem();
+
     void calcCtanLinear();
 
-    int LinCriteria;
-    void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
-    void loc_hom_Ctan (int macroGp_id, double *MacroStrain, double *MacroCtan);
-    void loc_hom_Ctan_Linear (double *Ctan);
-    void loc_hom_Stress_Linear (double *Strain, double *Stress);
     bool LinearCriteria (double *MacroStrain);
     double Invariant_I1 (double *tensor);
     double Invariant_I2 (double *tensor);
-    void updateIntVars ();
-    void updateCtanStatic ();
-    void getCtanStatic (int MacroGp_id, double *Ctan);
 
     void setMacroStrain(const int Gauss_ID, const double *MacroStrain);
     void getMacroStress(const int Gauss_ID, double *MacroStress);
@@ -132,14 +125,10 @@ class Problem {
     void solve();
     void newtonRaphson (bool *non_linear_flag);
 
-    void getParams_LinCriteria (int *LinCriteria) {*LinCriteria = this->LinCriteria;};
-    void getParams_NR (int *NR_its, double *NR_norm, int *NR_non_linear ) 
-    {*NR_its = this->NR_its; *NR_norm = this->NR_norm; *NR_non_linear = this->NR_non_linear;};
     void getNonLinearFlag (int macroGp_id, int *non_linear);
     void getIntVars (int macroGp_id, int n, int *int_vars);
 
     void setDisp (double *eps);
-
     void Assembly_A ();
     double Assembly_b (bool *non_linear_flag);
 

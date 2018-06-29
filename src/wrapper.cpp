@@ -33,26 +33,6 @@ extern "C"
     micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
   }
 
-  void micropp_loc_hom_stress_(int *Gauss_ID, double *MacroStrain, double *MacroStress)
-  {
-    micro->loc_hom_Stress(*Gauss_ID, MacroStrain, MacroStress); 
-  }
-
-  void micropp_loc_hom_ctan_(int *Gauss_ID, double *MacroStrain, double *MacroCtan)
-  {
-    micro->loc_hom_Ctan(*Gauss_ID, MacroStrain, MacroCtan); 
-  }
-
-  void micropp_loc_hom_ctan_linear_(double *Ctan)
-  {
-    micro->loc_hom_Ctan_Linear (Ctan);
-  }
-
-  void micropp_loc_hom_stress_linear_(double *strain, double *stress)
-  {
-    micro->loc_hom_Stress_Linear (strain, stress);
-  }
-
   void micropp_output_(int *time_step, int *Gauss_ID, double *MacroStrain)
   {
     micro->output (*time_step, *Gauss_ID, MacroStrain);
@@ -61,26 +41,6 @@ extern "C"
   void micropp_get_non_linear_flag_(int *Gauss_ID, int *non_linear)
   {
     micro->getNonLinearFlag (*Gauss_ID, non_linear);
-  }
-
-  void micropp_get_params_nr_(int *NR_its, double *NR_norm, int *NR_non_linear)
-  {
-    micro->getParams_NR (NR_its, NR_norm, NR_non_linear);
-  }
-
-  void micropp_get_int_vars_(int *Gauss_ID, int *n, int *int_vars)
-  {
-    micro->getIntVars (*Gauss_ID, *n, int_vars);
-  }
-
-  void micropp_update_ctan_static_(void)
-  {
-    micro->updateCtanStatic ();
-  }
-
-  void micropp_get_ctan_static_(int *Gauss_ID, double *Ctan)
-  {
-    micro->getCtanStatic (*Gauss_ID, Ctan);
   }
 
   void micropp_set_macro_strain_(int *Gauss_ID, double *MacroStrain)
@@ -106,11 +66,6 @@ extern "C"
   void micropp_update_internal_variables_(void)
   {
     micro->updateInternalVariables ();
-  }
-
-  void micropp_update_int_vars_(void)
-  {
-    micro->updateIntVars ();
   }
 
   void micropp_write_convergence_file_(void)
