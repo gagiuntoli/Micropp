@@ -29,7 +29,7 @@
 
 using namespace std;
 
-void Problem::solve (void)
+void Problem::solve()
 {
   ell_solver solver;
   solver.max_its = CG_MAX_ITS;

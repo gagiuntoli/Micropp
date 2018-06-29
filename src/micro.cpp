@@ -148,7 +148,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   file.close ();
 }
 
-Problem::~Problem (void)
+Problem::~Problem()
 {
   ell_free (A);
   free(b);
@@ -177,7 +177,7 @@ void Problem::getIntVars (int macroGp_id, int n, int *int_vars)
   }
 }
 
-void Problem::updateIntVars (void)
+void Problem::updateIntVars()
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {

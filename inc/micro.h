@@ -75,7 +75,7 @@ struct material_t {
 
 class Problem {
 
-  public:
+  private:
 
     int dim, npe, nvoi;
     int nx, ny, nz, nn; 
@@ -102,9 +102,14 @@ class Problem {
     double I_max;
     double I_reached;
 
+    double NR_norm;
+    int NR_its, NR_non_linear;
+
+  public:
+
     Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
-    ~Problem (void);
-    void calcCtanLinear (void);
+    ~Problem();
+    void calcCtanLinear();
 
     int LinCriteria;
     void loc_hom_Stress (int macro_id, double *MacroStrain, double *MacroStress);
@@ -114,19 +119,17 @@ class Problem {
     bool LinearCriteria (double *MacroStrain);
     double Invariant_I1 (double *tensor);
     double Invariant_I2 (double *tensor);
-    void updateIntVars (void);
-    void updateCtanStatic (void);
+    void updateIntVars ();
+    void updateCtanStatic ();
     void getCtanStatic (int MacroGp_id, double *Ctan);
 
     void setMacroStrain(int Gauss_ID, double *MacroStrain);
     void getMacroStress(int Gauss_ID, double *MacroStress);
     void getMacroCtan(int Gauss_ID, double *MacroCtan);
-    void localizeHomogenize(void);
-    void updateInternalVariables (void);
+    void localizeHomogenize();
+    void updateInternalVariables();
 
-    double NR_norm;
-    int NR_its, NR_non_linear;
-    void solve (void);
+    void solve();
     void newtonRaphson (bool *non_linear_flag);
 
     void getParams_LinCriteria (int *LinCriteria) {*LinCriteria = this->LinCriteria;};
@@ -137,7 +140,7 @@ class Problem {
 
     void setDisp (double *eps);
 
-    void Assembly_A (void);
+    void Assembly_A ();
     double Assembly_b (bool *non_linear_flag);
 
     void getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4]);
@@ -168,13 +171,12 @@ class Problem {
 
     void calc_bmat_3D (int gp, double bmat[6][3*8]);
 
-    void calcDistributions (void);
+    void calcDistributions ();
     void calcAverageStress (double stress_ave[6]);
     void calcAverageStrain (double strain_ave[6]);
 
     void output (int time_step, int Gauss_ID, double *MacroStrain);
     void writeVtu (int time_step, int elem);
-    void writeConvergenceFile (void);
+    void writeConvergenceFile ();
     bool output_files_header;
-
 };

@@ -178,7 +178,7 @@ void Problem::loc_hom_Ctan (int Gauss_ID, double *MacroStrain, double *MacroCtan
   }
 }
 
-void Problem::calcCtanLinear (void)
+void Problem::calcCtanLinear()
 {
   double Stress_1[6], Strain_1[6];
   double delta_Strain = 1.0e-8;
@@ -240,7 +240,7 @@ double Problem::Invariant_I2 (double *tensor)
     return tensor[0]*tensor[1] + tensor[0]*tensor[2] + tensor[1]*tensor[2] + tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
 }
 
-void Problem::updateCtanStatic (void)
+void Problem::updateCtanStatic()
 {
   bool filter = true;
   double tol_filter = 1.0e-2;
@@ -348,7 +348,7 @@ void Problem::getMacroCtan(int Gauss_ID, double *MacroCtan)
   }
 }
 
-void Problem::localizeHomogenize(void)
+void Problem::localizeHomogenize()
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
@@ -423,7 +423,7 @@ void Problem::localizeHomogenize(void)
   }
 }
 
-void Problem::updateInternalVariables (void)
+void Problem::updateInternalVariables()
 {
   list<GaussPoint_t>::iterator GaussPoint;
   for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {

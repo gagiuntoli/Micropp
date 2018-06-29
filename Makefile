@@ -39,7 +39,7 @@ LFLAGS += -lboost_program_options
 #INC=/apps/BOOST/1.67.0/include
 #INC=
 
-all: build test_1 test_2 test_3 test_4 test_5 test_6 test_7 test_8
+all: build test_1 test_3 test_5 test_6 test_7 test_8
 
 lib: build/libmicropp.a
 

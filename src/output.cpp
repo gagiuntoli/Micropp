@@ -227,7 +227,7 @@ void Problem::writeVtu (int time_step, int Gauss_ID)
   file.close();
 }
 
-void Problem::writeConvergenceFile (void)
+void Problem::writeConvergenceFile ()
 {
   list <GaussPoint_t>::iterator GaussPoint;
 

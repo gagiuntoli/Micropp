@@ -327,7 +327,7 @@ double Problem::Assembly_b (bool *non_linear)
   return norm;
 }
 
-void Problem::Assembly_A (void)
+void Problem::Assembly_A()
 {
   int index[8];
 
@@ -793,7 +793,7 @@ void Problem::calcAverageStrain (double strain_ave[6])
     strain_ave[v] /= (lx*ly);
 }
 
-void Problem::calcDistributions (void)
+void Problem::calcDistributions()
 {
   bool non_linear_flag;
 
