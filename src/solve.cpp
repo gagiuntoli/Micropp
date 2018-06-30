@@ -1,6 +1,6 @@
 /*
- *  MicroPP : 
- *  Finite element library to solve microstructural problems for composite materials.
+ *  This source code is part of MicroPP: a finite element library
+ *  to solve microstructural problems for composite materials.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *  
@@ -31,45 +31,45 @@ using namespace std;
 
 void Problem::solve()
 {
-  ell_solver solver;
-  solver.max_its = CG_MAX_ITS;
-  solver.min_tol = CG_MAX_TOL;
+  	ell_solver solver;
+  	solver.max_its = CG_MAX_ITS;
+  	solver.min_tol = CG_MAX_TOL;
 
-  if (dim == 2)
-    ell_solve_cgpd_2D (&solver, &A, dim, nx, ny, b, du);
-  else if (dim == 3)
-    ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
+  	if (dim == 2)
+    	ell_solve_cgpd_2D (&solver, &A, dim, nx, ny, b, du);
+  	else if (dim == 3)
+    	ell_solve_cgpd_struct (&solver, &A, dim, dim, nn, b, du);
 
-  //cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
+  	//cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 }
 
 void Problem::newtonRaphson (bool *non_linear)
 {
-  int its = 0;
-  double tol;
+  	int its = 0;
+  	double tol;
 
-  do {
+  	do {
 
-    tol = Assembly_b(non_linear);
+    	tol = Assembly_b(non_linear);
 
-    if (tol < NR_MAX_TOL) break;
-    //cout << "NEWTON-R ITS = " << its << " TOL = " << tol << endl;
+    	if (tol < NR_MAX_TOL) break;
+    	//cout << "NEWTON-R ITS = " << its << " TOL = " << tol << endl;
 
-    Assembly_A();
+    	Assembly_A();
 
-    for (int i=0; i<nn*dim; i++)
-      du[i] = 0.0;
+    	for (int i=0; i<nn*dim; i++)
+      		du[i] = 0.0;
 
-    solve();
+    	solve();
 
-    for (int i=0; i<nn*dim; i++)
-      u[i] = u[i] + du[i];
+    	for (int i=0; i<nn*dim; i++)
+      		u[i] = u[i] + du[i];
 
-    its++;
+    	its++;
 
-  } while ((its < NR_MAX_ITS) && (tol > NR_MAX_TOL));
+  	} while ((its < NR_MAX_ITS) && (tol > NR_MAX_TOL));
 
-  NR_norm = tol;
-  NR_its = its;
-  NR_non_linear = (*non_linear == true) ? 1:0;
+  	NR_norm = tol;
+  	NR_its = its;
+  	NR_non_linear = (*non_linear == true) ? 1:0;
 }

@@ -1,6 +1,6 @@
 /*
- *  MicroPP : 
- *  Finite element library to solve microstructural problems for composite materials.
+ *  This source code is part of MicroPP: a finite element library
+ *  to solve microstructural problems for composite materials.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *  
@@ -28,48 +28,48 @@ static Problem* micro = NULL;
 
 extern "C"
 {
-  void micropp_construct_(int *dim, int size[3], int *micro_type, double *micro_params, int *mat_types, double *params)
-  {
-    micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
-  }
+  	void micropp_construct_(int *dim, int size[3], int *micro_type, double *micro_params, int *mat_types, double *params)
+  	{
+    	micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
+  	}
 
-  void micropp_output_(int *time_step, int *Gauss_ID, double *MacroStrain)
-  {
-    micro->output (*time_step, *Gauss_ID, MacroStrain);
-  }
+  	void micropp_output_(int *time_step, int *Gauss_ID, double *MacroStrain)
+  	{
+    	micro->output (*time_step, *Gauss_ID, MacroStrain);
+  	}
 
-  void micropp_get_non_linear_flag_(int *Gauss_ID, int *non_linear)
-  {
-    micro->getNonLinearFlag (*Gauss_ID, non_linear);
-  }
+  	void micropp_get_non_linear_flag_(int *Gauss_ID, int *non_linear)
+  	{
+    	micro->getNonLinearFlag (*Gauss_ID, non_linear);
+  	}
 
-  void micropp_set_macro_strain_(int *Gauss_ID, double *MacroStrain)
-  {
-    micro->setMacroStrain (*Gauss_ID, MacroStrain);
-  }
+  	void micropp_set_macro_strain_(int *gp_id, double *macro_strain)
+  	{
+    	micro->set_macro_strain(*gp_id, macro_strain);
+  	}
 
-  void micropp_localize_homogenize_(void)
-  {
-    micro->localizeHomogenize();
-  }
+  	void micropp_localize_homogenize_(void)
+  	{
+    	micro->localizeHomogenize();
+  	}
 
-  void micropp_get_macro_stress_(int *Gauss_ID, double *MacroStress)
-  {
-    micro->getMacroStress(*Gauss_ID, MacroStress);
-  }
+  	void micropp_get_macro_stress_(int *Gauss_ID, double *MacroStress)
+  	{
+    	micro->getMacroStress(*Gauss_ID, MacroStress);
+  	}
 
-  void micropp_get_macro_ctan_(int *Gauss_ID, double *MacroCtan)
-  {
-    micro->getMacroCtan(*Gauss_ID, MacroCtan);
-  }
+  	void micropp_get_macro_ctan_(int *Gauss_ID, double *MacroCtan)
+  	{
+    	micro->getMacroCtan(*Gauss_ID, MacroCtan);
+  	}
 
-  void micropp_update_internal_variables_(void)
-  {
-    micro->updateInternalVariables ();
-  }
+  	void micropp_update_internal_variables_(void)
+  	{
+    	micro->updateInternalVariables ();
+  	}
 
-  void micropp_write_convergence_file_(void)
-  {
-    micro->writeConvergenceFile ();
-  }
+  	void micropp_write_convergence_file_(void)
+  	{
+    	micro->writeConvergenceFile ();
+  	}
 } 

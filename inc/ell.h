@@ -1,6 +1,6 @@
 /*
- *  MicroPP : 
- *  Finite element library to solve microstructural problems for composite materials.
+ *  This source code is part of MicroPP: a finite element library
+ *  to solve microstructural problems for composite materials.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
  *  
@@ -22,18 +22,18 @@
 #define ELL_H_
 
 typedef struct {
-  int nrow;     // number of rows
-  int ncol;     // number of columns
-  int nnz;      // non zeros per row
-  int *cols;
-  double *vals;
+  	int nrow;     // number of rows
+  	int ncol;     // number of columns
+  	int nnz;      // non zeros per row
+  	int *cols;
+  	double *vals;
 } ell_matrix;
 
 typedef struct {
-  int max_its;
-  int its;
-  double min_tol;
-  double err;
+  	int max_its;
+  	int its;
+  	double min_tol;
+  	double err;
 } ell_solver;
 
 int ell_set_val (ell_matrix *m, int row, int col, double val);
