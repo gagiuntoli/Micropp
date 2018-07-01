@@ -136,7 +136,6 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   	else if (dim == 3)
     	ell_init_3D (A, dim, nx, ny, nz);
 
-  	cout << "calculating Ctan (linear) ..." << endl;
   	calcCtanLinear ();
 
   	output_files_header = false;
@@ -158,25 +157,22 @@ Problem::~Problem()
   	free(elem_strain);
   	free(elem_type);
   	free(vars_old);
+  	free(vars_new);
 
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	free(GaussPoint->int_vars_n);
-    	free(GaussPoint->int_vars_k);
+	for (auto const& gp : GaussPointList) {
+    	free(gp.int_vars_n);
+    	free(gp.int_vars_k);
   	}
 }
 
-void Problem::getNonLinearFlag (int macroGp_id, int *non_linear)
+void Problem::getNonLinearFlag (int gp_id, int *non_linear)
 {
   	*non_linear = 0;
-
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->id == macroGp_id) {
-      		*non_linear = (GaussPoint->int_vars_n == NULL) ? 0:1;
+	for (auto const& gp : GaussPointList)
+    	if (gp.id == gp_id) {
+      		*non_linear = (gp.int_vars_n == NULL) ? 0:1;
       		break;
     	}
-  	}
 }
 
 int Problem::getElemType (int ex, int ey)
