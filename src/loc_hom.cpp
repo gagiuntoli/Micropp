@@ -77,27 +77,23 @@ double Problem::Invariant_I2 (const double *tensor)
 
 void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
 {
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->id == gp_id) {
-      		for (int i=0; i<nvoi; i++)
-				GaussPoint->macro_strain[i] = macro_strain[i];
+	list<GaussPoint_t>::iterator gp;
+	for(gp = GaussPointList.begin(); gp != GaussPointList.end(); ++gp) {
+    	if (gp->id == gp_id) {
+      		for (int i = 0; i < nvoi; ++i)
+				gp->macro_strain[i] = macro_strain[i];
       		break;
     	}
   	}
-	if (GaussPoint ==  GaussPointList.end()) {
-
-    	GaussPoint_t GaussPointNew;
-
-    	GaussPointNew.id = gp_id;
-    	GaussPointNew.int_vars_n = NULL;
-    	GaussPointNew.int_vars_k = NULL;
+	if (gp == GaussPointList.end()) {
+    	GaussPoint_t gp_n;
+    	gp_n.id = gp_id;
+    	gp_n.int_vars_n = NULL;
+    	gp_n.int_vars_k = NULL;
     	for (int i=0; i<nvoi; i++)
-      		GaussPointNew.macro_strain[i] = macro_strain[i];
-
-    	GaussPointNew.convergence.I_reached = -1.0e10;
-
-    	GaussPointList.push_back(GaussPointNew);
+      		gp_n.macro_strain[i] = macro_strain[i];
+    	gp_n.convergence.I_reached = -1.0e10;
+    	GaussPointList.push_back(gp_n);
   	}
 }
 
