@@ -53,14 +53,14 @@ extern "C"
     	micro->localizeHomogenize();
   	}
 
-  	void micropp_get_macro_stress_(int *Gauss_ID, double *MacroStress)
+  	void micropp_get_macro_stress_(int *gp_id, double *macro_stress)
   	{
-    	micro->getMacroStress(*Gauss_ID, MacroStress);
+    	micro->get_macro_stress(*gp_id, macro_stress);
   	}
 
-  	void micropp_get_macro_ctan_(int *Gauss_ID, double *MacroCtan)
+  	void micropp_get_macro_ctan_(int *gp_id, double *macro_ctan)
   	{
-    	micro->getMacroCtan(*Gauss_ID, MacroCtan);
+    	micro->get_macro_ctan(*gp_id, macro_ctan);
   	}
 
   	void micropp_update_internal_variables_(void)

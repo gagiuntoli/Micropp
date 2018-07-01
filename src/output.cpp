@@ -26,7 +26,7 @@
 
 using namespace std;
 
-void Problem::output (int time_step, int Gauss_ID, double *MacroStrain)
+void Problem::output (int time_step, int Gauss_ID, double *macro_strain)
 {
   	list<GaussPoint_t>::iterator GaussPoint;
   	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
@@ -42,9 +42,9 @@ void Problem::output (int time_step, int Gauss_ID, double *MacroStrain)
     	}
   	}
 
-  	double MacroStress[6];
+  	double macro_stress[6];
   	bool non_linear;
-  	setDisp(MacroStrain);
+  	setDisp(macro_strain);
   	newtonRaphson(&non_linear);
 
   	calcDistributions();
@@ -278,9 +278,9 @@ void Problem::writeConvergenceFile ()
   	file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
   	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
     	for (int i=0; i<6; i++)
-      		file << setw(14) << GaussPoint->MacroStrain[i] << " ";
+      		file << setw(14) << GaussPoint->macro_strain[i] << " ";
     	for (int i=0; i<6; i++)
-      		file << setw(14) << GaussPoint->MacroStress[i] << " ";
+      		file << setw(14) << GaussPoint->macro_stress[i] << " ";
     	file << " | ";
   	}
   	file << endl;

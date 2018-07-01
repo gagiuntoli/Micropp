@@ -66,6 +66,7 @@ int main (int argc, char *argv[])
   	int dir = 2;
   	int ngp = 2;
   	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  	double sig[6];
 
   	int time_steps = 10;
   	for (int t=0; t<time_steps; t++)
@@ -82,14 +83,26 @@ int main (int argc, char *argv[])
     	else
       		eps[dir] += d_eps;
 
+      	cout << "setting strains ..." << endl;
     	for (int gp = 0; gp < ngp; ++gp) {
       		cout << "gp = " << gp << endl;
       		micro.set_macro_strain(gp, eps);
     	}
   		double MacroStress[6], MacroCtan[36];
+      	cout << "homogenizing ..." << endl;
     	micro.localizeHomogenize ();
+      	cout << "getting stresses ..." << endl;
+    	for (int gp = 0; gp < ngp; ++gp) {
+      		micro.get_macro_stress(gp, sig);
+      		cout << "gp = " << gp << " sig = ";
+    		cout << scientific;
+    		for (int i = 0; i < 6; ++i)
+      			cout << setw(14) << sig[i] << " ";
+      		cout << endl; 
+    	}
     	micro.updateInternalVariables ();
     	micro.writeConvergenceFile ();
+      	cout << endl; 
   	}
   	return 0;
 }

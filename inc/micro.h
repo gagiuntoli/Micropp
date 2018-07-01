@@ -49,9 +49,9 @@ struct GaussPoint_t {
   	int id;
   	double *int_vars_n;
   	double *int_vars_k;
-  	double MacroStrain[6];
-  	double MacroStress[6];
-  	double MacroCtan[36];
+  	double macro_strain[6];
+  	double macro_stress[6];
+  	double macro_ctan[36];
   	convergence_t convergence;
 };
 
@@ -85,7 +85,7 @@ class Problem {
     	int numMaterials;
     	material_t material_list[MAX_MATS];
     	std::list<GaussPoint_t> GaussPointList;
-    	double CtanLinear[6][6];
+    	double ctan_lin[6][6];
 
     	double *elem_strain;
     	double *elem_stress;
@@ -109,13 +109,13 @@ class Problem {
 
     	void calcCtanLinear();
 
-    	bool LinearCriteria (double *MacroStrain);
-    	double Invariant_I1 (double *tensor);
-    	double Invariant_I2 (double *tensor);
+    	bool LinearCriteria (const double *macro_strain);
+    	double Invariant_I1 (const double *tensor);
+    	double Invariant_I2 (const double *tensor);
 
     	void set_macro_strain(const int gp_id, const double *macro_strain);
-    	void getMacroStress(const int gp_id, double *macro_stress);
-    	void getMacroCtan(const int gp_id, double *macro_ctan);
+    	void get_macro_stress(const int gp_id, double *macro_stress);
+    	void get_macro_ctan(const int gp_id, double *macro_ctan);
     	void localizeHomogenize();
     	void updateInternalVariables();
 
@@ -161,7 +161,7 @@ class Problem {
     	void calcAverageStress (double stress_ave[6]);
     	void calcAverageStrain (double strain_ave[6]);
 
-    	void output (int time_step, int Gauss_ID, double *MacroStrain);
+    	void output (int time_step, int Gauss_ID, double *macro_strain);
     	void writeVtu (int time_step, int elem);
     	void writeConvergenceFile ();
     	bool output_files_header;

@@ -38,28 +38,28 @@ void Problem::calcCtanLinear()
     	calcAverageStress(sig_1);
 
     	for (int v=0; v<nvoi; v++)
-      		CtanLinear[v][i] = sig_1[v] / d_eps;
+      		ctan_lin[v][i] = sig_1[v] / d_eps;
   	}
 }
 
-bool Problem::LinearCriteria (double *MacroStrain)
+bool Problem::LinearCriteria (const double *macro_strain)
 {
-  	double MacroStress[6];
+  	double macro_stress[6];
 
   	for (int i=0; i<nvoi; i++) {
-    	MacroStress[i] = 0.0;
+    	macro_stress[i] = 0.0;
     	for (int j=0; j<nvoi; j++) {
-      		MacroStress[i] += CtanLinear[i][j] * MacroStrain[j];
+      		macro_stress[i] += ctan_lin[i][j] * macro_strain[j];
     	}
   	}
-  	double Inv = Invariant_I1(MacroStress);
+  	double Inv = Invariant_I1(macro_stress);
 
   	if (fabs(Inv) > I_reached) I_reached = fabs(Inv);
 
   	return (fabs(Inv) < I_max) ? true : false;
 }
 
-double Problem::Invariant_I1 (double *tensor)
+double Problem::Invariant_I1 (const double *tensor)
 {
   	if (dim == 2)
     	return tensor[0] + tensor[1];
@@ -67,7 +67,7 @@ double Problem::Invariant_I1 (double *tensor)
     	return tensor[0] + tensor[1] + tensor[2];
 }
 
-double Problem::Invariant_I2 (double *tensor)
+double Problem::Invariant_I2 (const double *tensor)
 {
   	if (dim == 3)
     	return \
@@ -75,13 +75,13 @@ double Problem::Invariant_I2 (double *tensor)
     		tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
 }
 
-void Problem::set_macro_strain(const int Gauss_ID, const double *MacroStrain)
+void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
 {
   	list<GaussPoint_t>::iterator GaussPoint;
   	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->id == Gauss_ID) {
+    	if (GaussPoint->id == gp_id) {
       		for (int i=0; i<nvoi; i++)
-				GaussPoint->MacroStrain[i] = MacroStrain[i];
+				GaussPoint->macro_strain[i] = macro_strain[i];
       		break;
     	}
   	}
@@ -89,11 +89,11 @@ void Problem::set_macro_strain(const int Gauss_ID, const double *MacroStrain)
 
     	GaussPoint_t GaussPointNew;
 
-    	GaussPointNew.id = Gauss_ID;
+    	GaussPointNew.id = gp_id;
     	GaussPointNew.int_vars_n = NULL;
     	GaussPointNew.int_vars_k = NULL;
     	for (int i=0; i<nvoi; i++)
-      		GaussPointNew.MacroStrain[i] = MacroStrain[i];
+      		GaussPointNew.macro_strain[i] = macro_strain[i];
 
     	GaussPointNew.convergence.I_reached = -1.0e10;
 
@@ -101,107 +101,102 @@ void Problem::set_macro_strain(const int Gauss_ID, const double *MacroStrain)
   	}
 }
 
-void Problem::getMacroStress(const int Gauss_ID, double *MacroStress)
+void Problem::get_macro_stress(const int gp_id, double *macro_stress)
 {
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->id == Gauss_ID) {
+	for (auto const& gp : GaussPointList)
+    	if (gp.id == gp_id) {
       		for (int i=0; i<nvoi; i++)
-				MacroStress[i] = GaussPoint->MacroStress[i];
+				macro_stress[i] = gp.macro_stress[i];
       		break;
     	}
-  	}
 }
 
-void Problem::getMacroCtan(const int Gauss_ID, double *MacroCtan)
+void Problem::get_macro_ctan(const int gp_id, double *macro_ctan)
 {
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->id == Gauss_ID) {
-      		for (int i=0; i<nvoi*nvoi; i++)
-				MacroCtan[i] = GaussPoint->MacroCtan[i];
+	for (auto const& gp : GaussPointList)
+    	if (gp.id == gp_id) {
+      		for (int i = 0; i < nvoi*nvoi; ++i)
+				macro_ctan[i] = gp.macro_ctan[i];
       		break;
     	}
-  	}
 }
 
 void Problem::localizeHomogenize()
 {
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->int_vars_n == NULL) {
-      		for (int i=0; i<num_int_vars; i++)
+	for (auto& gp : GaussPointList) {
+    	if (gp.int_vars_n == NULL) {
+      		for (int i = 0; i < num_int_vars; ++i)
 				vars_old[i] = 0.0;
     	} else {
-      		for (int i=0; i<num_int_vars; i++)
-				vars_old[i] = GaussPoint->int_vars_n[i];
+      		for (int i = 0; i < num_int_vars; ++i)
+				vars_old[i] = gp.int_vars_n[i];
     	}
 
-    	I_reached = GaussPoint->convergence.I_reached;
+    	I_reached = gp.convergence.I_reached;
 
-    	if ((LinearCriteria(GaussPoint->MacroStrain) == true) && (GaussPoint->int_vars_n == NULL)) {
+    	if ((LinearCriteria(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
 
       		// S = CL : E
-      		for (int i=0; i<nvoi; i++) {
-				GaussPoint->MacroStress[i] = 0.0;
-				for (int j=0; j<nvoi; j++)
-	  				GaussPoint->MacroStress[i] += CtanLinear[i][j] * GaussPoint->MacroStrain[j];
+      		for (int i = 0; i < nvoi; ++i) {
+				gp.macro_stress[i] = 0.0;
+				for (int j = 0; j < nvoi; ++j)
+	  				gp.macro_stress[i] += ctan_lin[i][j] * gp.macro_strain[j];
       		}
       		// C = CL
       		for (int i=0; i<nvoi; i++) {
 				for (int j=0; j<nvoi; j++)
-	  				GaussPoint->MacroCtan[i*nvoi + j] = CtanLinear[i][j];
+	  				gp.macro_ctan[i*nvoi + j] = ctan_lin[i][j];
       		}
-      		GaussPoint->convergence.NR_Its_Stress = 0;
-      		GaussPoint->convergence.NR_Err_Stress = 0.0;
+      		gp.convergence.NR_Its_Stress = 0;
+      		gp.convergence.NR_Err_Stress = 0.0;
       		for (int i=0; i<nvoi; i++) {
-				GaussPoint->convergence.NR_Its_Ctan[i] = 0;
-				GaussPoint->convergence.NR_Err_Ctan[i] = 0.0;
+				gp.convergence.NR_Its_Ctan[i] = 0;
+				gp.convergence.NR_Err_Ctan[i] = 0.0;
       		}
 
     	} else {
 
       		// HOMOGENIZE SIGMA (FEM)
       		bool non_linear;
-      		setDisp(GaussPoint->MacroStrain);
+      		setDisp(gp.macro_strain);
       		newtonRaphson(&non_linear); 
-      		calcAverageStress(GaussPoint->MacroStress);
+      		calcAverageStress(gp.macro_stress);
 
     		if (non_linear == true)
     		{
-      			if(GaussPoint->int_vars_k == NULL) {
-					GaussPoint->int_vars_k = (double *)malloc(num_int_vars*sizeof(double));
-					GaussPoint->int_vars_n = (double *)malloc(num_int_vars*sizeof(double));
+      			if(gp.int_vars_k == NULL) {
+					gp.int_vars_k = (double *)malloc(num_int_vars*sizeof(double));
+					gp.int_vars_n = (double *)malloc(num_int_vars*sizeof(double));
 				}
       			for (int i=0; i<num_int_vars; i++)
-					GaussPoint->int_vars_k[i] = vars_new[i];
+					gp.int_vars_k[i] = vars_new[i];
 			}
 
-      		GaussPoint->convergence.NR_Its_Stress = NR_its;
-      		GaussPoint->convergence.NR_Err_Stress = NR_norm;
+      		gp.convergence.NR_Its_Stress = NR_its;
+      		gp.convergence.NR_Err_Stress = NR_norm;
 
       		// HOMOGENIZE CTAN (FEM)
       		double eps_1[6], sig_0[6], sig_1[6], dEps = 1.0e-10;
-      		setDisp(GaussPoint->MacroStrain);
+      		setDisp(gp.macro_strain);
       		newtonRaphson(&non_linear);
       		calcAverageStress(sig_0);
 
       		for (int i=0; i<nvoi; i++) {
 				for (int v=0; v<nvoi; v++)
-	  				eps_1[v] = GaussPoint->MacroStrain[v];
+	  				eps_1[v] = gp.macro_strain[v];
 				eps_1[i] += dEps;
 
 				setDisp(eps_1);
 				newtonRaphson(&non_linear);
 				calcAverageStress(sig_1);
 				for (int v=0; v<nvoi; v++)
-	  				GaussPoint->MacroCtan[v*nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
+	  				gp.macro_ctan[v*nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
 
-				GaussPoint->convergence.NR_Its_Ctan[i] = NR_its;
-				GaussPoint->convergence.NR_Err_Ctan[i] = NR_norm;
+				gp.convergence.NR_Its_Ctan[i] = NR_its;
+				gp.convergence.NR_Err_Ctan[i] = NR_norm;
       		}
     	}
-    	GaussPoint->convergence.I_reached_aux = I_reached;
+    	gp.convergence.I_reached_aux = I_reached;
   	}
 }
 
