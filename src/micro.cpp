@@ -167,7 +167,7 @@ Problem::~Problem()
   	free(vars_old);
   	free(vars_new);
 
-	for (auto const& gp : GaussPointList) {
+	for (auto const& gp : gauss_list) {
     	free(gp.int_vars_n);
     	free(gp.int_vars_k);
   	}
@@ -176,7 +176,7 @@ Problem::~Problem()
 void Problem::getNonLinearFlag (int gp_id, int *non_linear)
 {
   	*non_linear = 0;
-	for (auto const& gp : GaussPointList)
+	for (auto const& gp : gauss_list)
     	if (gp.id == gp_id) {
       		*non_linear = (gp.int_vars_n == NULL) ? 0:1;
       		break;

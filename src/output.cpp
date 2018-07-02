@@ -28,12 +28,12 @@ using namespace std;
 
 void Problem::output (int time_step, int Gauss_ID, double *macro_strain)
 {
-  	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
-    	if (GaussPoint->id == Gauss_ID) {
-      		if (GaussPoint->int_vars_n != NULL) {
+  	list<GaussPoint_t>::iterator gp;
+  	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
+    	if (gp->id == Gauss_ID) {
+      		if (gp->int_vars_n != NULL) {
 				for (int i=0; i<num_int_vars; i++)
-	  				vars_old[i] = GaussPoint->int_vars_n[i];
+	  				vars_old[i] = gp->int_vars_n[i];
       		} else {
 				for (int i=0; i<num_int_vars; i++)
 	  				vars_old[i] = 0.0;
@@ -229,7 +229,7 @@ void Problem::writeVtu (int time_step, int Gauss_ID)
 
 void Problem::writeConvergenceFile ()
 {
-  	list <GaussPoint_t>::iterator GaussPoint;
+  	list <GaussPoint_t>::iterator gp;
 
   	ofstream file;
 
@@ -238,8 +238,8 @@ void Problem::writeConvergenceFile ()
 
     	file.open ("micropp_convergence.dat", std::ios_base::app);
     	file << "#GaussPointID : ";
-    	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
-      		file << GaussPoint->id << " ";
+    	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
+      		file << gp->id << " ";
     	}
     	file << endl;
     	file << "# NL[1] I_reached[2] I_max[3] "
@@ -249,8 +249,8 @@ void Problem::writeConvergenceFile ()
 
     	file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
     	file << "#GaussPointID : ";
-    	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
-      		file << GaussPoint->id << " ";
+    	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
+      		file << gp->id << " ";
     	}
     	file << "# epsxx[1] epsyy[2] epszz[3] epsxy[4] epsxz[5] epsyz[6] " <<
       		"sigxx[1] sigyy[2] sigzz[3] sigxy[4] sigxz[5] sigyz[6]" << endl;
@@ -259,16 +259,16 @@ void Problem::writeConvergenceFile ()
   	}
 
   	file.open ("micropp_convergence.dat", std::ios_base::app);
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
+  	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
     	file << scientific;
-    	file << setw(14) << ((GaussPoint->int_vars_n == NULL) ? 0:1) << " ";
-    	file << setw(14) << GaussPoint->convergence.I_reached << " ";
+    	file << setw(14) << ((gp->int_vars_n == NULL) ? 0:1) << " ";
+    	file << setw(14) << gp->convergence.I_reached << " ";
     	file << setw(14) << I_max << " ";
-    	file << setw(14) << GaussPoint->convergence.NR_Its_Stress << " ";
-    	file << setw(14) << GaussPoint->convergence.NR_Err_Stress << " ";
+    	file << setw(14) << gp->convergence.NR_Its_Stress << " ";
+    	file << setw(14) << gp->convergence.NR_Err_Stress << " ";
     	for (int i=0; i<nvoi; i++) {
-      		file << setw(14) << GaussPoint->convergence.NR_Its_Ctan[i] << " ";
-      		file << setw(14) << GaussPoint->convergence.NR_Err_Ctan[i] << " ";
+      		file << setw(14) << gp->convergence.NR_Its_Ctan[i] << " ";
+      		file << setw(14) << gp->convergence.NR_Err_Ctan[i] << " ";
     	}
     	file << " | ";
   	}
@@ -276,11 +276,11 @@ void Problem::writeConvergenceFile ()
   	file.close();
 
   	file.open ("micropp_eps_sig_ctan.dat", std::ios_base::app);
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint !=  GaussPointList.end(); GaussPoint++) {
+  	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
     	for (int i=0; i<6; i++)
-      		file << setw(14) << GaussPoint->macro_strain[i] << " ";
+      		file << setw(14) << gp->macro_strain[i] << " ";
     	for (int i=0; i<6; i++)
-      		file << setw(14) << GaussPoint->macro_stress[i] << " ";
+      		file << setw(14) << gp->macro_stress[i] << " ";
     	file << " | ";
   	}
   	file << endl;

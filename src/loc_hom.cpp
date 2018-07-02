@@ -48,9 +48,8 @@ bool Problem::LinearCriteria (const double *macro_strain)
 
   	for (int i=0; i<nvoi; i++) {
     	macro_stress[i] = 0.0;
-    	for (int j=0; j<nvoi; j++) {
+    	for (int j=0; j<nvoi; j++)
       		macro_stress[i] += ctan_lin[i][j] * macro_strain[j];
-    	}
   	}
   	double Inv = Invariant_I1(macro_stress);
 
@@ -78,14 +77,14 @@ double Problem::Invariant_I2 (const double *tensor)
 void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
 {
 	list<GaussPoint_t>::iterator gp;
-	for(gp = GaussPointList.begin(); gp != GaussPointList.end(); ++gp) {
+	for(gp = gauss_list.begin(); gp != gauss_list.end(); ++gp) {
     	if (gp->id == gp_id) {
       		for (int i = 0; i < nvoi; ++i)
 				gp->macro_strain[i] = macro_strain[i];
       		break;
     	}
   	}
-	if (gp == GaussPointList.end()) {
+	if (gp == gauss_list.end()) {
     	GaussPoint_t gp_n;
     	gp_n.id = gp_id;
     	gp_n.int_vars_n = NULL;
@@ -93,13 +92,13 @@ void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
     	for (int i=0; i<nvoi; i++)
       		gp_n.macro_strain[i] = macro_strain[i];
     	gp_n.convergence.I_reached = -1.0e10;
-    	GaussPointList.push_back(gp_n);
+    	gauss_list.push_back(gp_n);
   	}
 }
 
 void Problem::get_macro_stress(const int gp_id, double *macro_stress)
 {
-	for (auto const& gp : GaussPointList)
+	for (auto const& gp : gauss_list)
     	if (gp.id == gp_id) {
       		for (int i=0; i<nvoi; i++)
 				macro_stress[i] = gp.macro_stress[i];
@@ -109,7 +108,7 @@ void Problem::get_macro_stress(const int gp_id, double *macro_stress)
 
 void Problem::get_macro_ctan(const int gp_id, double *macro_ctan)
 {
-	for (auto const& gp : GaussPointList)
+	for (auto const& gp : gauss_list)
     	if (gp.id == gp_id) {
       		for (int i = 0; i < nvoi*nvoi; ++i)
 				macro_ctan[i] = gp.macro_ctan[i];
@@ -119,7 +118,7 @@ void Problem::get_macro_ctan(const int gp_id, double *macro_ctan)
 
 void Problem::localizeHomogenize()
 {
-	for (auto& gp : GaussPointList) {
+	for (auto& gp : gauss_list) {
     	if (gp.int_vars_n == NULL) {
       		for (int i = 0; i < num_int_vars; ++i)
 				vars_old[i] = 0.0;
@@ -198,11 +197,11 @@ void Problem::localizeHomogenize()
 
 void Problem::updateInternalVariables()
 {
-	list<GaussPoint_t>::iterator GaussPoint;
-  	for (GaussPoint=GaussPointList.begin(); GaussPoint!=GaussPointList.end(); GaussPoint++) {
-      	if(GaussPoint->int_vars_n != NULL) {
+	list<GaussPoint_t>::iterator gp;
+  	for (gp=gauss_list.begin(); gp!=gauss_list.end(); gp++) {
+      	if(gp->int_vars_n != NULL) {
       		for (int i=0; i<num_int_vars; i++)
-				GaussPoint->int_vars_n[i] = GaussPoint->int_vars_k[i];
+				gp->int_vars_n[i] = gp->int_vars_k[i];
     	}
   	}
 }
