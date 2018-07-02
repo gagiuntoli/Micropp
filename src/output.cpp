@@ -281,6 +281,8 @@ void Problem::writeConvergenceFile ()
       		file << setw(14) << gp->macro_strain[i] << " ";
     	for (int i=0; i<6; i++)
       		file << setw(14) << gp->macro_stress[i] << " ";
+    	for (int i=0; i<36; i++)
+      		file << setw(14) << gp->macro_ctan[i] << " ";
     	file << " | ";
   	}
   	file << endl;
