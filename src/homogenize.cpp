@@ -195,11 +195,10 @@ void Problem::homogenize()
 	}
 }
 
-void Problem::updateInternalVariables()
+void Problem::update_vars()
 {
 	for (auto const& gp : gauss_list)
-		if(gp.int_vars_n != NULL) {
+		if(gp.int_vars_n != NULL)
   			for (int i=0; i<num_int_vars; i++)
 				gp.int_vars_n[i] = gp.int_vars_k[i];
-		}
 }

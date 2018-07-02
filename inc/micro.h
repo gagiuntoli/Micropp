@@ -117,7 +117,7 @@ class Problem {
     	void get_macro_stress(const int gp_id, double *macro_stress);
     	void get_macro_ctan(const int gp_id, double *macro_ctan);
     	void homogenize();
-    	void updateInternalVariables();
+    	void update_vars();
 
     	void solve();
     	void newtonRaphson (bool *non_linear_flag);

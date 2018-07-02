@@ -65,7 +65,7 @@ extern "C"
 
   	void micropp_update_internal_variables_(void)
   	{
-    	micro->updateInternalVariables ();
+    	micro->update_vars ();
   	}
 
   	void micropp_write_convergence_file_(void)

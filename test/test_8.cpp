@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
       			cout << setw(14) << sig[i] << " ";
       		cout << endl; 
     	}
-    	micro.updateInternalVariables ();
+    	micro.update_vars();
     	micro.writeConvergenceFile ();
       	cout << endl; 
   	}
