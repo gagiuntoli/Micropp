@@ -85,8 +85,12 @@ int main (int argc, char *argv[])
 
       	cout << "setting strains ..." << endl;
     	for (int gp = 0; gp < ngp; ++gp) {
-      		cout << "gp = " << gp << endl;
       		micro.set_macro_strain(gp, eps);
+      		cout << "gp = " << gp << " eps = ";
+    		cout << scientific;
+    		for (int i = 0; i < 6; ++i)
+      			cout << setw(14) << eps[i] << " ";
+      		cout << endl; 
     	}
   		double MacroStress[6], MacroCtan[36];
       	cout << "homogenizing ..." << endl;

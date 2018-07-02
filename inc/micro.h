@@ -144,7 +144,7 @@ class Problem {
     	void getStress (int ex, int ey, int gp, double strain_gp[3], bool *non_linear_flag, double *stress_gp);
     	void getStress (int ex, int ey, int ez, int gp, double strain_gp[3], bool *non_linear_flag, double *stress_gp);
     	void getDeviatoric (double tensor[6], double tensor_dev[6]);
-    	void plasticStep(
+    	void plastic_step(
 				material_t &material, double eps[6], double eps_p_1[6], double alpha_1, double eps_p[6], 
 				double *alpha, bool *non_linear, double stress[6]);
 

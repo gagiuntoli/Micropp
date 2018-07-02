@@ -47,7 +47,11 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   	lz = this->micro_params[2];
 
   	I_max = this->micro_params[4];  
-
+  	
+  	ofstream file;
+  	file.open ("micropp_materials.dat");
+    file << scientific;
+    	
   	for (int i=0; i<numMaterials; i++)
   	{
     	material_list[i].E  = params[i*MAX_MAT_PARAM + 0];
@@ -72,7 +76,12 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
       		material_list[i].plasticity = false;
       		material_list[i].damage     = true;
     	}
+    	file << setw(14) << material_list[i].E << " " 
+			 << material_list[i].nu << " " 
+			 << material_list[i].Sy << " " 
+			 << material_list[i].Ka << endl;
   	}
+  	file.close ();
 
   	this->dim = dim;
   	if (dim == 2) {
@@ -140,7 +149,6 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
 
   	output_files_header = false;
 
-  	ofstream file;
   	file.open ("micropp_convergence.dat");
   	file.close ();
   	file.open ("micropp_eps_sig_ctan.dat");

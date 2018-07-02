@@ -931,7 +931,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
       		eps_p_1[i] = vars_old[intvar_ix(e, gp, i)];
     	alpha_1 = vars_old[intvar_ix(e, gp, 6)];
 
-    	plasticStep(material, eps, eps_p_1, alpha_1, eps_p, &alpha, non_linear, stress_gp);
+    	plastic_step(material, eps, eps_p_1, alpha_1, eps_p, &alpha, non_linear, stress_gp);
 
     	for (int i=0; i<6; i++)
       		vars_new[intvar_ix(e, gp, i)] = eps_p[i];
@@ -951,7 +951,7 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
 }
 
-void Problem::plasticStep(
+void Problem::plastic_step(
     	material_t &material, double eps[6], double eps_p_1[6], 
     	double alpha_1, double eps_p[6], double *alpha, bool *non_linear, double stress[6])
 {
@@ -978,7 +978,7 @@ void Problem::plasticStep(
       		2*sig_dev_trial[4]*sig_dev_trial[4] + \
       		2*sig_dev_trial[5]*sig_dev_trial[5]);
 
-  	double f_trial = sig_dev_trial_norm - (material.Sy + material.Ka * alpha_1);
+  	double f_trial = sig_dev_trial_norm - sqrt(2.0/3) * (material.Sy + material.Ka * alpha_1);
 
   	if (f_trial > 0) {
 
@@ -988,8 +988,8 @@ void Problem::plasticStep(
     	for (int i=0; i<6; i++)
       		normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
 
-    	dl = f_trial/(2*material.mu);
-    	*alpha += dl;
+    	dl = f_trial/(2*material.mu*(1.0 + (0.0 * material.Ka)/(3*material.mu)));
+    	*alpha += sqrt(2.0/3) * dl;
     	for (int i=0; i<6; i++)
       		eps_p[i] = eps_p_1[i] + dl*normal[i];
 
