@@ -955,76 +955,74 @@ void Problem::plastic_step(
     	material_t &material, double eps[6], double eps_p_1[6], 
     	double alpha_1, double eps_p[6], double *alpha, bool *non_linear, double stress[6])
 {
+	double eps_dev[6];
+	double eps_p_dev_1[6];
+	double normal[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+	double dl = 0.0;
+	double sig_dev_trial[6], sig_dev_trial_norm;
 
-  	double eps_dev[6];
-  	double eps_p_dev_1[6];
-  	double normal[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  	double dl=0.0;
-  	double sig_dev_trial[6], sig_dev_trial_norm;
+	getDeviatoric (eps_p_1, eps_p_dev_1);
+	getDeviatoric (eps, eps_dev);
 
-  	getDeviatoric (eps_p_1, eps_p_dev_1);
-  	getDeviatoric (eps, eps_dev);
+	for (int i=0; i<3; i++) 
+		sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
+	for (int i=3; i<6; i++) 
+		sig_dev_trial[i] = material.mu * (eps_dev[i] - eps_p_dev_1[i]);
 
-  	for (int i=0; i<3; i++) 
-    	sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
-  	for (int i=3; i<6; i++) 
-    	sig_dev_trial[i] = material.mu * (eps_dev[i] - eps_p_dev_1[i]);
+	sig_dev_trial_norm = sqrt( \
+  			sig_dev_trial[0]*sig_dev_trial[0] + \
+  			sig_dev_trial[1]*sig_dev_trial[1] + \
+  			sig_dev_trial[2]*sig_dev_trial[2] + \
+  			2*sig_dev_trial[3]*sig_dev_trial[3] + \
+  			2*sig_dev_trial[4]*sig_dev_trial[4] + \
+  			2*sig_dev_trial[5]*sig_dev_trial[5]);
 
-  	sig_dev_trial_norm = sqrt( \
-      		sig_dev_trial[0]*sig_dev_trial[0] + \
-      		sig_dev_trial[1]*sig_dev_trial[1] + \
-      		sig_dev_trial[2]*sig_dev_trial[2] + \
-      		2*sig_dev_trial[3]*sig_dev_trial[3] + \
-      		2*sig_dev_trial[4]*sig_dev_trial[4] + \
-      		2*sig_dev_trial[5]*sig_dev_trial[5]);
+	double f_trial = sig_dev_trial_norm - sqrt(2.0/3) * (material.Sy + material.Ka * alpha_1);
 
-  	double f_trial = sig_dev_trial_norm - sqrt(2.0/3) * (material.Sy + material.Ka * alpha_1);
+	if (f_trial > 0) {
 
-  	if (f_trial > 0) {
+		// linear hardening K(alpha) = Sy + Ka * alpha
+		*non_linear = true;
 
-    	// linear hardening K(alpha) = Sy + Ka * alpha
-    	*non_linear = true;
+		for (int i = 0; i < 6; ++i)
+  			normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
 
-    	for (int i=0; i<6; i++)
-      		normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
+		dl = f_trial/(2*material.mu*(1.0 + (0.0 * material.Ka)/(3*material.mu)));
+		*alpha += sqrt(2.0/3) * dl;
+		for (int i = 0; i < 6; ++i)
+  			eps_p[i] = eps_p_1[i] + dl*normal[i];
 
-    	dl = f_trial/(2*material.mu*(1.0 + (0.0 * material.Ka)/(3*material.mu)));
-    	*alpha += sqrt(2.0/3) * dl;
-    	for (int i=0; i<6; i++)
-      		eps_p[i] = eps_p_1[i] + dl*normal[i];
+	} else {
 
-  	} else {
+		for (int i = 0; i < 6; ++i)
+  			eps_p[i] = eps_p_1[i];
+		*alpha = alpha_1;
+	}
 
-    	for (int i=0; i<6; i++)
-      		eps_p[i] = eps_p_1[i];
-    	*alpha = alpha_1;
-  	}
-
-  	//sig_2 = s_trial + K * tr(eps) * 1 - 2*mu*dl*normal;
-  	for (int i=0; i<6; i++)
-    	stress[i] = sig_dev_trial[i];
-  	for (int i=0; i<3; i++)
-    	stress[i] += material.k * (eps[0] + eps[1] + eps[2]);
-  	for (int i=0; i<6; i++)
-    	stress[i] -= 2 * material.mu * dl * normal[i];
+	//sig_2 = s_trial + K * tr(eps) * 1 - 2*mu*dl*normal;
+	for (int i = 0; i < 6; ++i)
+		stress[i] = sig_dev_trial[i];
+	for (int i = 0; i < 3; ++i)
+		stress[i] += material.k * (eps[0] + eps[1] + eps[2]);
+	for (int i = 0; i < 6; ++i)
+		stress[i] -= 2 * material.mu * dl * normal[i];
 }
 
 void Problem::getMaterial (int e, material_t &material)
 {
   	int mat_num;
-  	if (micro_type == 0) {
-    	if (elem_type[e] == 0) {
+  	if (micro_type == 0)
+    	if (elem_type[e] == 0)
       		mat_num = 0;
-    	} else {
+    	else
       		mat_num = 1;
-    	}
-  	} else if (micro_type == 1) {
-    	if (elem_type[e] == 0) {
+
+  	else if (micro_type == 1)
+    	if (elem_type[e] == 0)
       		mat_num = 0;
-    	} else {
+    	else
       		mat_num = 1;
-    	}
-  	}
+
   	material.E          = material_list[mat_num].E;
   	material.nu         = material_list[mat_num].nu;
   	material.Sy         = material_list[mat_num].Sy;
