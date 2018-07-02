@@ -44,7 +44,7 @@ test_7: build/test_7.o build/libmicropp.a
 test_8: build/test_8.o build/libmicropp.a
 	$(CC) $< -o $@ -L build -lmicropp 
 
-build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/micro.o build/ell.o build/loc_hom.o build/wrapper.o  
+build/libmicropp.a: build/assembly.o build/solve.o build/output.o  build/micro.o build/ell.o build/homogenize.o build/wrapper.o  
 	ar rcs $@ $^
     
 build/%.o: test/%.f90
