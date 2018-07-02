@@ -116,7 +116,7 @@ class Problem {
     	void set_macro_strain(const int gp_id, const double *macro_strain);
     	void get_macro_stress(const int gp_id, double *macro_stress);
     	void get_macro_ctan(const int gp_id, double *macro_ctan);
-    	void localizeHomogenize();
+    	void homogenize();
     	void updateInternalVariables();
 
     	void solve();

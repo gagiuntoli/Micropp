@@ -83,7 +83,7 @@ int main (int argc, char *argv[])
       		eps[dir] += d_eps;
 
     	micro.set_macro_strain(1, eps);
-    	micro.localizeHomogenize();
+    	micro.homogenize();
 
     	micro.get_macro_stress(1, MacroStress);
 

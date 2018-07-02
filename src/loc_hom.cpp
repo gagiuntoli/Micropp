@@ -116,7 +116,7 @@ void Problem::get_macro_ctan(const int gp_id, double *macro_ctan)
     	}
 }
 
-void Problem::localizeHomogenize()
+void Problem::homogenize()
 {
 	for (auto& gp : gauss_list) {
     	if (gp.int_vars_n == NULL) {

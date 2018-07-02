@@ -94,7 +94,7 @@ int main (int argc, char *argv[])
     	}
   		double MacroStress[6], MacroCtan[36];
       	cout << "homogenizing ..." << endl;
-    	micro.localizeHomogenize ();
+    	micro.homogenize ();
       	cout << "getting stresses ..." << endl;
     	for (int gp = 0; gp < ngp; ++gp) {
       		micro.get_macro_stress(gp, sig);

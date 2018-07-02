@@ -48,9 +48,9 @@ extern "C"
     	micro->set_macro_strain(*gp_id, macro_strain);
   	}
 
-  	void micropp_localize_homogenize_(void)
+  	void micropp_homogenize_(void)
   	{
-    	micro->localizeHomogenize();
+    	micro->homogenize();
   	}
 
   	void micropp_get_macro_stress_(int *gp_id, double *macro_stress)
