@@ -43,33 +43,25 @@ void Problem::solve()
   	//cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 }
 
-void Problem::newtonRaphson (bool *non_linear)
+void Problem::newton_raphson(bool *nl_flag, int *its, double *err)
 {
-  	int its = 0;
-  	double tol;
+ 	*its = 0;
+ 	*err = 0.0;
+ 	do
+ 	{
+ 		*err = Assembly_b(nl_flag);
+ 		if (*err < NR_MAX_TOL)
+ 			break;
 
-  	do {
+ 		Assembly_A();
 
-    	tol = Assembly_b(non_linear);
+ 		for (int i=0; i<(nn*dim); i++)
+  			du[i] = 0.0;
+ 		solve();
+ 		for (int i=0; i<nn*dim; i++)
+  			u[i] = u[i] + du[i];
 
-    	if (tol < NR_MAX_TOL) break;
-    	//cout << "NEWTON-R ITS = " << its << " TOL = " << tol << endl;
+ 		*its++;
 
-    	Assembly_A();
-
-    	for (int i=0; i<nn*dim; i++)
-      		du[i] = 0.0;
-
-    	solve();
-
-    	for (int i=0; i<nn*dim; i++)
-      		u[i] = u[i] + du[i];
-
-    	its++;
-
-  	} while ((its < NR_MAX_ITS) && (tol > NR_MAX_TOL));
-
-  	NR_norm = tol;
-  	NR_its = its;
-  	NR_non_linear = (*non_linear == true) ? 1:0;
+	} while ((*its < NR_MAX_ITS) && (*err > NR_MAX_TOL));
 }

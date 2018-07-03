@@ -24,7 +24,6 @@ void Problem::calcCtanLinear()
 {
 	double sig_1[6], eps_1[6];
 	double d_eps = 1.0e-8;
-	bool non_linear;
 
 	for (int i=0; i<nvoi; i++)
 	{
@@ -33,8 +32,11 @@ void Problem::calcCtanLinear()
 
 		eps_1[i] += d_eps;
 
+		int nr_its;
+		bool nl_flag;
+        double nr_err;
 		setDisp(eps_1);
-		newtonRaphson(&non_linear);
+		newton_raphson(&nl_flag, &nr_its, &nr_err);
 		calcAverageStress(sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
@@ -91,7 +93,7 @@ void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
 		gp_n.int_vars_k = NULL;
 		for (int i=0; i<nvoi; i++)
   			gp_n.macro_strain[i] = macro_strain[i];
-		gp_n.convergence.I_reached = -1.0e10;
+		gp_n.inv_max = -1.0e10;
 		gauss_list.push_back(gp_n);
 	}
 }
@@ -127,7 +129,7 @@ void Problem::homogenize()
   			for (int i = 0; i < num_int_vars; ++i)
 				vars_old[i] = gp.int_vars_n[i];
 		
-		I_reached = gp.convergence.I_reached;
+		I_reached = -1.0e10;
 
 		if ((LinearCriteria(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
 
@@ -142,22 +144,22 @@ void Problem::homogenize()
 				for (int j = 0; j < nvoi; ++j)
   					gp.macro_ctan[i*nvoi + j] = ctan_lin[i][j];
 
-  			gp.convergence.NR_Its_Stress = 0;
-  			gp.convergence.NR_Err_Stress = 0.0;
-  			for (int i=0; i<nvoi; i++) {
-				gp.convergence.NR_Its_Ctan[i] = 0;
-				gp.convergence.NR_Err_Ctan[i] = 0.0;
+  			for (int i = 0; i < (1+nvoi); ++i) {
+				gp.nr_its[i] = 0;
+				gp.nr_err[i] = 0.0;
   			}
 
 		} else {
 
   			// SIGMA
-  			bool non_linear;
+			int nr_its;
+  			bool nl_flag;
+        	double nr_err;
   			setDisp(gp.macro_strain);
-  			newtonRaphson(&non_linear); 
+  			newton_raphson(&nl_flag, &nr_its, &nr_err); 
   			calcAverageStress(gp.macro_stress);
 
-			if (non_linear == true)
+			if (nl_flag == true)
 			{
   				if(gp.int_vars_n == NULL) {
 					gp.int_vars_k = (double *)malloc(num_int_vars*sizeof(double));
@@ -167,8 +169,8 @@ void Problem::homogenize()
 					gp.int_vars_k[i] = vars_new[i];
 			}
 
-  			gp.convergence.NR_Its_Stress = NR_its;
-  			gp.convergence.NR_Err_Stress = NR_norm;
+  			gp.nr_its[0] = nr_its;
+  			gp.nr_err[0] = nr_err;
 
   			// CTAN
   			double eps_1[6], sig_0[6], sig_1[6], dEps = 1.0e-8;
@@ -182,16 +184,16 @@ void Problem::homogenize()
 				eps_1[i] += dEps;
 
 				setDisp(eps_1);
-				newtonRaphson(&non_linear);
+				newton_raphson(&nl_flag, &nr_its, &nr_err);
 				calcAverageStress(sig_1);
 				for (int v = 0; v < nvoi; ++v)
   					gp.macro_ctan[v*nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
 
-				gp.convergence.NR_Its_Ctan[i] = NR_its;
-				gp.convergence.NR_Err_Ctan[i] = NR_norm;
+				gp.nr_its[1+i] = nr_its;
+				gp.nr_err[1+i] = nr_err;
   			}
 		}
-		gp.convergence.I_reached_aux = I_reached;
+		gp.inv_max = I_reached;
 	}
 }
 

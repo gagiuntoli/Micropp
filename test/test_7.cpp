@@ -98,7 +98,7 @@ int main (int argc, char *argv[])
       		<< endl;
 
     	cout << endl;
-    	micro.output (t, 1, eps);
+    	micro.output (t, 1);
   	}
   	return 0;
 }

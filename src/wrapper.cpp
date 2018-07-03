@@ -28,48 +28,48 @@ static Problem* micro = NULL;
 
 extern "C"
 {
-  	void micropp_construct_(int *dim, int size[3], int *micro_type, double *micro_params, int *mat_types, double *params)
-  	{
-    	micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
-  	}
+	void micropp_construct_(int *dim, int size[3], int *micro_type, double *micro_params, int *mat_types, double *params)
+	{
+		micro = new Problem(*dim, size, *micro_type, micro_params, mat_types, params); 
+	}
 
-  	void micropp_output_(int *time_step, int *Gauss_ID, double *MacroStrain)
-  	{
-    	micro->output (*time_step, *Gauss_ID, MacroStrain);
-  	}
+	void micropp_output_(int *tstep, int *gp_id)
+	{
+		micro->output (*tstep, *gp_id);
+	}
 
-  	void micropp_get_non_linear_flag_(int *Gauss_ID, int *non_linear)
-  	{
-    	micro->getNonLinearFlag (*Gauss_ID, non_linear);
-  	}
+	void micropp_get_non_linear_flag_(int *gp_id, int *non_linear)
+	{
+		micro->getNonLinearFlag (*gp_id, non_linear);
+	}
 
-  	void micropp_set_macro_strain_(int *gp_id, double *macro_strain)
-  	{
-    	micro->set_macro_strain(*gp_id, macro_strain);
-  	}
+	void micropp_set_macro_strain_(int *gp_id, double *macro_strain)
+	{
+		micro->set_macro_strain(*gp_id, macro_strain);
+	}
 
-  	void micropp_homogenize_(void)
-  	{
-    	micro->homogenize();
-  	}
+	void micropp_homogenize_(void)
+	{
+		micro->homogenize();
+	}
 
-  	void micropp_get_macro_stress_(int *gp_id, double *macro_stress)
-  	{
-    	micro->get_macro_stress(*gp_id, macro_stress);
-  	}
+	void micropp_get_macro_stress_(int *gp_id, double *macro_stress)
+	{
+		micro->get_macro_stress(*gp_id, macro_stress);
+	}
 
-  	void micropp_get_macro_ctan_(int *gp_id, double *macro_ctan)
-  	{
-    	micro->get_macro_ctan(*gp_id, macro_ctan);
-  	}
+	void micropp_get_macro_ctan_(int *gp_id, double *macro_ctan)
+	{
+		micro->get_macro_ctan(*gp_id, macro_ctan);
+	}
 
-  	void micropp_update_internal_variables_(void)
-  	{
-    	micro->update_vars ();
-  	}
+	void micropp_update_internal_variables_(void)
+	{
+		micro->update_vars ();
+	}
 
-  	void micropp_write_convergence_file_(void)
-  	{
-    	micro->writeConvergenceFile ();
-  	}
+	void micropp_write_convergence_file_(void)
+	{
+		micro->writeConvergenceFile ();
+	}
 } 

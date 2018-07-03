@@ -26,29 +26,27 @@
 
 using namespace std;
 
-void Problem::output (int time_step, int Gauss_ID, double *macro_strain)
+void Problem::output (int time_step, int gp_id)
 {
-  	list<GaussPoint_t>::iterator gp;
-  	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
-    	if (gp->id == Gauss_ID) {
-      		if (gp->int_vars_n != NULL) {
-				for (int i=0; i<num_int_vars; i++)
-	  				vars_old[i] = gp->int_vars_n[i];
-      		} else {
-				for (int i=0; i<num_int_vars; i++)
-	  				vars_old[i] = 0.0;
-      		}
-      		break;
-    	}
-  	}
+	for (auto const& gp : gauss_list)
+		if (gp.id == gp_id) {
+  			if (gp.int_vars_n != NULL)
+				for (int i = 0; i < num_int_vars; ++i)
+  					vars_old[i] = gp.int_vars_n[i];
+  			else 
+				for (int i = 0; i < num_int_vars; ++i)
+  					vars_old[i] = 0.0;
 
-  	double macro_stress[6];
-  	bool non_linear;
-  	setDisp(macro_strain);
-  	newtonRaphson(&non_linear);
+			int nr_its;
+			bool nl_flag;
+			double nr_err;
+			setDisp((double*)gp.macro_strain);
+			newton_raphson(&nl_flag, &nr_its, &nr_err); 
 
-  	calcDistributions();
-  	writeVtu(time_step, Gauss_ID);
+			calcDistributions();
+			writeVtu(time_step, gp_id);
+  			break;
+		}
 }
 
 void Problem::writeVtu (int time_step, int Gauss_ID)
@@ -252,8 +250,9 @@ void Problem::writeConvergenceFile ()
     	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
       		file << gp->id << " ";
     	}
-    	file << "# epsxx[1] epsyy[2] epszz[3] epsxy[4] epsxz[5] epsyz[6] " <<
-      		"sigxx[1] sigyy[2] sigzz[3] sigxy[4] sigxz[5] sigyz[6]" << endl;
+    	file << 
+			"# epsxx [1]\n# epsyy [2]\n# epszz[3]\n# epsxy[4]\n# epsxz[5]\n# epsyz[6]\n" <<
+      		"# sigxx [7]\n# sigyy [2]\n# sigzz[3]\n# sigxy[4]\n# sigxz[5]\n# sigyz[6]" << endl;
     	file << endl;
     	file.close();
   	}
@@ -262,13 +261,10 @@ void Problem::writeConvergenceFile ()
   	for (gp=gauss_list.begin(); gp !=  gauss_list.end(); gp++) {
     	file << scientific;
     	file << setw(14) << ((gp->int_vars_n == NULL) ? 0:1) << " ";
-    	file << setw(14) << gp->convergence.I_reached << " ";
-    	file << setw(14) << I_max << " ";
-    	file << setw(14) << gp->convergence.NR_Its_Stress << " ";
-    	file << setw(14) << gp->convergence.NR_Err_Stress << " ";
-    	for (int i=0; i<nvoi; i++) {
-      		file << setw(14) << gp->convergence.NR_Its_Ctan[i] << " ";
-      		file << setw(14) << gp->convergence.NR_Err_Ctan[i] << " ";
+    	file << setw(14) << gp->inv_max << " ";
+    	for (int i = 0; i < (1+nvoi); ++i) {
+      		file << setw(14) << gp->nr_its[i] << " ";
+      		file << setw(14) << gp->nr_err[i] << " ";
     	}
     	file << " | ";
   	}
