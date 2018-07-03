@@ -87,8 +87,8 @@ class Problem {
 		ell_matrix A;
 		double *u, *du, *b;
 
-		double I_max;
-		double I_reached;
+		double inv_tol, inv_max;
+		bool output_files_header;
 
 	public:
 
@@ -97,9 +97,9 @@ class Problem {
 
 		void calcCtanLinear();
 
-		bool LinearCriteria (const double *macro_strain);
-		double Invariant_I1 (const double *tensor);
-		double Invariant_I2 (const double *tensor);
+		bool is_linear(const double *macro_strain);
+		double get_inv_1(const double *tensor);
+		double get_inv_2(const double *tensor);
 
 		void set_macro_strain(const int gp_id, const double *macro_strain);
 		void get_macro_stress(const int gp_id, double *macro_stress);
@@ -152,5 +152,4 @@ class Problem {
 		void output (int time_step, int gp_id);
 		void writeVtu (int time_step, int elem);
 		void writeConvergenceFile ();
-		bool output_files_header;
 };

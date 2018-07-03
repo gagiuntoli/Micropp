@@ -44,23 +44,23 @@ void Problem::calcCtanLinear()
 	}
 }
 
-bool Problem::LinearCriteria (const double *macro_strain)
+bool Problem::is_linear (const double *macro_strain)
 {
 	double macro_stress[6];
-
-	for (int i=0; i<nvoi; i++) {
+	for (int i = 0; i < nvoi; ++i) {
 		macro_stress[i] = 0.0;
-		for (int j=0; j<nvoi; j++)
+		for (int j = 0; j < nvoi; ++j)
   			macro_stress[i] += ctan_lin[i][j] * macro_strain[j];
 	}
-	double Inv = Invariant_I1(macro_stress);
 
-	if (fabs(Inv) > I_reached) I_reached = fabs(Inv);
+	double inv = get_inv_1(macro_stress);
+	if (fabs(inv) > inv_max)
+ 		inv_max = fabs(inv);
 
-	return (fabs(Inv) < I_max) ? true : false;
+	return (fabs(inv) < inv_tol) ? true : false;
 }
 
-double Problem::Invariant_I1 (const double *tensor)
+double Problem::get_inv_1(const double *tensor)
 {
 	if (dim == 2)
 		return tensor[0] + tensor[1];
@@ -68,7 +68,7 @@ double Problem::Invariant_I1 (const double *tensor)
 		return tensor[0] + tensor[1] + tensor[2];
 }
 
-double Problem::Invariant_I2 (const double *tensor)
+double Problem::get_inv_2(const double *tensor)
 {
 	if (dim == 3)
 		return \
@@ -129,9 +129,9 @@ void Problem::homogenize()
   			for (int i = 0; i < num_int_vars; ++i)
 				vars_old[i] = gp.int_vars_n[i];
 		
-		I_reached = -1.0e10;
+		inv_max = -1.0e10;
 
-		if ((LinearCriteria(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
+		if ((is_linear(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
 
   			// S = CL : E
   			for (int i = 0; i < nvoi; ++i) {
@@ -193,7 +193,7 @@ void Problem::homogenize()
 				gp.nr_err[1+i] = nr_err;
   			}
 		}
-		gp.inv_max = I_reached;
+		gp.inv_max = inv_max;
 	}
 }
 
