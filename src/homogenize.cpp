@@ -122,13 +122,6 @@ void Problem::homogenize()
 {
 	for (auto& gp : gauss_list) {
 
-		if (gp.int_vars_n == NULL)
-  			for (int i = 0; i < num_int_vars; ++i)
-				vars_old[i] = 0.0;
-		else
-  			for (int i = 0; i < num_int_vars; ++i)
-				vars_old[i] = gp.int_vars_n[i];
-		
 		inv_max = -1.0e10;
 
 		if ((is_linear(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
@@ -151,7 +144,14 @@ void Problem::homogenize()
 
 		} else {
 
-  			// SIGMA
+			if (gp.int_vars_n == NULL)
+  				for (int i = 0; i < num_int_vars; ++i)
+					vars_old[i] = 0.0;
+			else
+  				for (int i = 0; i < num_int_vars; ++i)
+					vars_old[i] = gp.int_vars_n[i];
+
+		 	// SIGMA
 			int nr_its;
   			bool nl_flag;
         	double nr_err;

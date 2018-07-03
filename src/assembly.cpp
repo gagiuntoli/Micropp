@@ -924,36 +924,32 @@ void Problem::getStress (int ex, int ey, int ez, int gp, double eps[6], bool *no
 
   	if (material.plasticity == true)
   	{
-    	double alpha_1, alpha, eps_p_1[6], eps_p[6];
+    	double alpha_old, alpha_new, eps_p_old[6], eps_p_new[6];
+    	for (int i = 0; i < 6; ++i)
+      		eps_p_old[i] = vars_old[intvar_ix(e, gp, i)];
+    	alpha_old = vars_old[intvar_ix(e, gp, 6)];
 
-    	// charge old values from internal variables
-    	for (int i=0; i<6; i++)
-      		eps_p_1[i] = vars_old[intvar_ix(e, gp, i)];
-    	alpha_1 = vars_old[intvar_ix(e, gp, 6)];
+    	plastic_step(material, eps, eps_p_old, alpha_old, eps_p_new, &alpha_new, non_linear, stress_gp);
 
-    	plastic_step(material, eps, eps_p_1, alpha_1, eps_p, &alpha, non_linear, stress_gp);
-
-    	for (int i=0; i<6; i++)
-      		vars_new[intvar_ix(e, gp, i)] = eps_p[i];
-    	vars_new[intvar_ix(e, gp, 6)] = alpha;
+    	for (int i = 0; i < 6; ++i)
+      		vars_new[intvar_ix(e, gp, i)] = eps_p_new[i];
+    	vars_new[intvar_ix(e, gp, 6)] = alpha_new;
 
   	} else {
 
-    	for (int i=0; i<3; i++) {
-      		stress_gp[i] = 0.0;
-      		for (int j=0; j<3; j++)
-				stress_gp[i] += material.lambda*eps[j];
+    	for (int i = 0; i < 3; ++i) {
+      		stress_gp[i] = material.lambda * (eps[0] + eps[1] + eps[2]);
       		stress_gp[i] += 2*material.mu*eps[i];
     	}
-    	for (int i=3; i<6; i++)
+    	for (int i = 3; i < 6; ++i)
       		stress_gp[i] = material.mu*eps[i];
   	}
 
 }
 
-void Problem::plastic_step(
-    	material_t &material, double eps[6], double eps_p_1[6], 
-    	double alpha_1, double eps_p[6], double *alpha, bool *non_linear, double stress[6])
+void Problem::plastic_step(material_t &material, double eps[6], 
+		double eps_p_old[6], double alpha_old, double eps_p_new[6], double *alpha_new,
+ 		bool *non_linear, double stress[6])
 {
 	double eps_dev[6];
 	double eps_p_dev_1[6];
@@ -961,12 +957,12 @@ void Problem::plastic_step(
 	double dl = 0.0;
 	double sig_dev_trial[6], sig_dev_trial_norm;
 
-	getDeviatoric (eps_p_1, eps_p_dev_1);
-	getDeviatoric (eps, eps_dev);
+	getDeviatoric(eps_p_old, eps_p_dev_1);
+	getDeviatoric(eps, eps_dev);
 
-	for (int i=0; i<3; i++) 
+	for (int i = 0; i < 3; ++i) 
 		sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
-	for (int i=3; i<6; i++) 
+	for (int i = 3; i < 6; ++i) 
 		sig_dev_trial[i] = material.mu * (eps_dev[i] - eps_p_dev_1[i]);
 
 	sig_dev_trial_norm = sqrt( \
@@ -977,33 +973,35 @@ void Problem::plastic_step(
   			2*sig_dev_trial[4]*sig_dev_trial[4] + \
   			2*sig_dev_trial[5]*sig_dev_trial[5]);
 
-	double f_trial = sig_dev_trial_norm - sqrt(2.0/3) * (material.Sy + material.Ka * alpha_1);
+	double f_trial = sig_dev_trial_norm - sqrt(2.0/3) * (material.Sy + material.Ka * alpha_old);
 
-	if (f_trial > 0) {
-
-		// linear hardening K(alpha) = Sy + Ka * alpha
+	if (f_trial > 0)
+ 	{
 		*non_linear = true;
 
 		for (int i = 0; i < 6; ++i)
   			normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
 
-		dl = f_trial/(2*material.mu*(1.0 + (0.0 * material.Ka)/(3*material.mu)));
-		*alpha += sqrt(2.0/3) * dl;
-		for (int i = 0; i < 6; ++i)
-  			eps_p[i] = eps_p_1[i] + dl*normal[i];
-
-	} else {
+		dl = f_trial / (2*material.mu * (1.0 + (0.0 * material.Ka)/(3*material.mu)));
 
 		for (int i = 0; i < 6; ++i)
-  			eps_p[i] = eps_p_1[i];
-		*alpha = alpha_1;
+  			eps_p_new[i] = eps_p_old[i] + dl * normal[i];
+		*alpha_new = alpha_old + sqrt(2.0/3) * dl;
+	}
+ 	else
+ 	{
+		for (int i = 0; i < 6; ++i)
+  			eps_p_new[i] = eps_p_old[i];
+		*alpha_new = alpha_old;
 	}
 
 	//sig_2 = s_trial + K * tr(eps) * 1 - 2*mu*dl*normal;
 	for (int i = 0; i < 6; ++i)
 		stress[i] = sig_dev_trial[i];
+
 	for (int i = 0; i < 3; ++i)
 		stress[i] += material.k * (eps[0] + eps[1] + eps[2]);
+
 	for (int i = 0; i < 6; ++i)
 		stress[i] -= 2 * material.mu * dl * normal[i];
 }

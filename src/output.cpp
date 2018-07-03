@@ -228,7 +228,6 @@ void Problem::writeVtu (int time_step, int Gauss_ID)
 void Problem::writeConvergenceFile ()
 {
 	ofstream file;
-
 	if (output_files_header == false) {
 		output_files_header = true;
 
