@@ -153,6 +153,8 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   	file.close ();
   	file.open ("micropp_eps_sig_ctan.dat");
   	file.close ();
+  	file.open ("micropp_int_vars.dat");
+  	file.close ();
 }
 
 Problem::~Problem()

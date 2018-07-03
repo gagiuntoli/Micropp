@@ -278,4 +278,16 @@ void Problem::writeConvergenceFile ()
 	}
 	file << endl;
 	file.close();
+
+	file.open ("micropp_int_vars.dat", std::ios_base::app);
+	for (auto const& gp : gauss_list) {
+		for (int i = 0; i < num_int_vars; ++i)
+        	if (gp.int_vars_n != NULL) 
+  				file << setw(14) << gp.int_vars_n[i] << " ";
+			else
+  				file << setw(14) << 0.0 << " ";
+		file << " | ";
+	}
+	file << endl;
+	file.close();
 }

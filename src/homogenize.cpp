@@ -162,8 +162,8 @@ void Problem::homogenize()
 			if (nl_flag == true)
 			{
   				if(gp.int_vars_n == NULL) {
-					gp.int_vars_k = (double *)malloc(num_int_vars*sizeof(double));
-					gp.int_vars_n = (double *)malloc(num_int_vars*sizeof(double));
+					gp.int_vars_k = (double*)malloc(num_int_vars*sizeof(double));
+					gp.int_vars_n = (double*)malloc(num_int_vars*sizeof(double));
 				}
   				for (int i = 0; i < num_int_vars; ++i)
 					gp.int_vars_k[i] = vars_new[i];
