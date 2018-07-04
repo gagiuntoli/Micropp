@@ -122,6 +122,13 @@ void micropp_t::homogenize()
 {
 	for (auto& gp : gauss_list) {
 
+		if (gp.int_vars_n == NULL)
+  			for (int i = 0; i < num_int_vars; ++i)
+				vars_old[i] = 0.0;
+		else
+  			for (int i = 0; i < num_int_vars; ++i)
+				vars_old[i] = gp.int_vars_n[i];
+
 		inv_max = -1.0e10;
 
 		if ((is_linear(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
@@ -144,13 +151,6 @@ void micropp_t::homogenize()
 
 		} else {
 
-			if (gp.int_vars_n == NULL)
-  				for (int i = 0; i < num_int_vars; ++i)
-					vars_old[i] = 0.0;
-			else
-  				for (int i = 0; i < num_int_vars; ++i)
-					vars_old[i] = gp.int_vars_n[i];
-
 		 	// SIGMA
 			int nr_its;
   			bool nl_flag;
@@ -164,6 +164,8 @@ void micropp_t::homogenize()
   				if(gp.int_vars_n == NULL) {
 					gp.int_vars_k = (double*)malloc(num_int_vars*sizeof(double));
 					gp.int_vars_n = (double*)malloc(num_int_vars*sizeof(double));
+  					for (int i = 0; i < num_int_vars; ++i)
+						gp.int_vars_n[i] = 0.0;
 				}
   				for (int i = 0; i < num_int_vars; ++i)
 					gp.int_vars_k[i] = vars_new[i];

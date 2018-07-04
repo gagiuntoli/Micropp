@@ -279,7 +279,7 @@ void micropp_t::write_info_files ()
 	file << endl;
 	file.close();
 
-	file.open ("micropp_int_vars.dat", std::ios_base::app);
+	file.open ("micropp_int_vars_n.dat", std::ios_base::app);
 	for (auto const& gp : gauss_list) {
 		for (int i = 0; i < num_int_vars; ++i)
         	if (gp.int_vars_n != NULL) 
