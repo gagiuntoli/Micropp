@@ -37,7 +37,7 @@
 
 using namespace std;
 
-struct GaussPoint_t {
+struct gp_t {
   	int id;
   	int nr_its[7];
   	double *int_vars_n;
@@ -61,7 +61,7 @@ struct material_t {
   	bool damage;
 };
 
-class Problem {
+class micropp_t {
 
 	private:
 
@@ -75,7 +75,7 @@ class Problem {
 		double micro_params[5];
 		int numMaterials;
 		material_t material_list[MAX_MATS];
-		std::list<GaussPoint_t> gauss_list;
+		std::list<gp_t> gauss_list;
 		double ctan_lin[6][6];
 
 		double *elem_strain;
@@ -92,10 +92,10 @@ class Problem {
 
 	public:
 
-		Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
-		~Problem();
+		micropp_t (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params);
+		~micropp_t();
 
-		void calcCtanLinear();
+		void calc_ctan_lin();
 
 		bool is_linear(const double *macro_strain);
 		double get_inv_1(const double *tensor);
@@ -106,32 +106,28 @@ class Problem {
 		void get_macro_ctan(const int gp_id, double *macro_ctan);
 		void homogenize();
 		void update_vars();
+		void get_nl_flag (int gp_id, int *nl_flag);
 
+		void set_displ (double *eps);
+		double assembly_rhs (bool *nl_flag);
+		void get_elem_rhs (int ex, int ey, bool *nl_flag, double (&be)[2*4]);
+		void get_elem_rhs (int ex, int ey, int ez, bool *nl_flag, double (&be)[3*8]);
+		void assembly_mat ();
+		void get_elem_mat (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
+		void get_elem_mat (int ex, int ey, double (&Ae)[2*4*2*4]);
 		void solve();
 		void newton_raphson(bool *nl_flag, int *its, double *err);
 
-		void getNonLinearFlag (int gp_id, int *nl_flag);
-		void getIntVars (int gp_id, int n, int *int_vars);
+		void get_ctan_plast_sec (int ex, int ey, int ez, int gp, double ctan[6][6]);
+		void get_ctan_plast_exact (int ex, int ey, int ez, int gp, double ctan[6][6]);
+		void get_ctan_plast_pert (int ex, int ey, int ez, int gp, double ctan[6][6]);
 
-		void set_displ (double *eps);
-		void assembly_mat ();
-		double assembly_rhs (bool *nl_flag);
+		void get_strain (int ex, int ey, int gp, double *strain_gp);
+		void get_strain (int ex, int ey, int ez, int gp, double *strain_gp);
 
-		void get_elem_mat (int ex, int ey, double (&Ae)[2*4*2*4]);
-		void get_elem_mat (int ex, int ey, int ez, double (&Ae)[3*8*3*8]);
-		void getCtanPlasSecant (int ex, int ey, int ez, int gp, double ctan[6][6]);
-		void getCtanPlasExact (int ex, int ey, int ez, int gp, double ctan[6][6]);
-		void getCtanPlasPert (int ex, int ey, int ez, int gp, double ctan[6][6]);
-
-		void get_elem_rhs (int ex, int ey, bool *nl_flag, double (&be)[2*4]);
-		void get_elem_rhs (int ex, int ey, int ez, bool *nl_flag, double (&be)[3*8]);
-
-		void getStrain (int ex, int ey, int gp, double *strain_gp);
-		void getStrain (int ex, int ey, int ez, int gp, double *strain_gp);
-
-		void getStress (int ex, int ey, int gp, double strain_gp[3], bool *nl_flag, double *stress_gp);
-		void getStress (int ex, int ey, int ez, int gp, double strain_gp[3], bool *nl_flag, double *stress_gp);
-		void getDeviatoric (double tensor[6], double tensor_dev[6]);
+		void get_stress (int ex, int ey, int gp, double strain_gp[3], bool *nl_flag, double *stress_gp);
+		void get_stress (int ex, int ey, int ez, int gp, double strain_gp[3], bool *nl_flag, double *stress_gp);
+		void get_dev_tensor (double tensor[6], double tensor_dev[6]);
 		void plastic_step(
 				material_t &material, double eps[6], double eps_p_1[6], double alpha_1, double eps_p[6], 
 				double *alpha, bool *nl_flag, double stress[6]);
@@ -139,9 +135,9 @@ class Problem {
 		void getElemDisp (int ex, int ey, double *elem_disp);
 		void getElemDisp (int ex, int ey, int ez, double *elem_disp);
 
-		int getElemType (int ex, int ey);
-		int getElemType (int ex, int ey, int ez);
-		void getMaterial (int e, material_t &material);
+		int get_elem_type (int ex, int ey);
+		int get_elem_type (int ex, int ey, int ez);
+		void get_material (int e, material_t &material);
 
 		void calc_bmat_3D (int gp, double bmat[6][3*8]);
 

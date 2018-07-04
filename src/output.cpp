@@ -26,7 +26,7 @@
 
 using namespace std;
 
-void Problem::output (int time_step, int gp_id)
+void micropp_t::output (int time_step, int gp_id)
 {
 	for (auto const& gp : gauss_list)
 		if (gp.id == gp_id) {
@@ -49,7 +49,7 @@ void Problem::output (int time_step, int gp_id)
 		}
 }
 
-void Problem::write_vtu (int time_step, int gp_id)
+void micropp_t::write_vtu (int time_step, int gp_id)
 {
   	std::stringstream fname_vtu_s;
   	fname_vtu_s  << "micropp_" << gp_id << "_" << time_step << ".vtu";
@@ -225,7 +225,7 @@ void Problem::write_vtu (int time_step, int gp_id)
   	file.close();
 }
 
-void Problem::write_info_files ()
+void micropp_t::write_info_files ()
 {
 	ofstream file;
 	if (output_files_header == false) {

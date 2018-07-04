@@ -29,7 +29,7 @@
 
 using namespace std;
 
-void Problem::solve()
+void micropp_t::solve()
 {
   	ell_solver solver;
   	solver.max_its = CG_MAX_ITS;
@@ -43,7 +43,7 @@ void Problem::solve()
   	//cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
 }
 
-void Problem::newton_raphson(bool *nl_flag, int *its, double *err)
+void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 {
  	*its = 0;
  	*err = 0.0;

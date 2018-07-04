@@ -22,7 +22,7 @@
 #include <iostream>
 #include "micro.h"
 
-Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params)
+micropp_t::micropp_t (int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params)
 {
   	this->micro_type = micro_type;
 
@@ -126,7 +126,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
     	for (int ex=0; ex<nx-1; ex++) {
       		for (int ey=0; ey<ny-1; ey++) {
 				int e = glo_elem3D(ex,ey,0);
-				elem_type[e] = getElemType(ex,ey);
+				elem_type[e] = get_elem_type(ex,ey);
       		}
     	}
   	} else {
@@ -134,7 +134,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
       		for (int ey=0; ey<ny-1; ey++) {
 				for (int ez=0; ez<nz-1; ez++) {
 	  				int e = glo_elem3D(ex,ey,ez);
-	  				elem_type[e] = getElemType(ex,ey,ez);
+	  				elem_type[e] = get_elem_type(ex,ey,ez);
 				}
       		}
     	}
@@ -145,7 +145,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   	else if (dim == 3)
     	ell_init_3D (A, dim, nx, ny, nz);
 
-  	calcCtanLinear ();
+  	calc_ctan_lin ();
 
   	output_files_header = false;
 
@@ -157,7 +157,7 @@ Problem::Problem (int dim, int size[3], int micro_type, double *micro_params, in
   	file.close ();
 }
 
-Problem::~Problem()
+micropp_t::~micropp_t()
 {
   	ell_free (A);
   	free(b);
@@ -175,7 +175,7 @@ Problem::~Problem()
   	}
 }
 
-void Problem::getNonLinearFlag (int gp_id, int *non_linear)
+void micropp_t::get_nl_flag (int gp_id, int *non_linear)
 {
   	*non_linear = 0;
 	for (auto const& gp : gauss_list)
@@ -185,7 +185,7 @@ void Problem::getNonLinearFlag (int gp_id, int *non_linear)
     	}
 }
 
-int Problem::getElemType (int ex, int ey)
+int micropp_t::get_elem_type (int ex, int ey)
 {
   	if (micro_type == 0) {
     	// esfera en matriz
@@ -209,7 +209,7 @@ int Problem::getElemType (int ex, int ey)
   	}
 }
 
-int Problem::getElemType (int ex, int ey, int ez)
+int micropp_t::get_elem_type (int ex, int ey, int ez)
 {
   	if (micro_type == 0) {
     	// esfera en matriz

@@ -20,7 +20,7 @@
 
 #include "micro.h"
 
-void Problem::calcCtanLinear()
+void micropp_t::calc_ctan_lin()
 {
 	double sig_1[6], eps_1[6];
 	double d_eps = 1.0e-8;
@@ -44,7 +44,7 @@ void Problem::calcCtanLinear()
 	}
 }
 
-bool Problem::is_linear (const double *macro_strain)
+bool micropp_t::is_linear (const double *macro_strain)
 {
 	double macro_stress[6];
 	for (int i = 0; i < nvoi; ++i) {
@@ -60,7 +60,7 @@ bool Problem::is_linear (const double *macro_strain)
 	return (fabs(inv) < inv_tol) ? true : false;
 }
 
-double Problem::get_inv_1(const double *tensor)
+double micropp_t::get_inv_1(const double *tensor)
 {
 	if (dim == 2)
 		return tensor[0] + tensor[1];
@@ -68,7 +68,7 @@ double Problem::get_inv_1(const double *tensor)
 		return tensor[0] + tensor[1] + tensor[2];
 }
 
-double Problem::get_inv_2(const double *tensor)
+double micropp_t::get_inv_2(const double *tensor)
 {
 	if (dim == 3)
 		return \
@@ -76,9 +76,9 @@ double Problem::get_inv_2(const double *tensor)
 			tensor[3]*tensor[3] + tensor[4]*tensor[4] + tensor[5]*tensor[5];
 }
 
-void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
+void micropp_t::set_macro_strain(const int gp_id, const double *macro_strain)
 {
-	list<GaussPoint_t>::iterator gp;
+	list<gp_t>::iterator gp;
 	for(gp = gauss_list.begin(); gp != gauss_list.end(); ++gp) {
 		if (gp->id == gp_id) {
   			for (int i = 0; i < nvoi; ++i)
@@ -87,7 +87,7 @@ void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
 		}
 	}
 	if (gp == gauss_list.end()) {
-		GaussPoint_t gp_n;
+		gp_t gp_n;
 		gp_n.id = gp_id;
 		gp_n.int_vars_n = NULL;
 		gp_n.int_vars_k = NULL;
@@ -98,7 +98,7 @@ void Problem::set_macro_strain(const int gp_id, const double *macro_strain)
 	}
 }
 
-void Problem::get_macro_stress(const int gp_id, double *macro_stress)
+void micropp_t::get_macro_stress(const int gp_id, double *macro_stress)
 {
 	for (auto const& gp : gauss_list)
 		if (gp.id == gp_id) {
@@ -108,7 +108,7 @@ void Problem::get_macro_stress(const int gp_id, double *macro_stress)
 		}
 }
 
-void Problem::get_macro_ctan(const int gp_id, double *macro_ctan)
+void micropp_t::get_macro_ctan(const int gp_id, double *macro_ctan)
 {
 	for (auto const& gp : gauss_list)
 		if (gp.id == gp_id) {
@@ -118,7 +118,7 @@ void Problem::get_macro_ctan(const int gp_id, double *macro_ctan)
 		}
 }
 
-void Problem::homogenize()
+void micropp_t::homogenize()
 {
 	for (auto& gp : gauss_list) {
 
@@ -197,7 +197,7 @@ void Problem::homogenize()
 	}
 }
 
-void Problem::update_vars()
+void micropp_t::update_vars()
 {
 	for (auto const& gp : gauss_list)
 		if(gp.int_vars_n != NULL)

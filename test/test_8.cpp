@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
   	mat_params[1*MAX_MAT_PARAM + 2] = 1.0e4;
   	mat_params[1*MAX_MAT_PARAM + 3] = 0.0e-1;
 
-  	Problem micro (dim, size, micro_type, micro_params, mat_types, mat_params);
+  	micropp_t micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
   	double d_eps = 0.01;
   	int dir = 2;
