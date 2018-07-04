@@ -40,19 +40,19 @@ void Problem::output (int time_step, int gp_id)
 			int nr_its;
 			bool nl_flag;
 			double nr_err;
-			setDisp((double*)gp.macro_strain);
+			set_displ((double*)gp.macro_strain);
 			newton_raphson(&nl_flag, &nr_its, &nr_err); 
 
-			calcDistributions();
-			writeVtu(time_step, gp_id);
+			calc_fields();
+			write_vtu(time_step, gp_id);
   			break;
 		}
 }
 
-void Problem::writeVtu (int time_step, int Gauss_ID)
+void Problem::write_vtu (int time_step, int gp_id)
 {
   	std::stringstream fname_vtu_s;
-  	fname_vtu_s  << "micropp_" << Gauss_ID << "_" << time_step << ".vtu";
+  	fname_vtu_s  << "micropp_" << gp_id << "_" << time_step << ".vtu";
   	std::string fname_vtu  = fname_vtu_s.str();
 
   	ofstream file;
@@ -225,7 +225,7 @@ void Problem::writeVtu (int time_step, int Gauss_ID)
   	file.close();
 }
 
-void Problem::writeConvergenceFile ()
+void Problem::write_info_files ()
 {
 	ofstream file;
 	if (output_files_header == false) {

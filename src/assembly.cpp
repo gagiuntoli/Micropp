@@ -26,7 +26,7 @@
 
 using namespace std;
 
-void Problem::setDisp (double *eps)
+void Problem::set_displ (double *eps)
 {
 
   	if (dim == 2)
@@ -168,7 +168,7 @@ void Problem::setDisp (double *eps)
   	}
 }
 
-double Problem::Assembly_b (bool *non_linear)
+double Problem::assembly_rhs (bool *non_linear)
 {
   	int index[3*8];
   	int n0, n1, n2, n3, n4, n5, n6, n7;
@@ -195,7 +195,7 @@ double Problem::Assembly_b (bool *non_linear)
 				index[4] = n2*dim; index[5] = n2*dim + 1;
 				index[6] = n3*dim; index[7] = n3*dim + 1;
 
-				getElemental_b (ex, ey, &non_linear_one_elem, be);
+				get_elem_rhs (ex, ey, &non_linear_one_elem, be);
 				if (non_linear_one_elem == true)
 	  				*non_linear = true;
 
@@ -253,7 +253,7 @@ double Problem::Assembly_b (bool *non_linear)
 	    				index[7*dim + d] = n7*dim + d;
 	  				}
 
-	  				getElemental_b (ex, ey, ez, &non_linear_one_elem, be);
+	  				get_elem_rhs (ex, ey, ez, &non_linear_one_elem, be);
 	  				if (non_linear_one_elem == true)
 	    				*non_linear = true;
 
@@ -327,7 +327,7 @@ double Problem::Assembly_b (bool *non_linear)
   	return norm;
 }
 
-void Problem::Assembly_A()
+void Problem::assembly_mat()
 {
   	int index[8];
 
@@ -338,7 +338,7 @@ void Problem::Assembly_A()
     	double Ae[2*4*2*4];
     	for (int ex=0; ex<nx-1; ex++) {
       		for (int ey=0; ey<ny-1; ey++) {
-				getElemental_A (ex, ey, Ae);
+				get_elem_mat (ex, ey, Ae);
 				ell_add_struct (A, ex, ey, Ae, dim, nx, ny);
       		}
     	}
@@ -350,7 +350,7 @@ void Problem::Assembly_A()
     	for (int ex=0; ex<nx-1; ex++) {
       		for (int ey=0; ey<ny-1; ey++) {
 				for (int ez=0; ez<nz-1; ez++) {
-	  				getElemental_A (ex, ey, ez, Ae);
+	  				get_elem_mat (ex, ey, ez, Ae);
 	  				ell_add_struct (A, ex, ey, ez, Ae, dim, nx, ny, nz);
 				}
       		}
@@ -360,7 +360,7 @@ void Problem::Assembly_A()
   	//  ell_print (&A);
 }
 
-void Problem::getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4])
+void Problem::get_elem_mat (int ex, int ey, double (&Ae)[2*4*2*4])
 {
 
   	double nu, E;
@@ -425,7 +425,7 @@ void Problem::getElemental_A (int ex, int ey, double (&Ae)[2*4*2*4])
   	} // gp loop
 }
 
-void Problem::getElemental_A (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
+void Problem::get_elem_mat (int ex, int ey, int ez, double (&Ae)[3*8*3*8])
 {
   	int e = glo_elem3D(ex,ey,ez);
   	material_t material;
@@ -608,7 +608,7 @@ void Problem::calc_bmat_3D (int gp, double bmat[6][3*8]) {
 
 }
 
-void Problem::getElemental_b (int ex, int ey, bool *non_linear, double (&be)[2*4])
+void Problem::get_elem_rhs (int ex, int ey, bool *non_linear, double (&be)[2*4])
 {
   	double dsh[4][2], bmat[3][2*4], cxb[3][8], stress_gp[6];
   	double xg[4][2] = {
@@ -647,7 +647,7 @@ void Problem::getElemental_b (int ex, int ey, bool *non_linear, double (&be)[2*4
   	} // gp loop
 }
 
-void Problem::getElemental_b (int ex, int ey, int ez, bool *non_linear, double (&be)[3*8])
+void Problem::get_elem_rhs (int ex, int ey, int ez, bool *non_linear, double (&be)[3*8])
 {
   	double bmat[6][3*8], cxb[6][3*8], stress_gp[6];
 
@@ -670,7 +670,7 @@ void Problem::getElemental_b (int ex, int ey, int ez, bool *non_linear, double (
   	} // gp loop
 }
 
-void Problem::calcAverageStress (double stress_ave[6])
+void Problem::calc_ave_stress (double stress_ave[6])
 {
   	bool non_linear_flag;
 
@@ -736,7 +736,7 @@ void Problem::calcAverageStress (double stress_ave[6])
     	stress_ave[v] /= (lx*ly);
 }
 
-void Problem::calcAverageStrain (double strain_ave[6])
+void Problem::calc_ave_strain (double strain_ave[6])
 {
   	for (int v=0; v<nvoi; v++)
     	strain_ave[v] = 0.0;
@@ -793,7 +793,7 @@ void Problem::calcAverageStrain (double strain_ave[6])
     	strain_ave[v] /= (lx*ly);
 }
 
-void Problem::calcDistributions()
+void Problem::calc_fields()
 {
   	bool non_linear_flag;
 

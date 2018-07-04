@@ -70,6 +70,6 @@ extern "C"
 
 	void micropp_write_convergence_file_(void)
 	{
-		micro->writeConvergenceFile ();
+		micro->write_info_files ();
 	}
 } 

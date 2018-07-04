@@ -105,7 +105,7 @@ int main (int argc, char *argv[])
       		cout << endl; 
     	}
     	micro.update_vars();
-    	micro.writeConvergenceFile ();
+    	micro.write_info_files ();
       	cout << endl; 
   	}
   	return 0;

@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
     	micro.get_macro_stress(1, MacroStress);
 
     	micro.update_vars();
-    	micro.writeConvergenceFile ();
+    	micro.write_info_files ();
 
     	cout << "eps = " << eps[dir] << endl;
     	cout 

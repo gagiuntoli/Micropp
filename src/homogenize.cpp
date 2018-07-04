@@ -35,9 +35,9 @@ void Problem::calcCtanLinear()
 		int nr_its;
 		bool nl_flag;
         double nr_err;
-		setDisp(eps_1);
+		set_displ(eps_1);
 		newton_raphson(&nl_flag, &nr_its, &nr_err);
-		calcAverageStress(sig_1);
+		calc_ave_stress(sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
   			ctan_lin[v][i] = sig_1[v] / d_eps;
@@ -155,9 +155,9 @@ void Problem::homogenize()
 			int nr_its;
   			bool nl_flag;
         	double nr_err;
-  			setDisp(gp.macro_strain);
+  			set_displ(gp.macro_strain);
   			newton_raphson(&nl_flag, &nr_its, &nr_err); 
-  			calcAverageStress(gp.macro_stress);
+  			calc_ave_stress(gp.macro_stress);
 
 			if (nl_flag == true)
 			{
@@ -183,9 +183,9 @@ void Problem::homogenize()
   					eps_1[v] = gp.macro_strain[v];
 				eps_1[i] += dEps;
 
-				setDisp(eps_1);
+				set_displ(eps_1);
 				newton_raphson(&nl_flag, &nr_its, &nr_err);
-				calcAverageStress(sig_1);
+				calc_ave_stress(sig_1);
 				for (int v = 0; v < nvoi; ++v)
   					gp.macro_ctan[v*nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
 

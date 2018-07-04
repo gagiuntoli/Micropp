@@ -49,11 +49,11 @@ void Problem::newton_raphson(bool *nl_flag, int *its, double *err)
  	*err = 0.0;
  	do
  	{
- 		*err = Assembly_b(nl_flag);
+ 		*err = assembly_rhs(nl_flag);
  		if (*err < NR_MAX_TOL)
  			break;
 
- 		Assembly_A();
+ 		assembly_mat();
 
  		for (int i=0; i<(nn*dim); i++)
   			du[i] = 0.0;
