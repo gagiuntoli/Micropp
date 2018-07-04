@@ -76,7 +76,7 @@ class micropp_t {
 		int numMaterials;
 		material_t material_list[MAX_MATS];
 		std::list<gp_t> gauss_list;
-		double ctan_lin[6][6];
+		double ctan_lin[36];
 
 		double *elem_strain;
 		double *elem_stress;

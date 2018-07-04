@@ -40,7 +40,7 @@ void micropp_t::calc_ctan_lin()
 		calc_ave_stress(sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
-  			ctan_lin[v][i] = sig_1[v] / d_eps;
+  			ctan_lin[v*nvoi + i] = sig_1[v] / d_eps;
 	}
 }
 
@@ -50,7 +50,7 @@ bool micropp_t::is_linear (const double *macro_strain)
 	for (int i = 0; i < nvoi; ++i) {
 		macro_stress[i] = 0.0;
 		for (int j = 0; j < nvoi; ++j)
-  			macro_stress[i] += ctan_lin[i][j] * macro_strain[j];
+  			macro_stress[i] += ctan_lin[i*nvoi + j] * macro_strain[j];
 	}
 
 	double inv = get_inv_1(macro_stress);
@@ -130,12 +130,12 @@ void micropp_t::homogenize()
   			for (int i = 0; i < nvoi; ++i) {
 				gp.macro_stress[i] = 0.0;
 				for (int j = 0; j < nvoi; ++j)
-  					gp.macro_stress[i] += ctan_lin[i][j] * gp.macro_strain[j];
+  					gp.macro_stress[i] += ctan_lin[i*nvoi + j] * gp.macro_strain[j];
   			}
   			// C = CL
   			for (int i = 0; i < nvoi; ++i)
 				for (int j = 0; j < nvoi; ++j)
-  					gp.macro_ctan[i*nvoi + j] = ctan_lin[i][j];
+  					gp.macro_ctan[i*nvoi + j] = ctan_lin[i*nvoi + j];
 
   			for (int i = 0; i < (1+nvoi); ++i) {
 				gp.nr_its[i] = 0;
