@@ -153,7 +153,7 @@ micropp_t::micropp_t (int dim, int size[3], int micro_type, double *micro_params
   	file.close ();
   	file.open ("micropp_eps_sig_ctan.dat");
   	file.close ();
-  	file.open ("micropp_int_vars.dat");
+  	file.open ("micropp_int_vars_n.dat");
   	file.close ();
 }
 
