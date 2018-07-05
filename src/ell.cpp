@@ -326,7 +326,7 @@ int ell_print(ell_matrix *m)
 	return 0;
 }
 
-void ell_add_struct(ell_matrix *m, int ex, int ey, double *Ae,
+void ell_add_struct2D(ell_matrix *m, int ex, int ey, double *Ae,
                     int nFields, int nx, int ny)
 {
 	// assembly Ae in 2D structured grid representation
@@ -357,7 +357,8 @@ void ell_add_struct(ell_matrix *m, int ex, int ey, double *Ae,
 
 }
 
-void ell_add_struct(ell_matrix *m, int ex, int ey, int ez, double *Ae, int nFields, int nx, int ny, int nz)
+void ell_add_struct3D(ell_matrix *m, int ex, int ey, int ez, double *Ae,
+                    int nFields, int nx, int ny, int nz)
 {
 	// assembly Ae in 3D structured grid representation
 	// nFields : number of scalar components on each node

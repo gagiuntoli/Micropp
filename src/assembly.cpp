@@ -342,7 +342,7 @@ void micropp_t::assembly_mat()
 		for (int ex = 0; ex < nx - 1; ex++) {
 			for (int ey = 0; ey < ny - 1; ey++) {
 				get_elem_mat(ex, ey, Ae);
-				ell_add_struct(&A, ex, ey, Ae, dim, nx, ny);
+				ell_add_struct2D(&A, ex, ey, Ae, dim, nx, ny);
 			}
 		}
 		ell_set_bc_2D(&A, dim, nx, ny);
@@ -354,7 +354,7 @@ void micropp_t::assembly_mat()
 			for (int ey = 0; ey < ny - 1; ey++) {
 				for (int ez = 0; ez < nz - 1; ez++) {
 					get_elem_mat(ex, ey, ez, Ae);
-					ell_add_struct(&A, ex, ey, ez, Ae, dim, nx, ny, nz);
+					ell_add_struct3D(&A, ex, ey, ez, Ae, dim, nx, ny, nz);
 				}
 			}
 		}
