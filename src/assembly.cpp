@@ -198,7 +198,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 				index[6] = n3 * dim;
 				index[7] = n3 * dim + 1;
 
-				get_elem_rhs(ex, ey, &non_linear_one_elem, be);
+				get_elem_rhs2D(ex, ey, &non_linear_one_elem, be);
 				if (non_linear_one_elem == true)
 					*non_linear = true;
 
@@ -256,7 +256,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 						index[7 * dim + d] = n7 * dim + d;
 					}
 
-					get_elem_rhs(ex, ey, ez, &non_linear_one_elem, be);
+					get_elem_rhs3D(ex, ey, ez, &non_linear_one_elem, be);
 					if (non_linear_one_elem == true)
 						*non_linear = true;
 
@@ -341,7 +341,7 @@ void micropp_t::assembly_mat()
 		double Ae[2 * 4 * 2 * 4];
 		for (int ex = 0; ex < nx - 1; ex++) {
 			for (int ey = 0; ey < ny - 1; ey++) {
-				get_elem_mat(ex, ey, Ae);
+				get_elem_mat2D(ex, ey, Ae);
 				ell_add_struct2D(&A, ex, ey, Ae, dim, nx, ny);
 			}
 		}
@@ -353,7 +353,7 @@ void micropp_t::assembly_mat()
 		for (int ex = 0; ex < nx - 1; ex++) {
 			for (int ey = 0; ey < ny - 1; ey++) {
 				for (int ez = 0; ez < nz - 1; ez++) {
-					get_elem_mat(ex, ey, ez, Ae);
+					get_elem_mat3D(ex, ey, ez, Ae);
 					ell_add_struct3D(&A, ex, ey, ez, Ae, dim, nx, ny, nz);
 				}
 			}
@@ -363,7 +363,7 @@ void micropp_t::assembly_mat()
 	//  ell_print (&A);
 }
 
-void micropp_t::get_elem_mat(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
+void micropp_t::get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
 {
 
 	double nu, E;
@@ -442,7 +442,7 @@ void micropp_t::get_elem_mat(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
 	}			// gp loop
 }
 
-void micropp_t::get_elem_mat(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 8])
+void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 8])
 {
 	int e = glo_elem3D(ex, ey, ez);
 	material_t material;
@@ -512,7 +512,7 @@ void micropp_t::get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[6
 {
 	bool non_linear;
 	double stress_pert[6], strain_pert[6], strain_0[6], d_strain = 1.0e-8;
-	get_strain(ex, ey, ez, gp, strain_0);
+	get_strain3D(ex, ey, ez, gp, strain_0);
 
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++)
@@ -523,7 +523,7 @@ void micropp_t::get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[6
 		else
 			strain_pert[i] = d_strain;
 
-		get_stress(ex, ey, ez, gp, strain_pert, &non_linear, stress_pert);
+		get_stress3D(ex, ey, ez, gp, strain_pert, &non_linear, stress_pert);
 
 		for (int j = 0; j < 6; j++)
 			ctan[j][i] = stress_pert[j] / strain_pert[i];
@@ -535,7 +535,7 @@ void micropp_t::get_ctan_plast_exact(int ex, int ey, int ez, int gp, double ctan
 {
 	double strain[6];
 	int e = glo_elem3D(ex, ey, ez);
-	get_strain(ex, ey, ez, gp, strain);
+	get_strain3D(ex, ey, ez, gp, strain);
 
 	material_t material;
 	get_material(e, material);
@@ -572,15 +572,15 @@ void micropp_t::get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[
 {
 	bool non_linear;
 	double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 1.0e-8;
-	get_strain(ex, ey, ez, gp, strain_0);
-	get_stress(ex, ey, ez, gp, strain_0, &non_linear, stress_0);
+	get_strain3D(ex, ey, ez, gp, strain_0);
+	get_stress3D(ex, ey, ez, gp, strain_0, &non_linear, stress_0);
 
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++)
 			strain_pert[j] = strain_0[j];
 
 		strain_pert[i] += deps;
-		get_stress(ex, ey, ez, gp, strain_pert, &non_linear, stress_pert);
+		get_stress3D(ex, ey, ez, gp, strain_pert, &non_linear, stress_pert);
 
 		for (int j = 0; j < 6; j++)
 			ctan[j][i] = (stress_pert[j] - stress_0[j]) / deps;
@@ -590,7 +590,7 @@ void micropp_t::get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[
 void micropp_t::calc_bmat_3D(int gp, double bmat[6][3 * 8])
 {
 
-	double xg[8][3] = {
+	const double xg[8][3] = {
 		{-0.577350269189626, -0.577350269189626, -0.577350269189626},
 		{+0.577350269189626, -0.577350269189626, -0.577350269189626},
 		{+0.577350269189626, +0.577350269189626, -0.577350269189626},
@@ -651,7 +651,7 @@ void micropp_t::calc_bmat_3D(int gp, double bmat[6][3 * 8])
 
 }
 
-void micropp_t::get_elem_rhs(int ex, int ey, bool * non_linear, double (&be)[2 * 4])
+void micropp_t::get_elem_rhs2D(int ex, int ey, bool *non_linear, double (&be)[2 * 4])
 {
 	double dsh[4][2], bmat[3][2 * 4], cxb[3][8], stress_gp[6];
 	double xg[4][2] = {
@@ -685,8 +685,8 @@ void micropp_t::get_elem_rhs(int ex, int ey, bool * non_linear, double (&be)[2 *
 		}
 
 		double strain_gp[3];
-		get_strain(ex, ey, gp, strain_gp);
-		get_stress(ex, ey, gp, strain_gp, non_linear, stress_gp);
+		get_strain2D(ex, ey, gp, strain_gp);
+		get_stress2D(ex, ey, gp, strain_gp, non_linear, stress_gp);
 
 		double wg = 0.25 * dx * dy;
 		for (int i = 0; i < npe * dim; i++) {
@@ -698,7 +698,7 @@ void micropp_t::get_elem_rhs(int ex, int ey, bool * non_linear, double (&be)[2 *
 	}			// gp loop
 }
 
-void micropp_t::get_elem_rhs(int ex, int ey, int ez, bool * non_linear, double (&be)[3 * 8])
+void micropp_t::get_elem_rhs3D(int ex, int ey, int ez, bool * non_linear, double (&be)[3 * 8])
 {
 	double bmat[6][3 * 8], cxb[6][3 * 8], stress_gp[6];
 
@@ -710,8 +710,8 @@ void micropp_t::get_elem_rhs(int ex, int ey, int ez, bool * non_linear, double (
 		calc_bmat_3D(gp, bmat);
 
 		double strain_gp[6];
-		get_strain(ex, ey, ez, gp, strain_gp);
-		get_stress(ex, ey, ez, gp, strain_gp, non_linear, stress_gp);
+		get_strain3D(ex, ey, ez, gp, strain_gp);
+		get_stress3D(ex, ey, ez, gp, strain_gp, non_linear, stress_gp);
 
 		double wg = (1 / 8.0) * dx * dy * dz;
 		for (int i = 0; i < npe * dim; i++)
@@ -743,8 +743,8 @@ void micropp_t::calc_ave_stress(double stress_ave[6])
 					double wg = 0.25 * dx * dy;
 
 					double strain_gp[3];
-					get_strain(ex, ey, gp, strain_gp);
-					get_stress(ex, ey, gp, strain_gp, &non_linear_flag, stress_gp);
+					get_strain2D(ex, ey, gp, strain_gp);
+					get_stress2D(ex, ey, gp, strain_gp, &non_linear_flag, stress_gp);
 					for (int v = 0; v < nvoi; v++)
 						stress_aux[v] += stress_gp[v] * wg;
 
@@ -770,8 +770,8 @@ void micropp_t::calc_ave_stress(double stress_ave[6])
 						double wg = (1 / 8.0) * dx * dy * dz;
 
 						double strain_gp[6];
-						get_strain(ex, ey, ez, gp, strain_gp);
-						get_stress(ex, ey, ez, gp, strain_gp, &non_linear_flag, stress_gp);
+						get_strain3D(ex, ey, ez, gp, strain_gp);
+						get_stress3D(ex, ey, ez, gp, strain_gp, &non_linear_flag, stress_gp);
 						for (int v = 0; v < nvoi; v++)
 							stress_aux[v] += stress_gp[v] * wg;
 
@@ -804,7 +804,7 @@ void micropp_t::calc_ave_strain(double strain_ave[6])
 				for (int gp = 0; gp < 4; gp++) {
 					double strain_gp[6];
 					double wg = 0.25 * dx * dy;
-					get_strain(ex, ey, gp, strain_gp);
+					get_strain2D(ex, ey, gp, strain_gp);
 					for (int v = 0; v < nvoi; v++)
 						strain_aux[v] += strain_gp[v] * wg;
 				}
@@ -827,7 +827,7 @@ void micropp_t::calc_ave_strain(double strain_ave[6])
 					for (int gp = 0; gp < 8; gp++) {
 						double strain_gp[6];
 						double wg = (1 / 8.0) * dx * dy * dz;
-						get_strain(ex, ey, ez, gp, strain_gp);
+						get_strain3D(ex, ey, ez, gp, strain_gp);
 						for (int v = 0; v < nvoi; v++)
 							strain_aux[v] += strain_gp[v] * wg;
 					}
@@ -864,8 +864,8 @@ void micropp_t::calc_fields()
 					double stress_gp[3], strain_gp[3];
 					double wg = 0.25 * dx * dy;
 
-					get_strain(ex, ey, gp, strain_gp);
-					get_stress(ex, ey, gp, strain_gp, &non_linear_flag, stress_gp);
+					get_strain2D(ex, ey, gp, strain_gp);
+					get_stress2D(ex, ey, gp, strain_gp, &non_linear_flag, stress_gp);
 					for (int v = 0; v < nvoi; v++) {
 						strain_aux[v] += strain_gp[v] * wg;
 						stress_aux[v] += stress_gp[v] * wg;
@@ -899,8 +899,8 @@ void micropp_t::calc_fields()
 						double stress_gp[6], strain_gp[6];
 						double wg = (1 / 8.0) * dx * dy * dz;
 
-						get_strain(ex, ey, ez, gp, strain_gp);
-						get_stress(ex, ey, ez, gp, strain_gp, &non_linear_flag, stress_gp);
+						get_strain3D(ex, ey, ez, gp, strain_gp);
+						get_stress3D(ex, ey, ez, gp, strain_gp, &non_linear_flag, stress_gp);
 						for (int v = 0; v < nvoi; v++) {
 							strain_aux[v] += strain_gp[v] * wg;
 							stress_aux[v] += stress_gp[v] * wg;
@@ -921,7 +921,7 @@ void micropp_t::calc_fields()
 	}
 }
 
-void micropp_t::get_stress(int ex, int ey, int gp, double strain_gp[3], bool * non_linear, double *stress_gp)
+void micropp_t::get_stress2D(int ex, int ey, int gp, double strain_gp[3], bool * non_linear, double *stress_gp)
 {
 	*non_linear = false;
 
@@ -969,7 +969,8 @@ void micropp_t::get_dev_tensor(double tensor[6], double tensor_dev[6])
 
 }
 
-void micropp_t::get_stress(int ex, int ey, int ez, int gp, double eps[6], bool * non_linear, double *stress_gp)
+void micropp_t::get_stress3D(int ex, int ey, int ez, int gp, double eps[6],
+                             bool * non_linear, double *stress_gp)
 {
 	*non_linear = false;
 
@@ -984,7 +985,8 @@ void micropp_t::get_stress(int ex, int ey, int ez, int gp, double eps[6], bool *
 			eps_p_old[i] = vars_old[intvar_ix(e, gp, i)];
 		alpha_old = vars_old[intvar_ix(e, gp, 6)];
 
-		plastic_step(material, eps, eps_p_old, alpha_old, eps_p_new, &alpha_new, non_linear, stress_gp);
+		plastic_step(&material, eps, eps_p_old, alpha_old, eps_p_new,
+		             &alpha_new, non_linear, stress_gp);
 
 		for (int i = 0; i < 6; ++i)
 			vars_new[intvar_ix(e, gp, i)] = eps_p_new[i];
@@ -1002,7 +1004,10 @@ void micropp_t::get_stress(int ex, int ey, int ez, int gp, double eps[6], bool *
 
 }
 
-void micropp_t::plastic_step(material_t & material, double eps[6], double eps_p_old[6], double alpha_old, double eps_p_new[6], double *alpha_new, bool * non_linear, double stress[6])
+void micropp_t::plastic_step(material_t *material, double eps[6],
+                             double eps_p_old[6], double alpha_old,
+                             double eps_p_new[6], double *alpha_new,
+                             bool *non_linear, double stress[6])
 {
 	double eps_dev[6];
 	double eps_p_dev_1[6];
@@ -1014,14 +1019,19 @@ void micropp_t::plastic_step(material_t & material, double eps[6], double eps_p_
 	get_dev_tensor(eps, eps_dev);
 
 	for (int i = 0; i < 3; ++i)
-		sig_dev_trial[i] = 2 * material.mu * (eps_dev[i] - eps_p_dev_1[i]);
+		sig_dev_trial[i] = 2 * material->mu * (eps_dev[i] - eps_p_dev_1[i]);
+
 	for (int i = 3; i < 6; ++i)
-		sig_dev_trial[i] = material.mu * (eps_dev[i] - eps_p_dev_1[i]);
+		sig_dev_trial[i] = material->mu * (eps_dev[i] - eps_p_dev_1[i]);
 
 	sig_dev_trial_norm = sqrt(sig_dev_trial[0] * sig_dev_trial[0] +
-	                          sig_dev_trial[1] * sig_dev_trial[1] + sig_dev_trial[2] * sig_dev_trial[2] + 2 * sig_dev_trial[3] * sig_dev_trial[3] + 2 * sig_dev_trial[4] * sig_dev_trial[4] + 2 * sig_dev_trial[5] * sig_dev_trial[5]);
+	                          sig_dev_trial[1] * sig_dev_trial[1] +
+	                          sig_dev_trial[2] * sig_dev_trial[2] +
+	                          2 * sig_dev_trial[3] * sig_dev_trial[3] +
+	                          2 * sig_dev_trial[4] * sig_dev_trial[4] +
+	                          2 * sig_dev_trial[5] * sig_dev_trial[5]);
 
-	double f_trial = sig_dev_trial_norm - sqrt(2.0 / 3) * (material.Sy + material.Ka * alpha_old);
+	double f_trial = sig_dev_trial_norm - sqrt(2.0 / 3) * (material->Sy + material->Ka * alpha_old);
 
 	if (f_trial > 0) {
 		*non_linear = true;
@@ -1029,7 +1039,7 @@ void micropp_t::plastic_step(material_t & material, double eps[6], double eps_p_
 		for (int i = 0; i < 6; ++i)
 			normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
 
-		dl = f_trial / (2 * material.mu * (1.0 + (0.0 * material.Ka) / (3 * material.mu)));
+		dl = f_trial / (2 * material->mu * (1.0 + (0.0 * material->Ka) / (3 * material->mu)));
 
 		for (int i = 0; i < 6; ++i)
 			eps_p_new[i] = eps_p_old[i] + dl * normal[i];
@@ -1045,10 +1055,10 @@ void micropp_t::plastic_step(material_t & material, double eps[6], double eps_p_
 		stress[i] = sig_dev_trial[i];
 
 	for (int i = 0; i < 3; ++i)
-		stress[i] += material.k * (eps[0] + eps[1] + eps[2]);
+		stress[i] += material->k * (eps[0] + eps[1] + eps[2]);
 
 	for (int i = 0; i < 6; ++i)
-		stress[i] -= 2 * material.mu * dl * normal[i];
+		stress[i] -= 2 * material->mu * dl * normal[i];
 }
 
 void micropp_t::get_material(int e, material_t & material)
@@ -1076,7 +1086,7 @@ void micropp_t::get_material(int e, material_t & material)
 	material.plasticity = material_list[mat_num].plasticity;
 }
 
-void micropp_t::get_strain(int ex, int ey, int gp, double *strain_gp)
+void micropp_t::get_strain2D(int ex, int ey, int gp, double *strain_gp)
 {
 	double elem_disp[2 * 4];
 	getElemDisp(ex, ey, elem_disp);
@@ -1116,7 +1126,7 @@ void micropp_t::get_strain(int ex, int ey, int gp, double *strain_gp)
 
 }
 
-void micropp_t::get_strain(int ex, int ey, int ez, int gp, double *strain_gp)
+void micropp_t::get_strain3D(int ex, int ey, int ez, int gp, double *strain_gp)
 {
 
 	double elem_disp[3 * 8];
