@@ -30,23 +30,21 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
-	if (argc < 4) {
-		cerr << "Usage: " << argv[0] << " nx ny nz [steps]" << endl;
+	if (argc < 3) {
+		cerr << "Usage: " << argv[0] << " nx ny [steps]" << endl;
 		return(1);
 	}
 
 	const int dim = 2;
 	const int nx = atoi(argv[1]);
 	const int ny = atoi(argv[2]);
-	const int nz = atoi(argv[3]);
-	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
+	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);  // Optional value
 
-	assert(nx > 2 && ny > 2 && nz > 2);
+	assert(nx > 1 && ny > 1);
 
 	int size[3];
 	size[0] = nx;
 	size[1] = ny;
-	size[2] = nz;
 
 	int micro_type = 1; // 2 materiales matriz y fibra (3D esfera en matriz)
 	double micro_params[5];

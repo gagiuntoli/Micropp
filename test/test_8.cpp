@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	const int nz = atoi(argv[3]);
 	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
 
-	assert(nx > 2 && ny > 2 && nz > 2);
+	assert(nx > 1 && ny > 1 && nz > 1);
 
 	int size[dim] = {nx, ny, nz};
 

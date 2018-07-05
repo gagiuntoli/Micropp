@@ -21,7 +21,7 @@ endforeach ()
 
 # Add tests with no arguments.
 add_test(test_3 test_3)
-add_test(test_7 test_7)
 
 # Add a test that requires arguments
+add_test(NAME test_7 COMMAND test_8 5 5 5 10)
 add_test(NAME test_8 COMMAND test_8 5 5 5 10)
