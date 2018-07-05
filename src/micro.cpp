@@ -49,7 +49,8 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 	nelem(dim == 2 ? (nx - 1) * (ny - 1) : (nx - 1) * (ny - 1) * (nz - 1)),
 
 	micro_type(_micro_type),
-	num_int_vars(nelem * 8 * NUM_VAR_GP)
+	num_int_vars(nelem * 8 * NUM_VAR_GP),
+	output_files_header(false)
 {
 	assert(dim == 2 || dim == 3);
 
@@ -135,8 +136,6 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 	}
 
 	calc_ctan_lin();
-
-	output_files_header = false;
 
 	file.open("micropp_convergence.dat");
 	file.close();
