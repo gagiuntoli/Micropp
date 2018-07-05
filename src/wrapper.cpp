@@ -20,15 +20,15 @@
 
 #include <stdlib.h> 
 #include <iostream>
-#include "micro.h"
+#include "micro.hpp"
 
 using namespace std;
 
 static micropp_t* micro = NULL;
 
-extern "C"
-{
-	void micropp_construct_(int *dim, int size[3], int *micro_type, double *micro_params, int *mat_types, double *params)
+extern "C" {
+	void micropp_construct_(int *dim, int size[3], int *micro_type,
+	                        double *micro_params, int *mat_types, double *params)
 	{
 		micro = new micropp_t(*dim, size, *micro_type, micro_params, mat_types, params); 
 	}
@@ -72,4 +72,4 @@ extern "C"
 	{
 		micro->write_info_files ();
 	}
-} 
+}
