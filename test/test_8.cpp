@@ -22,56 +22,62 @@
 #include <iomanip>
 
 #include <ctime>
+#include <cassert>
 
 #include "micro.hpp"
 
 using namespace std;
 
-int main(int argc, char *argv[])
-{
-	int dim = 3;
-	int nx = 5;
-	int ny = 5;
-	int nz = 5;
+#define dim 3
+#define nmaterials 2
 
-	int size[3];
-	size[0] = nx;
-	size[1] = ny;
-	size[2] = nz;
+int main(int argc, char **argv)
+{
+
+	if (argc < 4) {
+		cerr << "Usage: " << argv[0] << " nx ny nz [steps]" << endl;
+		return(1);
+	}
+
+	const int nx = atoi(argv[1]);
+	const int ny = atoi(argv[2]);
+	const int nz = atoi(argv[3]);
+	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
+
+	assert(nx > 2 && ny > 2 && nz > 2);
+
+	int size[dim] = {nx, ny, nz};
 
 	int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
-	double micro_params[5];
-	micro_params[0] = 1.0;	// lx
-	micro_params[1] = 1.0;	// ly
-	micro_params[2] = 1.0;	// lz
-	micro_params[3] = 0.1;	// grosor capa de abajo
-	micro_params[4] = 1.0e-5;	// INV_MAX
 
-	int mat_types[2];	// dos materiales lineales (type = 0)
-	mat_types[0] = 1;
-	mat_types[1] = 0;
+	double micro_params[5] = {1.0,		// lx
+	                          1.0,		// ly
+	                          1.0,		// lz
+	                          0.1,		// Layer width
+	                          1.0e-5};	// INV_MAX
 
-	double mat_params[2 * MAX_MAT_PARAM];
-	mat_params[0 * MAX_MAT_PARAM + 0] = 1.0e6;	// E
-	mat_params[0 * MAX_MAT_PARAM + 1] = 0.3;	// nu
-	mat_params[0 * MAX_MAT_PARAM + 2] = 5.0e4;	// Sy
-	mat_params[0 * MAX_MAT_PARAM + 3] = 5.0e4;	// Ka
 
-	mat_params[1 * MAX_MAT_PARAM + 0] = 1.0e6;
-	mat_params[1 * MAX_MAT_PARAM + 1] = 0.3;
-	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
-	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
+	int mat_types[nmaterials] = {1, 0};	// dos materiales lineales (type = 0)
 
-	micropp_t micro(dim, size, micro_type, micro_params, mat_types,
-			mat_params);
+	double mat_params[nmaterials * MAX_MAT_PARAM] =	{
+		// Material 0
+		1.0e6,	// E
+		0.3,	// nu
+		5.0e4,	// Sy
+		5.0e4,	// Ka
+		// Material 1
+		1.0e6,
+		0.3,
+		1.0e4,
+		0.0e-1 };
 
+	micropp_t micro(dim, size, micro_type, micro_params, mat_types, mat_params);
+
+	int dir = 2, ngp = 2;
 	double d_eps = 0.01;
-	int dir = 2;
-	int ngp = 2;
 	double eps[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	double sig[6];
 
-	int time_steps = 10;
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;
 		if (t < 30)
@@ -97,15 +103,15 @@ int main(int argc, char *argv[])
 		}
 
 		double MacroStress[6], MacroCtan[36];
-		cout << "homogenizing ..." << endl;
+		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
-		cout << "getting stresses ..." << endl;
 
+		cout << "Getting stresses ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.get_macro_stress(gp, sig);
 			cout << "gp = " << gp << " sig = ";
-			cout << scientific;
 
+			cout << scientific;
 			for (int i = 0; i < 6; ++i)
 				cout << setw(14) << sig[i] << " ";
 			cout << endl;
