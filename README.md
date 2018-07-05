@@ -62,3 +62,25 @@ Optimized version
 ```bash
 make lib OPT=1
 ```
+
+Build steps with CMake:
+-----------------------
+
+1. Clone the repository 
+2. cd cloned directory
+3. mkdir build (can be also build+anything)
+4. cd build
+5. cmake .. (important the 2 points)
+6. make
+
+This will build the examples and the library in debug mode. CMake does not touch
+the original sources and you can have many build directories with different
+options if you want.
+
+To build the optimized version proceed like before but change step 5 for:
+
+cmake -DCMAKE\_BUILD\_TYPE=Release ..
+
+Other possible options are: Debug, Release, RelWithDebInfo, MinSizeRel. Read CMake documentation for more information.
+
+
