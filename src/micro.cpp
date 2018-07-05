@@ -22,7 +22,8 @@
 #include <iostream>
 #include "micro.hpp"
 
-micropp_t::micropp_t(int dim, int size[3], int micro_type, double *micro_params, int *mat_types, double *params)
+micropp_t::micropp_t(const int dim, const int size[3], const int micro_type, const double *micro_params,
+		          const int *mat_types, const double *params)
 {
 	this->micro_type = micro_type;
 
