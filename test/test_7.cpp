@@ -22,6 +22,7 @@
 #include <iomanip>
 
 #include <ctime>
+#include <cassert>
 
 #include "micro.hpp"
 
@@ -29,10 +30,16 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
-	int dim = 3;
-	int nx = 10;
-	int ny = 10;
-	int nz = 10;
+	const int dim = 3;
+	if (argc < 4) {
+		cerr << "Usage: " << argv[0] << " nx ny nz [steps]" << endl;
+		return(1);
+	}
+
+	const int nx = atoi(argv[1]);
+	const int ny = atoi(argv[2]);
+	const int nz = atoi(argv[3]);
+	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
 
 	int size[3];
 	size[0] = nx;
@@ -64,7 +71,6 @@ int main (int argc, char *argv[])
 
 	micropp_t micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
-	int time_steps = 80;
 	double MacroStress[6], MacroCtan[36];
 	double d_eps = 0.01;
 	int dir = 2;
