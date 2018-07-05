@@ -12,7 +12,7 @@ foreach (testfile ${testsources})
 
   # Create the executable test_i and link.
   add_executable(${testname} ${testfile})
-  target_link_libraries(${testname} microcpp)
+  target_link_libraries(${testname} micropp)
 endforeach ()
 
 # As some tests will require commands and could be executed in loops we add the
