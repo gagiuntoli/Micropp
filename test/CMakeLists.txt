@@ -1,18 +1,26 @@
 
-# The test files I care only
+# The test files I care only (create a list)
 set(testsources
   test_7.cpp
   test_8.cpp
   test_3.f90)
 
+# Iterate over the list above
 foreach (testfile ${testsources})
-  # Parsing path and filename
-  get_filename_component(testname ${testfile} NAME_WE)  # delete extension
+  # Delete File extensions (test_i.cpp -> test_i)
+  get_filename_component(testname ${testfile} NAME_WE)
 
-  # Create the executable and link
+  # Create the executable test_i and link.
   add_executable(${testname} ${testfile})
   target_link_libraries(${testname} microcpp)
-
-  # Add a test with no arguments
-  add_test(${testname} ${testname})
 endforeach ()
+
+# As some tests will require commands and could be executed in loops we add the
+# tests individually here.
+
+# Add tests with no arguments.
+add_test(test_3 test_3)
+add_test(test_7 test_7)
+
+# Add a test that requires arguments
+add_test(NAME test_8 COMMAND test_8 5 5 5 10)
