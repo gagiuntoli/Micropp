@@ -1,6 +1,7 @@
 
 # The test files I care only (create a list)
 set(testsources
+  test2d_1.cpp
   test_7.cpp
   test_8.cpp
   test_3.f90)
