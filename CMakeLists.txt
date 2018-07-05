@@ -6,6 +6,9 @@ project(MicroCpp VERSION 0.1
   DESCRIPTION "Description here!!"
   LANGUAGES C CXX Fortran)
 
+# Use C++11
+set(CMAKE_CXX_STANDARD 11)
+
 # Include Directories (for all targets)
 include_directories(include)
 

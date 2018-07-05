@@ -18,6 +18,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+#include <cassert>
+
 #include "micro.hpp"
 
 void micropp_t::calc_ctan_lin()
@@ -61,16 +64,27 @@ bool micropp_t::is_linear(const double *macro_strain)
 
 double micropp_t::get_inv_1(const double *tensor)
 {
+	assert(dim == 2 || dim == 3);
+
 	if (dim == 2)
 		return tensor[0] + tensor[1];
-	if (dim == 3)
+	else if (dim == 3)
 		return tensor[0] + tensor[1] + tensor[2];
+
+	return NAN;
 }
 
 double micropp_t::get_inv_2(const double *tensor)
 {
 	if (dim == 3)
-		return tensor[0] * tensor[1] + tensor[0] * tensor[2] + tensor[1] * tensor[2] + tensor[3] * tensor[3] + tensor[4] * tensor[4] + tensor[5] * tensor[5];
+		return tensor[0] * tensor[1] +
+			tensor[0] * tensor[2] +
+			tensor[1] * tensor[2] +
+			tensor[3] * tensor[3] +
+			tensor[4] * tensor[4] +
+			tensor[5] * tensor[5];
+
+	return NAN;
 }
 
 void micropp_t::set_macro_strain(const int gp_id, const double *macro_strain)
