@@ -68,11 +68,11 @@ class micropp_t {
 	private:
 		const int dim;
 		const int nx, ny, nz, nn;
-		const double lx, ly, lz, dx, dy, dz, width;
+		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
 		const int npe, nvoi, nelem;
-		int size_tot;
-
 		const int micro_type, num_int_vars;
+
+		bool output_files_header;
 
 		double micro_params[5];
 		int numMaterials;
@@ -92,8 +92,7 @@ class micropp_t {
 		double * vars_old;
 		double * vars_new;
 
-		double inv_tol, inv_max;
-		bool output_files_header;
+		double inv_max;
 
 	public:
 		micropp_t(const int dim, const int size[3], const int micro_type, const double *micro_params,
