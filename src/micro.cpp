@@ -31,7 +31,8 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 
 	lx(_micro_params[0]),
 	ly(_micro_params[1]),
-	lz(_micro_params[2]),
+	lz(dim == 2 ? 0.0 : _micro_params[2]),
+	width(_micro_params[3]),
 
 	inv_tol(micro_params[4]),
 	nx(size[0]),
@@ -53,14 +54,14 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 	assert(dim == 2 || dim == 3);
 
 
-	b = (double *)malloc(nn * dim * sizeof(double));
-	du = (double *)malloc(nn * dim * sizeof(double));
-	u = (double *)malloc(nn * dim * sizeof(double));
-	elem_stress = (double *)malloc(nelem * nvoi * sizeof(double));
-	elem_strain = (double *)malloc(nelem * nvoi * sizeof(double));
-	elem_type = (int *)malloc(nelem * sizeof(int));
-	vars_old = (double *)malloc(num_int_vars * sizeof(double));
-	vars_new = (double *)malloc(num_int_vars * sizeof(double));
+	b = (double *) malloc(nn * dim * sizeof(double));
+	du = (double *) malloc(nn * dim * sizeof(double));
+	u = (double *) malloc(nn * dim * sizeof(double));
+	elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
+	elem_strain = (double *) malloc(nelem * nvoi * sizeof(double));
+	elem_type = (int *) malloc(nelem * sizeof(int));
+	vars_old = (double *) malloc(num_int_vars * sizeof(double));
+	vars_new = (double *) malloc(num_int_vars * sizeof(double));
 
 	assert( b && du && u && elem_stress && elem_strain &&
 	        elem_type && vars_old && vars_new );
@@ -117,7 +118,7 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 		for (int ex = 0; ex < nx - 1; ex++) {
 			for (int ey = 0; ey < ny - 1; ey++) {
 				int e = glo_elem3D(ex, ey, 0);
-				elem_type[e] = get_elem_type(ex, ey);
+				elem_type[e] = get_elem_type2D(ex, ey);
 			}
 		}
 		ell_init_2D(&A, dim, nx, ny);
@@ -126,7 +127,7 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 			for (int ey = 0; ey < ny - 1; ey++) {
 				for (int ez = 0; ez < nz - 1; ez++) {
 					int e = glo_elem3D(ex, ey, ez);
-					elem_type[e] = get_elem_type(ex, ey, ez);
+					elem_type[e] = get_elem_type3D(ex, ey, ez);
 				}
 			}
 		}
@@ -174,7 +175,7 @@ void micropp_t::get_nl_flag(int gp_id, int *non_linear)
 		}
 }
 
-int micropp_t::get_elem_type(int ex, int ey)
+int micropp_t::get_elem_type2D(int ex, int ey)
 {
 	assert(micro_type == 0 || micro_type == 1);
 
@@ -185,19 +186,19 @@ int micropp_t::get_elem_type(int ex, int ey)
 		double x2 = lx / 2;
 		double y2 = ly / 2;
 		double rad = micro_params[3];
-		return ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) < rad * rad);
+		return ((x2 - x1) * (x2 - x1) +
+		        (y2 - y1) * (y2 - y1) < width * width);
 
 	} else if (micro_type == 1) {
-		double y = ey * dy + dy / 2;
-		double espesor = micro_params[3];
-		return (y < espesor);
+		const double y = ey * dy + dy / 2;
+		return (y < width);
 	}
 
 	cerr << "Invalid micro_type = " << micro_type << endl;
 	return -1;
 }
 
-int micropp_t::get_elem_type(int ex, int ey, int ez)
+int micropp_t::get_elem_type3D(int ex, int ey, int ez)
 {
 	assert(micro_type == 0 || micro_type == 1);
 
@@ -212,12 +213,11 @@ int micropp_t::get_elem_type(int ex, int ey, int ez)
 		double rad = micro_params[3];
 		return ((x2 - x1) * (x2 - x1) +
 		        (y2 - y1) * (y2 - y1) +
-		        (z2 - z1) * (z2 - z1) < rad * rad);
+		        (z2 - z1) * (z2 - z1) < width * width);
 
 	} else if (micro_type == 1) {
-		double y = ey * dy + dy / 2;
-		double espesor = micro_params[3];
-		return (y < espesor);
+		const double y = ey * dy + dy / 2;
+		return (y < width);
 	}
 
 	cerr << "Invalid micro_type = " << micro_type << endl;
