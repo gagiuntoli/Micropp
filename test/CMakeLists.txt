@@ -7,7 +7,7 @@ set(testsources
 
 foreach (testfile ${testsources})
   # Parsing path and filename
-  get_filename_component(testname ${testfile} NAME)  # delete extension
+  get_filename_component(testname ${testfile} NAME_WE)  # delete extension
 
   # Create the executable and link
   add_executable(${testname} ${testfile})

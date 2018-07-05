@@ -190,19 +190,14 @@ int micropp_t::get_elem_type(int ex, int ey)
 		double x2 = lx / 2;
 		double y2 = ly / 2;
 		double rad = micro_params[3];
-		if ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) < rad * rad)
-			return 1;
-		else
-			return 0;
+		return ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) < rad * rad);
 
 	} else if (micro_type == 1) {
 		double y = ey * dy + dy / 2;
 		double espesor = micro_params[3];
-		if (y < espesor)
-			return 1;
-		else
-			return 0;
+		return (y < espesor);
 	}
+	return 0;
 }
 
 int micropp_t::get_elem_type(int ex, int ey, int ez)
@@ -216,17 +211,15 @@ int micropp_t::get_elem_type(int ex, int ey, int ez)
 		double y2 = ly / 2;
 		double z2 = lz / 2;
 		double rad = micro_params[3];
-		if ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1) < rad * rad)
-			return 1;
-		else
-			return 0;
+		return ((x2 - x1) * (x2 - x1) +
+		        (y2 - y1) * (y2 - y1) +
+		        (z2 - z1) * (z2 - z1) < rad * rad);
 
 	} else if (micro_type == 1) {
 		double y = ey * dy + dy / 2;
 		double espesor = micro_params[3];
-		if (y < espesor)
-			return 1;
-		else
-			return 0;
+		return (y < espesor);
 	}
+
+	return 0;
 }
