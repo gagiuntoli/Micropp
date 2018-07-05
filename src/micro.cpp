@@ -138,9 +138,9 @@ micropp_t::micropp_t(const int dim, const int size[3], const int micro_type, con
 	}
 
 	if (dim == 2)
-		ell_init_2D(A, dim, nx, ny);
+		ell_init_2D(&A, dim, nx, ny);
 	else if (dim == 3)
-		ell_init_3D(A, dim, nx, ny, nz);
+		ell_init_3D(&A, dim, nx, ny, nz);
 
 	calc_ctan_lin();
 
@@ -156,7 +156,7 @@ micropp_t::micropp_t(const int dim, const int size[3], const int micro_type, con
 
 micropp_t::~micropp_t()
 {
-	ell_free(A);
+	ell_free(&A);
 	free(b);
 	free(du);
 	free(u);
