@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(MicroCpp VERSION 0.1
+project(MicroPP VERSION 0.1
   LANGUAGES C CXX Fortran)
 
 # Use C++11
@@ -21,7 +21,7 @@ include_directories(include)
 file(GLOB SOURCESLIB src/*.cpp)
 
 # Library
-add_library(microcpp ${SOURCESLIB})
+add_library(micropp ${SOURCESLIB})
 
 # Enable auto create tests
 enable_testing()
