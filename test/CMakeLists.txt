@@ -2,9 +2,9 @@
 # The test files I care only (create a list)
 set(testsources
   test2d_1.cpp
-  test_7.cpp
-  test_8.cpp
-  test_3.f90)
+  test3d_7.cpp
+  test3d_8.cpp
+  test3d_3.f90)
 
 # Iterate over the list above
 foreach (testfile ${testsources})
@@ -20,8 +20,9 @@ endforeach ()
 # tests individually here.
 
 # Add tests with no arguments.
-add_test(test_3 test_3)
+add_test(test3d_3 test3d_3)
 
 # Add a test that requires arguments
-add_test(NAME test_7 COMMAND test_8 5 5 5 10)
-add_test(NAME test_8 COMMAND test_8 5 5 5 10)
+add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
+add_test(NAME test3d_7 COMMAND test3d_7 5 5 5 10)
+add_test(NAME test3d_8 COMMAND test3d_8 5 5 5 10)
