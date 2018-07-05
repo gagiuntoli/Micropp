@@ -68,7 +68,7 @@ class micropp_t {
 	private:
 		const int dim;
 		const int nx, ny, nz, nn;
-		const double lx, ly, lz, dx, dy, dz;
+		const double lx, ly, lz, dx, dy, dz, width;
 		const int npe, nvoi, nelem;
 		int size_tot;
 
@@ -118,13 +118,13 @@ class micropp_t {
 		void set_displ(double *eps);
 		double assembly_rhs(bool *nl_flag);
 
-		void get_elem_rhs(int ex, int ey, bool *nl_flag, double (&be)[2 * 4]);
-		void get_elem_rhs(int ex, int ey, int ez, bool *nl_flag, double (&be)[3 * 8]);
+		void get_elem_rhs2D(int ex, int ey, bool *nl_flag, double (&be)[2 * 4]);
+		void get_elem_rhs3D(int ex, int ey, int ez, bool *nl_flag, double (&be)[3 * 8]);
 
 		void assembly_mat();
 
-		void get_elem_mat(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 8]);
-		void get_elem_mat(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4]);
+		void get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4]);
+		void get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 8]);
 
 		void solve();
 		void newton_raphson(bool *nl_flag, int *its, double *err);
@@ -133,24 +133,24 @@ class micropp_t {
 		void get_ctan_plast_exact(int ex, int ey, int ez, int gp, double ctan[6][6]);
 		void get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[6][6]);
 
-		void get_strain(int ex, int ey, int gp, double *strain_gp);
-		void get_strain(int ex, int ey, int ez, int gp, double *strain_gp);
+		void get_strain2D(int ex, int ey, int gp, double *strain_gp);
+		void get_strain3D(int ex, int ey, int ez, int gp, double *strain_gp);
 
-		void get_stress(int ex, int ey, int gp, double strain_gp[3],
-		                bool *nl_flag, double *stress_gp);
+		void get_stress2D(int ex, int ey, int gp, double strain_gp[3],
+		                  bool *nl_flag, double *stress_gp);
 
-		void get_stress(int ex, int ey, int ez, int gp, double strain_gp[3],
-		                bool *nl_flag, double *stress_gp);
+		void get_stress3D(int ex, int ey, int ez, int gp, double strain_gp[3],
+		                  bool *nl_flag, double *stress_gp);
 
 		void get_dev_tensor(double tensor[6], double tensor_dev[6]);
-		void plastic_step(material_t &material, double eps[6], double eps_p_1[6], double alpha_1,
+		void plastic_step(material_t *material, double eps[6], double eps_p_1[6], double alpha_1,
 		                  double eps_p[6], double *alpha, bool *nl_flag, double stress[6]);
 
 		void getElemDisp(int ex, int ey, double *elem_disp);
 		void getElemDisp(int ex, int ey, int ez, double *elem_disp);
 
-		int get_elem_type(int ex, int ey);
-		int get_elem_type(int ex, int ey, int ez);
+		int get_elem_type2D(int ex, int ey);
+		int get_elem_type3D(int ex, int ey, int ez);
 
 		void get_material(int e, material_t &material);
 
