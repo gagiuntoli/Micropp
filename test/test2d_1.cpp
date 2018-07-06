@@ -101,8 +101,7 @@ int main (int argc, char *argv[])
 		cout << "eps = " << eps[dir] << endl;
 		cout
 			<< "MacroStress = "
-			<< MacroStress[0] << " " << MacroStress[1] << " " << MacroStress[2] << " "
-			<< MacroStress[3] << " " << MacroStress[4] << " " << MacroStress[5]
+			<< MacroStress[0] << " " << MacroStress[1] << " " << MacroStress[2]
 			<< endl;
 
 		cout << endl;
