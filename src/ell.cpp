@@ -334,26 +334,26 @@ void ell_add_struct2D(ell_matrix *m, int ex, int ey, double *Ae,
 
 	const int npe = 4;
 	const int nnz = m->nnz;
-	int cols_row_0[4] = { 4, 5, 8, 7 };
-	int cols_row_1[4] = { 3, 4, 7, 6 };
-	int cols_row_2[4] = { 0, 1, 4, 3 };
-	int cols_row_3[4] = { 1, 2, 5, 4 };
+	const int cols_row[4][4] = { { 4, 5, 8, 7 },
+	                             { 3, 4, 7, 6 },
+	                             { 0, 1, 4, 3 },
+	                             { 1, 2, 5, 4 } };
 
-	int n0 = ey * nx + ex;
-	int n1 = ey * nx + ex + 1;
-	int n2 = (ey + 1) * nx + ex + 1;
-	int n3 = (ey + 1) * nx + ex;
+	const int sn[4] = { ey * nx + ex,
+	                   ey * nx + ex + 1,
+	                   (ey + 1) * nx + ex + 1,
+	                   (ey + 1) * nx + ex };
 
-	for (int i = 0; i < nFields; i++) {
-		for (int n = 0; n < npe; n++) {
-			for (int j = 0; j < nFields; j++) {
-				m->vals[n0 * nFields * nnz + i * nnz + cols_row_0[n] * nFields + j] += Ae[0 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n1 * nFields * nnz + i * nnz + cols_row_1[n] * nFields + j] += Ae[1 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n2 * nFields * nnz + i * nnz + cols_row_2[n] * nFields + j] += Ae[2 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n3 * nFields * nnz + i * nnz + cols_row_3[n] * nFields + j] += Ae[3 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-			}
-		}
-	}
+	const int npenFields = npe * nFields;
+	const int npenFields2 = npe * nFields * nFields;
+	const int nFieldsnnz = npe * nFields * nFields;
+
+	for (int i = 0; i < nFields; ++i)
+		for (int n = 0; n < npe; ++n)
+			for (int k = 0; k < 4; ++k)
+				for (int j = 0; j < nFields; ++j)
+					m->vals[sn[k] * nFieldsnnz + i * nnz + cols_row[k][n] * nFields + j]
+						+= Ae[k * npenFields2 + i * npenFields + n * nFields + j];
 
 }
 
@@ -366,39 +366,36 @@ void ell_add_struct3D(ell_matrix *m, int ex, int ey, int ez, double *Ae,
 	const int npe = 8;
 
 	const int nnz = m->nnz;
-	const int cols_row_0[8] = { 13, 14, 17, 16, 22, 23, 26, 25 };
-	const int cols_row_1[8] = { 12, 13, 16, 15, 21, 22, 25, 24 };
-	const int cols_row_2[8] = { 9, 10, 13, 12, 18, 19, 22, 21 };
-	const int cols_row_3[8] = { 10, 11, 14, 13, 19, 20, 23, 22 };
-	const int cols_row_4[8] = { 4, 5, 8, 7, 13, 14, 17, 16 };
-	const int cols_row_5[8] = { 3, 4, 7, 6, 12, 13, 16, 15 };
-	const int cols_row_6[8] = { 0, 1, 4, 3, 9, 10, 13, 12 };
-	const int cols_row_7[8] = { 1, 2, 5, 4, 10, 11, 14, 13 };
+	const int cols_row[8][8] = { { 13, 14, 17, 16, 22, 23, 26, 25 },
+	                             { 12, 13, 16, 15, 21, 22, 25, 24 },
+	                             { 9, 10, 13, 12, 18, 19, 22, 21 },
+	                             { 10, 11, 14, 13, 19, 20, 23, 22 },
+	                             { 4, 5, 8, 7, 13, 14, 17, 16 },
+	                             { 3, 4, 7, 6, 12, 13, 16, 15 },
+	                             { 0, 1, 4, 3, 9, 10, 13, 12 },
+	                             { 1, 2, 5, 4, 10, 11, 14, 13 } };
 
 	const int n0 = ez * (nx * ny) + ey * nx + ex;
 	const int n1 = ez * (nx * ny) + ey * nx + ex + 1;
 	const int n2 = ez * (nx * ny) + (ey + 1) * nx + ex + 1;
 	const int n3 = ez * (nx * ny) + (ey + 1) * nx + ex;
-	const int n4 = n0 + nx * ny;
-	const int n5 = n1 + nx * ny;
-	const int n6 = n2 + nx * ny;
-	const int n7 = n3 + nx * ny;
 
-	for (int i = 0; i < nFields; i++) {
-		for (int n = 0; n < npe; n++) {
-			for (int j = 0; j < nFields; j++) {
-				m->vals[n0 * nFields * nnz + i * nnz + cols_row_0[n] * nFields + j] += Ae[0 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n1 * nFields * nnz + i * nnz + cols_row_1[n] * nFields + j] += Ae[1 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n2 * nFields * nnz + i * nnz + cols_row_2[n] * nFields + j] += Ae[2 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n3 * nFields * nnz + i * nnz + cols_row_3[n] * nFields + j] += Ae[3 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n4 * nFields * nnz + i * nnz + cols_row_4[n] * nFields + j] += Ae[4 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n5 * nFields * nnz + i * nnz + cols_row_5[n] * nFields + j] += Ae[5 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n6 * nFields * nnz + i * nnz + cols_row_6[n] * nFields + j] += Ae[6 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-				m->vals[n7 * nFields * nnz + i * nnz + cols_row_7[n] * nFields + j] += Ae[7 * (npe * nFields) * nFields + i * (npe * nFields) + n * nFields + j];
-			}
-		}
-	}
+	const int sn[8] = {	n0, n1, n2, n3,
+		n0 + nx * ny,
+		n1 + nx * ny,
+		n2 + nx * ny,
+		n3 + nx * ny };
 
+	const int nFieldsnnz = nFields * nnz;
+	const int npenFields = npe * nFields;
+	const int npenFields2 = npe * nFields * nFields;
+
+	for (int i = 0; i < nFields; ++i)
+		for (int n = 0; n < npe; ++n)
+			for (int k = 0; k < 8; ++k)
+				for (int j = 0; j < nFields; ++j)
+					m->vals[sn[k] * nFieldsnnz + i * nnz + cols_row[k][n] * nFields + j]
+						+= Ae[k * npenFields2 + i * npenFields + n * nFields + j];
 }
 
 void ell_set_bc_2D(ell_matrix *m, int nFields, int nx, int ny)
@@ -639,17 +636,9 @@ void ell_set_bc_3D(ell_matrix *m, int nFields, int nx, int ny, int nz)
 			for (int i = 1; i < nx - 1; i++) {
 				for (int j = 1; j < ny - 1; j++) {
 					n = nod_index(i, j, 1);
-					for (int d2 = 0; d2 < nFields; d2++) {
-						mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 1 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 3 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 4 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 5 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 7 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
-					}
+					for (int l = 0; l < 9; ++l)
+						for (int d2 = 0; d2 < nFields; d2++)
+							mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 				}
 			}
 		}
@@ -660,100 +649,65 @@ void ell_set_bc_3D(ell_matrix *m, int nFields, int nx, int ny, int nz)
 			for (int i = 1; i < nx - 1; i++) {
 				for (int j = 1; j < ny - 1; j++) {
 					n = nod_index(i, j, nz - 2);
-					for (int d2 = 0; d2 < nFields; d2++) {
-						mvals[n * nFields * nnz + d1 * nnz + 18 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 19 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 20 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 21 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 22 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 23 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 24 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 25 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 26 * nFields + d2] = 0;
-					}
+					for (int l = 18; l < 27; ++l)
+						for (int d2 = 0; d2 < nFields; d2++)
+							mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 				}
 			}
 		}
 	}
 	// y= 0 + dy
 	if (ny > 2) {
+		const int tmp[] = { 0, 1, 2, 9, 10, 11, 18, 19, 20 };
 		for (int d1 = 0; d1 < nFields; d1++) {
 			for (int i = 1; i < nx - 1; i++) {
 				for (int k = 1; k < nz - 1; k++) {
 					n = nod_index(i, 1, k);
-					for (int d2 = 0; d2 < nFields; d2++) {
-						mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 1 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 9 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 10 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 11 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 18 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 19 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 20 * nFields + d2] = 0;
-					}
+					for (auto l : tmp)
+						for (int d2 = 0; d2 < nFields; d2++)
+							mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 				}
 			}
 		}
 	}
 	// y= ly - dy
-	for (int d1 = 0; d1 < nFields; d1++) {
-		for (int i = 1; i < nx - 1; i++) {
-			for (int k = 1; k < nz - 1; k++) {
-				n = nod_index(i, ny - 2, k);
-				for (int d2 = 0; d2 < nFields; d2++) {
-					mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 7 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 15 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 16 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 17 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 24 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 25 * nFields + d2] = 0;
-					mvals[n * nFields * nnz + d1 * nnz + 26 * nFields + d2] = 0;
+	{
+		const int tmp[] = { 6, 7, 8, 15, 16, 17, 24, 25, 26 };
+		for (int d1 = 0; d1 < nFields; d1++) {
+			for (int i = 1; i < nx - 1; i++) {
+				for (int k = 1; k < nz - 1; k++) {
+					n = nod_index(i, ny - 2, k);
+					for (auto l : tmp)
+						for (int d2 = 0; d2 < nFields; d2++)
+							mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 				}
 			}
 		}
 	}
-
 	// x= 0 + dy
 	if (nx > 2) {
+		const int tmp[] = { 0, 3, 6, 9, 12, 15, 18, 21, 24 };
 		for (int d1 = 0; d1 < nFields; d1++) {
 			for (int j = 1; j < ny - 1; j++) {
 				for (int k = 1; k < nz - 1; k++) {
 					n = nod_index(1, j, k);
-					for (int d2 = 0; d2 < nFields; d2++) {
-						mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 3 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 9 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 12 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 15 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 18 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 21 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 24 * nFields + d2] = 0;
-					}
+					for (auto l : tmp)
+						for (int d2 = 0; d2 < nFields; ++d2)
+							mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 				}
 			}
 		}
 	}
 	// x= lx - dx
 	if (nx > 2) {
+		const int tmp[] = { 2, 5, 8, 11, 14, 17, 20, 23, 26 };
 		for (int d1 = 0; d1 < nFields; d1++) {
 			for (int j = 1; j < ny - 1; j++) {
 				for (int k = 1; k < nz - 1; k++) {
 					n = nod_index(nx - 2, j, k);
-					for (int d2 = 0; d2 < nFields; d2++) {
-						mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 5 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 11 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 14 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 17 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 20 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 23 * nFields + d2] = 0;
-						mvals[n * nFields * nnz + d1 * nnz + 26 * nFields + d2] = 0;
-					}
+					for (auto l : tmp )
+						for (int d2 = 0; d2 < nFields; d2++)
+							mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 				}
 			}
 		}
