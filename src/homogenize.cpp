@@ -133,7 +133,7 @@ void micropp_t::homogenize()
 {
 	for (auto & gp:gauss_list) {
 
-		if (gp.int_vars_n == NULL)
+		if (!gp.int_vars_n)
 			for (int i = 0; i < num_int_vars; ++i)
 				vars_old[i] = 0.0;
 		else
