@@ -448,11 +448,9 @@ void ell_set_bc_2D(ell_matrix *m, int nFields, int nx, int ny)
 	for (int d1 = 0; d1 < nFields; d1++) {
 		int n = nx + 2;
 		for (int i = 0; i < nx - 4; i++) {
-			for (int d2 = 0; d2 < nFields; d2++) {
-				mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 1 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-			}
+			for (int l = 0; l < 3; ++l)
+				for (int d2 = 0; d2 < nFields; d2++) 
+					mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 			n += 1;
 		}
 	}
@@ -461,86 +459,77 @@ void ell_set_bc_2D(ell_matrix *m, int nFields, int nx, int ny)
 	for (int d1 = 0; d1 < nFields; d1++) {
 		int n = (ny - 2) * nx + 2;
 		for (int i = 0; i < nx - 4; i++) {
-			for (int d2 = 0; d2 < nFields; d2++) {
-				mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 7 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
-			}
+			for (int l = 6; l < 9; ++l)
+				for (int d2 = 0; d2 < nFields; d2++)
+					mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
 			n += 1;
 		}
 	}
 
-	// x = hx
-	for (int d1 = 0; d1 < nFields; d1++) {
-		int n = 2 * nx + 1;
-		for (int i = 0; i < ny - 4; i++) {
-			for (int d2 = 0; d2 < nFields; d2++) {
-				mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 3 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
+	{ 	// x = hx
+		const int tmp[] = { 0, 3, 6 };
+		for (int d1 = 0; d1 < nFields; d1++) {
+			int n = 2 * nx + 1;
+			for (int i = 0; i < ny - 4; i++) {
+				for (auto l : tmp)
+					for (int d2 = 0; d2 < nFields; ++d2)
+						mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
+				n += nx;
 			}
-			n += nx;
 		}
 	}
 
-	// x = lx - hx
-	for (int d1 = 0; d1 < nFields; d1++) {
-		int n = 4 * nx - 1;
-		for (int i = 0; i < ny - 4; i++) {
-			for (int d2 = 0; d2 < nFields; d2++) {
-				mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 5 * nFields + d2] = 0;
-				mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
+	{ // x = lx - hx
+		const int tmp[] = { 2, 5, 8 };
+		for (int d1 = 0; d1 < nFields; d1++) {
+			int n = 4 * nx - 1;
+			for (int i = 0; i < ny - 4; i++) {
+				for (auto l : tmp)
+					for (int d2 = 0; d2 < nFields; d2++)
+						mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
+				n += nx;
 			}
-			n += nx;
 		}
 	}
 
-	// x = hx , y = hy
-	for (int d1 = 0; d1 < nFields; d1++) {
-		int n = nx + 1;
-		for (int d2 = 0; d2 < nFields; d2++) {
-			mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 1 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 3 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
+	{ // x = hx , y = hy
+		const int tmp[] = { 0, 1, 2, 3, 6 };
+		for (int d1 = 0; d1 < nFields; d1++) {
+			int n = nx + 1;
+			for (auto l : tmp)
+				for (int d2 = 0; d2 < nFields; d2++)
+					mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
+
 		}
 	}
 
-	// x = lx - hx , y = hy
-	for (int d1 = 0; d1 < nFields; d1++) {
-		int n = 2 * nx - 2;
-		for (int d2 = 0; d2 < nFields; d2++) {
-			mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 1 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 5 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
+	{// x = lx - hx , y = hy
+		const int tmp[] = {0, 1, 2, 5, 8};
+		for (int d1 = 0; d1 < nFields; d1++) {
+			int n = 2 * nx - 2;
+			for (auto l : tmp)
+				for (int d2 = 0; d2 < nFields; d2++)
+					mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 		}
 	}
 
-	// x = lx - hx , y = ly - hy
-	for (int d1 = 0; d1 < nFields; d1++) {
-		int n = (ny - 1) * nx - 1;
-		for (int d2 = 0; d2 < nFields; d2++) {
-			mvals[n * nFields * nnz + d1 * nnz + 2 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 5 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 7 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
+	{// x = lx - hx , y = ly - hy
+		const int tmp[] = { 2, 5, 6, 7, 8 };
+		for (int d1 = 0; d1 < nFields; d1++) {
+			int n = (ny - 1) * nx - 1;
+			for (auto l : tmp)
+				for (int d2 = 0; d2 < nFields; d2++)
+					mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 		}
 	}
 
-	// x = hx , y = ly - hy
-	for (int d1 = 0; d1 < nFields; d1++) {
-		int n = (ny - 2) * nx + 1;
-		for (int d2 = 0; d2 < nFields; d2++) {
-			mvals[n * nFields * nnz + d1 * nnz + 0 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 3 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 6 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 7 * nFields + d2] = 0;
-			mvals[n * nFields * nnz + d1 * nnz + 8 * nFields + d2] = 0;
+	{// x = hx , y = ly - hy
+		const int tmp[] = { 0, 3, 6, 7, 8 };
+		for (int d1 = 0; d1 < nFields; d1++) {
+			int n = (ny - 2) * nx + 1;
+			for (auto l : tmp)
+				for (int d2 = 0; d2 < nFields; d2++)
+					mvals[n * nFields * nnz + d1 * nnz + l * nFields + d2] = 0;
 		}
 	}
 }
