@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cassert>
 
+#include "instrument.hpp"
 #include "micro.hpp"
 
 void micropp_t::calc_ctan_lin()
@@ -131,6 +132,8 @@ void micropp_t::get_macro_ctan(const int gp_id, double *macro_ctan)
 
 void micropp_t::homogenize()
 {
+	INST_START;
+
 	for (auto & gp:gauss_list) {
 
 		if (!gp.int_vars_n)
@@ -206,6 +209,7 @@ void micropp_t::homogenize()
 		}
 		gp.inv_max = inv_max;
 	}
+	INST_END;
 }
 
 void micropp_t::update_vars()

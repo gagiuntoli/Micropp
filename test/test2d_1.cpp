@@ -59,34 +59,34 @@ int main (int argc, char *argv[])
 	mat_types[0] = 0;
 	mat_types[1] = 0;
 
-	double mat_params[2*MAX_MAT_PARAM];
-	mat_params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
-	mat_params[0*MAX_MAT_PARAM + 1] = 0.3;   // nu
-	mat_params[0*MAX_MAT_PARAM + 2] = 5.0e4; // Sy
-	mat_params[0*MAX_MAT_PARAM + 3] = 5.0e4; // Ka
+	double mat_params[2 * MAX_MAT_PARAM];
+	mat_params[0 * MAX_MAT_PARAM + 0] = 1.0e6; // E
+	mat_params[0 * MAX_MAT_PARAM + 1] = 0.3;   // nu
+	mat_params[0 * MAX_MAT_PARAM + 2] = 5.0e4; // Sy
+	mat_params[0 * MAX_MAT_PARAM + 3] = 5.0e4; // Ka
 
-	mat_params[1*MAX_MAT_PARAM + 0] = 1.0e6;
-	mat_params[1*MAX_MAT_PARAM + 1] = 0.3;
-	mat_params[1*MAX_MAT_PARAM + 2] = 1.0e4;
-	mat_params[1*MAX_MAT_PARAM + 3] = 0.0e-1;
+ 	mat_params[1 * MAX_MAT_PARAM + 0] = 1.0e6;
+	mat_params[1 * MAX_MAT_PARAM + 1] = 0.3;
+	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
+	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
-	micropp_t micro (dim, size, micro_type, micro_params, mat_types, mat_params);
+	micropp_t micro(dim, size, micro_type, micro_params, mat_types, mat_params);
 
 	double MacroStress[6], MacroCtan[36];
 	double d_eps = 0.01;
 	int dir = 2;
 
 	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-	for (int t = 0; t < time_steps; ++t)
-	{
+
+	for (int t = 0; t < time_steps; ++t) {
 		cout << "time step = " << t << endl;
-		if (t<30)
+		if (t < 30)
 			eps[dir] += d_eps;
-		else if (t<80)
+		else if (t < 80)
 			eps[dir] -= d_eps;
-		else if (t<130)
+		else if (t < 130)
 			eps[dir] += d_eps;
-		else if (t<250)
+		else if (t < 250)
 			eps[dir] -= d_eps;
 		else
 			eps[dir] += d_eps;
@@ -100,11 +100,8 @@ int main (int argc, char *argv[])
 		micro.write_info_files ();
 
 		cout << "eps = " << eps[dir] << endl;
-		cout
-			<< "MacroStress = "
-			<< MacroStress[0] << " " << MacroStress[1] << " " << MacroStress[2]
-			<< endl;
-
+		cout << "MacroStress = " << MacroStress[0] << " "
+		     << MacroStress[1] << " " << MacroStress[2] << endl;
 		cout << endl;
 		micro.output (t, 1);
 	}

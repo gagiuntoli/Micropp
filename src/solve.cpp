@@ -20,6 +20,10 @@
 
 #include <iostream>
 #include <iomanip>		// print with format
+
+#include <cassert>
+
+#include "instrument.hpp"
 #include "micro.hpp"
 
 #define CG_MAX_TOL 1.0e-8
@@ -31,6 +35,9 @@ using namespace std;
 
 void micropp_t::solve()
 {
+	INST_START;
+
+	assert(dim == 2 | dim ==3 );
 	ell_solver solver;
 	solver.max_its = CG_MAX_ITS;
 	solver.min_tol = CG_MAX_TOL;
@@ -40,11 +47,13 @@ void micropp_t::solve()
 	else if (dim == 3)
 		ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
 
-	//cout << "CG Its = " << solver.its << " Err = " << solver.err << endl;
+	INST_END;
 }
 
 void micropp_t::newton_raphson(bool * nl_flag, int *its, double *err)
 {
+	INST_START;
+
 	*its = 0;
 	*err = 0.0;
 	do {
@@ -63,4 +72,6 @@ void micropp_t::newton_raphson(bool * nl_flag, int *its, double *err)
 		*its++;
 
 	} while ((*its < NR_MAX_ITS) && (*err > NR_MAX_TOL));
+
+	INST_END;
 }
