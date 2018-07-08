@@ -204,7 +204,8 @@ int ell_solve_cgpd_2D(ell_solver *solver, ell_matrix *m, int nFields, int nx, in
 	return 0;
 }
 
-int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields, int dim, int nn, double *b, double *x)
+int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
+                          int dim, int nn, double *b, double *x)
 {
 	/* cg with jacobi preconditioner
 	 * r_1 residue in actual iteration
@@ -220,11 +221,11 @@ int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields, int di
 		return 1;
 
 	int its = 0;
-	double *k = (double *)malloc(m->nrow * sizeof(double));	// K = diag(A)
-	double *r = (double *)malloc(m->nrow * sizeof(double));
-	double *z = (double *)malloc(m->nrow * sizeof(double));
-	double *p = (double *)malloc(m->nrow * sizeof(double));
-	double *q = (double *)malloc(m->nrow * sizeof(double));
+	double *k = (double *) malloc(m->nrow * sizeof(double));	// K = diag(A)
+	double *r = (double *) malloc(m->nrow * sizeof(double));
+	double *z = (double *) malloc(m->nrow * sizeof(double));
+	double *p = (double *) malloc(m->nrow * sizeof(double));
+	double *q = (double *) malloc(m->nrow * sizeof(double));
 	double rho_0, rho_1, d;
 	double err;
 
@@ -251,7 +252,9 @@ int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields, int di
 		err = 0;
 		for (int i = 0; i < m->nrow; i++)
 			err += r[i] * r[i];
+
 		err = sqrt(err);
+
 		if (err < solver->min_tol)
 			break;
 
