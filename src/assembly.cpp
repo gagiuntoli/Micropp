@@ -20,6 +20,8 @@
 
 #include <cmath>
 #include <iostream>
+
+#include "instrument.hpp"
 #include "micro.hpp"
 
 #define nod_index(i,j,k) ((k)*nx*ny + (j)*nx + (i))
@@ -332,6 +334,8 @@ double micropp_t::assembly_rhs(bool * non_linear)
 
 void micropp_t::assembly_mat()
 {
+	INST_START;
+
 	int index[8];
 
 	ell_set_zero_mat(&A);
@@ -361,6 +365,7 @@ void micropp_t::assembly_mat()
 		ell_set_bc_3D(&A, dim, nx, ny, nz);
 	}
 	//  ell_print (&A);
+	INST_END;
 }
 
 void micropp_t::get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
