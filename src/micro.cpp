@@ -53,7 +53,7 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 	num_int_vars(nelem * 8 * NUM_VAR_GP),
 	output_files_header(false)
 {
-	INST_INIT; // Initialize the Intrumentation
+	INST_CONSTRUCT; // Initialize the Intrumentation
 	INST_START;
 
 	assert(dim == 2 || dim == 3);
@@ -147,12 +147,11 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 	file.close();
 	file.open("micropp_int_vars_n.dat");
 	file.close();
-	INST_END;
 }
 
 micropp_t::~micropp_t()
 {
-	INST_FINAL;
+	INST_DESTRUCT;
 
 	ell_free(&A);
 
