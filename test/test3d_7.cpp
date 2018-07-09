@@ -2,7 +2,8 @@
  *  This is a test example for MicroPP: a finite element library
  *  to solve microstructural problems for composite materials.
  *
- *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
+ *  Copyright (C) - 2018 - Jimmy Aguilar Mena <jimmy.aguilar@bsc.es>
+ *                         Guido Giuntoli <gagiuntoli@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,7 +72,7 @@ int main (int argc, char *argv[])
 
 	micropp_t micro (dim, size, micro_type, micro_params, mat_types, mat_params);
 
-	double MacroStress[6], MacroCtan[36];
+	double sig[6], ctan[36];
 	double d_eps = 0.01;
 	int dir = 2;
 
@@ -93,16 +94,16 @@ int main (int argc, char *argv[])
 		micro.set_macro_strain(1, eps);
 		micro.homogenize();
 
-		micro.get_macro_stress(1, MacroStress);
+		micro.get_macro_stress(1, sig);
 
 		micro.update_vars();
 		micro.write_info_files ();
 
 		cout << "eps = " << eps[dir] << endl;
 		cout
-			<< "MacroStress = "
-			<< MacroStress[0] << " " << MacroStress[1] << " " << MacroStress[2] << " "
-			<< MacroStress[3] << " " << MacroStress[4] << " " << MacroStress[5]
+			<< "sig = "
+			<< sig[0] << " " << sig[1] << " " << sig[2] << " "
+			<< sig[3] << " " << sig[4] << " " << sig[5]
 			<< endl;
 
 		cout << endl;

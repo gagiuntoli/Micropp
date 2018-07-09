@@ -2,6 +2,7 @@
 # The test files I care only (create a list)
 set(testsources
   test2d_1.cpp
+  test3d_1.cpp
   test3d_7.cpp
   test3d_8.cpp
   test3d_3.f90)
@@ -24,5 +25,6 @@ add_test(test3d_3 test3d_3)
 
 # Add a test that requires arguments
 add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
+add_test(NAME test3d_1 COMMAND test3d_1 5 5 5 1)
 add_test(NAME test3d_7 COMMAND test3d_7 5 5 5 10)
 add_test(NAME test3d_8 COMMAND test3d_8 5 5 5 10)
