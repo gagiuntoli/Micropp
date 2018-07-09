@@ -40,46 +40,15 @@
 
 using namespace std;
 
-inline double getus(const struct timespec &ts)
+inline uint64_t devest(const vector<uint64_t>  &in, const uint64_t mean)
 {
-	return ts.tv_sec * 1000000.0 + double(ts.tv_nsec) * 1.0E-3;
-}
-
-inline double devest(const vector<struct timespec>  &in, double mean)
-{
-	double out = 0;
+	uint64_t out = 0;
 	for (const auto &x : in) {
-		const double tmp = (getus(x) - mean);
+		const uint64_t tmp = (x - mean);
 		out += tmp * tmp;
 	}
 
-	out /= in.size();
-
-	return sqrt(out);
-}
-
-inline void getTime(struct timespec &ts)
-{
-	const int rc = clock_gettime(CLOCK_MONOTONIC, &ts);
-	if (rc) {
-		std::cerr << "Error reading time: " << strerror(errno) << std::endl;
-		exit(1);
-	}
-}
-
-static inline struct timespec getDt(const struct timespec &t1,
-                                    const struct timespec &t2)
-{
-	struct timespec dt;
-
-	if (t2.tv_nsec >= t1.tv_nsec) {
-		dt.tv_sec = t2.tv_sec - t1.tv_sec;
-		dt.tv_nsec = t2.tv_nsec - t1.tv_nsec;
-	} else {
-		dt.tv_sec = t2.tv_sec - 1 - t1.tv_sec;
-		dt.tv_nsec = 1000000000L + t2.tv_nsec - t1.tv_nsec;
-	}
-	return dt;
+	return sqrt(out / in.size());
 }
 
 #endif //UTIL_HPP
