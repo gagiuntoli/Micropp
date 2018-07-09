@@ -2,7 +2,8 @@
 ! This is a test example for MicroPP: a finite element library
 ! to solve microstructural problems for composite materials.
 !
-! Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
+!  Copyright (C) - 2018 - Jimmy Aguilar Mena <jimmy.aguilar@bsc.es>
+!                         Guido Giuntoli <gagiuntoli@gmail.com>
 ! 
 ! This program is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by
