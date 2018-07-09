@@ -24,10 +24,9 @@
 
 #ifdef NDEBUG // For optimized compilation
 
-#define INST_INIT
+#define INST_CONSTRUCT
+#define INST_DESTRUCT
 #define INST_START
-#define INST_END
-#define INST_FINAL
 
 #else // For debug compilation
 
