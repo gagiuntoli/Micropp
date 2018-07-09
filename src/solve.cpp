@@ -47,7 +47,6 @@ void micropp_t::solve()
 	else if (dim == 3)
 		ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
 
-	INST_END;
 }
 
 void micropp_t::newton_raphson(bool * nl_flag, int *its, double *err)
@@ -72,6 +71,4 @@ void micropp_t::newton_raphson(bool * nl_flag, int *its, double *err)
 		*its++;
 
 	} while ((*its < NR_MAX_ITS) && (*err > NR_MAX_TOL));
-
-	INST_END;
 }

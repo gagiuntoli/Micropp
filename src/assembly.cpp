@@ -364,8 +364,6 @@ void micropp_t::assembly_mat()
 		}
 		ell_set_bc_3D(&A, dim, nx, ny, nz);
 	}
-	//  ell_print (&A);
-	INST_END;
 }
 
 void micropp_t::get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])

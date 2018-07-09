@@ -209,7 +209,6 @@ void micropp_t::homogenize()
 		}
 		gp.inv_max = inv_max;
 	}
-	INST_END;
 }
 
 void micropp_t::update_vars()

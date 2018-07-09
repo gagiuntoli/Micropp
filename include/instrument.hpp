@@ -31,6 +31,11 @@
 
 #else // For debug compilation
 
+#define INST_CONSTRUCT instrument::initialize()
+#define INST_DESTRUCT instrument::finalize()
+#define INST_START instrument __timer__(__FUNCTION__)
+
+#include <chrono>
 #include <unordered_map>
 #include <vector>
 #include <stack>
@@ -39,43 +44,38 @@
 
 #include "util.hpp"
 
-#define INST_INIT instrument::init()
-#define INST_START instrument::registerStart(__FUNCTION__)
-#define INST_END instrument::registerEnd(__FUNCTION__)
-#define INST_FINAL instrument::finalize()
-
 using namespace std;
 
-typedef vector<struct timespec> timevect;
-typedef stack<struct timespec> timestack;
+typedef vector<uint64_t> timevect;
 
 class instrument {
 	private:
-		static unordered_map<string, timevect> times;                     // Final register time
-		static thread_local  unordered_map<string, timestack> startTime;  // Calls stack
-		static struct timespec initialTime;                         // Time collection
-		static atomic<int> instances;
+		const uint64_t start_time_;
+		const string funct_;
+
+		static atomic<size_t> instances;                     // Counter
+		static uint64_t initialTime;                         // Time collection
+		static unordered_map<string, timevect> times;        // Final register time
+
+		static inline uint64_t take_time_stamp()
+		{
+			return uint64_t(
+				chrono::high_resolution_clock::now().time_since_epoch().count());
+		}
 
 	public:
-		static void init();
 
-		static inline void registerStart(const string funct)
+		instrument(const string funct):
+			funct_(funct), start_time_(take_time_stamp())
+		{}
+
+		~instrument()
 		{
-			struct timespec time;
-			getTime(time);
-			startTime[funct].push(time);
+			const uint64_t elapsed =  (take_time_stamp() - start_time_) * 1E-3;
+			times[funct_].push_back(elapsed);
 		}
 
-		static inline void registerEnd(const string funct)
-		{
-			struct timespec time2;
-			getTime(time2);
-
-			const struct timespec time1 = startTime[funct].top();
-			startTime[funct].pop();
-
-			times[funct].push_back(getDt(time1, time2));
-		}
+		static void initialize();
 
 		static void finalize();
 };
