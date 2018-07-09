@@ -239,7 +239,10 @@ void micropp_t::write_info_files()
 		file << "# gp_id : ";
 		for (auto const &gp:gauss_list)
 			file << gp.id << " ";
-		file << "# epsxx [1] # epsyy [2] # epszz[3] # epsxy[4] # epsxz[5] # epsyz[6]" << "# sigxx [7] # sigyy [2] # sigzz[3] # sigxy[4] # sigxz[5] # sigyz[6]" << endl;
+		file 
+			<< endl
+			<< "# epsxx [1] # epsyy [2] # epszz[3] # epsxy[4]  # epsxz[5]  # epsyz[6]"  << endl
+			<< "# sigxx [7] # sigyy [8] # sigzz[9] # sigxy[10] # sigxz[11] # sigyz[12]" << endl;
 		file << endl;
 		file.close();
 	}
