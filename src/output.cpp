@@ -64,24 +64,13 @@ void micropp_t::write_vtu(int time_step, int gp_id)
 	     << endl << "<UnstructuredGrid>" << endl << "<Piece NumberOfPoints=\"" << nn
 	     << "\" NumberOfCells=\"" << nelem << "\">" << endl << "<Points>" << endl << "<DataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
-	double x, y, z;
-	if (dim == 2) {
+	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				x = i * dx;
-				y = j * dy;
-				file << x << " " << y << " " << "0.0" << endl;
-			}
-		}
-	} else if (dim == 3) {
-		for (int k = 0; k < nz; k++) {
-			for (int j = 0; j < ny; j++) {
-				for (int i = 0; i < nx; i++) {
-					x = i * dx;
-					y = j * dy;
-					z = k * dz;
-					file << x << " " << y << " " << z << endl;
-				}
+				double x = i * dx;
+				double y = j * dy;
+				double z = k * dz;
+				file << x << " " << y << " " << z << endl;
 			}
 		}
 	}
