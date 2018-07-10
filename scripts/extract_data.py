@@ -1,4 +1,6 @@
-from paraview.simple import *
+#!/usr/bin/python2
+
+from paraview.simple import * 
 import numpy as np
 import glob
 
