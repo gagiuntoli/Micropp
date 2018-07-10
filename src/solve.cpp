@@ -27,30 +27,17 @@
 #include "instrument.hpp"
 #include "micro.hpp"
 
-#define CG_MAX_TOL 1.0e-8
-#define CG_MAX_ITS 2000
-#define NR_MAX_TOL 1.0e-5
-#define NR_MAX_ITS 40
-
 using namespace std;
 
 void micropp_t::solve()
 {
 	INST_START;
 
-	assert(dim == 2 | dim ==3 );
-	ell_solver solver;
-	solver.max_its = CG_MAX_ITS;
-	solver.min_tol = CG_MAX_TOL;
-
-	if (dim == 2)
-		ell_solve_cgpd_2D(&solver, &A, dim, nx, ny, b, du);
-	else if (dim == 3)
-		ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
-
+	assert(dim == 2 | dim ==3);
+	ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
 }
 
-void micropp_t::newton_raphson(bool * nl_flag, int *its, double *err)
+void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 {
 	INST_START;
 

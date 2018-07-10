@@ -39,12 +39,15 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 	inv_tol(micro_params[4]),
 	nx(size[0]),
 	ny(size[1]),
-	nz(_dim == 2 ? 1 : size[2]),
+	nz(dim == 2 ? 1 : size[2]),
 	nn(nx * ny * nz),
+	nex(nx-1),
+	ney(ny-1),
+	nez(dim == 2 ? 1 : nz-1),
 
 	dx(lx / (nx - 1)),
 	dy(ly / (ny - 1)),
-	dz(lz / (nz - 1)),
+	dz(dim == 2 ? 0 : lz / (nz - 1)),
 
 	npe(dim == 2 ? 4 : 8),
 	nvoi(dim == 2 ? 3 : 6),
@@ -139,6 +142,13 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 		}
 		ell_init_3D(&A, dim, nx, ny, nz);
 	}
+	solver.max_its = CG_MAX_ITS;
+	solver.min_tol = CG_MAX_TOL;
+	solver.k = (double *) malloc(A.nrow * sizeof(double));
+	solver.r = (double *) malloc(A.nrow * sizeof(double));
+	solver.z = (double *) malloc(A.nrow * sizeof(double));
+	solver.p = (double *) malloc(A.nrow * sizeof(double));
+	solver.q = (double *) malloc(A.nrow * sizeof(double));
 
 	calc_ctan_lin();
 
@@ -169,6 +179,12 @@ micropp_t::~micropp_t()
 		free(gp.int_vars_n);
 		free(gp.int_vars_k);
 	}
+
+	free(solver.k);
+	free(solver.r);
+	free(solver.z);
+	free(solver.p);
+	free(solver.q);
 }
 
 void micropp_t::get_nl_flag(int gp_id, int *non_linear)

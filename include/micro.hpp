@@ -29,11 +29,19 @@
 
 #include "ell.hpp"
 
+#define MAX_DIM       3
 #define MAX_MAT_PARAM 10
 #define MAX_MATS      10
 #define MAX_GP_VARS   10
 #define INT_VARS_GP   7		// eps_p_1, alpha_1
 #define NUM_VAR_GP    7		// eps_p_1, alpha_1
+
+#define CG_MAX_TOL    1.0e-8
+#define CG_MAX_ITS    2000
+#define NR_MAX_TOL    1.0e-5
+#define NR_MAX_ITS    40
+
+#define CONSTXG 0.577350269189626
 
 #define glo_elem3D(ex,ey,ez) ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var) ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
@@ -69,6 +77,7 @@ class micropp_t {
 	private:
 		const int dim;
 		const int nx, ny, nz, nn;
+		const int nex, ney, nez;
 		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
 		const int npe, nvoi, nelem;
 		const int micro_type, num_int_vars;
@@ -86,6 +95,7 @@ class micropp_t {
 		double * u;
 		double * du;
 		double * b;
+		ell_solver solver;
 
 		double * elem_stress;
 		double * elem_strain;
@@ -95,9 +105,20 @@ class micropp_t {
 
 		double inv_max;
 
+		const double xg[8][3] = { {-CONSTXG, -CONSTXG, -CONSTXG},
+		                          {+CONSTXG, -CONSTXG, -CONSTXG},
+		                          {+CONSTXG, +CONSTXG, -CONSTXG},
+		                          {-CONSTXG, +CONSTXG, -CONSTXG},
+		                          {-CONSTXG, -CONSTXG, +CONSTXG},
+		                          {+CONSTXG, -CONSTXG, +CONSTXG},
+		                          {+CONSTXG, +CONSTXG, +CONSTXG},
+		                          {-CONSTXG, +CONSTXG, +CONSTXG} };
+
 	public:
-		micropp_t(const int dim, const int size[3], const int micro_type, const double *micro_params,
-		          const int *mat_types, const double *params);
+		micropp_t(const int dim, const int size[3], const int micro_type,
+		          const double *micro_params, const int *mat_types,
+		          const double *params);
+
 		~micropp_t();
 
 		void calc_ctan_lin();
@@ -143,8 +164,10 @@ class micropp_t {
 		                  bool *nl_flag, double *stress_gp);
 
 		void get_dev_tensor(double tensor[6], double tensor_dev[6]);
-		void plastic_step(material_t *material, double eps[6], double eps_p_1[6], double alpha_1,
-		                  double eps_p[6], double *alpha, bool *nl_flag, double stress[6]);
+		void plastic_step(const material_t *material, double eps[6],
+		                  double eps_p_1[6], double alpha_1,
+		                  double eps_p[6], double *alpha,
+		                  bool *nl_flag, double stress[6]);
 
 		void getElemDisp(int ex, int ey, double *elem_disp);
 		void getElemDisp(int ex, int ey, int ez, double *elem_disp);
@@ -152,7 +175,7 @@ class micropp_t {
 		int get_elem_type2D(int ex, int ey);
 		int get_elem_type3D(int ex, int ey, int ez);
 
-		void get_material(int e, material_t &material);
+		material_t get_material(const int e);
 
 		void calc_bmat_3D(int gp, double bmat[6][3 *8]);
 
