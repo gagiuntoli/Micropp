@@ -2,7 +2,8 @@
  *  This source code is part of MicroPP: a finite element library
  *  to solve microstructural problems for composite materials.
  *
- *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
+ *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                         Guido Giuntoli <gagiuntoli@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -244,6 +245,15 @@ void micropp_t::write_info_files()
 			<< "# epsxx [1] # epsyy [2] # epszz[3] # epsxy[4]  # epsxz[5]  # epsyz[6]"  << endl
 			<< "# sigxx [7] # sigyy [8] # sigzz[9] # sigxy[10] # sigxz[11] # sigyz[12]" << endl;
 		file << endl;
+		file.close();
+
+		file.open("micropp_int_vars_n.dat", std::ios_base::app);
+		file << "# gp_id : ";
+		for (auto const &gp:gauss_list)
+			file << gp.id << " ";
+		file 
+			<< endl
+			<< "# eps_p_xx [1]  # eps_p_yy [2]  # eps_p_zz[3] # eps_p_xy[4]  # eps_p_xz[5]  # eps_p_yz[6]  # alpha[7]"  << endl;
 		file.close();
 	}
 
