@@ -46,7 +46,7 @@ int ell_set_zero_mat(ell_matrix *m)
 	return 0;
 }
 
-void ell_mvp_2D(ell_matrix *m, double *x, double *y)
+void ell_mvp(const ell_matrix *m, const double *x, double *y)
 {
 	//  y = m * x
 	for (int i = 0; i < m->nrow; i++) {
@@ -99,7 +99,7 @@ int ell_solve_jacobi_2D(ell_solver *solver, ell_matrix *m, int nFields, int nx, 
 		}
 
 		err = 0;
-		ell_mvp_2D(m, x, e_i);
+		ell_mvp(m, x, e_i);
 		for (int i = 0; i < m->nrow; i++) {
 			e_i[i] -= b[i];
 			err += e_i[i] * e_i[i];
@@ -114,101 +114,10 @@ int ell_solve_jacobi_2D(ell_solver *solver, ell_matrix *m, int nFields, int nx, 
 	return 0;
 }
 
-int ell_solve_cgpd_2D(ell_solver *solver, ell_matrix *m, int nFields, int nx, int ny, double *b, double *x)
-{
-	/* cg with jacobi preconditioner
-	 * r_1 residue in actual iteration
-	 * z_1 = K^-1 * r_0 actual auxiliar vector
-	 * rho_0 rho_1 = r_0^t * z_1 previous and actual iner products <r_i, K^-1, r_i>
-	 * p_1 actual search direction
-	 * q_1 = A*p_1 auxiliar vector
-	 * d_1 = rho_0 / (p_1^t * q_1) actual step
-	 * x_1 = x_0 - d_1 * p_1
-	 * r_1 = r_0 - d_1 * q_1
-	 */
-	if (m == NULL || b == NULL || x == NULL)
-		return 1;
-
-	int its = 0;
-	double *k = (double *) malloc(m->nrow * sizeof(double));	// K = diag(A)
-	double *r = (double *) malloc(m->nrow * sizeof(double));
-	double *z = (double *) malloc(m->nrow * sizeof(double));
-	double *p = (double *) malloc(m->nrow * sizeof(double));
-	double *q = (double *) malloc(m->nrow * sizeof(double));
-	double rho_0, rho_1, d;
-	double err;
-
-	int nn = nx * ny;
-
-	for (int i = 0; i < nn; i++) {
-		for (int d = 0; d < nFields; d++) {
-			k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz + 4 * nFields + d * m->nnz + d];
-		}
-	}
-
-	ell_mvp_2D(m, x, r);
-
-	for (int i = 0; i < m->nrow; i++)
-		r[i] -= b[i];
-
-	do {
-
-		err = 0;
-		for (int i = 0; i < m->nrow; i++)
-			err += r[i] * r[i];
-		//    cout << "cg_err = " << err << endl;
-		err = sqrt(err);
-		if (err < solver->min_tol)
-			break;
-
-		for (int i = 0; i < m->nrow; i++)
-			z[i] = k[i] * r[i];
-
-		rho_1 = 0.0;
-		for (int i = 0; i < m->nrow; i++)
-			rho_1 += r[i] * z[i];
-
-		if (its == 0) {
-			for (int i = 0; i < m->nrow; i++)
-				p[i] = z[i];
-		} else {
-			double beta = rho_1 / rho_0;
-			for (int i = 0; i < m->nrow; i++)
-				p[i] = z[i] + beta * p[i];
-		}
-
-		ell_mvp_2D(m, p, q);
-		double aux = 0;
-		for (int i = 0; i < m->nrow; i++)
-			aux += p[i] * q[i];
-		d = rho_1 / aux;
-
-		for (int i = 0; i < m->nrow; i++) {
-			x[i] -= d * p[i];
-			r[i] -= d * q[i];
-		}
-
-		rho_0 = rho_1;
-		its++;
-
-	} while (its < solver->max_its);
-
-	solver->err = err;
-	solver->its = its;
-
-	free(k);
-	free(r);
-	free(z);
-	free(p);
-	free(q);
-
-	return 0;
-}
-
 int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
                           int dim, int nn, double *b, double *x)
 {
-	/* cg with jacobi preconditioner
+	/* Conjugate Gradient Algorithm (CG) with Jacobi Preconditioner
 	 * r_1 residue in actual iteration
 	 * z_1 = K^-1 * r_0 actual auxiliar vector
 	 * rho_0 rho_1 = r_0^t * z_1 previous and actual iner products <r_i, K^-1, r_i>
@@ -222,68 +131,51 @@ int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
 		return 1;
 
 	int its = 0;
-	double *k = (double *) malloc(m->nrow * sizeof(double));	// K = diag(A)
-	double *r = (double *) malloc(m->nrow * sizeof(double));
-	double *z = (double *) malloc(m->nrow * sizeof(double));
-	double *p = (double *) malloc(m->nrow * sizeof(double));
-	double *q = (double *) malloc(m->nrow * sizeof(double));
-	double rho_0, rho_1, d;
-	double err;
+	double rho_0, rho_1, err;
 
-	if (dim == 2) {
-		for (int i = 0; i < nn; i++) {
-			for (int d = 0; d < nFields; d++) {
-				k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz + 4 * nFields + d * m->nnz + d];
-			}
-		}
-	} else if (dim == 3) {
-		for (int i = 0; i < nn; i++) {
-			for (int d = 0; d < nFields; d++) {
-				k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz + 13 * nFields + d * m->nnz + d];
-			}
-		}
+	const int shift =  (dim == 2) ? 4 : 13;
+	for (int i = 0; i < nn; i++) {
+		for (int d = 0; d < nFields; d++)
+			solver->k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz + shift * nFields + d * m->nnz + d];
 	}
 
-	ell_mvp_2D(m, x, r);
+	ell_mvp(m, x, solver->r);
 	for (int i = 0; i < m->nrow; i++)
-		r[i] -= b[i];
+		solver->r[i] -= b[i];
 
 	do {
-
-		err = 0;
+		err = 0.0;
 		for (int i = 0; i < m->nrow; i++)
-			err += r[i] * r[i];
-
+			err += solver->r[i] * solver->r[i];
 		err = sqrt(err);
-
 		if (err < solver->min_tol)
 			break;
 
 		for (int i = 0; i < m->nrow; i++)
-			z[i] = k[i] * r[i];
+			solver->z[i] = solver->k[i] * solver->r[i];
 
 		rho_1 = 0.0;
 		for (int i = 0; i < m->nrow; i++)
-			rho_1 += r[i] * z[i];
+			rho_1 += solver->r[i] * solver->z[i];
 
-		if (its == 0) {
+		if (its == 0)
 			for (int i = 0; i < m->nrow; i++)
-				p[i] = z[i];
-		} else {
-			double beta = rho_1 / rho_0;
+				solver->p[i] = solver->z[i];
+		else {
+			const double beta = rho_1 / rho_0;
 			for (int i = 0; i < m->nrow; i++)
-				p[i] = z[i] + beta * p[i];
+				solver->p[i] = solver->z[i] + beta * solver->p[i];
 		}
 
-		ell_mvp_2D(m, p, q);
+		ell_mvp(m, solver->p, solver->q);
 		double aux = 0;
-		for (int i = 0; i < m->nrow; i++)
-			aux += p[i] * q[i];
-		d = rho_1 / aux;
+		for (int i = 0; i < m->nrow; ++i)
+			aux += solver->p[i] * solver->q[i];
 
-		for (int i = 0; i < m->nrow; i++) {
-			x[i] -= d * p[i];
-			r[i] -= d * q[i];
+		const double d = rho_1 / aux;
+		for (int i = 0; i < m->nrow; ++i) {
+			x[i] -= d * solver->p[i];
+			solver->r[i] -= d * solver->q[i];
 		}
 
 		rho_0 = rho_1;
@@ -293,13 +185,6 @@ int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
 
 	solver->err = err;
 	solver->its = its;
-
-	free(k);
-	free(r);
-	free(z);
-	free(p);
-	free(q);
-
 	return 0;
 }
 

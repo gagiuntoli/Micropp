@@ -35,13 +35,13 @@ typedef struct {
 	int its;
 	double min_tol;
 	double err;
+	double *k, *r, *z, *p, *q;
 } ell_solver;
-
 
 int ell_add_val(ell_matrix *m, int row, int col, double val);
 int ell_add_vals(ell_matrix *m, int *ix, int nx, int *iy, int ny, double *vals);
 
-int ell_mvp(ell_matrix *m, double *x, double *y);
+void ell_mvp(const ell_matrix *m, const double *x, double *y);
 int ell_get_val(ell_matrix *m, int row, int col, double *val);
 
 int ell_solve_cg(ell_solver *solver, ell_matrix *m, double *b, double *x);
@@ -58,11 +58,6 @@ int ell_print(ell_matrix *m);
 int ell_print_full(ell_matrix *m);
 
 void ell_free(ell_matrix *m);
-
-void ell_mvp_2D(ell_matrix *m, double *x, double *y);
-
-int ell_solve_cgpd_2D(ell_solver *solver, ell_matrix *m,
-                      int nFields, int nx, int ny, double *b, double *x);
 
 int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
                           int dim, int nn, double *b, double *x);

@@ -29,11 +29,17 @@
 
 #include "ell.hpp"
 
+#define MAX_DIM       3
 #define MAX_MAT_PARAM 10
 #define MAX_MATS      10
 #define MAX_GP_VARS   10
 #define INT_VARS_GP   7		// eps_p_1, alpha_1
 #define NUM_VAR_GP    7		// eps_p_1, alpha_1
+
+#define CG_MAX_TOL    1.0e-8
+#define CG_MAX_ITS    2000
+#define NR_MAX_TOL    1.0e-5
+#define NR_MAX_ITS    40
 
 #define glo_elem3D(ex,ey,ez) ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var) ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
@@ -69,6 +75,7 @@ class micropp_t {
 	private:
 		const int dim;
 		const int nx, ny, nz, nn;
+		const int nex, ney, nez;
 		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
 		const int npe, nvoi, nelem;
 		const int micro_type, num_int_vars;
@@ -86,6 +93,7 @@ class micropp_t {
 		double * u;
 		double * du;
 		double * b;
+		ell_solver solver;
 
 		double * elem_stress;
 		double * elem_strain;
