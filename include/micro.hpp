@@ -41,6 +41,8 @@
 #define NR_MAX_TOL    1.0e-5
 #define NR_MAX_ITS    40
 
+#define CONSTXG 0.577350269189626
+
 #define glo_elem3D(ex,ey,ez) ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var) ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
 
@@ -102,6 +104,15 @@ class micropp_t {
 		double * vars_new;
 
 		double inv_max;
+
+		const double xg[8][3] = { {-CONSTXG, -CONSTXG, -CONSTXG},
+		                          {+CONSTXG, -CONSTXG, -CONSTXG},
+		                          {+CONSTXG, +CONSTXG, -CONSTXG},
+		                          {-CONSTXG, +CONSTXG, -CONSTXG},
+		                          {-CONSTXG, -CONSTXG, +CONSTXG},
+		                          {+CONSTXG, -CONSTXG, +CONSTXG},
+		                          {+CONSTXG, +CONSTXG, +CONSTXG},
+		                          {-CONSTXG, +CONSTXG, +CONSTXG} };
 
 	public:
 		micropp_t(const int dim, const int size[3], const int micro_type,

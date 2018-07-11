@@ -55,10 +55,12 @@ void ell_mvp(const ell_matrix *m, const double *x, double *y)
 		y[i] = 0;
 		for (int j = 0; j < m->nnz; j++)
 			y[i] += m->vals[(i * m->nnz) + j] * x[m->cols[(i * m->nnz) + j]];
+		
 	}
 }
 
-int ell_solve_jacobi_2D(ell_solver *solver, ell_matrix *m, int nFields, int nx, int ny, double *b, double *x)
+int ell_solve_jacobi_2D(ell_solver *solver, ell_matrix *m, int nFields,
+                        int nx, int ny, double *b, double *x)
 {
 	/* A = K - N
 	 * K = diag(A)

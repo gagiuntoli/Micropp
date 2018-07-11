@@ -90,13 +90,13 @@ void micropp_t::set_displ(double *eps)
 		// z = lx
 		for (int i = 0; i < nx; i++) {
 			for (int j = 0; j < ny; j++) {
-				int n = nod_index(i, j, nz - 1);
-				double xcoor = i * dx;
-				double ycoor = j * dy;
-				double zcoor = lz;
-				double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
-				double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
-				double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
+				const int n = nod_index(i, j, nz - 1);
+				const double xcoor = i * dx;
+				const double ycoor = j * dy;
+				const double zcoor = lz;
+				const double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
+				const double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
+				const double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
 				u[n * dim] = dux;
 				u[n * dim + 1] = duy;
 				u[n * dim + 2] = duz;
@@ -448,6 +448,8 @@ void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 
 	const int e = glo_elem3D(ex, ey, ez);
 	const material_t material = get_material(e);
 	double ctan[6][6];
+	const int npedim = npe * dim;
+	const double wg = (1 / 8.0) * dx * dy * dz;
 
 	/*
 	  C = lambda * (1x1) + 2 mu I
@@ -458,18 +460,11 @@ void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 
 		Ae[i] = 0.0;
 
 	for (int gp = 0; gp < 8; gp++) {
-		if (material.plasticity == true) {
-			bool ctan_secant = false;
-			bool ctan_pert = true;
-			bool ctan_exact = false;
 
-			if (ctan_secant == true)
-				get_ctan_plast_sec(ex, ey, ez, gp, ctan);
-			else if (ctan_exact == true)
-				get_ctan_plast_exact(ex, ey, ez, gp, ctan);
-			else if (ctan_pert == true)
-				get_ctan_plast_pert(ex, ey, ez, gp, ctan);
-
+		if (material.plasticity) {
+			get_ctan_plast_pert(ex, ey, ez, gp, ctan);   // ctan_pert
+			//get_ctan_plast_sec(ex, ey, ez, gp, ctan);    // ctan_secant
+			//get_ctan_plast_exact(ex, ey, ez, gp, ctan);  // ctan_exact
 		} else {
 
 			for (int i = 0; i < 6; ++i)
@@ -488,23 +483,24 @@ void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 
 
 		}
 
-		double bmat[6][3 * 8], cxb[6][3 * 8];
+		double bmat[6][3 * 8], cxb[6][3 * 8] = { 0.0 };
 		calc_bmat_3D(gp, bmat);
 
-		for (int i = 0; i < nvoi; i++) {
-			for (int j = 0; j < npe * dim; j++) {
-				cxb[i][j] = 0.0;
-				for (int k = 0; k < nvoi; k++)
+		for (int i = 0; i < nvoi; ++i) {
+			for (int j = 0; j < npedim; ++j) {
+				for (int k = 0; k < nvoi; ++k)
 					cxb[i][j] += ctan[i][k] * bmat[k][j];
 			}
 		}
 
-		double wg = (1 / 8.0) * dx * dy * dz;
-		for (int i = 0; i < npe * dim; i++)
-			for (int j = 0; j < npe * dim; j++)
-				for (int m = 0; m < nvoi; m++)
-					Ae[i * npe * dim + j] += bmat[m][i] * cxb[m][j] * wg;
-
+		for (int m = 0; m < nvoi; ++m) {
+			for (int i = 0; i < npedim; ++i) {
+				const int inpedim = i * npedim;
+				const double bmatmi = bmat[m][i];
+				for (int j = 0; j < npedim; ++j)
+					Ae[inpedim + j] += bmatmi * cxb[m][j] * wg;
+			}
+		}
 	}			// gp loop
 }
 
@@ -591,91 +587,72 @@ void micropp_t::get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[
 
 void micropp_t::calc_bmat_3D(int gp, double bmat[6][3 * 8])
 {
-
-	const double xg[8][3] = {
-		{-0.577350269189626, -0.577350269189626, -0.577350269189626},
-		{+0.577350269189626, -0.577350269189626, -0.577350269189626},
-		{+0.577350269189626, +0.577350269189626, -0.577350269189626},
-		{-0.577350269189626, +0.577350269189626, -0.577350269189626},
-		{-0.577350269189626, -0.577350269189626, +0.577350269189626},
-		{+0.577350269189626, -0.577350269189626, +0.577350269189626},
-		{+0.577350269189626, +0.577350269189626, +0.577350269189626},
-		{-0.577350269189626, +0.577350269189626, +0.577350269189626}
-	};
-
-	double dsh[8][3];
-
-	dsh[0][0] = -(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8 * 2 / dx;
-	dsh[0][1] = -(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8 * 2 / dy;
-	dsh[0][2] = -(1 - xg[gp][0]) * (1 - xg[gp][1]) / 8 * 2 / dz;
-	dsh[1][0] = +(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8 * 2 / dx;
-	dsh[1][1] = -(1 + xg[gp][0]) * (1 - xg[gp][2]) / 8 * 2 / dy;
-	dsh[1][2] = -(1 + xg[gp][0]) * (1 - xg[gp][1]) / 8 * 2 / dz;
-	dsh[2][0] = +(1 + xg[gp][1]) * (1 - xg[gp][2]) / 8 * 2 / dx;
-	dsh[2][1] = +(1 + xg[gp][0]) * (1 - xg[gp][2]) / 8 * 2 / dy;
-	dsh[2][2] = -(1 + xg[gp][0]) * (1 + xg[gp][1]) / 8 * 2 / dz;
-	dsh[3][0] = -(1 + xg[gp][1]) * (1 - xg[gp][2]) / 8 * 2 / dx;
-	dsh[3][1] = +(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8 * 2 / dy;
-	dsh[3][2] = -(1 - xg[gp][0]) * (1 + xg[gp][1]) / 8 * 2 / dz;
-	dsh[4][0] = -(1 - xg[gp][1]) * (1 + xg[gp][2]) / 8 * 2 / dx;
-	dsh[4][1] = -(1 - xg[gp][0]) * (1 + xg[gp][2]) / 8 * 2 / dy;
-	dsh[4][2] = +(1 - xg[gp][0]) * (1 - xg[gp][1]) / 8 * 2 / dz;
-	dsh[5][0] = +(1 - xg[gp][1]) * (1 + xg[gp][2]) / 8 * 2 / dx;
-	dsh[5][1] = -(1 + xg[gp][0]) * (1 + xg[gp][2]) / 8 * 2 / dy;
-	dsh[5][2] = +(1 + xg[gp][0]) * (1 - xg[gp][1]) / 8 * 2 / dz;
-	dsh[6][0] = +(1 + xg[gp][1]) * (1 + xg[gp][2]) / 8 * 2 / dx;
-	dsh[6][1] = +(1 + xg[gp][0]) * (1 + xg[gp][2]) / 8 * 2 / dy;
-	dsh[6][2] = +(1 + xg[gp][0]) * (1 + xg[gp][1]) / 8 * 2 / dz;
-	dsh[7][0] = -(1 + xg[gp][1]) * (1 + xg[gp][2]) / 8 * 2 / dx;
-	dsh[7][1] = +(1 - xg[gp][0]) * (1 + xg[gp][2]) / 8 * 2 / dy;
-	dsh[7][2] = +(1 - xg[gp][0]) * (1 + xg[gp][1]) / 8 * 2 / dz;
+	const double dsh[8][3] = {
+		{ -(1 - xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+		  -(1 - xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+		  -(1 - xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
+		{ +(1 - xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+		  -(1 + xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+		  -(1 + xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
+		{ +(1 + xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+		  +(1 + xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+		  -(1 + xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz },
+		{ -(1 + xg[gp][1]) * (1 - xg[gp][2]) * 0.25 / dx,
+		  +(1 - xg[gp][0]) * (1 - xg[gp][2]) * 0.25 / dy,
+		  -(1 - xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz },
+		{ -(1 - xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+		  -(1 - xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+		  +(1 - xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
+		{ +(1 - xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+		  -(1 + xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+		  +(1 + xg[gp][0]) * (1 - xg[gp][1]) * 0.25 / dz },
+		{ +(1 + xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+		  +(1 + xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+		  +(1 + xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz },
+		{ -(1 + xg[gp][1]) * (1 + xg[gp][2]) * 0.25 / dx,
+		  +(1 - xg[gp][0]) * (1 + xg[gp][2]) * 0.25 / dy,
+		  +(1 - xg[gp][0]) * (1 + xg[gp][1]) * 0.25 / dz } };
 
 	for (int i = 0; i < 8; i++) {
-		bmat[0][i * dim] = dsh[i][0];
+		bmat[0][i * dim    ] = dsh[i][0];
 		bmat[0][i * dim + 1] = 0;
 		bmat[0][i * dim + 2] = 0;
-		bmat[1][i * dim] = 0;
+		bmat[1][i * dim    ] = 0;
 		bmat[1][i * dim + 1] = dsh[i][1];
 		bmat[1][i * dim + 2] = 0;
-		bmat[2][i * dim] = 0;
+		bmat[2][i * dim    ] = 0;
 		bmat[2][i * dim + 1] = 0;
 		bmat[2][i * dim + 2] = dsh[i][2];
-		bmat[3][i * dim] = dsh[i][1];
+		bmat[3][i * dim    ] = dsh[i][1];
 		bmat[3][i * dim + 1] = dsh[i][0];
 		bmat[3][i * dim + 2] = 0;
-		bmat[4][i * dim] = dsh[i][2];
+		bmat[4][i * dim    ] = dsh[i][2];
 		bmat[4][i * dim + 1] = 0;
 		bmat[4][i * dim + 2] = dsh[i][0];
-		bmat[5][i * dim] = 0;
+		bmat[5][i * dim    ] = 0;
 		bmat[5][i * dim + 1] = dsh[i][2];
 		bmat[5][i * dim + 2] = dsh[i][1];
 	}
-
 }
 
 void micropp_t::get_elem_rhs2D(int ex, int ey, bool *non_linear, double (&be)[2 * 4])
 {
-	double dsh[4][2], bmat[3][2 * 4], cxb[3][8], stress_gp[6];
-	double xg[4][2] = {
-		{-0.577350269189626, -0.577350269189626},
-		{+0.577350269189626, -0.577350269189626},
-		{+0.577350269189626, +0.577350269189626},
-		{-0.577350269189626, +0.577350269189626}
-	};
+	double bmat[3][2 * 4], cxb[3][8], stress_gp[6];
+	const double wg = 0.25 * dx * dy;
 
 	for (int i = 0; i < 2 * 4; i++)
 		be[i] = 0.0;
 
 	for (int gp = 0; gp < 4; gp++) {
 
-		dsh[0][0] = -(1 - xg[gp][1]) / 4 * 2 / dx;
-		dsh[0][1] = -(1 - xg[gp][0]) / 4 * 2 / dy;
-		dsh[1][0] = +(1 - xg[gp][1]) / 4 * 2 / dx;
-		dsh[1][1] = -(1 + xg[gp][0]) / 4 * 2 / dy;
-		dsh[2][0] = +(1 + xg[gp][1]) / 4 * 2 / dx;
-		dsh[2][1] = +(1 + xg[gp][0]) / 4 * 2 / dy;
-		dsh[3][0] = -(1 + xg[gp][1]) / 4 * 2 / dx;
-		dsh[3][1] = +(1 - xg[gp][0]) / 4 * 2 / dy;
+		const double dsh[4][2] = { { -(1 - xg[gp][1]) * 0.5 / dx,
+		                             -(1 - xg[gp][0]) * 0.5 / dy },
+		                           { +(1 - xg[gp][1]) * 0.5 / dx,
+		                             -(1 + xg[gp][0]) * 0.5 / dy },
+		                           { +(1 + xg[gp][1]) * 0.5 / dx,
+		                             +(1 + xg[gp][0]) * 0.5 / dy },
+		                           { -(1 + xg[gp][1]) * 0.5 / dx,
+		                             +(1 - xg[gp][0]) * 0.5 / dy } };
 
 		for (int i = 0; i < 4; i++) {
 			bmat[0][i * dim] = dsh[i][0];
@@ -690,7 +667,6 @@ void micropp_t::get_elem_rhs2D(int ex, int ey, bool *non_linear, double (&be)[2 
 		get_strain2D(ex, ey, gp, strain_gp);
 		get_stress2D(ex, ey, gp, strain_gp, non_linear, stress_gp);
 
-		double wg = 0.25 * dx * dy;
 		for (int i = 0; i < npe * dim; i++) {
 			for (int j = 0; j < nvoi; j++) {
 				be[i] += bmat[j][i] * stress_gp[j] * wg;
@@ -1128,7 +1104,7 @@ void micropp_t::get_strain3D(int ex, int ey, int ez, int gp, double *strain_gp)
 	double bmat[6][3 * 8];
 	calc_bmat_3D(gp, bmat);
 
-	for (int v = 0; v < nvoi; v++) {
+	for (int v = 0; v < nvoi; ++v) {
 		strain_gp[v] = 0.0;
 		for (int i = 0; i < npe * dim; i++)
 			strain_gp[v] += bmat[v][i] * elem_disp[i];

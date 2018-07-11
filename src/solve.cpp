@@ -37,7 +37,7 @@ void micropp_t::solve()
 	ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
 }
 
-void micropp_t::newton_raphson(bool * nl_flag, int *its, double *err)
+void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 {
 	INST_START;
 

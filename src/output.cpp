@@ -58,13 +58,13 @@ void micropp_t::write_vtu(int time_step, int gp_id)
 
 	ofstream file;
 	file.open(fname_vtu);
-	file << "<?xml version=\"1.0\"?>" << endl;
-	file << "<VTKFile type=\"UnstructuredGrid\""
-		 " version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
-	file << "<UnstructuredGrid>" << endl << "<Piece NumberOfPoints=\"" << nn;
-	file << "\" NumberOfCells=\"" << nelem << "\">" << "\n<Points>" << endl;
-	file << "<DataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\""
-			 " format=\"ascii\">" << endl;
+
+	file << "<?xml version=\"1.0\"?>\n"
+	     <<	"<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
+	     << "<UnstructuredGrid>\n"
+	     << "<Piece NumberOfPoints=\"" << nn << "\" NumberOfCells=\"" << nelem << "\">\n"
+	     << "<Points>\n"
+	     << "<DataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
 	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
@@ -76,7 +76,7 @@ void micropp_t::write_vtu(int time_step, int gp_id)
 			}
 		}
 	}
-	file << "</DataArray>" << endl << "</Points>" << endl << "<Cells>" << endl;
+	file << "</DataArray>\n</Points>\n<Cells>" << endl;
 
 	file << "<DataArray type=\"Int32\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int ez = 0; ez < nez; ez++) {
