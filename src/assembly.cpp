@@ -35,37 +35,37 @@ void micropp_t::set_displ(double *eps)
 	if (dim == 2) {
 		// y = 0
 		for (int i = 0; i < nx; i++) {
-			double xcoor = i * dx;
-			double ycoor = 0.0;
-			double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
-			double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
+			const double xcoor = i * dx;
+			const double ycoor = 0.0;
+			const double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
+			const double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
 			u[i * dim] = dux;
 			u[i * dim + 1] = duy;
 		}
 		// y = ly
 		for (int i = 0; i < nx; i++) {
-			double xcoor = i * dx;
-			double ycoor = ly;
-			double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
-			double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
+			const double xcoor = i * dx;
+			const double ycoor = ly;
+			const double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
+			const double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
 			u[(i + (ny - 1) * nx) * dim] = dux;
 			u[(i + (ny - 1) * nx) * dim + 1] = duy;
 		}
 		// x = 0
 		for (int i = 0; i < ny - 2; i++) {
-			double xcoor = 0.0;
-			double ycoor = (i + 1) * dy;
-			double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
-			double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
+			const double xcoor = 0.0;
+			const double ycoor = (i + 1) * dy;
+			const double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
+			const double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
 			u[(i + 1) * nx * dim] = dux;
 			u[(i + 1) * nx * dim + 1] = duy;
 		}
 		// x = lx
 		for (int i = 0; i < ny - 2; i++) {
-			double xcoor = lx;
-			double ycoor = (i + 1) * dy;
-			double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
-			double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
+			const double xcoor = lx;
+			const double ycoor = (i + 1) * dy;
+			const double dux = eps[0] * xcoor + 0.5 * eps[2] * ycoor;
+			const double duy = 0.5 * eps[2] * xcoor + eps[1] * ycoor;
 			u[((i + 2) * nx - 1) * dim] = dux;
 			u[((i + 2) * nx - 1) * dim + 1] = duy;
 		}
@@ -75,13 +75,13 @@ void micropp_t::set_displ(double *eps)
 		// z = 0
 		for (int i = 0; i < nx; i++) {
 			for (int j = 0; j < ny; j++) {
-				int n = nod_index(i, j, 0);
-				double xcoor = i * dx;
-				double ycoor = j * dy;
-				double zcoor = 0.0;
-				double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
-				double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
-				double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
+				const int n = nod_index(i, j, 0);
+				const double xcoor = i * dx;
+				const double ycoor = j * dy;
+				const double zcoor = 0.0;
+				const double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
+				const double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
+				const double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
 				u[n * dim] = dux;
 				u[n * dim + 1] = duy;
 				u[n * dim + 2] = duz;
@@ -106,13 +106,13 @@ void micropp_t::set_displ(double *eps)
 		// y = 0
 		for (int i = 0; i < nx; i++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(i, 0, k);
-				double xcoor = i * dx;
-				double ycoor = 0.0;
-				double zcoor = k * dz;
-				double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
-				double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
-				double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
+				const int n = nod_index(i, 0, k);
+				const double xcoor = i * dx;
+				const double ycoor = 0.0;
+				const double zcoor = k * dz;
+				const double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
+				const double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
+				const double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
 				u[n * dim] = dux;
 				u[n * dim + 1] = duy;
 				u[n * dim + 2] = duz;
@@ -122,13 +122,13 @@ void micropp_t::set_displ(double *eps)
 		// y = ly
 		for (int i = 0; i < nx; i++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(i, ny - 1, k);
-				double xcoor = i * dx;
-				double ycoor = ly;
-				double zcoor = k * dz;
-				double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
-				double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
-				double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
+				const int n = nod_index(i, ny - 1, k);
+				const double xcoor = i * dx;
+				const double ycoor = ly;
+				const double zcoor = k * dz;
+				const double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
+				const double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
+				const double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
 				u[n * dim] = dux;
 				u[n * dim + 1] = duy;
 				u[n * dim + 2] = duz;
@@ -138,13 +138,13 @@ void micropp_t::set_displ(double *eps)
 		// x=0
 		for (int j = 1; j < ny - 1; j++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(0, j, k);
-				double xcoor = 0.0;
-				double ycoor = j * dy;
-				double zcoor = k * dz;
-				double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
-				double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
-				double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
+				const int n = nod_index(0, j, k);
+				const double xcoor = 0.0;
+				const double ycoor = j * dy;
+				const double zcoor = k * dz;
+				const double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
+				const double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
+				const double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
 				u[n * dim] = dux;
 				u[n * dim + 1] = duy;
 				u[n * dim + 2] = duz;
@@ -154,13 +154,13 @@ void micropp_t::set_displ(double *eps)
 		// x=lx
 		for (int j = 1; j < ny - 1; j++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(nx - 1, j, k);
-				double xcoor = lx;
-				double ycoor = j * dy;
-				double zcoor = k * dz;
-				double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
-				double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
-				double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
+				const int n = nod_index(nx - 1, j, k);
+				const double xcoor = lx;
+				const double ycoor = j * dy;
+				const double zcoor = k * dz;
+				const double dux = eps[0] * xcoor + 0.5 * eps[3] * ycoor + 0.5 * eps[4] * zcoor;
+				const double duy = 0.5 * eps[3] * xcoor + eps[1] * ycoor + 0.5 * eps[5] * zcoor;
+				const double duz = 0.5 * eps[4] * xcoor + 0.5 * eps[5] * ycoor + eps[2] * zcoor;
 				u[n * dim] = dux;
 				u[n * dim + 1] = duy;
 				u[n * dim + 2] = duz;
@@ -170,42 +170,42 @@ void micropp_t::set_displ(double *eps)
 	}
 }
 
-double micropp_t::assembly_rhs(bool * non_linear)
+double micropp_t::assembly_rhs(bool *non_linear)
 {
-	int index[3 * 8];
-	int n0, n1, n2, n3, n4, n5, n6, n7;
+	INST_START;
+
 	bool non_linear_one_elem = false;
 	*non_linear = false;
 
-	for (int i = 0; i < nn * dim; i++)
+	for (int i = 0; i < nn * dim; ++i)
 		b[i] = 0.0;
 
 	if (dim == 2) {
 
 		double be[2 * 4];
 
-		for (int ex = 0; ex < nx - 1; ex++) {
-			for (int ey = 0; ey < ny - 1; ey++) {
+		for (int ex = 0; ex < nx - 1; ++ex) {
+			for (int ey = 0; ey < ny - 1; ++ey) {
 
-				n0 = ey * nx + ex;
-				n1 = ey * nx + ex + 1;
-				n2 = (ey + 1) * nx + ex + 1;
-				n3 = (ey + 1) * nx + ex;
+				const int n[4] = { ey * nx + ex,
+				                   ey * nx + ex + 1,
+				                   (ey + 1) * nx + ex + 1,
+				                   (ey + 1) * nx + ex };
 
-				index[0] = n0 * dim;
-				index[1] = n0 * dim + 1;
-				index[2] = n1 * dim;
-				index[3] = n1 * dim + 1;
-				index[4] = n2 * dim;
-				index[5] = n2 * dim + 1;
-				index[6] = n3 * dim;
-				index[7] = n3 * dim + 1;
+				const int index[2 * 4] = { n[0] * dim,
+				                           n[0] * dim + 1,
+				                           n[1] * dim,
+				                           n[1] * dim + 1,
+				                           n[2] * dim,
+				                           n[2] * dim + 1,
+				                           n[3] * dim,
+				                           n[3] * dim + 1 };
 
 				get_elem_rhs2D(ex, ey, &non_linear_one_elem, be);
-				if (non_linear_one_elem == true)
+				if (non_linear_one_elem)
 					*non_linear = true;
 
-				for (int i = 0; i < npe * dim; i++)
+				for (int i = 0; i < npe * dim; ++i)
 					b[index[i]] += be[i];	// assembly
 
 			}
@@ -235,35 +235,32 @@ double micropp_t::assembly_rhs(bool * non_linear)
 	} else if (dim == 3) {
 
 		double be[3 * 8];
+		int index[3 * 8];
+
 		for (int ex = 0; ex < nx - 1; ex++) {
 			for (int ey = 0; ey < ny - 1; ey++) {
 				for (int ez = 0; ez < nz - 1; ez++) {
 
-					n0 = ez * (nx * ny) + ey * nx + ex;
-					n1 = ez * (nx * ny) + ey * nx + ex + 1;
-					n2 = ez * (nx * ny) + (ey + 1) * nx + ex + 1;
-					n3 = ez * (nx * ny) + (ey + 1) * nx + ex;
-					n4 = n0 + nx * ny;
-					n5 = n1 + nx * ny;
-					n6 = n2 + nx * ny;
-					n7 = n3 + nx * ny;
+					const int n[] = { ez * (nx * ny) + ey * nx + ex,
+					                  ez * (nx * ny) + ey * nx + ex + 1,
+					                  ez * (nx * ny) + (ey + 1) * nx + ex + 1,
+					                  ez * (nx * ny) + (ey + 1) * nx + ex,
+					                  n[0] + nx * ny,
+					                  n[1] + nx * ny,
+					                  n[2] + nx * ny,
+					                  n[3] + nx * ny };
 
-					for (int d = 0; d < dim; d++) {
-						index[0 * dim + d] = n0 * dim + d;
-						index[1 * dim + d] = n1 * dim + d;
-						index[2 * dim + d] = n2 * dim + d;
-						index[3 * dim + d] = n3 * dim + d;
-						index[4 * dim + d] = n4 * dim + d;
-						index[5 * dim + d] = n5 * dim + d;
-						index[6 * dim + d] = n6 * dim + d;
-						index[7 * dim + d] = n7 * dim + d;
+					for (int j = 0; j < 8; ++j) {
+						for (int d = 0; d < dim; ++d) {
+							index[j * dim + d] = n[j] * dim + d;
+						}
 					}
 
 					get_elem_rhs3D(ex, ey, ez, &non_linear_one_elem, be);
-					if (non_linear_one_elem == true)
+					if (non_linear_one_elem)
 						*non_linear = true;
 
-					for (int i = 0; i < npe * dim; i++)
+					for (int i = 0; i < npe * dim; ++i)
 						b[index[i]] += be[i];
 
 				}
@@ -274,7 +271,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 		// z=0
 		for (int i = 0; i < nx; i++) {
 			for (int j = 0; j < ny; j++) {
-				int n = nod_index(i, j, 0);
+				const int n = nod_index(i, j, 0);
 				for (int d = 0; d < dim; d++)
 					b[n * dim + d] = 0.0;
 			}
@@ -282,7 +279,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 		// z = lx
 		for (int i = 0; i < nx; i++) {
 			for (int j = 0; j < ny; j++) {
-				int n = nod_index(i, j, nz - 1);
+				const int n = nod_index(i, j, nz - 1);
 				for (int d = 0; d < dim; d++)
 					b[n * dim + d] = 0.0;
 			}
@@ -290,7 +287,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 		// y = 0
 		for (int i = 0; i < nx; i++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(i, 0, k);
+				const int n = nod_index(i, 0, k);
 				for (int d = 0; d < dim; d++)
 					b[n * dim + d] = 0.0;
 			}
@@ -298,7 +295,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 		// y = ly
 		for (int i = 0; i < nx; i++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(i, ny - 1, k);
+				const int n = nod_index(i, ny - 1, k);
 				for (int d = 0; d < dim; d++)
 					b[n * dim + d] = 0.0;
 			}
@@ -306,7 +303,7 @@ double micropp_t::assembly_rhs(bool * non_linear)
 		// x=0
 		for (int j = 1; j < ny - 1; j++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(0, j, k);
+				const int n = nod_index(0, j, k);
 				for (int d = 0; d < dim; d++)
 					b[n * dim + d] = 0.0;
 			}
@@ -314,19 +311,18 @@ double micropp_t::assembly_rhs(bool * non_linear)
 		// x=lx
 		for (int j = 1; j < ny - 1; j++) {
 			for (int k = 1; k < nz - 1; k++) {
-				int n = nod_index(nx - 1, j, k);
+				const int n = nod_index(nx - 1, j, k);
 				for (int d = 0; d < dim; d++)
 					b[n * dim + d] = 0.0;
 			}
 		}
-
 	}
 
-	for (int i = 0; i < nn * dim; i++)
+	for (int i = 0; i < nn * dim; ++i)
 		b[i] = -b[i];
 
 	double norm = 0.0;
-	for (int i = 0; i < nn * dim; i++)
+	for (int i = 0; i < nn * dim; ++i)
 		norm += b[i] * b[i];
 	norm = sqrt(norm);
 
@@ -369,6 +365,7 @@ void micropp_t::assembly_mat()
 
 void micropp_t::get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
 {
+	INST_START;
 
 	double nu, E;
 	double ctan[3][3];
@@ -376,8 +373,7 @@ void micropp_t::get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
 
 	int e = glo_elem3D(ex, ey, 0);
 
-	material_t material;
-	get_material(e, material);
+	const material_t material = get_material(e);
 
 	E = material.E;
 	nu = material.nu;
@@ -448,9 +444,9 @@ void micropp_t::get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4])
 
 void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 8])
 {
-	int e = glo_elem3D(ex, ey, ez);
-	material_t material;
-	get_material(e, material);
+	INST_START;
+	const int e = glo_elem3D(ex, ey, ez);
+	const material_t material = get_material(e);
 	double ctan[6][6];
 
 	/*
@@ -476,18 +472,18 @@ void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 
 
 		} else {
 
-			for (int i = 0; i < 6; i++)
-				for (int j = 0; j < 6; j++)
+			for (int i = 0; i < 6; ++i)
+				for (int j = 0; j < 6; ++j)
 					ctan[i][j] = 0.0;
 
-			for (int i = 0; i < 3; i++)
-				for (int j = 0; j < 3; j++)
+			for (int i = 0; i < 3; ++i)
+				for (int j = 0; j < 3; ++j)
 					ctan[i][j] += material.lambda;
 
-			for (int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; ++i)
 				ctan[i][i] += 2 * material.mu;
 
-			for (int i = 3; i < 6; i++)
+			for (int i = 3; i < 6; ++i)
 				ctan[i][i] += material.mu;
 
 		}
@@ -514,6 +510,7 @@ void micropp_t::get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 
 
 void micropp_t::get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[6][6])
 {
+	INST_START;
 	bool non_linear;
 	double stress_pert[6], strain_pert[6], strain_0[6], d_strain = 1.0e-8;
 	get_strain3D(ex, ey, ez, gp, strain_0);
@@ -537,12 +534,12 @@ void micropp_t::get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[6
 
 void micropp_t::get_ctan_plast_exact(int ex, int ey, int ez, int gp, double ctan[6][6])
 {
+	INST_START;
 	double strain[6];
 	int e = glo_elem3D(ex, ey, ez);
 	get_strain3D(ex, ey, ez, gp, strain);
 
-	material_t material;
-	get_material(e, material);
+	const material_t material = get_material(e);
 
 	for (int i = 0; i < 6; i++)
 		for (int j = 0; j < 6; j++)
@@ -574,6 +571,7 @@ void micropp_t::get_ctan_plast_exact(int ex, int ey, int ez, int gp, double ctan
 
 void micropp_t::get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[6][6])
 {
+	INST_START;
 	bool non_linear;
 	double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 1.0e-8;
 	get_strain3D(ex, ey, ez, gp, strain_0);
@@ -935,8 +933,7 @@ void micropp_t::get_stress2D(int ex, int ey, int gp, double strain_gp[3], bool *
 
 	int e = glo_elem3D(ex, ey, 0);
 
-	material_t material;
-	get_material(e, material);
+	const material_t material = get_material(e);
 
 	E = material.E;
 	nu = material.nu;
@@ -980,8 +977,7 @@ void micropp_t::get_stress3D(int ex, int ey, int ez, int gp, double eps[6],
 
 	double ctan[6][6];
 	int e = glo_elem3D(ex, ey, ez);
-	material_t material;
-	get_material(e, material);
+	const material_t material = get_material(e);
 
 	if (material.plasticity == true) {
 		double alpha_old, alpha_new, eps_p_old[6], eps_p_new[6];
@@ -1008,7 +1004,7 @@ void micropp_t::get_stress3D(int ex, int ey, int ez, int gp, double eps[6],
 
 }
 
-void micropp_t::plastic_step(material_t *material, double eps[6],
+void micropp_t::plastic_step(const material_t *material, double eps[6],
                              double eps_p_old[6], double alpha_old,
                              double eps_p_new[6], double *alpha_new,
                              bool *non_linear, double stress[6])
@@ -1065,7 +1061,7 @@ void micropp_t::plastic_step(material_t *material, double eps[6],
 		stress[i] -= 2 * material->mu * dl * normal[i];
 }
 
-void micropp_t::get_material(int e, material_t & material)
+material_t micropp_t::get_material(const int e)
 {
 	int mat_num;
 	if (micro_type == 0)
@@ -1080,14 +1076,7 @@ void micropp_t::get_material(int e, material_t & material)
 		else
 			mat_num = 1;
 
-	material.E = material_list[mat_num].E;
-	material.nu = material_list[mat_num].nu;
-	material.Sy = material_list[mat_num].Sy;
-	material.Ka = material_list[mat_num].Ka;
-	material.mu = material_list[mat_num].mu;
-	material.k = material_list[mat_num].k;
-	material.lambda = material_list[mat_num].lambda;
-	material.plasticity = material_list[mat_num].plasticity;
+	return material_list[mat_num];
 }
 
 void micropp_t::get_strain2D(int ex, int ey, int gp, double *strain_gp)

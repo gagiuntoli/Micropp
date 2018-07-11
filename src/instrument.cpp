@@ -43,8 +43,8 @@ void instrument::finalize()
 
 		size_t cont = 0;
 		cout << "# Final execution report: total time = " << elapsed << endl;
-		cout << setw(6) << left << "# No"
-		     << setw(20) << "function"
+		cout << setw(6) << left << "#No"
+		     << setw(25) << "function"
 		     << setw(8) << right << "calls"
 		     << setw(16) << "total time"
 		     << setw(16) << "percent"
@@ -67,7 +67,7 @@ void instrument::finalize()
 			const double relative = double(stdev) * 100 / mean;
 
 			cout << setw(6) << left << cont++
-			     << setw(20) << f.first
+			     << setw(25) << f.first
 			     << setw(8) << right << entries
 			     << setw(16) << total
 			     << setw(16) << percent

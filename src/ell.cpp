@@ -25,6 +25,7 @@
 #include <cmath>
 
 #include "ell.hpp"
+#include "instrument.hpp"
 
 #define nod_index(i,j,k) ((k)*nx*ny + (j)*nx + (i))
 
@@ -48,6 +49,7 @@ int ell_set_zero_mat(ell_matrix *m)
 
 void ell_mvp(const ell_matrix *m, const double *x, double *y)
 {
+	INST_START;
 	//  y = m * x
 	for (int i = 0; i < m->nrow; i++) {
 		y[i] = 0;
@@ -218,6 +220,7 @@ int ell_print(ell_matrix *m)
 void ell_add_struct2D(ell_matrix *m, int ex, int ey, double *Ae,
                     int nFields, int nx, int ny)
 {
+	INST_START;
 	// assembly Ae in 2D structured grid representation
 	// nFields : number of scalar components on each node
 
@@ -249,6 +252,7 @@ void ell_add_struct2D(ell_matrix *m, int ex, int ey, double *Ae,
 void ell_add_struct3D(ell_matrix *m, int ex, int ey, int ez, double *Ae,
                     int nFields, int nx, int ny, int nz)
 {
+	INST_START;
 	// assembly Ae in 3D structured grid representation
 	// nFields : number of scalar components on each node
 
@@ -425,6 +429,7 @@ void ell_set_bc_2D(ell_matrix *m, int nFields, int nx, int ny)
 
 void ell_set_bc_3D(ell_matrix *m, int nFields, int nx, int ny, int nz)
 {
+	INST_START;
 	// Sets 1 on the diagonal of the boundaries and does 0 on the columns corresponding to that values
 	const int nnz = m->nnz;
 	double * const mvals = m->vals;
