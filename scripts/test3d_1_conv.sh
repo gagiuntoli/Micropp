@@ -1,6 +1,18 @@
 #!/bin/bash
 
-EXEC=../build_release/test/test3d_1 
+EXEC=../../build_release/test/test3d_1 
+
+i=0
+out_folder="output_"$i
+
+until [ ! -d $out_folder ]
+do
+   i=$(($i+1))
+   out_folder="output_"$i
+done
+echo $out_folder
+mkdir $out_folder
+cd $out_folder
 
 function generic {
 
@@ -37,24 +49,27 @@ done
 function uniform {
 
 nn_size=( 2 4 6 8 )
-dir=0 # sigxx[0] sigyy[1] sigzz[2] sigxy[3] sigxz[4] sigyz[5] 
+dires=( 0 1 2 3 4 5 ) # sigxx[0] sigyy[1] sigzz[2] sigxy[3] sigxz[4] sigyz[5] 
 
-for nn in ${nn_size[@]}; do 
-   echo $nn
-   $EXEC $nn $nn $nn $dir 100 > /dev/null
-   mv micropp_eps_sig_ctan.dat micropp_epssig_${nn}.dat
+for d in ${dires[@]}; do
+  for nn in ${nn_size[@]}; do 
+     echo "dir = " $d " nn = " $nn
+     $EXEC $nn $nn $nn $d 100 > /dev/null
+     mv micropp_eps_sig_ctan.dat micropp_epssig_${nn}.dat
+  done
+
+  echo "set term png ; set output \"curves_$d.png\";" > gnuplot.in
+  echo "plot \\" >> gnuplot.in
+
+  for nn in ${nn_size[@]}; do 
+     echo "\"micropp_epssig_${nn}.dat\" u $(($d+1)):$(($d+7)) w lp title '${nn}',\\" >> gnuplot.in
+  done
+
+  gnuplot gnuplot.in
 done
-
-echo "set term png ; set output \"curves.png\";" > gnuplot.in
-echo "plot \\" >> gnuplot.in
-
-for nn in ${nn_size[@]}; do 
-   echo "\"micropp_epssig_${nn}.dat\" u $((dir+1)):$((dir+7)) w lp title '${nn}',\\" >> gnuplot.in
-done
-
-gnuplot gnuplot.in
 
 }
 
 #generic
 uniform
+cd -
