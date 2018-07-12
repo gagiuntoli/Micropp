@@ -60,17 +60,16 @@ int main(int argc, char **argv)
 
 	int mat_types[nmaterials] = {1, 0};	// dos materiales lineales (type = 0)
 
-	double mat_params[nmaterials * MAX_MAT_PARAM] =	{
-		// Material 0
-		1.0e6,	// E
-		0.3,	// nu
-		5.0e4,	// Sy
-		5.0e4,	// Ka
-		// Material 1
-		1.0e6,
-		0.3,
-		1.0e4,
-		0.0e-1 };
+	double mat_params[2 * MAX_MAT_PARAM];
+	mat_params[0 * MAX_MAT_PARAM + 0] = 1.0e6; // E
+	mat_params[0 * MAX_MAT_PARAM + 1] = 0.3;   // nu
+	mat_params[0 * MAX_MAT_PARAM + 2] = 5.0e4; // Sy
+	mat_params[0 * MAX_MAT_PARAM + 3] = 5.0e4; // Ka
+
+ 	mat_params[1 * MAX_MAT_PARAM + 0] = 1.0e6;
+	mat_params[1 * MAX_MAT_PARAM + 1] = 0.3;
+	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
+	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
 	micropp_t micro(dim, size, micro_type, micro_params, mat_types, mat_params);
 
@@ -119,6 +118,7 @@ int main(int argc, char **argv)
 		}
 
 		micro.update_vars();
+		micro.output (t, 1);
 		micro.write_info_files();
 		cout << endl;
 	}
