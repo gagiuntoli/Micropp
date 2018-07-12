@@ -28,10 +28,10 @@ using namespace std;
 static micropp_t* micro = NULL;
 
 extern "C" {
-	void micropp_construct_(int *dim, int size[3], int *micro_type,
+	void micropp_construct_(int *dim, int ngp, int size[3], int *micro_type,
 	                        double *micro_params, int *mat_types, double *params)
 	{
-		micro = new micropp_t(*dim, size, *micro_type, micro_params, mat_types, params); 
+		micro = new micropp_t(*dim, ngp, size, *micro_type, micro_params, mat_types, params); 
 	}
 
 	void micropp_output_(int *tstep, int *gp_id)

@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 	mat_params[1*MAX_MAT_PARAM + 0] = 1.0e6; // E
 	mat_params[1*MAX_MAT_PARAM + 1] = 0.25;  // nu
 
-	micropp_t micro (dim, size, micro_type, micro_params, mat_types, mat_params);
+	micropp_t micro (dim, 1, size, micro_type, micro_params, mat_types, mat_params);
 
 	double sig[6], ctan[36];
 	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -88,10 +88,9 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += d_eps;
 
-		micro.set_macro_strain(1, eps);
+		micro.set_macro_strain(0, eps);
 		micro.homogenize();
-
-		micro.get_macro_stress(1, sig);
+		micro.get_macro_stress(0, sig);
 
 		micro.update_vars();
 		micro.write_info_files ();

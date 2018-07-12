@@ -91,77 +91,61 @@ double micropp_t::get_inv_2(const double *tensor)
 
 void micropp_t::set_macro_strain(const int gp_id, const double *macro_strain)
 {
-	list < gp_t >::iterator gp;
-	for (gp = gauss_list.begin(); gp != gauss_list.end(); ++gp) {
-		if (gp->id == gp_id) {
-			for (int i = 0; i < nvoi; ++i)
-				gp->macro_strain[i] = macro_strain[i];
-			break;
-		}
-	}
-	if (gp == gauss_list.end()) {
-		gp_t gp_n;
-		gp_n.id = gp_id;
-		gp_n.int_vars_n = NULL;
-		gp_n.int_vars_k = NULL;
-		for (int i = 0; i < nvoi; i++)
-			gp_n.macro_strain[i] = macro_strain[i];
-		gp_n.inv_max = -1.0e10;
-		gauss_list.push_back(gp_n);
-	}
+	assert(gp_id < ngp);
+	assert(ngp > 0);
+	for (int i = 0; i < nvoi; ++i)
+		gp_list[gp_id].macro_strain[i] = macro_strain[i];
 }
 
 void micropp_t::get_macro_stress(const int gp_id, double *macro_stress)
 {
-	for (auto const &gp:gauss_list)
-		if (gp.id == gp_id) {
-			for (int i = 0; i < nvoi; i++)
-				macro_stress[i] = gp.macro_stress[i];
-			break;
-		}
+	assert(gp_id < ngp);
+	assert(ngp > 0);
+	for (int i = 0; i < nvoi; ++i)
+		macro_stress[i] = gp_list[gp_id].macro_stress[i];
 }
 
 void micropp_t::get_macro_ctan(const int gp_id, double *macro_ctan)
 {
-	for (auto const &gp:gauss_list)
-		if (gp.id == gp_id) {
-			for (int i = 0; i < (nvoi * nvoi); ++i)
-				macro_ctan[i] = gp.macro_ctan[i];
-			break;
-		}
+	assert(gp_id < ngp);
+	assert(ngp > 0);
+	for (int i = 0; i < (nvoi * nvoi); ++i)
+		macro_ctan[i] = gp_list[gp_id].macro_ctan[i];
 }
 
 void micropp_t::homogenize()
 {
 	INST_START;
 
-	for (auto & gp:gauss_list) {
+	for (int igp = 0; igp < ngp; ++igp) {
+		gp_t * const gp_ptr = &gp_list[igp];
 
-		if (!gp.int_vars_n)
+		if (!gp_ptr->allocated)
 			for (int i = 0; i < num_int_vars; ++i)
 				vars_old[i] = 0.0;
 		else
 			for (int i = 0; i < num_int_vars; ++i)
-				vars_old[i] = gp.int_vars_n[i];
+				vars_old[i] = gp_ptr->int_vars_n[i];
 
 		inv_max = -1.0e10;
 
-		if ((is_linear(gp.macro_strain) == true) && (gp.int_vars_n == NULL)) {
+		if ((is_linear(gp_ptr->macro_strain) == true) && (!gp_ptr->allocated)) {
 
 			// S = CL : E
 			for (int i = 0; i < nvoi; ++i) {
-				gp.macro_stress[i] = 0.0;
+				double tmp = 0;
 				for (int j = 0; j < nvoi; ++j)
-					gp.macro_stress[i] += ctan_lin[i * nvoi + j] * gp.macro_strain[j];
+					tmp += ctan_lin[i * nvoi + j] * gp_ptr->macro_strain[j];
+				gp_ptr->macro_stress[i] = tmp;
 			}
 			// C = CL
 			for (int i = 0; i < nvoi; ++i)
 				for (int j = 0; j < nvoi; ++j)
-					gp.macro_ctan[i * nvoi + j] = ctan_lin[i * nvoi + j];
+					gp_ptr->macro_ctan[i * nvoi + j] = ctan_lin[i * nvoi + j];
 
 			for (int i = 0; i < (1 + nvoi); ++i) {
-				gp.nr_its[i] = 0;
-				gp.nr_err[i] = 0.0;
+				gp_ptr->nr_its[i] = 0;
+				gp_ptr->nr_err[i] = 0.0;
 			}
 
 		} else {
@@ -170,52 +154,48 @@ void micropp_t::homogenize()
 			int nr_its;
 			bool nl_flag;
 			double nr_err;
-			set_displ(gp.macro_strain);
+			set_displ(gp_ptr->macro_strain);
 			newton_raphson(&nl_flag, &nr_its, &nr_err);
-			calc_ave_stress(gp.macro_stress);
+			calc_ave_stress(gp_ptr->macro_stress);
 
-			if (nl_flag == true) {
-				if (gp.int_vars_n == NULL) {
-					gp.int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
-					gp.int_vars_n = (double *) malloc(num_int_vars * sizeof(double));
-					for (int i = 0; i < num_int_vars; ++i)
-						gp.int_vars_n[i] = 0.0;
-				}
+			if (nl_flag) {
+				if (!gp_ptr->allocated)
+					gp_ptr->allocate(num_int_vars, nn, dim);
+
 				for (int i = 0; i < num_int_vars; ++i)
-					gp.int_vars_k[i] = vars_new[i];
+					gp_ptr->int_vars_k[i] = vars_new[i];
 			}
 
-			gp.nr_its[0] = nr_its;
-			gp.nr_err[0] = nr_err;
+			gp_ptr->nr_its[0] = nr_its;
+			gp_ptr->nr_err[0] = nr_err;
 
 			// CTAN
-			double eps_1[6], sig_0[6], sig_1[6], dEps = 1.0e-8;
+			double eps_1[6], sig_0[6], sig_1[6];
+			const double dEps = 1.0e-8;
 			for (int v = 0; v < nvoi; ++v)
-				sig_0[v] = gp.macro_stress[v];
+				sig_0[v] = gp_ptr->macro_stress[v];
 
 			for (int i = 0; i < nvoi; ++i) {
 				for (int v = 0; v < nvoi; ++v)
-					eps_1[v] = gp.macro_strain[v];
+					eps_1[v] = gp_ptr->macro_strain[v];
 				eps_1[i] += dEps;
 
 				set_displ(eps_1);
 				newton_raphson(&nl_flag, &nr_its, &nr_err);
 				calc_ave_stress(sig_1);
 				for (int v = 0; v < nvoi; ++v)
-					gp.macro_ctan[v * nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
+					gp_ptr->macro_ctan[v * nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
 
-				gp.nr_its[1 + i] = nr_its;
-				gp.nr_err[1 + i] = nr_err;
+				gp_ptr->nr_its[i + 1] = nr_its;
+				gp_ptr->nr_err[i + 1] = nr_err;
 			}
 		}
-		gp.inv_max = inv_max;
+		gp_ptr->inv_max = inv_max;
 	}
 }
 
 void micropp_t::update_vars()
 {
-	for (auto const &gp:gauss_list)
-		if (gp.int_vars_n != NULL)
-			for (int i = 0; i < num_int_vars; ++i)
-				gp.int_vars_n[i] = gp.int_vars_k[i];
+	for (int igp = 0; igp < ngp; ++igp)
+		gp_list[igp].update_vars();
 }

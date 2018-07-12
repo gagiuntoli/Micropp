@@ -29,25 +29,22 @@ using namespace std;
 
 void micropp_t::output(int time_step, int gp_id)
 {
-	for (auto const &gp:gauss_list)
-		if (gp.id == gp_id) {
-			if (gp.int_vars_n != NULL)
-				for (int i = 0; i < num_int_vars; ++i)
-					vars_old[i] = gp.int_vars_n[i];
-			else
-				for (int i = 0; i < num_int_vars; ++i)
-					vars_old[i] = 0.0;
 
-			int nr_its;
-			bool nl_flag;
-			double nr_err;
-			set_displ((double *)gp.macro_strain);
-			newton_raphson(&nl_flag, &nr_its, &nr_err);
+	if (gp_list[gp_id].allocated)
+		for (int i = 0; i < num_int_vars; ++i)
+			vars_old[i] = gp_list[gp_id].int_vars_n[i];
+	else
+		for (int i = 0; i < num_int_vars; ++i)
+			vars_old[i] = 0.0;
 
-			calc_fields();
-			write_vtu(time_step, gp_id);
-			break;
-		}
+	int nr_its;
+	bool nl_flag;
+	double nr_err;
+	set_displ(gp_list[gp_id].macro_strain);
+	newton_raphson(&nl_flag, &nr_its, &nr_err);
+
+	calc_fields();
+	write_vtu(time_step, gp_id);
 }
 
 void micropp_t::write_vtu(int time_step, int gp_id)
@@ -198,15 +195,15 @@ void micropp_t::write_info_files()
 
 		file.open("micropp_convergence.dat", std::ios_base::app);
 		file << "# gp_id : ";
-		for (auto const &gp:gauss_list)
-			file << gp.id << " ";
+		for (int igp = 0 ; igp < ngp; ++igp)
+			file << igp << " ";
 		file << "\n# nl_flag [1] # inv_max [2] # inv_tol [3]" << endl << "# nr_its  [4] # nr_tol  [5]" << endl;
 		file.close();
 
 		file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
 		file << "# gp_id : ";
-		for (auto const &gp:gauss_list)
-			file << gp.id << " ";
+		for (int igp = 0 ; igp < ngp; ++igp)
+			file << igp << " ";
 		file
 			<< "\n# epsxx [1] # epsyy [2] # epszz[3] # epsxy[4]  # epsxz[5]  # epsyz[6]"
 			<< "\n# sigxx [7] # sigyy [8] # sigzz[9] # sigxy[10] # sigxz[11] # sigyz[12]" << endl;
@@ -214,8 +211,8 @@ void micropp_t::write_info_files()
 
 		file.open("micropp_int_vars_n.dat", std::ios_base::app);
 		file << "# gp_id : ";
-		for (auto const &gp:gauss_list)
-			file << gp.id << " ";
+		for (int igp = 0 ; igp < ngp; ++igp)
+			file << igp << " ";
 
 		file
 			<< "\n# eps_p_xx [1]  # eps_p_yy [2]  # eps_p_zz[3] # eps_p_xy[4]  # eps_p_xz[5]  # eps_p_yz[6]  # alpha[7]"  << endl;
@@ -224,13 +221,13 @@ void micropp_t::write_info_files()
 	}
 
 	file.open("micropp_convergence.dat", std::ios_base::app);
-	for (auto const &gp:gauss_list) {
+	for (int igp = 0 ; igp < ngp; ++igp) {
 		file << scientific;
-		file << setw(3) << ((gp.int_vars_n == NULL) ? 0 : 1) << " ";
-		file << setw(14) << gp.inv_max << " ";
+		file << setw(3) << ((gp_list[igp].int_vars_n == NULL) ? 0 : 1) << " ";
+		file << setw(14) << gp_list[igp].inv_max << " ";
 		for (int i = 0; i < (1 + nvoi); ++i) {
-			file << setw(14) << gp.nr_its[i] << " ";
-			file << setw(14) << gp.nr_err[i] << " ";
+			file << setw(14) << gp_list[igp].nr_its[i] << " ";
+			file << setw(14) << gp_list[igp].nr_err[i] << " ";
 		}
 		file << " | ";
 	}
@@ -238,23 +235,23 @@ void micropp_t::write_info_files()
 	file.close();
 
 	file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
-	for (auto const &gp:gauss_list) {
+	for (int igp = 0 ; igp < ngp; ++igp) {
 		for (int i = 0; i < 6; ++i)
-			file << setw(14) << gp.macro_strain[i] << " ";
+			file << setw(14) << gp_list[igp].macro_strain[i] << " ";
 		for (int i = 0; i < 6; ++i)
-			file << setw(14) << gp.macro_stress[i] << " ";
+			file << setw(14) << gp_list[igp].macro_stress[i] << " ";
 		for (int i = 0; i < 36; ++i)
-			file << setw(14) << gp.macro_ctan[i] << " ";
+			file << setw(14) << gp_list[igp].macro_ctan[i] << " ";
 		file << " | ";
 	}
 	file << endl;
 	file.close();
 
 	file.open("micropp_int_vars_n.dat", std::ios_base::app);
-	for (auto const &gp:gauss_list) {
+	for (int igp = 0 ; igp < ngp; ++igp) {
 		for (int i = 0; i < num_int_vars; ++i)
-			if (gp.int_vars_n != NULL)
-				file << setw(14) << gp.int_vars_n[i] << " ";
+			if (gp_list[igp].allocated)
+				file << setw(14) << gp_list[igp].int_vars_n[i] << " ";
 			else
 				file << setw(14) << 0.0 << " ";
 		file << " | ";

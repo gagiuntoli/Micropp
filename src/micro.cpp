@@ -27,9 +27,10 @@
 #include "instrument.hpp"
 #include "micro.hpp"
 
-micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
+micropp_t::micropp_t(const int _dim, const int _ngp, const int size[3], const int _micro_type,
                      const double *_micro_params, const int *mat_types, const double *params):
 	dim(_dim),
+	ngp(_ngp),
 
 	lx(_micro_params[0]),
 	ly(_micro_params[1]),
@@ -55,6 +56,8 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 
 	micro_type(_micro_type),
 	num_int_vars(nelem * 8 * NUM_VAR_GP),
+	gp_list(new gp_t[_ngp]()),
+
 	output_files_header(false)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
@@ -62,13 +65,13 @@ micropp_t::micropp_t(const int _dim, const int size[3], const int _micro_type,
 
 	assert(dim == 2 || dim == 3);
 
-
 	b = (double *) malloc(nn * dim * sizeof(double));
 	du = (double *) malloc(nn * dim * sizeof(double));
 	u = (double *) malloc(nn * dim * sizeof(double));
+
+	elem_type = (int *) malloc(nelem * sizeof(int));
 	elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
 	elem_strain = (double *) malloc(nelem * nvoi * sizeof(double));
-	elem_type = (int *) malloc(nelem * sizeof(int));
 	vars_old = (double *) malloc(num_int_vars * sizeof(double));
 	vars_new = (double *) malloc(num_int_vars * sizeof(double));
 
@@ -175,10 +178,7 @@ micropp_t::~micropp_t()
 	free(vars_old);
 	free(vars_new);
 
-	for (auto const &gp:gauss_list) {
-		free(gp.int_vars_n);
-		free(gp.int_vars_k);
-	}
+	delete [] gp_list;
 
 	free(solver.k);
 	free(solver.r);
@@ -189,12 +189,9 @@ micropp_t::~micropp_t()
 
 void micropp_t::get_nl_flag(int gp_id, int *non_linear)
 {
-	*non_linear = 0;
-	for (auto const &gp : gauss_list)
-		if (gp.id == gp_id) {
-			*non_linear = (gp.int_vars_n != NULL);
-			break;
-		}
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+	*non_linear = gp_list[gp_id].allocated;
 }
 
 int micropp_t::get_elem_type2D(int ex, int ey)
