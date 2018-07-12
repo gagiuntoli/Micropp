@@ -41,22 +41,29 @@ void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 {
 	INST_START;
 
-	*its = 0;
-	*err = 0.0;
+	int lits = 0;
+	double lerr = 0.0;
+
 	do {
-		*err = assembly_rhs(nl_flag);
-		if (*err < NR_MAX_TOL)
+		lerr = assembly_rhs(nl_flag);
+
+		if (lerr < NR_MAX_TOL)
 			break;
 
 		assembly_mat();
 
-		for (int i = 0; i < (nn * dim); i++)
+		for (int i = 0; i < (nn * dim); ++i)
 			du[i] = 0.0;
+
 		solve();
-		for (int i = 0; i < nn * dim; i++)
-			u[i] = u[i] + du[i];
 
-		*its++;
+		for (int i = 0; i < nn * dim; ++i)
+			u[i] += du[i];
 
-	} while ((*its < NR_MAX_ITS) && (*err > NR_MAX_TOL));
+		lits++;
+
+	} while ((lits < NR_MAX_ITS) && (lerr > NR_MAX_TOL));
+
+	*its = lits;
+	*err = lerr;
 }
