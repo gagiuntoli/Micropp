@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
-
+#include <cstring>
 #include <ctime>
 #include <cassert>
 
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	int dir = 2, ngp = 2;
 	double d_eps = 0.01;
 	double eps[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	double sig[6];
+	double sig[6], sig_test[2][3];
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;
@@ -115,7 +115,15 @@ int main(int argc, char **argv)
 			for (int i = 0; i < 6; ++i)
 				cout << setw(14) << sig[i] << " ";
 			cout << endl;
+
+            memcpy(sig_test[gp], sig, 3*sizeof(double));
 		}
+
+		for (int i = 0; i < 3; ++i)
+        	if(fabs(sig_test[1][i] - sig_test[0][i]) > 1.0e-4) {
+        		assert(fabs(sig_test[1][i] - sig_test[0][i]) < 1.0e-6);
+				exit(1);
+			}
 
 		micro.update_vars();
 		micro.output (t, 1);

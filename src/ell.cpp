@@ -143,6 +143,9 @@ int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
 			solver->k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz + shift * nFields + d * m->nnz + d];
 	}
 
+	for (int i = 0; i < nn*dim; i++)
+		x[i] = 0.0;
+
 	ell_mvp(m, x, solver->r);
 	for (int i = 0; i < m->nrow; i++)
 		solver->r[i] -= b[i];
