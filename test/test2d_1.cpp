@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
 		cout << "MacroStress = " << MacroStress[0] << " "
 		     << MacroStress[1] << " " << MacroStress[2] << endl;
 		cout << endl;
-		micro.output (t, 1);
+		micro.output (t, 0);
 	}
 	return 0;
 }

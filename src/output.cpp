@@ -29,7 +29,8 @@ using namespace std;
 
 void micropp_t::output(int time_step, int gp_id)
 {
-
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
 	if (gp_list[gp_id].allocated)
 		for (int i = 0; i < num_int_vars; ++i)
 			vars_old[i] = gp_list[gp_id].int_vars_n[i];
@@ -49,6 +50,9 @@ void micropp_t::output(int time_step, int gp_id)
 
 void micropp_t::write_vtu(int time_step, int gp_id)
 {
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+
 	std::stringstream fname_vtu_s;
 	fname_vtu_s << "micropp_" << gp_id << "_" << time_step << ".vtu";
 	std::string fname_vtu = fname_vtu_s.str();
