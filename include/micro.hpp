@@ -26,6 +26,8 @@
 #include <list>
 
 #include <cmath>
+#include <cassert>
+#include <cstring>
 
 #include "ell.hpp"
 
@@ -48,16 +50,66 @@
 
 using namespace std;
 
-struct gp_t {
-	int id;
-	int nr_its[7];
-	double *int_vars_n;
-	double *int_vars_k;
-	double macro_strain[6];
-	double macro_stress[6];
-	double macro_ctan[36];
-	double nr_err[7];
-	double inv_max;
+class gp_t {
+	private:
+		int size_u, size_int;
+	public:
+		int nr_its[7];
+		double *int_vars_n;
+		double *u_n;
+		double *int_vars_k;
+		double *u_k;
+		double macro_strain[6];
+		double macro_stress[6];
+		double macro_ctan[36];
+		double nr_err[7];
+		double inv_max;
+		bool allocated;
+
+		gp_t():
+			int_vars_n(nullptr),
+			u_n(nullptr),
+			int_vars_k(nullptr),
+			u_k(nullptr),
+			inv_max(-1.0),
+			allocated(false)
+		{}
+
+		~gp_t()
+		{
+			if (allocated) {
+				free(int_vars_n);
+				free(u_n);
+				free(int_vars_k);
+				free(u_k);
+			}
+		}
+
+		void allocate(const int num_int_vars, const int nn, const int dim)
+		{
+			assert(!allocated);
+
+			size_u = nn * dim * sizeof(double);
+			size_int = num_int_vars * sizeof(double);
+
+			const int size = nn * dim;
+			int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
+			int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
+			u_n = (double *) malloc(size_u);
+			u_k = (double *) malloc(size_int);
+
+			allocated = (int_vars_n && int_vars_k && u_n && u_k);
+			assert(allocated);
+		}
+
+
+		void update_vars()
+		{
+			if (allocated) {
+				memcpy(int_vars_n, int_vars_k, size_int);
+				memcpy(u_n, u_k, size_u);
+			}
+		}
 };
 
 struct material_t {
@@ -75,12 +127,13 @@ struct material_t {
 class micropp_t {
 
 	private:
-		const int dim;
+		const int dim, ngp;
 		const int nx, ny, nz, nn;
 		const int nex, ney, nez;
 		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
 		const int npe, nvoi, nelem;
 		const int micro_type, num_int_vars;
+		gp_t * const gp_list;
 
 		bool output_files_header;
 
@@ -89,19 +142,18 @@ class micropp_t {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[36];
 
-		list<gp_t> gauss_list;
-
 		ell_matrix A;
-		double * u;
-		double * du;
-		double * b;
 		ell_solver solver;
 
-		double * elem_stress;
-		double * elem_strain;
-		int * elem_type;
-		double * vars_old;
-		double * vars_new;
+		double *b;
+		double *du;
+		double *u;
+
+		int *elem_type;
+		double *elem_stress;
+		double *elem_strain;
+		double *vars_old;
+		double *vars_new;
 
 		double inv_max;
 
@@ -154,8 +206,9 @@ class micropp_t {
 
 	public:
 
-		micropp_t(const int dim, const int size[3], const int micro_type, const double *micro_params,
-		          const int *mat_types, const double *params);
+		micropp_t(const int dim, const int ngp,const int size[3], const int micro_type,
+		          const double *micro_params, const int *mat_types,
+		          const double *params);
 		~micropp_t();
 
 		void set_macro_strain(const int gp_id, const double *macro_strain);

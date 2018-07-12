@@ -71,12 +71,13 @@ int main(int argc, char **argv)
 	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
 	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
-	micropp_t micro(dim, size, micro_type, micro_params, mat_types, mat_params);
 
 	int dir = 2, ngp = 2;
 	double d_eps = 0.01;
 	double eps[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	double sig[6], sig_test[2][3];
+	
+	micropp_t micro(dim, ngp, size, micro_type, micro_params, mat_types, mat_params);
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;
