@@ -50,19 +50,19 @@ implicit none
   params(1*10 + 1) = 1.0e7;
   params(1*10 + 2) = 0.3;
 
-  call micropp_construct(dims, sizes, micro_type, micro_params, types, params)
+  call micropp_construct(dims, 1, sizes, micro_type, micro_params, types, params)
 
   strain(1) = 0.005
   strain(2) = 0.0
   strain(3) = 0.0
-  call micropp_set_macro_strain(69, strain) 
+  call micropp_set_macro_strain(0, strain)
   call micropp_homogenize()
-  call micropp_get_macro_stress(69, stress) 
+  call micropp_get_macro_stress(0, stress)
 
   WRITE(*,*) 'Stress : '
   WRITE(*,'(F12.2,F12.2,F12.2,A)') stress(1), stress(2), stress(3)
 
-  call micropp_get_macro_ctan(69, ctan) 
+  call micropp_get_macro_ctan(0, ctan)
   WRITE(*,*) 'Ctan : '
   WRITE(*,'(F12.2,F12.2,F12.2,A)') ctan(1), ctan(2), ctan(3)
   WRITE(*,'(F12.2,F12.2,F12.2,A)') ctan(4), ctan(5), ctan(6)

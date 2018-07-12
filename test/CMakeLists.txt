@@ -1,4 +1,6 @@
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # The test files I care only (create a list)
 set(testsources
   test2d_1.cpp

@@ -120,11 +120,13 @@ int main(int argc, char **argv)
             memcpy(sig_test[gp], sig, 3*sizeof(double));
 		}
 
-		for (int i = 0; i < 3; ++i)
-        	if(fabs(sig_test[1][i] - sig_test[0][i]) > 1.0e-4) {
-        		assert(fabs(sig_test[1][i] - sig_test[0][i]) < 1.0e-6);
-				exit(1);
-			}
+		cout << "Diff: \t";
+		for (int i = 0; i < 3; ++i) {
+			const double tmp = fabs(sig_test[1][i] - sig_test[0][i]);
+			cout << tmp << "\t";
+			assert(tmp < 1.0e-6);
+		}
+		cout << endl;
 
 		micro.update_vars();
 		micro.output (t, 1);
