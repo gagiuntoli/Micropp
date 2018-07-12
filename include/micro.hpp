@@ -105,10 +105,13 @@ class gp_t {
 
 		void update_vars()
 		{
-			if (allocated) {
-				memcpy(int_vars_n, int_vars_k, size_int);
-				memcpy(u_n, u_k, size_u);
-			}
+			double *tmp = int_vars_n;
+			int_vars_n = int_vars_k;
+			int_vars_k = tmp;
+
+			tmp = u_n;
+			u_n = u_k;
+			u_k = tmp;
 		}
 };
 
