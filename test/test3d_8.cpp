@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
+
 #include <cstring>
 #include <ctime>
 #include <cassert>
@@ -36,16 +37,17 @@ int main(int argc, char **argv)
 {
 
 	if (argc < 4) {
-		cerr << "Usage: " << argv[0] << " nx ny nz [steps]" << endl;
+		cerr << "Usage: " << argv[0] << " nx ny nz [ngp] [steps]" << endl;
 		return(1);
 	}
 
 	const int nx = atoi(argv[1]);
 	const int ny = atoi(argv[2]);
 	const int nz = atoi(argv[3]);
-	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
+	const int ngp = (argc > 4 ? atoi(argv[4]) : 2);
+	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 
-	assert(nx > 1 && ny > 1 && nz > 1);
+	assert(nx > 1 && ny > 1 && nz > 1 && ngp > 1 && time_steps > 0);
 
 	int size[dim] = {nx, ny, nz};
 
@@ -71,11 +73,12 @@ int main(int argc, char **argv)
 	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
 	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
-
-	int dir = 2, ngp = 2;
+	int dir = 2;
 	double d_eps = 0.01;
 	double eps[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	double sig[6], sig_test[2][3];
+	double sig[6], (*sig_test)[3];
+
+    sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
 	
 	micropp_t micro(dim, ngp, size, micro_type, micro_params, mat_types, mat_params);
 
@@ -120,13 +123,15 @@ int main(int argc, char **argv)
             memcpy(sig_test[gp], sig, 3*sizeof(double));
 		}
 
-		cout << "Diff: \t";
-		for (int i = 0; i < 3; ++i) {
-			const double tmp = fabs(sig_test[1][i] - sig_test[0][i]);
-			cout << tmp << "\t";
-			assert(tmp < 1.0e-6);
+		for (int gp = 1; gp < ngp; ++gp) {
+			cout << "Diff: \t";
+			for (int i = 0; i < 3; ++i) {
+				const double tmp = fabs(sig_test[gp][i] - sig_test[0][i]);
+				cout << tmp << "\t";
+				assert(tmp < 1.0e-9);
+			}
+			cout << endl;
 		}
-		cout << endl;
 
 		micro.update_vars();
 		micro.output (t, 1);
