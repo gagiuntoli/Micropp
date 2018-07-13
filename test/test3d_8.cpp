@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 			for (int i = 0; i < 3; ++i) {
 				const double tmp = fabs(sig_test[gp][i] - sig_test[0][i]);
 				cout << tmp << "\t";
-				assert(tmp < 1.0e-9);
+				assert(tmp < 1.0e-6);
 			}
 			cout << endl;
 		}

@@ -120,13 +120,6 @@ void micropp_t::homogenize()
 	for (int igp = 0; igp < ngp; ++igp) {
 		gp_t * const gp_ptr = &gp_list[igp];
 
-		if (!gp_ptr->allocated)
-			for (int i = 0; i < num_int_vars; ++i)
-				vars_old[i] = 0.0;
-		else
-			for (int i = 0; i < num_int_vars; ++i)
-				vars_old[i] = gp_ptr->int_vars_n[i];
-
 		inv_max = -1.0e10;
 
 		if ((is_linear(gp_ptr->macro_strain) == true) && (!gp_ptr->allocated)) {
@@ -150,10 +143,18 @@ void micropp_t::homogenize()
 
 		} else {
 
+			if (!gp_ptr->allocated)
+				for (int i = 0; i < num_int_vars; ++i)
+					vars_old[i] = 0.0;
+			else
+				for (int i = 0; i < num_int_vars; ++i)
+					vars_old[i] = gp_ptr->int_vars_n[i];
+
 			// SIGMA
 			int nr_its;
 			bool nl_flag;
 			double nr_err;
+
 			set_displ(gp_ptr->macro_strain);
 			newton_raphson(&nl_flag, &nr_its, &nr_err);
 			calc_ave_stress(gp_ptr->macro_stress);
