@@ -144,14 +144,12 @@ void micropp_t::homogenize()
 		} else {
 
 			if (!gp_ptr->allocated) {
-				for (int i = 0; i < num_int_vars; ++i)
-					vars_old[i] = 0.0;
-				for (int i = 0; i < nn * dim; ++i)
-					u[i] = 0.0;
+				memset(vars_old, 0.0, num_int_vars * sizeof(double));
+				memset(u, 0.0, nn * dim * sizeof(double));
 			} else {
 				for (int i = 0; i < num_int_vars; ++i)
 					vars_old[i] = gp_ptr->int_vars_n[i];
-				for (int i = 0; i < nn * dim; ++i)
+				for (int i = 0; i < (nn * dim); ++i)
 					u[i] = gp_ptr->u_n[i];
 			}
 

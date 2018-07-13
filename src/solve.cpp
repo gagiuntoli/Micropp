@@ -52,9 +52,7 @@ void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 
 		assembly_mat();
 
-		for (int i = 0; i < (nn * dim); ++i)
-			du[i] = 0.0;
-
+		memset(du, 0.0, nn * dim * sizeof(double));
 		solve();
 
 		for (int i = 0; i < nn * dim; ++i)
