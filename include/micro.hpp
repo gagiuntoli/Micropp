@@ -51,8 +51,6 @@
 using namespace std;
 
 class gp_t {
-	private:
-		int size_u, size_int;
 	public:
 		int nr_its[7];
 		double *int_vars_n;
@@ -89,14 +87,11 @@ class gp_t {
 		{
 			assert(!allocated);
 
-			size_u = nn * dim * sizeof(double);
-			size_int = num_int_vars * sizeof(double);
-
 			const int size = nn * dim;
 			int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
 			int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
-			u_n = (double *) malloc(size_u);
-			u_k = (double *) malloc(size_int);
+			u_n = (double *) malloc(size * sizeof(double));
+			u_k = (double *) malloc(size * sizeof(double));
 
 			allocated = (int_vars_n && int_vars_k && u_n && u_k);
 			assert(allocated);
