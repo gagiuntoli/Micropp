@@ -143,12 +143,17 @@ void micropp_t::homogenize()
 
 		} else {
 
-			if (!gp_ptr->allocated)
+			if (!gp_ptr->allocated) {
 				for (int i = 0; i < num_int_vars; ++i)
 					vars_old[i] = 0.0;
-			else
+				for (int i = 0; i < nn * dim; ++i)
+					u[i] = 0.0;
+			} else {
 				for (int i = 0; i < num_int_vars; ++i)
 					vars_old[i] = gp_ptr->int_vars_n[i];
+				for (int i = 0; i < nn * dim; ++i)
+					u[i] = gp_ptr->u_n[i];
+			}
 
 			// SIGMA
 			int nr_its;
@@ -165,6 +170,9 @@ void micropp_t::homogenize()
 
 				for (int i = 0; i < num_int_vars; ++i)
 					gp_ptr->int_vars_k[i] = vars_new[i];
+
+				for (int i = 0; i < nn * dim; ++i)
+					gp_ptr->u_k[i] = u[i];
 			}
 
 			gp_ptr->nr_its[0] = nr_its;
