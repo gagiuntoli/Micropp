@@ -148,10 +148,10 @@ class micropp_t {
 		double *u;
 
 		int *elem_type;
-		double *elem_stress;
-		double *elem_strain;
-		double *vars_old;
-		double *vars_new;
+		double * const elem_stress;
+		double * const elem_strain;
+		double * const vars_old_aux, *vars_old;
+		double * const vars_new_aux, *vars_new;
 
 		double inv_max;
 
