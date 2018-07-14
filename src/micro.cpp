@@ -62,7 +62,7 @@ micropp_t::micropp_t(const int _dim, const int _ngp, const int size[3], const in
 	elem_stress((double *) malloc(nelem * nvoi * sizeof(double))),
 	elem_strain((double *) malloc(nelem * nvoi * sizeof(double))),
 	vars_old_aux((double *) calloc(num_int_vars, sizeof(double))),
-	vars_new_aux((double *) calloc(num_int_vars, sizeof(double))),
+	vars_new_aux((double *) malloc(num_int_vars* sizeof(double))),
 	vars_old(vars_old_aux),
 	vars_new(vars_new_aux),
 

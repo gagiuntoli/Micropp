@@ -165,8 +165,10 @@ void micropp_t::homogenize()
 			calc_ave_stress(gp_ptr->macro_stress);
 
 			if (nl_flag) {
-				if (!gp_ptr->allocated)
+				if (!gp_ptr->allocated) {
 					gp_ptr->allocate(num_int_vars, nn, dim);
+					memcpy(gp_ptr->int_vars_k, vars_new, num_int_vars*sizeof(double));
+				}
 
 				for (int i = 0; i < nn * dim; ++i)
 					gp_ptr->u_k[i] = u[i];
@@ -180,6 +182,8 @@ void micropp_t::homogenize()
 			const double dEps = 1.0e-8;
 			for (int v = 0; v < nvoi; ++v)
 				sig_0[v] = gp_ptr->macro_stress[v];
+
+            vars_new = NULL;
 
 			for (int i = 0; i < nvoi; ++i) {
 				for (int v = 0; v < nvoi; ++v)

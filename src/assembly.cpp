@@ -964,9 +964,11 @@ void micropp_t::get_stress3D(int ex, int ey, int ez, int gp, double eps[6],
 		plastic_step(&material, eps, eps_p_old, alpha_old, eps_p_new,
 		             &alpha_new, non_linear, stress_gp);
 
-		for (int i = 0; i < 6; ++i)
-			vars_new[intvar_ix(e, gp, i)] = eps_p_new[i];
-		vars_new[intvar_ix(e, gp, 6)] = alpha_new;
+		if (vars_new) {
+			for (int i = 0; i < 6; ++i)
+				vars_new[intvar_ix(e, gp, i)] = eps_p_new[i];
+			vars_new[intvar_ix(e, gp, 6)] = alpha_new;
+		}
 
 	} else {
 
