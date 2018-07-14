@@ -38,6 +38,8 @@ void micropp_t::output(int time_step, int gp_id)
 		for (int i = 0; i < num_int_vars; ++i)
 			vars_old[i] = 0.0;
 
+	vars_new = NULL;
+
 	int nr_its;
 	bool nl_flag;
 	double nr_err;
