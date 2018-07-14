@@ -144,13 +144,15 @@ void micropp_t::homogenize()
 		} else {
 
 			if (!gp_ptr->allocated) {
+				vars_old = vars_old_aux;
+				vars_new = vars_new_aux;
 				memset(vars_old, 0.0, num_int_vars * sizeof(double));
 				memset(u, 0.0, nn * dim * sizeof(double));
 			} else {
-				for (int i = 0; i < num_int_vars; ++i)
-					vars_old[i] = gp_ptr->int_vars_n[i];
 				for (int i = 0; i < (nn * dim); ++i)
 					u[i] = gp_ptr->u_n[i];
+				vars_old = gp_ptr->int_vars_n;
+				vars_new = gp_ptr->int_vars_k;
 			}
 
 			// SIGMA
@@ -165,9 +167,6 @@ void micropp_t::homogenize()
 			if (nl_flag) {
 				if (!gp_ptr->allocated)
 					gp_ptr->allocate(num_int_vars, nn, dim);
-
-				for (int i = 0; i < num_int_vars; ++i)
-					gp_ptr->int_vars_k[i] = vars_new[i];
 
 				for (int i = 0; i < nn * dim; ++i)
 					gp_ptr->u_k[i] = u[i];

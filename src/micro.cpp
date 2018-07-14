@@ -58,6 +58,14 @@ micropp_t::micropp_t(const int _dim, const int _ngp, const int size[3], const in
 	num_int_vars(nelem * 8 * NUM_VAR_GP),
 	gp_list(new gp_t[_ngp]()),
 
+	elem_type((int *) malloc(nelem * sizeof(int))),
+	elem_stress((double *) malloc(nelem * nvoi * sizeof(double))),
+	elem_strain((double *) malloc(nelem * nvoi * sizeof(double))),
+	vars_old_aux((double *) calloc(num_int_vars, sizeof(double))),
+	vars_new_aux((double *) calloc(num_int_vars, sizeof(double))),
+	vars_old(vars_old_aux),
+	vars_new(vars_new_aux),
+
 	output_files_header(false)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
@@ -68,12 +76,6 @@ micropp_t::micropp_t(const int _dim, const int _ngp, const int size[3], const in
 	b = (double *) malloc(nn * dim * sizeof(double));
 	du = (double *) malloc(nn * dim * sizeof(double));
 	u = (double *) malloc(nn * dim * sizeof(double));
-
-	elem_type = (int *) malloc(nelem * sizeof(int));
-	elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
-	elem_strain = (double *) malloc(nelem * nvoi * sizeof(double));
-	vars_old = (double *) malloc(num_int_vars * sizeof(double));
-	vars_new = (double *) malloc(num_int_vars * sizeof(double));
 
 	assert( b && du && u && elem_stress && elem_strain &&
 	        elem_type && vars_old && vars_new );
@@ -175,8 +177,8 @@ micropp_t::~micropp_t()
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
-	free(vars_old);
-	free(vars_new);
+	free(vars_old_aux);
+	free(vars_new_aux);
 
 	delete [] gp_list;
 
