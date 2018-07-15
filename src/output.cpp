@@ -27,7 +27,8 @@
 
 using namespace std;
 
-void micropp_t::output(int time_step, int gp_id)
+template <int tdim>
+void micropp<tdim>::output(int time_step, int gp_id)
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
@@ -50,7 +51,9 @@ void micropp_t::output(int time_step, int gp_id)
 	write_vtu(time_step, gp_id);
 }
 
-void micropp_t::write_vtu(int time_step, int gp_id)
+
+template <int tdim>
+void micropp<tdim>::write_vtu(int time_step, int gp_id)
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
@@ -193,7 +196,9 @@ void micropp_t::write_vtu(int time_step, int gp_id)
 	file.close();
 }
 
-void micropp_t::write_info_files()
+
+template <int tdim>
+void micropp<tdim>::write_info_files()
 {
 	ofstream file;
 	if (output_files_header == false) {
@@ -265,3 +270,8 @@ void micropp_t::write_info_files()
 	file << endl;
 	file.close();
 }
+
+
+// Explicit instantiation
+template class micropp<2>;
+template class micropp<3>;

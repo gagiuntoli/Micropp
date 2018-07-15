@@ -6,7 +6,7 @@ set(testsources
   test2d_1.cpp
   test3d_1.cpp
   test3d_2.cpp
-  test3d_3.f90
+  #test3d_3.f90
   test3d_4.cpp
   test3d_5.cpp)
 
@@ -24,11 +24,11 @@ endforeach ()
 # tests individually here.
 
 # Add tests with no arguments.
-add_test(test3d_3 test3d_3)
+# add_test(test3d_3 test3d_3)
 
 # Add a test that requires arguments
 add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
 add_test(NAME test3d_1 COMMAND test3d_1 5 5 5 1)
-add_test(NAME test3d_2 COMMAND test3d_3 5 5 5 10)
+#add_test(NAME test3d_2 COMMAND test3d_3 5 5 5 10)
 add_test(NAME test3d_4 COMMAND test3d_4 5 5 5 5 10)
 add_test(NAME test3d_5 COMMAND test3d_5 5 5 5)

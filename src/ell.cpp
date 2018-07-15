@@ -27,8 +27,6 @@
 #include "ell.hpp"
 #include "instrument.hpp"
 
-#define nod_index(i,j,k) ((k)*nx*ny + (j)*nx + (i))
-
 using namespace std;
 
 void ell_free(ell_matrix *m)

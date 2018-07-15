@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 	mat_params[1*MAX_MAT_PARAM + 0] = 1.0e6; // E
 	mat_params[1*MAX_MAT_PARAM + 1] = 0.25;  // nu
 
-	micropp_t micro (dim, 1, size, micro_type, micro_params, mat_types, mat_params);
+	micropp<3> micro(1, size, micro_type, micro_params, mat_types, mat_params);
 
 	double sig[6], ctan[36];
 	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
