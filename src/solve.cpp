@@ -19,25 +19,12 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <iomanip>		// print with format
-
-#include <cassert>
-
-#include "instrument.hpp"
 #include "micro.hpp"
 
 using namespace std;
 
-void micropp_t::solve()
-{
-	INST_START;
-
-	assert(dim == 2 | dim ==3);
-	ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
-}
-
-void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
+template <int tdim>
+void micropp<tdim>::newton_raphson(bool *nl_flag, int *its, double *err)
 {
 	INST_START;
 
@@ -53,7 +40,7 @@ void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 		assembly_mat();
 
 		memset(du, 0.0, nn * dim * sizeof(double));
-		solve();
+		ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
@@ -65,3 +52,8 @@ void micropp_t::newton_raphson(bool *nl_flag, int *its, double *err)
 	*its = lits;
 	*err = lerr;
 }
+
+
+// Explicit instantiation
+template class micropp<2>;
+template class micropp<3>;

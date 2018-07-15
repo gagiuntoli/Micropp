@@ -51,4 +51,9 @@ inline uint64_t devest(const vector<uint64_t>  &in, const uint64_t mean)
 	return sqrt(out / in.size());
 }
 
+constexpr int mypow(int v, int e)
+{
+	return (e == 0) ? 1 : v * mypow(v, e - 1);
+}
+
 #endif //UTIL_HPP

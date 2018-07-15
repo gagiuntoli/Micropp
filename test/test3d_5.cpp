@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
     sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
 	
-	micropp_t micro(dim, ngp, size, micro_type, micro_params, mat_types, mat_params);
+    micropp<dim> micro(ngp, size, micro_type, micro_params, mat_types, mat_params);
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;

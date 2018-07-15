@@ -22,6 +22,8 @@
 #ifndef ELL_H_
 #define ELL_H_
 
+#define nod_index(i,j,k) ((k)*nx*ny + (j)*nx + (i))
+
 typedef struct {
 	int nrow;		// number of rows
 	int ncol;		// number of columns

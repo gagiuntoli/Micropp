@@ -29,7 +29,10 @@
 #include <cassert>
 #include <cstring>
 
+#include "util.hpp"
 #include "ell.hpp"
+#include "gp.hpp"
+#include "instrument.hpp"
 
 #define MAX_DIM       3
 #define MAX_MAT_PARAM 10
@@ -50,66 +53,6 @@
 
 using namespace std;
 
-class gp_t {
-	public:
-		int nr_its[7];
-		double *int_vars_n;
-		double *u_n;
-		double *int_vars_k;
-		double *u_k;
-		double macro_strain[6];
-		double macro_stress[6];
-		double macro_ctan[36];
-		double nr_err[7];
-		double inv_max;
-		bool allocated;
-
-		gp_t():
-			int_vars_n(nullptr),
-			u_n(nullptr),
-			int_vars_k(nullptr),
-			u_k(nullptr),
-			inv_max(-1.0),
-			allocated(false)
-		{}
-
-		~gp_t()
-		{
-			if (allocated) {
-				free(int_vars_n);
-				free(u_n);
-				free(int_vars_k);
-				free(u_k);
-			}
-		}
-
-		void allocate(const int num_int_vars, const int nn, const int dim)
-		{
-			assert(!allocated);
-
-			const int size = nn * dim;
-			int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
-			int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
-			u_n = (double *) malloc(size * sizeof(double));
-			u_k = (double *) malloc(size * sizeof(double));
-
-			allocated = (int_vars_n && int_vars_k && u_n && u_k);
-			assert(allocated);
-		}
-
-
-		void update_vars()
-		{
-			double *tmp = int_vars_n;
-			int_vars_n = int_vars_k;
-			int_vars_k = tmp;
-
-			tmp = u_n;
-			u_n = u_k;
-			u_k = tmp;
-		}
-};
-
 struct material_t {
 	double E;
 	double nu;
@@ -122,17 +65,25 @@ struct material_t {
 	bool damage;
 };
 
-class micropp_t {
+
+template <int tdim>
+class micropp {
 
 	private:
-		const int dim, ngp;
-		const int nx, ny, nz, nn;
-		const int nex, ney, nez;
-		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
-		const int npe, nvoi, nelem;
-		const int micro_type, num_int_vars;
-		gp_t * const gp_list;
+		// Variables (static constexpr)
+		static constexpr int dim = tdim;
+		static constexpr int npe = mypow(2, dim);         // 4, 8
+		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 
+		// Constants only vars
+		const int ngp, nx, ny, nz, nn;
+		const int nex, ney, nez, nelem;
+		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
+
+		const int micro_type, num_int_vars;
+		gp_t *gp_list;
+
+		// Other variables
 		bool output_files_header;
 
 		double micro_params[5];
@@ -148,10 +99,10 @@ class micropp_t {
 		double *u;
 
 		int *elem_type;
-		double * const elem_stress;
-		double * const elem_strain;
-		double * const vars_old_aux, *vars_old;
-		double * const vars_new_aux, *vars_new;
+		double *elem_stress;
+		double *elem_strain;
+		double *vars_old_aux, *vars_old;
+		double *vars_new_aux, *vars_new;
 
 		double inv_max;
 
@@ -164,57 +115,79 @@ class micropp_t {
 		                          {+CONSTXG, +CONSTXG, +CONSTXG},
 		                          {-CONSTXG, +CONSTXG, +CONSTXG} };
 
+		// Common
 		void calc_ctan_lin();
 		bool is_linear(const double *macro_strain);
-		double get_inv_1(const double *tensor);
-		double get_inv_2(const double *tensor);
+		double get_inv_1(const double *tensor) const;
+		material_t get_material(const int e) const;
+
+		// Specialized
+		template <typename... Rest>
+		int get_elem_type(Rest...);
+
+		template <typename... Rest>
+		void get_elem_rhs(bool *nl_flag, Rest...) const;
+
+		template <typename... Rest>
+		void get_elem_mat(Rest...);
+
 		void set_displ(double *eps);
 		double assembly_rhs(bool *nl_flag);
 		void assembly_mat();
-		void get_elem_rhs2D(int ex, int ey, bool *nl_flag, double (&be)[2 * 4]);
-		void get_elem_rhs3D(int ex, int ey, int ez, bool *nl_flag, double (&be)[3 * 8]);
-		void get_elem_mat2D(int ex, int ey, double (&Ae)[2 * 4 * 2 * 4]);
-		void get_elem_mat3D(int ex, int ey, int ez, double (&Ae)[3 * 8 * 3 * 8]);
-		void solve();
+
+		template <typename T>
+		void calc_bmat(int gp, T bmat) const;
+
+		template <typename... Rest>
+		void get_strain(int gp, double *strain_gp, Rest...) const;
+
+		template <typename... Rest>
+		void get_stress(int gp, double strain_gp[3],
+		                bool *nl_flag, double *stress_gp, Rest...) const;
+
 		void newton_raphson(bool *nl_flag, int *its, double *err);
-		void get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[6][6]);
-		void get_ctan_plast_exact(int ex, int ey, int ez, int gp, double ctan[6][6]);
-		void get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[6][6]);
-		void get_strain2D(int ex, int ey, int gp, double *strain_gp);
-		void get_strain3D(int ex, int ey, int ez, int gp, double *strain_gp);
-		void get_stress2D(int ex, int ey, int gp, double strain_gp[3],
-		                  bool *nl_flag, double *stress_gp);
-		void get_stress3D(int ex, int ey, int ez, int gp, double strain_gp[3],
-		                  bool *nl_flag, double *stress_gp);
-		void get_dev_tensor(double tensor[6], double tensor_dev[6]);
+
+		template <typename... Rest>
+		void getElemDisp(double *elem_disp, Rest...) const;
+
+		void calc_ave_stress(double stress_ave[6]);
+		void calc_ave_strain(double strain_ave[6]);
+
+		void calc_fields();
+
+		void write_vtu(int tstep, int gp_id);
+
+		// Functions Only for 3D
+		//double get_inv_2(const double *tensor);
+
+		void get_ctan_plast_sec(int ex, int ey, int ez, int gp,
+		                        double ctan[6][6]);
+		void get_ctan_plast_exact(int ex, int ey, int ez, int gp,
+		                          double ctan[6][6]);
+		void get_ctan_plast_pert(int ex, int ey, int ez, int gp,
+		                         double ctan[6][6]);
+
+		void get_dev_tensor(double tensor[6], double tensor_dev[6]) const;
 		void plastic_step(const material_t *material, double eps[6],
 		                  double eps_p_1[6], double alpha_1,
 		                  double eps_p[6], double *alpha,
-		                  bool *nl_flag, double stress[6]);
-		void getElemDisp(int ex, int ey, double *elem_disp);
-		void getElemDisp(int ex, int ey, int ez, double *elem_disp);
-		int get_elem_type2D(int ex, int ey);
-		int get_elem_type3D(int ex, int ey, int ez);
-		material_t get_material(const int e);
-		void calc_bmat_3D(int gp, double bmat[6][3 *8]);
-		void calc_fields();
-		void calc_ave_stress(double stress_ave[6]);
-		void calc_ave_strain(double strain_ave[6]);
-		void write_vtu(int tstep, int gp_id);
+		                  bool *nl_flag, double stress[6]) const;
+
+		void initialize(const double *micro_params, const int *mat_types,
+		                const double *params);
 
 	public:
+		micropp(const int ngp,const int size[3], const int micro_type,
+		        const double *micro_params, const int *mat_types,
+		        const double *params);
+		~micropp();
 
-		micropp_t(const int dim, const int ngp,const int size[3], const int micro_type,
-		          const double *micro_params, const int *mat_types,
-		          const double *params);
-		~micropp_t();
-
+		// common Functions
+		int get_nl_flag(int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
 		void get_macro_stress(const int gp_id, double *macro_stress);
 		void get_macro_ctan(const int gp_id, double *macro_ctan);
 		void homogenize();
-		void update_vars();
-		void get_nl_flag(int gp_id, int *nl_flag);
 		void output(int tstep, int gp_id);
-		void write_info_files();
+		void write_info_files();		void update_vars();
 };
