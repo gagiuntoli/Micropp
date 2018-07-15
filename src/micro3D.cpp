@@ -196,19 +196,17 @@ void micropp<3>::get_stress(int gp, double eps[6], bool * non_linear,
 	const double mu = material.mu;
 
 	if (material.plasticity == true) {
-		double alpha_old, alpha_new, eps_p_old[6], eps_p_new[6];
-		for (int i = 0; i < 6; ++i)
-			eps_p_old[i] = vars_old[intvar_ix(e, gp, i)];
-		alpha_old = vars_old[intvar_ix(e, gp, 6)];
-
-		plastic_step(&material, eps, eps_p_old, alpha_old, eps_p_new,
-		             &alpha_new, non_linear, stress_gp);
+		double *eps_p_new = NULL, * alpha_new = NULL;
+		double * const eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
+		const double alpha_old = vars_old[intvar_ix(e, gp, 6)];
 
 		if (vars_new) {
-			for (int i = 0; i < 6; ++i)
-				vars_new[intvar_ix(e, gp, i)] = eps_p_new[i];
-			vars_new[intvar_ix(e, gp, 6)] = alpha_new;
+			eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
+			alpha_new = &vars_new[intvar_ix(e, gp, 6)];
 		}
+
+		plastic_step(&material, eps, eps_p_old, alpha_old, eps_p_new,
+		             alpha_new, non_linear, stress_gp);
 
 	} else {
 

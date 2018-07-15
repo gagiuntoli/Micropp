@@ -151,10 +151,12 @@ void micropp<3>::plastic_step(const material_t *material, double eps[6],
 
 		dl = f_trial / (2 * material->mu * (1.0 + (0.0 * material->Ka) / (3 * material->mu)));
 
-		for (int i = 0; i < 6; ++i)
-			eps_p_new[i] = eps_p_old[i] + dl * normal[i];
-		*alpha_new = alpha_old + sqrt(2.0 / 3) * dl;
-	} else {
+		if (eps_p_new && alpha_new) {
+			for (int i = 0; i < 6; ++i)
+				eps_p_new[i] = eps_p_old[i] + dl * normal[i];
+			*alpha_new = alpha_old + sqrt(2.0 / 3) * dl;
+		}
+	} else if (eps_p_new && alpha_new){
 		for (int i = 0; i < 6; ++i)
 			eps_p_new[i] = eps_p_old[i];
 		*alpha_new = alpha_old;
