@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 	double sig[6], (*sig_test)[3];
 
     sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
-	
+
     micropp<dim> micro(ngp, size, micro_type, micro_params, mat_types, mat_params);
 
 	for (int t = 0; t < time_steps; ++t) {
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 				cout << setw(14) << sig[i] << " ";
 			cout << endl;
 
-            memcpy(sig_test[gp], sig, 3*sizeof(double));
+            memcpy(sig_test[gp], sig, 3 * sizeof(double));
 		}
 
 		for (int gp = 2; gp < ngp; ++gp) {

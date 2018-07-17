@@ -314,7 +314,7 @@ double micropp<2>::assembly_rhs(bool *non_linear)
 
 template <>
 template <>
-void micropp<2>::get_elem_mat(double Ae[2 * 4 * 2 * 4 ], int ex, int ey)
+void micropp<2>::get_elem_mat(double Ae[2 * 4 * 2 * 4], int ex, int ey) const
 {
 	INST_START;
 
@@ -382,7 +382,7 @@ void micropp<2>::assembly_mat()
 
 
 template <>
-void micropp<2>::calc_ave_stress(double stress_ave[6])
+void micropp<2>::calc_ave_stress(double stress_ave[6]) const
 {
 	bool non_linear_flag;
 	const double wg = (1 / 4.0) * dx * dy;
@@ -417,7 +417,7 @@ void micropp<2>::calc_ave_stress(double stress_ave[6])
 
 
 template <>
-void micropp<2>::calc_ave_strain(double strain_ave[6])
+void micropp<2>::calc_ave_strain(double strain_ave[6]) const
 {
 	const double wg = (1 / 4.0) * dx * dy;
 
@@ -433,7 +433,7 @@ void micropp<2>::calc_ave_strain(double strain_ave[6])
 				double strain_gp[6];
 
 				get_strain(gp, strain_gp, ex, ey);
-				for (int v = 0; v < nvoi; v++)
+				for (int v = 0; v < nvoi; ++v)
 					strain_aux[v] += strain_gp[v] * wg;
 			}
 

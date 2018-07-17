@@ -66,7 +66,6 @@ void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan)
 	memcpy(macro_ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
 }
 
-
 template <int tdim>
 void micropp<tdim>::homogenize()
 {
@@ -77,14 +76,14 @@ void micropp<tdim>::homogenize()
 
 		inv_max = -1.0e10;
 
-		if ((is_linear(gp_ptr->macro_strain) == true) && (!gp_ptr->allocated)) {
+		if (is_linear(gp_ptr->macro_strain) && (!gp_ptr->allocated)) {
 
 			// S = CL : E
 			for (int i = 0; i < nvoi; ++i) {
-				double tmp = 0;
+				gp_ptr->macro_stress[i] = 0.0;
 				for (int j = 0; j < nvoi; ++j)
-					tmp += ctan_lin[i * nvoi + j] * gp_ptr->macro_strain[j];
-				gp_ptr->macro_stress[i] = tmp;
+					gp_ptr->macro_stress[i] += ctan_lin[i * nvoi + j]
+						* gp_ptr->macro_strain[j];
 			}
 			// C = CL
 			memcpy(gp_ptr->macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
@@ -110,7 +109,7 @@ void micropp<tdim>::homogenize()
 			bool nl_flag;
 			double nr_err;
 
-			set_displ(gp_ptr->macro_strain);
+			set_displ(gp_ptr->macro_strain);  // Acts on u
 			newton_raphson(&nl_flag, &nr_its, &nr_err);
 			calc_ave_stress(gp_ptr->macro_stress);
 
@@ -136,7 +135,7 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_NLIN;
 
-				set_displ(eps_1);
+				set_displ(eps_1);   // Acts on u
 				newton_raphson(&nl_flag, &nr_its, &nr_err);
 				calc_ave_stress(sig_1);
 
