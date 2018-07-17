@@ -116,9 +116,11 @@ int ell_solve_jacobi_2D(ell_solver *solver, ell_matrix *m, int nFields,
 	return 0;
 }
 
-int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
-                          int dim, int nn, double *b, double *x)
+int ell_solve_cgpd_struct(ell_solver *solver, const ell_matrix * const m,
+                          int nFields, int dim, int nn,
+                          const double * const b, double *x)
 {
+	INST_START;
 	/* Conjugate Gradient Algorithm (CG) with Jacobi Preconditioner
 	 * r_1 residue in actual iteration
 	 * z_1 = K^-1 * r_0 actual auxiliar vector
@@ -138,7 +140,10 @@ int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
 	const int shift =  (dim == 2) ? 4 : 13;
 	for (int i = 0; i < nn; i++) {
 		for (int d = 0; d < nFields; d++)
-			solver->k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz + shift * nFields + d * m->nnz + d];
+			solver->k[i * nFields + d] = 1 / m->vals[i * nFields * m->nnz
+			                                         + shift * nFields
+			                                         + d * m->nnz
+			                                         + d];
 	}
 
 	for (int i = 0; i < nn*dim; i++)

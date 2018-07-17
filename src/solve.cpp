@@ -32,14 +32,17 @@ void micropp<tdim>::newton_raphson(bool *nl_flag, int *its, double *err)
 	double lerr = 0.0;
 
 	do {
-		lerr = assembly_rhs(nl_flag);
+		lerr = assembly_rhs(nl_flag);  // Acts on b
 
 		if (lerr < NR_MAX_TOL)
 			break;
 
-		assembly_mat();
+		assembly_mat();   // Acts on A
 
+		// Move this inside ell_solve_cgpd_struct
 		memset(du, 0.0, nn * dim * sizeof(double));
+
+		// in(b) inout
 		ell_solve_cgpd_struct(&solver, &A, dim, dim, nn, b, du);
 
 		for (int i = 0; i < nn * dim; ++i)
@@ -47,7 +50,7 @@ void micropp<tdim>::newton_raphson(bool *nl_flag, int *its, double *err)
 
 		lits++;
 
-	} while ((lits < NR_MAX_ITS) && (lerr > NR_MAX_TOL));
+	} while (lits < NR_MAX_ITS);
 
 	*its = lits;
 	*err = lerr;

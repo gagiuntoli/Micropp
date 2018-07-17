@@ -87,8 +87,8 @@ template <>
 void micropp<3>::set_displ(double *eps)
 {
 	// z = 0
-	for (int i = 0; i < nx; i++) {
-		for (int j = 0; j < ny; j++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int j = 0; j < ny; ++j) {
 			const int n = nod_index(i, j, 0);
 			const double xcoor = i * dx;
 			const double ycoor = j * dy;
@@ -102,8 +102,8 @@ void micropp<3>::set_displ(double *eps)
 		}
 	}
 	// z = lx
-	for (int i = 0; i < nx; i++) {
-		for (int j = 0; j < ny; j++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int j = 0; j < ny; ++j) {
 			const int n = nod_index(i, j, nz - 1);
 			const double xcoor = i * dx;
 			const double ycoor = j * dy;
@@ -118,8 +118,8 @@ void micropp<3>::set_displ(double *eps)
 	}
 
 	// y = 0
-	for (int i = 0; i < nx; i++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(i, 0, k);
 			const double xcoor = i * dx;
 			const double ycoor = 0.0;
@@ -134,8 +134,8 @@ void micropp<3>::set_displ(double *eps)
 	}
 
 	// y = ly
-	for (int i = 0; i < nx; i++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(i, ny - 1, k);
 			const double xcoor = i * dx;
 			const double ycoor = ly;
@@ -150,8 +150,8 @@ void micropp<3>::set_displ(double *eps)
 	}
 
 	// x=0
-	for (int j = 1; j < ny - 1; j++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int j = 1; j < ny - 1; ++j) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(0, j, k);
 			const double xcoor = 0.0;
 			const double ycoor = j * dy;
@@ -166,8 +166,8 @@ void micropp<3>::set_displ(double *eps)
 	}
 
 	// x=lx
-	for (int j = 1; j < ny - 1; j++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int j = 1; j < ny - 1; ++j) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(nx - 1, j, k);
 			const double xcoor = lx;
 			const double ycoor = j * dy;
@@ -185,18 +185,17 @@ void micropp<3>::set_displ(double *eps)
 
 template <>
 template <>
-void micropp<3>::get_stress(int gp, double eps[6], bool * non_linear,
+void micropp<3>::get_stress(int gp, double eps[6], bool *non_linear,
                             double *stress_gp, int ex, int ey, int ez) const
 {
 	*non_linear = false;
 
-	double ctan[6][6];
 	const int e = glo_elem3D(ex, ey, ez);
 	const material_t material = get_material(e);
 	const double mu = material.mu;
 
 	if (material.plasticity == true) {
-		double *eps_p_new = NULL, * alpha_new = NULL;
+		double *eps_p_new = NULL, *alpha_new = NULL;
 		double * const eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
 		const double alpha_old = vars_old[intvar_ix(e, gp, 6)];
 
@@ -317,7 +316,7 @@ void micropp<3>::get_strain(int gp, double *strain_gp,
 template <>
 template <>
 void micropp<3>::get_elem_rhs(bool *non_linear,
-                             double *be, int ex, int ey, int ez) const
+                              double *be, int ex, int ey, int ez) const
 {
 	double bmat[6][3 * 8], cxb[6][3 * 8], stress_gp[6];
 	const double wg = (1 / 8.0) * dx * dy * dz;
@@ -355,26 +354,27 @@ double micropp<3>::assembly_rhs(bool *non_linear)
 	double be[3 * 8];
 	int index[3 * 8];
 
+	const int nxny = nx * ny;
+
 	for (int ex = 0; ex < nx - 1; ex++) {
 		for (int ey = 0; ey < ny - 1; ey++) {
 			for (int ez = 0; ez < nz - 1; ez++) {
 
-				const int n[npe] = { ez * (nx * ny) + ey * nx + ex,
-				                     ez * (nx * ny) + ey * nx + ex + 1,
-				                     ez * (nx * ny) + (ey + 1) * nx + ex + 1,
-				                     ez * (nx * ny) + (ey + 1) * nx + ex,
-				                     n[0] + nx * ny,
-				                     n[1] + nx * ny,
-				                     n[2] + nx * ny,
-				                     n[3] + nx * ny };
+				const int n[npe] = { ez * nxny + ey * nx + ex,
+				                     ez * nxny + ey * nx + ex + 1,
+				                     ez * nxny + (ey + 1) * nx + ex + 1,
+				                     ez * nxny + (ey + 1) * nx + ex,
+				                     n[0] + nxny,
+				                     n[1] + nxny,
+				                     n[2] + nxny,
+				                     n[3] + nxny };
 
-				for (int j = 0; j < npe; ++j) {
-					for (int d = 0; d < dim; ++d) {
+				for (int j = 0; j < npe; ++j)
+					for (int d = 0; d < dim; ++d)
 						index[j * dim + d] = n[j] * dim + d;
-					}
-				}
 
 				get_elem_rhs(&non_linear_one_elem, be, ex, ey, ez);
+
 				if (non_linear_one_elem)
 					*non_linear = true;
 
@@ -386,50 +386,50 @@ double micropp<3>::assembly_rhs(bool *non_linear)
 
 	// boundary conditions
 	// z=0
-	for (int i = 0; i < nx; i++) {
-		for (int j = 0; j < ny; j++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int j = 0; j < ny; ++j) {
 			const int n = nod_index(i, j, 0);
-			for (int d = 0; d < dim; d++)
+			for (int d = 0; d < dim; ++d)
 				b[n * dim + d] = 0.0;
 		}
 	}
 	// z = lx
-	for (int i = 0; i < nx; i++) {
-		for (int j = 0; j < ny; j++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int j = 0; j < ny; ++j) {
 			const int n = nod_index(i, j, nz - 1);
-			for (int d = 0; d < dim; d++)
+			for (int d = 0; d < dim; ++d)
 				b[n * dim + d] = 0.0;
 		}
 	}
 	// y = 0
-	for (int i = 0; i < nx; i++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(i, 0, k);
-			for (int d = 0; d < dim; d++)
+			for (int d = 0; d < dim; ++d)
 				b[n * dim + d] = 0.0;
 		}
 	}
 	// y = ly
-	for (int i = 0; i < nx; i++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int i = 0; i < nx; ++i) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(i, ny - 1, k);
 			for (int d = 0; d < dim; d++)
 				b[n * dim + d] = 0.0;
 		}
 	}
 	// x=0
-	for (int j = 1; j < ny - 1; j++) {
-		for (int k = 1; k < nz - 1; k++) {
+	for (int j = 1; j < ny - 1; ++j) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(0, j, k);
-			for (int d = 0; d < dim; d++)
+			for (int d = 0; d < dim; ++d)
 				b[n * dim + d] = 0.0;
 		}
 	}
 	// x=lx
 	for (int j = 1; j < ny - 1; j++) {
-		for (int k = 1; k < nz - 1; k++) {
+		for (int k = 1; k < nz - 1; ++k) {
 			const int n = nod_index(nx - 1, j, k);
-			for (int d = 0; d < dim; d++)
+			for (int d = 0; d < dim; ++d)
 				b[n * dim + d] = 0.0;
 		}
 	}
@@ -449,7 +449,7 @@ double micropp<3>::assembly_rhs(bool *non_linear)
 
 template <>
 template <>
-void micropp<3>::get_elem_mat(double Ae[3 * 8 * 3 * 8], int ex, int ey, int ez)
+void micropp<3>::get_elem_mat(double Ae[3 * 8 * 3 * 8], int ex, int ey, int ez) const
 {
 	INST_START;
 	const int e = glo_elem3D(ex, ey, ez);
@@ -463,7 +463,7 @@ void micropp<3>::get_elem_mat(double Ae[3 * 8 * 3 * 8], int ex, int ey, int ez)
 	  last 3 components are without the 2 because we use eps = {e11 e22 e33 2*e12 2*e13 2*e23}
 	*/
 
-	for (int i = 0; i < npedim * npedim; i++)
+	for (int i = 0; i < npedim * npedim; ++i)
 		Ae[i] = 0.0;
 
 	for (int gp = 0; gp < npe; ++gp) {
@@ -520,9 +520,9 @@ void micropp<3>::assembly_mat()
 	ell_set_zero_mat(&A);
 
 	double Ae[3 * 8 * 3 * 8];
-	for (int ex = 0; ex < nx - 1; ex++) {
-		for (int ey = 0; ey < ny - 1; ey++) {
-			for (int ez = 0; ez < nz - 1; ez++) {
+	for (int ex = 0; ex < nx - 1; ++ex) {
+		for (int ey = 0; ey < ny - 1; ++ey) {
+			for (int ez = 0; ez < nz - 1; ++ez) {
 				get_elem_mat(Ae, ex, ey, ez);
 				ell_add_struct3D(&A, ex, ey, ez, Ae, dim, nx, ny, nz);
 			}
@@ -533,28 +533,28 @@ void micropp<3>::assembly_mat()
 
 
 template <>
-void micropp<3>::calc_ave_stress(double stress_ave[6])
+void micropp<3>::calc_ave_stress(double stress_ave[6]) const
 {
 	bool non_linear_flag;
 	const double wg = (1 / 8.0) * dx * dy * dz;
 
-	for (int v = 0; v < nvoi; v++)
+	for (int v = 0; v < nvoi; ++v)
 		stress_ave[v] = 0.0;
 
-	for (int ex = 0; ex < nx - 1; ex++) {
-		for (int ey = 0; ey < ny - 1; ey++) {
-			for (int ez = 0; ez < nz - 1; ez++) {
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) {
 
 				double stress_aux[6] = { 0.0 };
 
 				for (int gp = 0; gp < npe; ++gp) {
 
 					double stress_gp[6];
-
 					double strain_gp[6];
+
 					get_strain(gp, strain_gp, ex, ey, ez);
-					get_stress(gp, strain_gp, &non_linear_flag, stress_gp,
-					           ex, ey, ez);
+					get_stress(gp, strain_gp, &non_linear_flag,
+					           stress_gp, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v)
 						stress_aux[v] += stress_gp[v] * wg;
 
@@ -571,24 +571,24 @@ void micropp<3>::calc_ave_stress(double stress_ave[6])
 
 
 template <>
-void micropp<3>::calc_ave_strain(double strain_ave[6])
+void micropp<3>::calc_ave_strain(double strain_ave[6]) const
 {
 	const double wg = (1 / 8.0) * dx * dy * dz;
 
-	for (int v = 0; v < nvoi; v++)
+	for (int v = 0; v < nvoi; ++v)
 		strain_ave[v] = 0.0;
 
-	for (int ex = 0; ex < nx - 1; ex++) {
-		for (int ey = 0; ey < ny - 1; ey++) {
-			for (int ez = 0; ez < nz - 1; ez++) {
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) {
 
 				double strain_aux[6] = { 0.0 };
 
-				for (int gp = 0; gp < npe; gp++) {
+				for (int gp = 0; gp < npe; ++gp) {
 					double strain_gp[6];
 
 					get_strain(gp, strain_gp, ex, ey, ez);
-					for (int v = 0; v < nvoi; v++)
+					for (int v = 0; v < nvoi; ++v)
 						strain_aux[v] += strain_gp[v] * wg;
 				}
 
@@ -597,7 +597,6 @@ void micropp<3>::calc_ave_strain(double strain_ave[6])
 			}
 		}
 	}
-
 
 	for (int v = 0; v < nvoi; v++)
 		strain_ave[v] /= (lx * ly);
@@ -612,14 +611,14 @@ void micropp<3>::calc_fields()
 	const double ivol = 1.0 / (dx * dy * dz);
 	const double wg = (1 / 8.0) * dx * dy * dz;
 
-	for (int ex = 0; ex < nx - 1; ex++) {
-		for (int ey = 0; ey < ny - 1; ey++) {
-			for (int ez = 0; ez < nz - 1; ez++) {
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) {
 
 				double strain_aux[6] = { 0.0 };
 				double stress_aux[6] = { 0.0 };
 
-				for (int gp = 0; gp < npe; gp++) {
+				for (int gp = 0; gp < npe; ++gp) {
 
 					double stress_gp[6], strain_gp[6];
 
@@ -629,7 +628,6 @@ void micropp<3>::calc_fields()
 						strain_aux[v] += strain_gp[v] * wg;
 						stress_aux[v] += stress_gp[v] * wg;
 					}
-
 				}
 
 				const int e = glo_elem3D(ex, ey, ez);

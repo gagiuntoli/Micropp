@@ -25,3 +25,4 @@ extract_data.py
 !scripts/compile_opt.sh
 !scripts/compile_debug.sh
 !scripts/extract_data.py
+compile_commands.json

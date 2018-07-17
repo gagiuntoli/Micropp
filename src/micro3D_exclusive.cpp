@@ -30,7 +30,8 @@
 using namespace std;
 
 template <>
-void micropp<3>::get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[6][6])
+void micropp<3>::get_ctan_plast_sec(int ex, int ey, int ez,
+                                    int gp, double ctan[6][6]) const
 {
 	INST_START;
 	bool non_linear;
@@ -56,7 +57,8 @@ void micropp<3>::get_ctan_plast_sec(int ex, int ey, int ez, int gp, double ctan[
 
 
 template <>
-void micropp<3>::get_ctan_plast_exact(int ex, int ey, int ez, int gp, double ctan[6][6])
+void micropp<3>::get_ctan_plast_exact(int ex, int ey, int ez,
+                                      int gp, double ctan[6][6]) const
 {
 	INST_START;
 	double strain[6];
@@ -82,7 +84,8 @@ void micropp<3>::get_ctan_plast_exact(int ex, int ey, int ez, int gp, double cta
 }
 
 template <>
-void micropp<3>::get_ctan_plast_pert(int ex, int ey, int ez, int gp, double ctan[6][6])
+void micropp<3>::get_ctan_plast_pert(int ex, int ey, int ez,
+                                     int gp, double ctan[6][6]) const
 {
 	INST_START;
 	bool non_linear;
