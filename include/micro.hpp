@@ -129,7 +129,7 @@ class micropp {
 		void get_elem_rhs(bool *nl_flag, Rest...) const;
 
 		template <typename... Rest>
-		void get_elem_mat(Rest...);
+		void get_elem_mat(Rest...) const;
 
 		void set_displ(double *eps);
 		double assembly_rhs(bool *nl_flag);
@@ -150,8 +150,8 @@ class micropp {
 		template <typename... Rest>
 		void getElemDisp(double *elem_disp, Rest...) const;
 
-		void calc_ave_stress(double stress_ave[6]);
-		void calc_ave_strain(double strain_ave[6]);
+		void calc_ave_stress(double stress_ave[6]) const;
+		void calc_ave_strain(double strain_ave[6]) const;
 
 		void calc_fields();
 
@@ -161,11 +161,11 @@ class micropp {
 		//double get_inv_2(const double *tensor);
 
 		void get_ctan_plast_sec(int ex, int ey, int ez, int gp,
-		                        double ctan[6][6]);
+		                        double ctan[6][6]) const;
 		void get_ctan_plast_exact(int ex, int ey, int ez, int gp,
-		                          double ctan[6][6]);
+		                          double ctan[6][6]) const;
 		void get_ctan_plast_pert(int ex, int ey, int ez, int gp,
-		                         double ctan[6][6]);
+		                         double ctan[6][6]) const;
 
 		void get_dev_tensor(double tensor[6], double tensor_dev[6]) const;
 		void plastic_step(const material_t *material, double eps[6],

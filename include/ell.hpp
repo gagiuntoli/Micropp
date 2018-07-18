@@ -61,8 +61,9 @@ int ell_print_full(ell_matrix *m);
 
 void ell_free(ell_matrix *m);
 
-int ell_solve_cgpd_struct(ell_solver *solver, ell_matrix *m, int nFields,
-                          int dim, int nn, double *b, double *x);
+int ell_solve_cgpd_struct(ell_solver *solver, const ell_matrix * const m,
+                          int nFields, int dim, int nn,
+                          const double * const b, double *x);
 
 void ell_add_struct2D(ell_matrix *m, int ex, int ey, double *Ae,
                       int nFields, int nx, int ny);
