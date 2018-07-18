@@ -168,6 +168,7 @@ class micropp {
 		                         double ctan[6][6]);
 
 		void get_dev_tensor(double tensor[6], double tensor_dev[6]) const;
+
 		void plastic_step(const material_t *material, double eps[6],
 		                  double eps_p_1[6], double alpha_1,
 		                  double eps_p[6], double *alpha,
