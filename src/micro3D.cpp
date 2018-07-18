@@ -210,10 +210,10 @@ void micropp<3>::get_stress(int gp, double eps[6], bool * non_linear,
 
 	} else {
 
-		for (int i = 0; i < 3; ++i) {
-			stress_gp[i] = material.lambda * (eps[0] + eps[1] + eps[2]);
-			stress_gp[i] += 2 * mu * eps[i];
-		}
+		for (int i = 0; i < 3; ++i)
+			stress_gp[i] = material.lambda * (eps[0] + eps[1] + eps[2]) \
+						   + 2 * mu * eps[i];
+
 		for (int i = 3; i < 6; ++i)
 			stress_gp[i] = mu * eps[i];
 	}

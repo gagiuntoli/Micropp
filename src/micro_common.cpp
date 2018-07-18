@@ -30,7 +30,7 @@ void micropp<tdim>::initialize(const double *_micro_params,
 
 	b = (double *) malloc(nn * dim * sizeof(double));
 	du = (double *) malloc(nn * dim * sizeof(double));
-	u = (double *) malloc(nn * dim * sizeof(double));
+	u_aux = (double *) malloc(nn * dim * sizeof(double));
 
 	gp_list = new gp_t[ngp]();
 
@@ -119,7 +119,7 @@ micropp<tdim>::~micropp()
 
 	free(b);
 	free(du);
-	free(u);
+	free(u_aux);
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
@@ -148,14 +148,18 @@ int micropp<tdim>::get_nl_flag(int gp_id) const
 template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
-	double sig_1[6], eps_1[6];
-	double d_eps = 1.0e-8;
+	double sig_1[6];
 
-	for (int i = 0; i < nvoi; i++) {
-		for (int v = 0; v < nvoi; v++)
-			eps_1[v] = 0.0;
+	for (int i = 0; i < nvoi; ++i) {
 
-		eps_1[i] += d_eps;
+        double eps_1[nvoi] = {0.0};
+		eps_1[i] += D_EPS_LIN;
+
+		u = u_aux;
+		vars_old = vars_old_aux;
+		vars_new = NULL;
+		memset(vars_old, 0, num_int_vars * sizeof(double));
+		memset(u, 0.0, nn * dim * sizeof(double));
 
 		int nr_its;
 		bool nl_flag;
@@ -165,7 +169,7 @@ void micropp<tdim>::calc_ctan_lin()
 		calc_ave_stress(sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
-			ctan_lin[v * nvoi + i] = sig_1[v] / d_eps;
+			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_LIN;
 	}
 }
 
@@ -220,6 +224,7 @@ material_t micropp<tdim>::get_material(const int e) const
 
 	return material_list[mat_num];
 }
+
 
 // Explicit instantiation
 template class micropp<2>;

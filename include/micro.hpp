@@ -45,6 +45,8 @@
 #define CG_MAX_ITS    2000
 #define NR_MAX_TOL    1.0e-5
 #define NR_MAX_ITS    40
+#define D_EPS_LIN     1.0e-8
+#define D_EPS_NLIN    1.0e-8
 
 #define CONSTXG 0.577350269189626
 
@@ -97,6 +99,9 @@ class micropp {
 		double *b;
 		double *du;
 		double *u;
+		double *u_aux;
+		double *u_old;
+		double *u_new;
 
 		int *elem_type;
 		double *elem_stress;
@@ -168,6 +173,7 @@ class micropp {
 		                         double ctan[6][6]);
 
 		void get_dev_tensor(double tensor[6], double tensor_dev[6]) const;
+
 		void plastic_step(const material_t *material, double eps[6],
 		                  double eps_p_1[6], double alpha_1,
 		                  double eps_p[6], double *alpha,

@@ -54,8 +54,7 @@ void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress)
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
-	for (int i = 0; i < nvoi; ++i)
-		macro_stress[i] = gp_list[gp_id].macro_stress[i];
+	memcpy(macro_stress, gp_list[gp_id].macro_stress, nvoi * sizeof(double));
 }
 
 
@@ -64,8 +63,7 @@ void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan)
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
-	for (int i = 0; i < (nvoi * nvoi); ++i)
-		macro_ctan[i] = gp_list[gp_id].macro_ctan[i];
+	memcpy(macro_ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
 }
 
 
@@ -89,25 +87,20 @@ void micropp<tdim>::homogenize()
 				gp_ptr->macro_stress[i] = tmp;
 			}
 			// C = CL
-			for (int i = 0; i < nvoi; ++i)
-				for (int j = 0; j < nvoi; ++j)
-					gp_ptr->macro_ctan[i * nvoi + j] = ctan_lin[i * nvoi + j];
-
-			for (int i = 0; i < (1 + nvoi); ++i) {
-				gp_ptr->nr_its[i] = 0;
-				gp_ptr->nr_err[i] = 0.0;
-			}
+			memcpy(gp_ptr->macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
+			memset(gp_ptr->nr_its, 0  , (1 + nvoi) * sizeof(double));
+			memset(gp_ptr->nr_err, 0.0, (1 + nvoi) * sizeof(double));
 
 		} else {
 
 			if (!gp_ptr->allocated) {
+				u = u_aux;
 				vars_old = vars_old_aux;
 				vars_new = vars_new_aux;
 				memset(vars_old, 0, num_int_vars * sizeof(double));
 				memset(u, 0.0, nn * dim * sizeof(double));
 			} else {
-				for (int i = 0; i < (nn * dim); ++i)
-					u[i] = gp_ptr->u_n[i];
+				u = gp_ptr->u_n;
 				vars_old = gp_ptr->int_vars_n;
 				vars_new = gp_ptr->int_vars_k;
 			}
@@ -126,9 +119,7 @@ void micropp<tdim>::homogenize()
 					gp_ptr->allocate(num_int_vars, nn, dim);
 					memcpy(gp_ptr->int_vars_k, vars_new, num_int_vars * sizeof(double));
 				}
-
-				for (int i = 0; i < nn * dim; ++i)
-					gp_ptr->u_k[i] = u[i];
+				memcpy(gp_ptr->u_k, u, nn * dim * sizeof(double));
 			}
 
 			gp_ptr->nr_its[0] = nr_its;
@@ -136,22 +127,21 @@ void micropp<tdim>::homogenize()
 
 			// CTAN
 			double eps_1[6], sig_0[6], sig_1[6];
-			const double dEps = 1.0e-8;
-			for (int v = 0; v < nvoi; ++v)
-				sig_0[v] = gp_ptr->macro_stress[v];
+			memcpy(sig_0, gp_ptr->macro_stress, nvoi * sizeof(double));
 
             vars_new = NULL;
 
 			for (int i = 0; i < nvoi; ++i) {
-				for (int v = 0; v < nvoi; ++v)
-					eps_1[v] = gp_ptr->macro_strain[v];
-				eps_1[i] += dEps;
+
+				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
+				eps_1[i] += D_EPS_NLIN;
 
 				set_displ(eps_1);
 				newton_raphson(&nl_flag, &nr_its, &nr_err);
 				calc_ave_stress(sig_1);
+
 				for (int v = 0; v < nvoi; ++v)
-					gp_ptr->macro_ctan[v * nvoi + i] = (sig_1[v] - sig_0[v]) / dEps;
+					gp_ptr->macro_ctan[v * nvoi + i] = (sig_1[v] - sig_0[v]) / D_EPS_NLIN;
 
 				gp_ptr->nr_its[i + 1] = nr_its;
 				gp_ptr->nr_err[i + 1] = nr_err;
