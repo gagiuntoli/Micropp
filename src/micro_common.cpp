@@ -221,6 +221,15 @@ material_t micropp<tdim>::get_material(const int e) const
 	return material_list[mat_num];
 }
 
+
+template <int tdim>
+void micropp<tdim>::print_info() const
+{
+	printf("micropp%d\n", dim);
+	printf("ngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
+	printf("l = [%lf, %lf, %lf]; width = %lf\n", lx, ly, lz, width);
+}
+
 // Explicit instantiation
 template class micropp<2>;
 template class micropp<3>;

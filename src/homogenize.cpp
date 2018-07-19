@@ -50,7 +50,7 @@ void micropp<tdim>::set_macro_strain(const int gp_id, const double *macro_strain
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress)
+void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress) const
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
@@ -60,7 +60,7 @@ void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress)
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan)
+void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan) const
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);

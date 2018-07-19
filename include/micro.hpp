@@ -183,11 +183,13 @@ class micropp {
 		~micropp();
 
 		// common Functions
-		int get_nl_flag(int gp_id) const;
+		int get_nl_flag(const int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
-		void get_macro_stress(const int gp_id, double *macro_stress);
-		void get_macro_ctan(const int gp_id, double *macro_ctan);
+		void get_macro_stress(const int gp_id, double *macro_stress) const;
+		void get_macro_ctan(const int gp_id, double *macro_ctan) const;
 		void homogenize();
 		void output(int tstep, int gp_id);
-		void write_info_files();		void update_vars();
+		void write_info_files();
+		void update_vars();
+		void print_info() const;
 };
