@@ -19,53 +19,98 @@
 ! along with this program.  If not, see <https://www.gnu.org/licenses/>.
 !
 
-program main_wrap
+program test3d_3
 
-implicit none
+  ! access computing environment
+  use ISO_FORTRAN_ENV, only : ERROR_UNIT
+  use libmicropp
+  
+  implicit none
 
-  integer dims
-  integer :: sizes(3), types(2)
-  real*8 :: strain(3)
-  real*8 :: stress(3)
-  real*8 :: ctan(9)
-  integer micro_type
-  real*8 :: micro_params(4), params(20)
+  integer, parameter :: MAX_MAT_PARAM = 10
+  type(micropp3) :: micro
+  integer :: argc, t
+  character(len=32) :: arg
+  integer :: sizes(3), time_steps
+  integer, parameter :: micro_type = 1
+  integer, dimension (1:2) :: mat_types = (/ 1, 0 /)
 
-  dims = 2 
-  sizes(1) = 10
-  sizes(2) = 10
-  sizes(3) = 1
+  real(8), parameter :: d_eps = 0.01
+  integer, parameter :: dir = 3;
+  real(8), dimension(*) :: eps(6), sig(6)
+  real(8) :: micro_params(5), mat_params(2 * MAX_MAT_PARAM)
 
-  micro_type = 0; ! 2 materiales matriz y fibra (3D esfera en matriz)
+  argc = command_argument_count()
+
+  if (argc < 3) then
+     call get_command_argument(0, arg)
+     write (ERROR_UNIT,*) "Usage: ./executable nx ny nz [steps]"
+     stop 1
+  end if
+
+  call get_command_argument(1, arg)
+  read(arg, *) sizes(1)
+  call get_command_argument(2, arg)
+  read(arg, *) sizes(2)
+  call get_command_argument(3, arg)
+  read(arg, *) sizes(3)
+
+  if (argc >= 4) then
+     call get_command_argument(4, arg)
+     read(arg, *) time_steps
+  else
+     time_steps = 10
+  end if
+
   micro_params(1) = 1.0; ! lx
   micro_params(2) = 1.0; ! ly
   micro_params(3) = 1.0; ! lz
-  micro_params(4) = 0.2; ! radio de la esfera
-  micro_params(4) = 0.0; ! I max
-  types(1) = 0;
-  types(2) = 0;
+  micro_params(4) = 0.1; ! grosor capa de abajo
+  micro_params(5) = 0.0; ! I max
 
-  params(0*10 + 1) = 1.0e6;
-  params(0*10 + 2) = 0.3;
-  params(1*10 + 1) = 1.0e7;
-  params(1*10 + 2) = 0.3;
+  mat_params(0 * MAX_MAT_PARAM + 1) = 1.0e6; ! E
+  mat_params(0 * MAX_MAT_PARAM + 2) = 0.3;   ! nu
+  mat_params(0 * MAX_MAT_PARAM + 3) = 5.0e4; ! Sy
+  mat_params(0 * MAX_MAT_PARAM + 4) = 5.0e4; ! Ka(
+  
+  mat_params(1 * MAX_MAT_PARAM + 1) = 1.0e6;
+  mat_params(1 * MAX_MAT_PARAM + 2) = 0.3;
+  mat_params(1 * MAX_MAT_PARAM + 3) = 1.0e4;
+  mat_params(1 * MAX_MAT_PARAM + 4) = 0.0e-1;
 
-  call micropp_construct(dims, 1, sizes, micro_type, micro_params, types, params)
+  micro = micropp3(1, sizes, micro_type, micro_params, mat_types, mat_params)
 
-  strain(1) = 0.005
-  strain(2) = 0.0
-  strain(3) = 0.0
-  call micropp_set_macro_strain(0, strain)
-  call micropp_homogenize()
-  call micropp_get_macro_stress(0, stress)
+  eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
+  sig = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
+  do t = 0, time_steps - 1
+     write (*,*) "time step = ", t
+     if (t < 30) then
+        eps(dir) = eps(dir) + d_eps;
+     else if (t < 80) then
+        eps(dir) = eps(dir) - d_eps;
+     else if (t < 130) then
+        eps(dir) = eps(dir) + d_eps;
+     else if (t < 250) then
+        eps(dir) = eps(dir) - d_eps;
+     else
+        eps(dir) = eps(dir) + d_eps;
+     end if
 
-  WRITE(*,*) 'Stress : '
-  WRITE(*,'(F12.2,F12.2,F12.2,A)') stress(1), stress(2), stress(3)
+     call micro%set_macro_strain(0, eps)
+     call micro%homogenize()
 
-  call micropp_get_macro_ctan(0, ctan)
-  WRITE(*,*) 'Ctan : '
-  WRITE(*,'(F12.2,F12.2,F12.2,A)') ctan(1), ctan(2), ctan(3)
-  WRITE(*,'(F12.2,F12.2,F12.2,A)') ctan(4), ctan(5), ctan(6)
-  WRITE(*,'(F12.2,F12.2,F12.2,A)') ctan(7), ctan(8), ctan(9)
+     call micro%get_macro_stress(0, sig)
 
-end program
+     call micro%update_vars()
+     call micro%write_info_files();
+
+     write(*,'(A,F12.2)') "eps = ", eps(dir)
+     write(*,'(A)', advance="no") 'sig = '
+     write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)
+     WRITE(*,'(F12.2,F12.2,F12.2,A)') sig(4), sig(5), sig(6)
+!     call micro%output(t, 0);
+  end do
+
+  call free(micro)
+
+end program test3d_3

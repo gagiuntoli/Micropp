@@ -42,51 +42,48 @@ int main (int argc, char *argv[])
 	const int nz = atoi(argv[3]);
 	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
 
-	int size[3];
-	size[0] = nx;
-	size[1] = ny;
-	size[2] = nz;
+	int size[3] = { nx, ny, nz };
 
-	int micro_type = 1; // 2 materiales matriz y fibra (3D esfera en matriz)
+	// 2 materiales matriz y fibra (3D esfera en matriz)
+	const int micro_type = 1;
+
 	double micro_params[5];
 	micro_params[0] = 1.0; // lx
 	micro_params[1] = 1.0; // ly
 	micro_params[2] = 1.0; // lz
 	micro_params[3] = 0.1; // grosor capa de abajo
-	micro_params[4] = 0; // INV_MAX
+	micro_params[4] = 0.0; // INV_MAX
 
-	int mat_types[2]; // dos materiales lineales (type = 0)
-	mat_types[0] = 1;
-	mat_types[1] = 0;
+	int mat_types[2] = { 1, 0 }; // dos materiales lineales (type = 0)
 
-	double mat_params[2*MAX_MAT_PARAM];
-	mat_params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
-	mat_params[0*MAX_MAT_PARAM + 1] = 0.3;   // nu
-	mat_params[0*MAX_MAT_PARAM + 2] = 5.0e4; // Sy
-	mat_params[0*MAX_MAT_PARAM + 3] = 5.0e4; // Ka
+	double mat_params[2 * MAX_MAT_PARAM];
+	mat_params[0 * MAX_MAT_PARAM + 0] = 1.0e6; // E
+	mat_params[0 * MAX_MAT_PARAM + 1] = 0.3;   // nu
+	mat_params[0 * MAX_MAT_PARAM + 2] = 5.0e4; // Sy
+	mat_params[0 * MAX_MAT_PARAM + 3] = 5.0e4; // Ka
 
-	mat_params[1*MAX_MAT_PARAM + 0] = 1.0e6;
-	mat_params[1*MAX_MAT_PARAM + 1] = 0.3;
-	mat_params[1*MAX_MAT_PARAM + 2] = 1.0e4;
-	mat_params[1*MAX_MAT_PARAM + 3] = 0.0e-1;
+	mat_params[1 * MAX_MAT_PARAM + 0] = 1.0e6;
+	mat_params[1 * MAX_MAT_PARAM + 1] = 0.3;
+	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
+	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_types, mat_params);
 
-	double sig[6], ctan[36];
-	double d_eps = 0.01;
+	double sig[6];
+	const double d_eps = 0.01;
 	int dir = 2;
 
 	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-	for (int t = 0; t < time_steps; ++t)
-	{
+
+	for (int t = 0; t < time_steps; ++t) {
 		cout << "time step = " << t << endl;
-		if (t<30)
+		if (t < 30)
 			eps[dir] += d_eps;
-		else if (t<80)
+		else if (t < 80)
 			eps[dir] -= d_eps;
-		else if (t<130)
+		else if (t < 130)
 			eps[dir] += d_eps;
-		else if (t<250)
+		else if (t < 250)
 			eps[dir] -= d_eps;
 		else
 			eps[dir] += d_eps;
@@ -97,7 +94,7 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 
 		micro.update_vars();
-		micro.write_info_files ();
+		micro.write_info_files();
 
 		cout << "eps = " << eps[dir] << endl;
 		cout

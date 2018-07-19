@@ -129,7 +129,7 @@ class micropp {
 		void get_elem_rhs(bool *nl_flag, Rest...) const;
 
 		template <typename... Rest>
-		void get_elem_mat(Rest...);
+		void get_elem_mat(Rest...) const;
 
 		void set_displ(double *eps);
 		double assembly_rhs(bool *nl_flag);
@@ -150,8 +150,8 @@ class micropp {
 		template <typename... Rest>
 		void getElemDisp(double *elem_disp, Rest...) const;
 
-		void calc_ave_stress(double stress_ave[6]);
-		void calc_ave_strain(double strain_ave[6]);
+		void calc_ave_stress(double stress_ave[6]) const;
+		void calc_ave_strain(double strain_ave[6]) const;
 
 		void calc_fields();
 
@@ -161,11 +161,11 @@ class micropp {
 		//double get_inv_2(const double *tensor);
 
 		void get_ctan_plast_sec(int ex, int ey, int ez, int gp,
-		                        double ctan[6][6]);
+		                        double ctan[6][6]) const;
 		void get_ctan_plast_exact(int ex, int ey, int ez, int gp,
-		                          double ctan[6][6]);
+		                          double ctan[6][6]) const;
 		void get_ctan_plast_pert(int ex, int ey, int ez, int gp,
-		                         double ctan[6][6]);
+		                         double ctan[6][6]) const;
 
 		void get_dev_tensor(double tensor[6], double tensor_dev[6]) const;
 
@@ -184,11 +184,13 @@ class micropp {
 		~micropp();
 
 		// common Functions
-		int get_nl_flag(int gp_id) const;
+		int get_nl_flag(const int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
-		void get_macro_stress(const int gp_id, double *macro_stress);
-		void get_macro_ctan(const int gp_id, double *macro_ctan);
+		void get_macro_stress(const int gp_id, double *macro_stress) const;
+		void get_macro_ctan(const int gp_id, double *macro_ctan) const;
 		void homogenize();
 		void output(int tstep, int gp_id);
-		void write_info_files();		void update_vars();
+		void write_info_files();
+		void update_vars();
+		void print_info() const;
 };

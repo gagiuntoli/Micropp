@@ -50,7 +50,7 @@ void micropp<tdim>::set_macro_strain(const int gp_id, const double *macro_strain
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress)
+void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress) const
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
@@ -60,14 +60,13 @@ void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress)
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan)
+void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan) const
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
 	for (int i = 0; i < (nvoi * nvoi); ++i)
 		macro_ctan[i] = gp_list[gp_id].macro_ctan[i];
 }
-
 
 template <int tdim>
 void micropp<tdim>::homogenize()
@@ -79,21 +78,21 @@ void micropp<tdim>::homogenize()
 
 		inv_max = -1.0e10;
 
-		if ((is_linear(gp_ptr->macro_strain) == true) && (!gp_ptr->allocated)) {
+		if (is_linear(gp_ptr->macro_strain) && (!gp_ptr->allocated)) {
 
 			// S = CL : E
 			for (int i = 0; i < nvoi; ++i) {
-				double tmp = 0;
+				gp_ptr->macro_stress[i] = 0.0;
 				for (int j = 0; j < nvoi; ++j)
-					tmp += ctan_lin[i * nvoi + j] * gp_ptr->macro_strain[j];
-				gp_ptr->macro_stress[i] = tmp;
+					gp_ptr->macro_stress[i] += ctan_lin[i * nvoi + j]
+						* gp_ptr->macro_strain[j];
 			}
 			// C = CL
 			for (int i = 0; i < nvoi; ++i)
 				for (int j = 0; j < nvoi; ++j)
 					gp_ptr->macro_ctan[i * nvoi + j] = ctan_lin[i * nvoi + j];
 
-			for (int i = 0; i < (1 + nvoi); ++i) {
+			for (int i = 0; i < (nvoi + 1); ++i) {
 				gp_ptr->nr_its[i] = 0;
 				gp_ptr->nr_err[i] = 0.0;
 			}
@@ -117,7 +116,7 @@ void micropp<tdim>::homogenize()
 			bool nl_flag;
 			double nr_err;
 
-			set_displ(gp_ptr->macro_strain);
+			set_displ(gp_ptr->macro_strain);  // Acts on u
 			newton_raphson(&nl_flag, &nr_its, &nr_err);
 			calc_ave_stress(gp_ptr->macro_stress);
 
@@ -147,7 +146,7 @@ void micropp<tdim>::homogenize()
 					eps_1[v] = gp_ptr->macro_strain[v];
 				eps_1[i] += dEps;
 
-				set_displ(eps_1);
+				set_displ(eps_1);   // Acts on u
 				newton_raphson(&nl_flag, &nr_its, &nr_err);
 				calc_ave_stress(sig_1);
 				for (int v = 0; v < nvoi; ++v)
