@@ -21,30 +21,33 @@
 
 #include "micro.hpp"
 
+
 template<int tdim>
 void micropp<tdim>::initialize(const double *_micro_params,
-                               const int *_mat_types,
-                               const double *_params)
+		const int *_mat_types, const double *_params)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
+
+	gp_list = new gp_t[ngp]();
+	for (int gp = 0; gp < ngp; gp++) {
+		gp_list[gp].u_n = (double *) calloc(nn * dim, sizeof(double));
+		gp_list[gp].u_k = (double *) malloc(nn * dim * sizeof(double));
+	}
 
 	b = (double *) malloc(nn * dim * sizeof(double));
 	du = (double *) malloc(nn * dim * sizeof(double));
 	u_aux = (double *) malloc(nn * dim * sizeof(double));
-
-	gp_list = new gp_t[ngp]();
 
 	elem_type = (int *) malloc(nelem * sizeof(int));
 	elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
 	elem_strain = (double *) malloc(nelem * nvoi * sizeof(double));
 	vars_old_aux = (double *) calloc(num_int_vars, sizeof(double));
 	vars_new_aux = (double *) malloc(num_int_vars* sizeof(double));
-	vars_old = vars_old_aux;
-	vars_new = vars_new_aux;
+
+	assert(b && du && u_aux && elem_stress && elem_strain &&
+			elem_type && vars_old_aux && vars_new_aux);
 
 	output_files_header = false;
-	assert( b && du && u && elem_stress && elem_strain &&
-	        elem_type && vars_old && vars_new );
 
 	int nParams;
 	if (micro_type == 0) {
@@ -94,14 +97,6 @@ void micropp<tdim>::initialize(const double *_micro_params,
 	}
 	file.close();
 
-	solver.max_its = CG_MAX_ITS;
-	solver.min_tol = CG_MAX_TOL;
-	solver.k = (double *) malloc(nn * dim * sizeof(double));
-	solver.r = (double *) malloc(nn * dim * sizeof(double));
-	solver.z = (double *) malloc(nn * dim * sizeof(double));
-	solver.p = (double *) malloc(nn * dim * sizeof(double));
-	solver.q = (double *) malloc(nn * dim * sizeof(double));
-
 	file.open("micropp_convergence.dat");
 	file.close();
 	file.open("micropp_eps_sig_ctan.dat");
@@ -127,12 +122,6 @@ micropp<tdim>::~micropp()
 	free(vars_new_aux);
 
 	delete [] gp_list;
-
-	free(solver.k);
-	free(solver.r);
-	free(solver.z);
-	free(solver.p);
-	free(solver.q);
 }
 
 
@@ -148,28 +137,23 @@ int micropp<tdim>::get_nl_flag(int gp_id) const
 template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
-	double sig_1[6];
+	u = u_aux;
+	vars_old = vars_old_aux;
 
 	for (int i = 0; i < nvoi; ++i) {
 
-        double eps_1[nvoi] = {0.0};
-		eps_1[i] += D_EPS_LIN;
+        double eps_1[nvoi] = { 0.0 };
+		eps_1[i] += D_EPS_CTAN_AVE;
 
-		u = u_aux;
-		vars_old = vars_old_aux;
-		vars_new = NULL;
-		memset(vars_old, 0, num_int_vars * sizeof(double));
-		memset(u, 0.0, nn * dim * sizeof(double));
+		int nr_its; double nr_err;
+		set_displ_bc(eps_1);
+		newton_raphson(&nr_its, &nr_err);
 
-		int nr_its;
-		bool nl_flag;
-		double nr_err;
-		set_displ(eps_1);
-		newton_raphson(&nl_flag, &nr_its, &nr_err);
+		double sig_1[6];
 		calc_ave_stress(sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
-			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_LIN;
+			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
 	}
 }
 
@@ -177,12 +161,10 @@ void micropp<tdim>::calc_ctan_lin()
 template <int tdim>
 bool micropp<tdim>::is_linear(const double *macro_strain)
 {
-	double macro_stress[6];
-	for (int i = 0; i < nvoi; ++i) {
-		macro_stress[i] = 0.0;
+	double macro_stress[6] = { 0.0 };
+	for (int i = 0; i < nvoi; ++i)
 		for (int j = 0; j < nvoi; ++j)
 			macro_stress[i] += ctan_lin[i * nvoi + j] * macro_strain[j];
-	}
 
 	const double inv = get_inv_1(macro_stress);
 	if (fabs(inv) > inv_max)
@@ -227,11 +209,80 @@ material_t micropp<tdim>::get_material(const int e) const
 
 
 template <int tdim>
+void micropp<tdim>::get_elem_nodes(int n[8], int ex, int ey, int ez) const
+{
+	const int nxny = ny * nx;
+	const int n0 = ez * nxny + ey * nx + ex;
+	n[0] = n0;
+	n[1] = n0 + 1;
+	n[2] = n0 + nx + 1;
+	n[3] = n0 + nx;
+	n[4] = n[0] + nxny;
+	n[5] = n[1] + nxny;
+	n[6] = n[2] + nxny;
+	n[7] = n[3] + nxny;
+}
+
+
+template <int tdim>
+void micropp<tdim>::get_elem_displ(const double *u,
+		double *elem_disp, int ex, int ey, int ez) const
+{
+	int n[8] ;
+	get_elem_nodes(n, ex, ey, ez);
+
+	for (int i = 0 ; i < npe; ++i)
+		for (int d = 0; d < dim; ++d)
+			elem_disp[i * dim + d] = u[n[i] * dim + d];
+}
+
+
+template <int tdim>
+void micropp<tdim>::get_strain(int gp, double *strain_gp,
+		int ex, int ey, int ez) const
+{
+	double elem_disp[3 * 8];
+	get_elem_displ(u, elem_disp, ex, ey, ez);
+
+	double bmat[6][3 * 8];
+	calc_bmat(gp, bmat);
+
+	memset(strain_gp, 0, nvoi * sizeof(double));
+	for (int v = 0; v < nvoi; ++v)
+		for (int i = 0; i < npe * dim; i++)
+			strain_gp[v] += bmat[v][i] * elem_disp[i];
+}
+
+
+template <int tdim>
 void micropp<tdim>::print_info() const
 {
 	printf("micropp%d\n", dim);
 	printf("ngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
 	printf("l = [%lf, %lf, %lf]; width = %lf\n", lx, ly, lz, width);
+}
+
+
+template <int tdim>
+void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
+		double stress_gp[nvoi], int ex, int ey, int ez) const
+{
+	const int e = glo_elem(ex, ey, ez);
+	const material_t material = get_material(e);
+	const double mu = material.mu;
+
+	if (material.plasticity == true) {
+
+		const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
+		const double alpha_old = vars_old[intvar_ix(e, gp, 6)];
+
+		plastic_get_stress(&material, eps, eps_p_old, alpha_old, stress_gp);
+
+	} else {
+
+		isolin_get_stress(&material, eps, stress_gp);
+	}
+
 }
 
 // Explicit instantiation

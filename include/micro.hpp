@@ -23,7 +23,6 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <list>
 
 #include <cmath>
 #include <cassert>
@@ -34,24 +33,24 @@
 #include "gp.hpp"
 #include "instrument.hpp"
 
-#define MAX_DIM       3
-#define MAX_MAT_PARAM 10
-#define MAX_MATS      10
-#define MAX_GP_VARS   10
-#define INT_VARS_GP   7		// eps_p_1, alpha_1
-#define NUM_VAR_GP    7		// eps_p_1, alpha_1
+#define MAX_DIM         3
+#define MAX_MAT_PARAM   10
+#define MAX_MATS        10
+#define MAX_GP_VARS     10
+#define INT_VARS_GP     7  // [eps_p_1(gp1), alpha_1(gp1), eps_p_1(gp2), ...]
+#define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
-#define CG_MAX_TOL    1.0e-8
-#define CG_MAX_ITS    2000
-#define NR_MAX_TOL    1.0e-5
-#define NR_MAX_ITS    40
-#define D_EPS_LIN     1.0e-8
-#define D_EPS_NLIN    1.0e-8
+#define CG_MIN_ERR      1.0e-8
+#define CG_MAX_ITS      2000
+#define NR_MAX_TOL      1.0e-5
+#define NR_MAX_ITS      40
+#define D_EPS_CTAN      1.0e-8
+#define D_EPS_CTAN_AVE  1.0e-8
 
-#define CONSTXG 0.577350269189626
+#define CONSTXG         0.577350269189626
 
-#define glo_elem3D(ex,ey,ez) ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
-#define intvar_ix(e,gp,var) ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
+#define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
+#define intvar_ix(e,gp,var)  ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
 
 using namespace std;
 
@@ -80,7 +79,9 @@ class micropp {
 		// Constants only vars
 		const int ngp, nx, ny, nz, nn;
 		const int nex, ney, nez, nelem;
-		const double lx, ly, lz, dx, dy, dz, width, inv_tol;
+		const double lx, ly, lz;
+		const double dx, dy, dz, dxi, dyi, dzi;
+		const double width, inv_tol;
 
 		const int micro_type, num_int_vars;
 		gp_t *gp_list;
@@ -94,14 +95,11 @@ class micropp {
 		double ctan_lin[36];
 
 		ell_matrix A;
-		ell_solver solver;
 
 		double *b;
 		double *du;
 		double *u;
 		double *u_aux;
-		double *u_old;
-		double *u_new;
 
 		int *elem_type;
 		double *elem_stress;
@@ -126,61 +124,78 @@ class micropp {
 		double get_inv_1(const double *tensor) const;
 		material_t get_material(const int e) const;
 
+		void get_strain(int gp, double *strain_gp,
+				int ex, int ey, int ez = 0) const;
+
+		void get_elem_nodes(int n[8], int ex, int ey, int ez = 0) const;
+
+		void get_elem_displ(const double *u, double *elem_disp,
+				int ex, int ey, int ez = 0) const;
+
+		void isolin_get_stress(
+				const material_t *material, const double eps[6],
+				double stress[6]) const;
+
+		void plastic_get_stress(
+				const material_t *material, const double eps[6],
+				const double eps_p_old[6], double alpha_old,
+				double stress[6]) const;
+
+		void get_stress(int gp, const double eps[nvoi],
+				double stress_gp[nvoi], int ex, int ey, int ez = 0) const;
+
 		// Specialized
 		template <typename... Rest>
 		int get_elem_type(Rest...);
 
 		template <typename... Rest>
-		void get_elem_rhs(bool *nl_flag, Rest...) const;
+		void get_elem_rhs(double *be, Rest...) const;
 
 		template <typename... Rest>
 		void get_elem_mat(Rest...) const;
 
-		void set_displ(double *eps);
-		double assembly_rhs(bool *nl_flag);
+		void set_displ_bc(const double *eps);
+		double assembly_rhs();
 		void assembly_mat();
 
 		template <typename T>
 		void calc_bmat(int gp, T bmat) const;
 
-		template <typename... Rest>
-		void get_strain(int gp, double *strain_gp, Rest...) const;
+		void newton_raphson(int *_its, double *_err);
 
-		template <typename... Rest>
-		void get_stress(int gp, double strain_gp[3],
-		                bool *nl_flag, double *stress_gp, Rest...) const;
+		void calc_ave_stress(double stress_ave[nvoi]) const;
+		void calc_ave_strain(double strain_ave[nvoi]) const;
 
-		void newton_raphson(bool *nl_flag, int *its, double *err);
-
-		template <typename... Rest>
-		void getElemDisp(double *elem_disp, Rest...) const;
-
-		void calc_ave_stress(double stress_ave[6]) const;
-		void calc_ave_strain(double strain_ave[6]) const;
+		bool calc_vars_new();
 
 		void calc_fields();
 
 		void write_vtu(int tstep, int gp_id);
 
 		// Functions Only for 3D
-		//double get_inv_2(const double *tensor);
 
-		void get_ctan_plast_sec(int ex, int ey, int ez, int gp,
-		                        double ctan[6][6]) const;
-		void get_ctan_plast_exact(int ex, int ey, int ez, int gp,
-		                          double ctan[6][6]) const;
-		void get_ctan_plast_pert(int ex, int ey, int ez, int gp,
-		                         double ctan[6][6]) const;
+		void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
 
-		void get_dev_tensor(double tensor[6], double tensor_dev[6]) const;
+		bool plastic_law(
+				const material_t *material, const double eps[6],
+				const double eps_p_old[6], double alpha_old,
+				double *_dl, double _normal[6], double _s_trial[6]) const;
 
-		void plastic_step(const material_t *material, double eps[6],
-		                  double eps_p_1[6], double alpha_1,
-		                  double eps_p[6], double *alpha,
-		                  bool *nl_flag, double stress[6]) const;
+		void plastic_get_ctan(
+				const material_t *material, const double eps[6],
+				const double eps_p_old[6], double alpha_old,
+				double ctan[6][6]) const;
+
+		bool plastic_evolute(
+				const material_t *material, const double eps[6],
+				const double eps_p_old[6], double alpha_old, 
+				double *eps_p_new, double *alpha_new) const;
+
+		void isolin_get_ctan(
+				const material_t *material, double ctan[6][6]) const;
 
 		void initialize(const double *micro_params, const int *mat_types,
-		                const double *params);
+				const double *params);
 
 	public:
 		micropp(const int ngp,const int size[3], const int micro_type,
@@ -189,6 +204,7 @@ class micropp {
 		~micropp();
 
 		// common Functions
+
 		int get_nl_flag(const int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
 		void get_macro_stress(const int gp_id, double *macro_stress) const;

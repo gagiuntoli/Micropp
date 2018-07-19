@@ -19,62 +19,59 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
+
+#include <cstdlib>
+#include <cstring>
+#include <cassert>
+
+using namespace std;
+
 #ifndef ELL_H_
 #define ELL_H_
 
-#define nod_index(i,j,k) ((k)*nx*ny + (j)*nx + (i))
+#define nod_index(i,j,k)   ((k)*nx*ny + (j)*nx + (i))
+#define nod_index3D(i,j,k) ((k)*nx*ny + (j)*nx + (i))
+#define nod_index2D(i,j)   ((j)*nx + (i))
 
 typedef struct {
+
+	int n[3];       // nx ny nz
+	int nn;
+	int dim;
+	int nfield;
 	int nrow;		// number of rows
 	int ncol;		// number of columns
 	int nnz;		// non zeros per row
-	int *cols;
-	double *vals;
+	int *cols = NULL;
+	double *vals = NULL;
+
+	int max_its;
+	double min_err;
+	double *k, *r, *z, *p, *q;
+
 } ell_matrix;
 
-typedef struct {
-	int max_its;
-	int its;
-	double min_tol;
-	double err;
-	double *k, *r, *z, *p, *q;
-} ell_solver;
-
-int ell_add_val(ell_matrix *m, int row, int col, double val);
-int ell_add_vals(ell_matrix *m, int *ix, int nx, int *iy, int ny, double *vals);
+void ell_init(ell_matrix *m, const int nfield, const int dim,
+		const int ns[3], const double min_err, const int max_its);
 
 void ell_mvp(const ell_matrix *m, const double *x, double *y);
-int ell_get_val(ell_matrix *m, int row, int col, double *val);
 
-int ell_solve_cg(ell_solver *solver, ell_matrix *m, double *b, double *x);
-int ell_solve_jacobi(ell_solver *solver, ell_matrix *m, double *b, double *x);
-int ell_solve_jacobi_2D(ell_solver *solver, ell_matrix *m, int nFields,
-                        int nx, int ny, double *b, double *x);
+int ell_solve_cgpd(const ell_matrix *m, const double *b,
+		double *x, double *err_, int *its_);
 
-int ell_set_val(ell_matrix *m, int row, int col, double val);
-int ell_set_zero_row(ell_matrix *m, int row, double diag_val);
-int ell_set_zero_col(ell_matrix *m, int col, double diag_val);
-int ell_set_zero_mat(ell_matrix *m);
+void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae);
 
-int ell_print(ell_matrix *m);
-int ell_print_full(ell_matrix *m);
+void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae);
+
+void ell_set_zero_mat(ell_matrix *m);
+
+void ell_set_bc_2D(ell_matrix *m);
+
+void ell_set_bc_3D(ell_matrix *m);
 
 void ell_free(ell_matrix *m);
 
-int ell_solve_cgpd_struct(ell_solver *solver, const ell_matrix * const m,
-                          int nFields, int dim, int nn,
-                          const double * const b, double *x);
-
-void ell_add_struct2D(ell_matrix *m, int ex, int ey, double *Ae,
-                      int nFields, int nx, int ny);
-
-void ell_add_struct3D(ell_matrix *m, int ex, int ey, int ez, double *Ae,
-                      int nFields, int nx, int ny, int nz);
-
-void ell_set_bc_2D(ell_matrix *m, int nFields, int nx, int ny);
-void ell_set_bc_3D(ell_matrix *m, int nFields, int nx, int ny, int nz);
-
-void ell_init_2D(ell_matrix *m, int nFields, int nx, int ny);
-void ell_init_3D(ell_matrix *m, int nFields, int nx, int ny, int nz);
+void print_ell(const ell_matrix *A);
 
 #endif

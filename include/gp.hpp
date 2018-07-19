@@ -22,48 +22,45 @@
 
 class gp_t {
 	public:
-		int nr_its[7];
-		double *int_vars_n;
-		double *u_n;
-		double *int_vars_k;
-		double *u_k;
 		double macro_strain[6];
 		double macro_stress[6];
 		double macro_ctan[36];
+
+		bool allocated; // flag for memory optimization
+
+		double *int_vars_n; // vectors for calculations
+		double *int_vars_k;
+		double *u_n;
+		double *u_k;
+
+		int nr_its[7]; // measurements
 		double nr_err[7];
 		double inv_max;
-		bool allocated;
 
 		gp_t():
 			int_vars_n(nullptr),
-			u_n(nullptr),
 			int_vars_k(nullptr),
-			u_k(nullptr),
 			inv_max(-1.0),
 			allocated(false)
 		{}
 
 		~gp_t()
 		{
+			free(u_n);
 			if (allocated) {
 				free(int_vars_n);
-				free(u_n);
 				free(int_vars_k);
-				free(u_k);
 			}
 		}
 
-		void allocate(const int num_int_vars, const int nn, const int dim)
+		void allocate(const int num_int_vars)
 		{
 			assert(!allocated);
 
-			const int size = nn * dim;
 			int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
 			int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
-			u_n = (double *) malloc(size * sizeof(double));
-			u_k = (double *) malloc(size * sizeof(double));
 
-			allocated = (int_vars_n && int_vars_k && u_n && u_k);
+			allocated = (int_vars_n && int_vars_k);
 			assert(allocated);
 		}
 

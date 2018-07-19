@@ -19,8 +19,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
 #include <iostream>
+
+#include <cmath>
 
 #include "instrument.hpp"
 #include "micro.hpp"
@@ -29,145 +30,72 @@
 
 using namespace std;
 
-template <>
-void micropp<3>::get_ctan_plast_sec(int ex, int ey, int ez,
-                                    int gp, double ctan[6][6]) const
-{
-	INST_START;
-	bool non_linear;
-	double stress_pert[6], strain_pert[6], strain_0[6], d_strain = 1.0e-8;
-	get_strain(gp, strain_0, ex, ey, ez);
-
-	for (int i = 0; i < 6; i++) {
-		for (int j = 0; j < 6; j++)
-			strain_pert[j] = 0.0;
-
-		if (fabs(strain_0[i]) > 1.0e-7)
-			strain_pert[i] = strain_0[i];
-		else
-			strain_pert[i] = d_strain;
-
-		get_stress(gp, strain_pert, &non_linear, stress_pert, ex, ey, ez);
-
-		for (int j = 0; j < 6; j++)
-			ctan[j][i] = stress_pert[j] / strain_pert[i];
-	}
-
-}
-
 
 template <>
-void micropp<3>::get_ctan_plast_exact(int ex, int ey, int ez,
-                                      int gp, double ctan[6][6]) const
+void micropp<3>::get_dev_tensor(const double tensor[6], double tensor_dev[6]) const
 {
-	INST_START;
-	double strain[6];
-	int e = glo_elem3D(ex, ey, ez);
-	get_strain(gp, strain, ex, ey, ez);
-
-	const material_t material = get_material(e);
-
-	for (int i = 0; i < 6; i++)
-		for (int j = 0; j < 6; j++)
-			ctan[i][j] = 0.0;
-
-	for (int i = 0; i < 3; i++)
-		for (int j = 0; j < 3; j++)
-			ctan[i][j] += material.lambda;
-
-	for (int i = 0; i < 3; i++)
-		ctan[i][i] += 2 * material.mu;
-
-	for (int i = 3; i < 6; i++)
-		ctan[i][i] += material.mu;
-
-}
-
-template <>
-void micropp<3>::get_ctan_plast_pert(int ex, int ey, int ez,
-                                     int gp, double ctan[6][6]) const
-{
-	INST_START;
-	bool non_linear;
-	double stress_0[6], stress_pert[6], strain_0[6], strain_pert[6], deps = 1.0e-8;
-	get_strain(gp, strain_0, ex, ey, ez);
-	get_stress(gp, strain_0, &non_linear, stress_0, ex, ey, ez);
-
-	for (int i = 0; i < 6; i++) {
-		for (int j = 0; j < 6; j++)
-			strain_pert[j] = strain_0[j];
-
-		strain_pert[i] += deps;
-		get_stress(gp, strain_pert, &non_linear, stress_pert, ex, ey, ez);
-
-		for (int j = 0; j < 6; j++)
-			ctan[j][i] = (stress_pert[j] - stress_0[j]) / deps;
-	}
-}
-
-
-template <>
-void micropp<3>::get_dev_tensor(double tensor[6], double tensor_dev[6]) const
-{
-	for (int i = 0; i < 6; i++)
-		tensor_dev[i] = tensor[i];
+	memcpy(tensor_dev, tensor, nvoi * sizeof(double));
 	for (int i = 0; i < 3; i++)
 		tensor_dev[i] -= (1 / 3.0) * (tensor[0] + tensor[1] + tensor[2]);
 }
 
 
 template <>
-void micropp<3>::plastic_step(const material_t *material, double eps[6],
-                             double eps_p_old[6], double alpha_old,
-                             double eps_p_new[6], double *alpha_new,
-                             bool *non_linear, double stress[6]) const
+bool micropp<3>::plastic_law(
+		const material_t *material, const double eps[6],
+		const double eps_p_old[6], double alpha_old,
+		double *_dl, double _normal[6], double _s_trial[6]) const
 {
 	double eps_dev[6];
 	double eps_p_dev_1[6];
-	double normal[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	double dl = 0.0;
-	double sig_dev_trial[6], sig_dev_trial_norm;
 
 	get_dev_tensor(eps_p_old, eps_p_dev_1);
 	get_dev_tensor(eps, eps_dev);
 
 	for (int i = 0; i < 3; ++i)
-		sig_dev_trial[i] = 2 * material->mu * (eps_dev[i] - eps_p_dev_1[i]);
+		_s_trial[i] = 2 * material->mu * (eps_dev[i] - eps_p_dev_1[i]);
 
 	for (int i = 3; i < 6; ++i)
-		sig_dev_trial[i] = material->mu * (eps_dev[i] - eps_p_dev_1[i]);
+		_s_trial[i] = material->mu * (eps_dev[i] - eps_p_dev_1[i]);
 
-	sig_dev_trial_norm = sqrt(sig_dev_trial[0] * sig_dev_trial[0] +
-	                          sig_dev_trial[1] * sig_dev_trial[1] +
-	                          sig_dev_trial[2] * sig_dev_trial[2] +
-	                          2 * sig_dev_trial[3] * sig_dev_trial[3] +
-	                          2 * sig_dev_trial[4] * sig_dev_trial[4] +
-	                          2 * sig_dev_trial[5] * sig_dev_trial[5]);
+	double tmp = 0.0;
+	for (int i = 0; i < 6; ++i)
+		tmp += _s_trial[i] * _s_trial[i];
+	double s_norm = sqrt(tmp);
 
-	double f_trial = sig_dev_trial_norm - sqrt(2.0 / 3) * (material->Sy + material->Ka * alpha_old);
+	double f_trial = s_norm - sqrt(2. / 3.) * (material->Sy + material->Ka * alpha_old);
 
 	if (f_trial > 0) {
-		*non_linear = true;
 
 		for (int i = 0; i < 6; ++i)
-			normal[i] = sig_dev_trial[i] / sig_dev_trial_norm;
+			_normal[i] = _s_trial[i] / s_norm;
+		*_dl = f_trial / (2. * material->mu * (1. + (0. * material->Ka) / (3. * material->mu)));
 
-		dl = f_trial / (2 * material->mu * (1.0 + (0.0 * material->Ka) / (3 * material->mu)));
+        return true;
 
-		if (eps_p_new && alpha_new) {
-			for (int i = 0; i < 6; ++i)
-				eps_p_new[i] = eps_p_old[i] + dl * normal[i];
-			*alpha_new = alpha_old + sqrt(2.0 / 3) * dl;
-		}
-	} else if (eps_p_new && alpha_new){
-		for (int i = 0; i < 6; ++i)
-			eps_p_new[i] = eps_p_old[i];
-		*alpha_new = alpha_old;
+	} else {
+
+		memset(_normal, 0, 6 * sizeof(double));
+		*_dl = 0;
+
+		return false;
 	}
+}
 
-	//sig_2 = s_trial + K * tr(eps) * 1 - 2*mu*dl*normal;
+
+template <>
+void micropp<3>::plastic_get_stress(
+		const material_t *material, const double eps[6],
+		const double eps_p_old[6], double alpha_old,
+		double stress[6]) const
+{
+	double dl, normal[6], s_trial[6];
+	bool nl_flag = plastic_law(material, eps, eps_p_old, alpha_old,
+			&dl, normal, s_trial);
+
+	//sig_2 = s_trial + K * tr(eps) * 1 - 2 * mu * dl * normal;
 	for (int i = 0; i < 6; ++i)
-		stress[i] = sig_dev_trial[i];
+		stress[i] = s_trial[i];
 
 	for (int i = 0; i < 3; ++i)
 		stress[i] += material->k * (eps[0] + eps[1] + eps[2]);
@@ -177,3 +105,78 @@ void micropp<3>::plastic_step(const material_t *material, double eps[6],
 }
 
 
+template <>
+void micropp<3>::plastic_get_ctan(
+		const material_t *material, const double eps[6],
+		const double eps_p_old[6], double alpha_old,
+		double ctan[6][6]) const
+{
+	INST_START;
+
+	double stress_0[6];
+	plastic_get_stress(material, eps, eps_p_old, alpha_old, stress_0);
+
+	for (int i = 0; i < nvoi; ++i) {
+
+		double eps_1[6];
+		memcpy(eps_1, eps, nvoi * sizeof(double));
+		eps_1[i] += D_EPS_CTAN;
+
+		double stress_1[6];
+		plastic_get_stress(material, eps_1, eps_p_old, alpha_old, stress_1);
+
+		for (int j = 0; j < nvoi; ++j)
+			ctan[j][i] = (stress_1[j] - stress_0[j]) / D_EPS_CTAN;
+	}
+}
+
+
+template <>
+bool micropp<3>::plastic_evolute(
+		const material_t *material, const double eps[6],
+		const double eps_p_old[6], double alpha_old, 
+		double *eps_p_new, double *alpha_new) const
+{
+	double dl, normal[6], s_trial[6];
+	bool nl_flag = plastic_law(material, eps, eps_p_old, alpha_old,
+			&dl, normal, s_trial);
+
+	for (int i = 0; i < 6; ++i)
+		eps_p_new[i] = eps_p_old[i] + dl * normal[i];
+
+	*alpha_new = alpha_old + sqrt(2. / 3.) * dl;
+
+	return nl_flag;
+}
+
+template <>
+void micropp<3>::isolin_get_ctan(
+		const material_t *material, double ctan[6][6]) const
+{
+	// C = lambda * (1x1) + 2 mu I
+	memset(ctan, 0, nvoi * nvoi * sizeof(double));
+
+	for (int i = 0; i < 3; ++i)
+		for (int j = 0; j < 3; ++j)
+			ctan[i][j] += material->lambda;
+
+	for (int i = 0; i < 3; ++i)
+		ctan[i][i] += 2 * material->mu;
+
+	for (int i = 3; i < 6; ++i)
+		ctan[i][i] = material->mu;
+}
+
+
+template <>
+void micropp<3>::isolin_get_stress(
+		const material_t *material, const double eps[6],
+		double stress[6]) const
+{
+	for (int i = 0; i < 3; ++i)
+		stress[i] = material->lambda * (eps[0] + eps[1] + eps[2]) \
+					   + 2 * material->mu * eps[i];
+
+	for (int i = 3; i < 6; ++i)
+		stress[i] = material->mu * eps[i];
+}

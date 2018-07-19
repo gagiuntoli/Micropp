@@ -1,5 +1,5 @@
 /*
- *  This source code is part of MicroPP: a finite element library
+ *  This is a test example for MicroPP: a finite element library
  *  to solve microstructural problems for composite materials.
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
@@ -19,41 +19,41 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "micro.hpp"
+#include <iostream>
+#include <iomanip>
+
+#include <ctime>
+#include <cmath>
+#include <cassert>
+
+#include "util.hpp"
 
 using namespace std;
 
-template <int tdim>
-void micropp<tdim>::newton_raphson(int *its_, double *err_)
+int main (int argc, char *argv[])
 {
-	INST_START;
+	const double a1[2][2] = {
+		{  10.66, -2.66 },
+		{ -2.66,   10.66 } };
+	const double v1[2] = { 47.1, -11.39 };
+	const double s2_exact[2] = { 532.3834, -246.7034 };
+	double s2[2];
 
-	int lits = 0, cg_its;
-	double lerr = 0.0, cg_err;
+	mvp_2(a1, v1, s2);
+	for (int i = 0; i < 2; ++i)
+		assert(fabs(s2[i] - s2_exact[i]) < 1.0e-10);
 
-	do {
-		lerr = assembly_rhs();  // Acts on b
+	const double a3[3][3] = {
+		{  10.66, -2.66   , 8.3},
+		{  10.66, -2.66   , 1.9},
+		{ -2.66,  -10.66  , 7.2} };
+	const double v3[3] = { -1.22, 7.1, -11.39 };
+	const double s3_exact[3] = { -126.4282, -53.53220, -154.4488 };
+	double s3[3];
 
-		if (lerr < NR_MAX_TOL)
-			break;
+	mvp_3(a3, v3, s3);
+	for (int i = 0; i < 3; ++i)
+		assert(fabs(s3[i] - s3_exact[i]) < 1.0e-10);
 
-		assembly_mat();   // Acts on A
-
-		// in(b) inout
-		ell_solve_cgpd(&A, b, du, &cg_err, &cg_its);
-
-		for (int i = 0; i < nn * dim; ++i)
-			u[i] += du[i];
-
-		lits++;
-
-	} while (lits < NR_MAX_ITS);
-
-	*its_ = lits;
-	*err_ = lerr;
+	return 0;
 }
-
-
-// Explicit instantiation
-template class micropp<2>;
-template class micropp<3>;

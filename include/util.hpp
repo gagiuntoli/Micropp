@@ -31,9 +31,10 @@
 
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <numeric>
-#include <cmath>
 
+#include <cmath>
 #include <ctime>
 #include <cstring>
 #include <cassert>
@@ -55,5 +56,44 @@ constexpr int mypow(int v, int e)
 {
 	return (e == 0) ? 1 : v * mypow(v, e - 1);
 }
+
+inline void print_vec(const double *vec, int n, const char file_name[])
+{
+	FILE *file = fopen(file_name, "w");
+	for (int i = 0; i < n; ++i)
+		fprintf(file, "[%lf]\n", vec[i]);
+	fclose(file);
+}
+
+inline void mvp_2(const double m[2][2], const double x[2], double y[2])
+{
+	for (int i = 0; i < 2; ++i) {
+		double tmp = 0.0;
+		for (int j = 0; j < 2; ++j)
+			tmp += m[i][j] * x[j];
+		y[i] = tmp;
+	}
+}
+
+inline void mvp_3(const double m[2][2], const double x[2], double y[2])
+{
+	for (int i = 0; i < 2; ++i) {
+		double tmp = 0.0;
+		for (int j = 0; j < 2; ++j)
+			tmp += m[i][j] * x[j];
+		y[i] = tmp;
+	}
+}
+
+inline void mvp_3(const double m[3][3], const double x[3], double y[3])
+{
+	for (int i = 0; i < 3; ++i) {
+		double tmp = 0.0;
+		for (int j = 0; j < 3; ++j)
+			tmp += m[i][j] * x[j];
+		y[i] = tmp;
+	}
+}
+
 
 #endif //UTIL_HPP

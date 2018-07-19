@@ -72,11 +72,10 @@ int main (int argc, char *argv[])
 
 	micropp<2> micro(1, size, micro_type, micro_params, mat_types, mat_params);
 
-	double MacroStress[6], MacroCtan[36];
-	double d_eps = 0.01;
 	int dir = 2;
-
-	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+	double sig[3], ctan[6];
+	double eps[3] = { 0 };
+	double d_eps = 0.01;
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "time step = " << t << endl;
@@ -93,15 +92,27 @@ int main (int argc, char *argv[])
 
 		micro.set_macro_strain(0, eps);
 		micro.homogenize();
-		micro.get_macro_stress(0, MacroStress);
+		micro.get_macro_stress(0, sig);
+		micro.get_macro_ctan(0, ctan);
 
 		micro.update_vars();
 		micro.write_info_files ();
 
-		cout << "eps = " << eps[dir] << endl;
-		cout << "MacroStress = " << MacroStress[0] << " "
-		     << MacroStress[1] << " " << MacroStress[2] << endl;
+		cout << "eps =\t";
+		for (int i = 0; i < 3; ++i)
+			cout << setw(14) << eps[i] << "\t";
 		cout << endl;
+
+		cout << "sig =\t";
+		for (int i = 0; i < 3; ++i)
+			cout << setw(14) << sig[i] << "\t";
+		cout << endl;
+
+		cout << "ctan =\t";
+		for (int i = 0; i < 3; ++i)
+			cout << setw(14) << ctan[i] << "\t";
+		cout << endl;
+
 		micro.output (t, 0);
 	}
 	return 0;

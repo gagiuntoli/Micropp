@@ -39,13 +39,10 @@ void micropp<tdim>::output(int time_step, int gp_id)
 		for (int i = 0; i < num_int_vars; ++i)
 			vars_old[i] = 0.0;
 
-	vars_new = NULL;
-
 	int nr_its;
-	bool nl_flag;
 	double nr_err;
-	set_displ(gp_list[gp_id].macro_strain);
-	newton_raphson(&nl_flag, &nr_its, &nr_err);
+	set_displ_bc(gp_list[gp_id].macro_strain);
+	newton_raphson(&nr_its, &nr_err);
 
 	calc_fields();
 	write_vtu(time_step, gp_id);
@@ -234,7 +231,7 @@ void micropp<tdim>::write_info_files()
 	file.open("micropp_convergence.dat", std::ios_base::app);
 	for (int igp = 0 ; igp < ngp; ++igp) {
 		file << scientific;
-		file << setw(3) << ((gp_list[igp].int_vars_n == NULL) ? 0 : 1) << " ";
+		file << setw(3) << ((gp_list[igp].allocated) ? 1 : 0) << " ";
 		file << setw(14) << gp_list[igp].inv_max << " ";
 		for (int i = 0; i < (1 + nvoi); ++i) {
 			file << setw(14) << gp_list[igp].nr_its[i] << " ";

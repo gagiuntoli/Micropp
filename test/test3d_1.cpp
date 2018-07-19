@@ -55,9 +55,7 @@ int main (int argc, char *argv[])
 	micro_params[3] = 0.1; // grosor capa de abajo
 	micro_params[4] = 0.0; // inv_tol
 
-	int mat_types[2]; // dos materiales lineales (type = 0)
-	mat_types[0] = 1;
-	mat_types[1] = 0;
+	int mat_types[2] = { 1, 0 }; // dos materiales lineales (type = 0)
 
 	double mat_params[2*MAX_MAT_PARAM];
 	mat_params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
@@ -71,7 +69,7 @@ int main (int argc, char *argv[])
 	micropp<3> micro(1, size, micro_type, micro_params, mat_types, mat_params);
 
 	double sig[6], ctan[36];
-	double eps[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+	double eps[6] = { 0 };
 	double d_eps = 0.01;
 
 	for (int t = 0; t < time_steps; ++t) {
@@ -91,16 +89,25 @@ int main (int argc, char *argv[])
 		micro.set_macro_strain(0, eps);
 		micro.homogenize();
 		micro.get_macro_stress(0, sig);
+		micro.get_macro_ctan(0, ctan);
 
 		micro.update_vars();
 		micro.write_info_files ();
 
-		cout << "eps = " << eps[dir] << endl;
-		cout
-			<< "sig = "
-			<< sig[0] << " " << sig[1] << " " << sig[2] << " "
-			<< sig[3] << " " << sig[4] << " " << sig[5]
-			<< endl;
+		cout << "eps =\t";
+		for (int i = 0; i < 6; ++i)
+			cout << setw(14) << eps[i] << "\t";
+		cout << endl;
+
+		cout << "sig =\t";
+		for (int i = 0; i < 6; ++i)
+			cout << setw(14) << sig[i] << "\t";
+		cout << endl;
+
+		cout << "ctan =\t";
+		for (int i = 0; i < 6; ++i)
+			cout << setw(14) << ctan[i] << "\t";
+		cout << endl;
 
 		cout << endl;
 		micro.output (t, 0);

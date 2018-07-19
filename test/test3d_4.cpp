@@ -41,6 +41,7 @@ int main(int argc, char **argv)
 		return(1);
 	}
 
+	const int nvoi = 6;
 	const int nx = atoi(argv[1]);
 	const int ny = atoi(argv[2]);
 	const int nz = atoi(argv[3]);
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
 
 	assert(nx > 1 && ny > 1 && nz > 1 && ngp > 1 && time_steps > 0);
 
-	int size[dim] = {nx, ny, nz};
+	int size[dim] = { nx, ny, nz };
 
 	int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
 
@@ -75,14 +76,13 @@ int main(int argc, char **argv)
 	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
 	int dir = 2;
-	const int nvoi = 6;
 	double d_eps = 0.01;
-	double eps[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	double eps[nvoi] = { 0.0 };
 	double sig[nvoi], (*sig_test)[nvoi];
 	double ctan[nvoi * nvoi], (*ctan_test)[nvoi * nvoi];
 
-	sig_test = (double (*)[6]) malloc (6 * ngp * sizeof(double));
-	ctan_test = (double (*)[36]) malloc (36 * ngp * sizeof(double));
+	sig_test = (double (*)[nvoi]) malloc (nvoi * ngp * sizeof(double));
+	ctan_test = (double (*)[nvoi * nvoi]) malloc (nvoi * nvoi * ngp * sizeof(double));
 
 	micropp<dim> micro(ngp, size, micro_type, micro_params, mat_types, mat_params);
 
@@ -111,7 +111,6 @@ int main(int argc, char **argv)
 			cout << endl;
 		}
 
-		double MacroStress[6], MacroCtan[36];
 		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
 
@@ -119,7 +118,6 @@ int main(int argc, char **argv)
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.get_macro_stress(gp, sig);
 			cout << "gp = " << gp << " sig  = ";
-
 			for (int i = 0; i < 6; ++i)
 				cout << setw(14) << sig[i] << "\t";
 			cout << endl;
@@ -135,23 +133,21 @@ int main(int argc, char **argv)
 			memcpy(ctan_test[gp], ctan, 3 * sizeof(double));
 		}
 
+		double diff_sum_sig = 0.0, diff_sum_ctan = 0.0;
 		for (int gp = 1; gp < ngp; ++gp) {
-			cout << "Diff sig:  \t";
 			for (int i = 0; i < 6; ++i) {
 				const double tmp = fabs(sig_test[gp][i] - sig_test[0][i]);
-				if (i < 3)
-					cout << tmp << "\t";
+				diff_sum_sig += tmp;
 				assert(tmp < 1.0e-8);
 			}
-			cout << "\nDiff ctan:  \t";
 			for (int i = 0; i < 6; ++i) {
 				const double tmp = fabs(ctan_test[gp][i] - ctan_test[0][i]);
-				if (i < 3)
-					cout << tmp << "\t";
+				diff_sum_ctan += tmp;
 				assert(tmp < 1.0e-8);
 			}
-			cout << endl;
 		}
+		cout << "Diff sig:\t" << diff_sum_sig << endl;
+		cout << "Diff ctan:\t" << diff_sum_ctan << endl;
 
 		micro.update_vars();
 		micro.output (t, 1);

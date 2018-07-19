@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
 	micro_params[0] = 1.0; // lx
 	micro_params[1] = 1.0; // ly
 	micro_params[2] = 1.0; // lz
-	micro_params[3] = 0.1; // grosor capa de abajo
+	micro_params[3] = 0.5; // grosor capa de abajo
 	micro_params[4] = 0.0; // INV_MAX
 
 	int mat_types[2] = { 1, 0 }; // dos materiales lineales (type = 0)
