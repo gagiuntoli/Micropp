@@ -199,9 +199,12 @@ class micropp {
 				const double *params);
 
 	public:
-		micropp(const int ngp,const int size[3], const int micro_type,
+		micropp() = delete;
+
+		micropp(const int ngp, const int size[3], const int micro_type,
 		        const double *micro_params, const int *mat_types,
 		        const double *params);
+
 		~micropp();
 
 		// common Functions

@@ -34,10 +34,11 @@ class test_t : public micropp<tdim> {
 
 	public:
 		test_t(const int size[3], const double mat_params[20],
-				const double micro_types[2], const double params[5])
-			: micropp<tdim> (4, size, 1, mat_params, micro_types, params) {};
-		
-		~test_t();
+		       const int micro_types[2], const double params[5])
+			: micropp<tdim> (4, size, 1, mat_params, micro_types, params)
+		{};
+
+		~test_t() {};
 
         void public_get_elem_nodes(int n[8], int ex, int ey, int ez = 0)
 		{
@@ -59,10 +60,10 @@ int main (int argc, char *argv[])
 	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
 	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
 
-	const double micro_types[2] = { 1, 0 };
+	const int micro_types[2] = { 1, 0 };
 	const double params[5] = { 1., 1., 1., .1, 0. };
 
-    test_t<2> test();
+	test_t<2> test(size, mat_params, micro_types, params);
 
 	int n[8];
 	test.public_get_elem_nodes(n, 0, 0, 0);
