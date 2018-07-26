@@ -118,6 +118,7 @@ class micropp {
 		                          {+CONSTXG, +CONSTXG, +CONSTXG},
 		                          {-CONSTXG, +CONSTXG, +CONSTXG} };
 
+	protected:
 		// Common
 		void calc_ctan_lin();
 		bool is_linear(const double *macro_strain);

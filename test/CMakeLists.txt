@@ -9,6 +9,7 @@ set(testsources
   test3d_3.f90
   test3d_4.cpp
   test3d_5.cpp
+  test_get_elem_nodes.cpp
   test_ell_1.cpp
   test_ell_2.cpp
   test_ell_3.cpp
