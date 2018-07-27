@@ -130,9 +130,10 @@ void micropp<3>::set_displ_bc(const double *eps)
 
 
 template <>
-template <>
-void micropp<3>::calc_bmat(int gp, double bmat[6][3 * 8]) const
+void micropp<3>::calc_bmat(int gp, double bmat[nvoi][npe * dim]) const
 {
+	INST_START;
+
 	const double dsh[8][3] = {
 		{ -(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
 		  -(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
@@ -184,25 +185,25 @@ void micropp<3>::calc_bmat(int gp, double bmat[6][3 * 8]) const
 
 template <>
 template <>
-void micropp<3>::get_elem_rhs(double *be, int ex, int ey, int ez) const
+void micropp<3>::get_elem_rhs(double be[npe * dim],
+                              int ex, int ey, int ez) const
 {
-	double bmat[6][3 * 8], cxb[6][3 * 8], stress_gp[6];
-	const double wg = (1. / 8.) * dx * dy * dz;
+	constexpr int npedim = npe * dim;
+	double bmat[nvoi][npe * dim], stress_gp[nvoi], strain_gp[nvoi];
+	const double wg = dx * dy * dz / npe;
 
-	memset(be, 0, 3 * 8 * sizeof(double));
+	memset(be, 0, npedim * sizeof(double));
 
-	for (int gp = 0; gp < 8; gp++) {
+	for (int gp = 0; gp < npe; ++gp) {
 
 		calc_bmat(gp, bmat);
 
-		double strain_gp[6];
 		get_strain(gp, strain_gp, ex, ey, ez);
 		get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npe * dim; i++)
 			for (int j = 0; j < nvoi; j++)
 				be[i] += bmat[j][i] * stress_gp[j] * wg;
-
 	}
 }
 
@@ -294,18 +295,21 @@ double micropp<3>::assembly_rhs()
 
 template <>
 template <>
-void micropp<3>::get_elem_mat(double Ae[3 * 8 * 3 * 8],
+void micropp<3>::get_elem_mat(double Ae[npe * dim * npe * dim],
 		int ex, int ey, int ez) const
 {
 	INST_START;
-	int e = glo_elem(ex, ey, ez);
+	const int e = glo_elem(ex, ey, ez);
 	const material_t material = get_material(e);
 
-	double ctan[6][6];
-	const int npedim = npe * dim;
+	double ctan[nvoi][nvoi];
+	constexpr int npedim = npe * dim;
+	constexpr int npedim2 = npedim * npedim;
 	const double wg = (1. / 8.) * dx * dy * dz;
 
-	memset(Ae, 0, npedim * npedim * sizeof(double));
+	double TAe[npedim2] = { 0.0 };
+
+	// memset(Ae, 0, npedim2 * sizeof(double));
 
 	for (int gp = 0; gp < npe; ++gp) {
 
@@ -319,12 +323,12 @@ void micropp<3>::get_elem_mat(double Ae[3 * 8 * 3 * 8],
 		else
 			isolin_get_ctan(&material, ctan);
 
-		double bmat[6][3 * 8], cxb[6][3 * 8];
+		double bmat[nvoi][npedim], cxb[nvoi][npedim];
 		calc_bmat(gp, bmat);
 
 		for (int i = 0; i < nvoi; ++i) {
 			for (int j = 0; j < npedim; ++j) {
-				double tmp = 0;
+				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
 					tmp += ctan[i][k] * bmat[k][j];
 				cxb[i][j] = tmp;
@@ -336,9 +340,11 @@ void micropp<3>::get_elem_mat(double Ae[3 * 8 * 3 * 8],
 				const int inpedim = i * npedim;
 				const double bmatmi = bmat[m][i];
 				for (int j = 0; j < npedim; ++j)
-					Ae[inpedim + j] += bmatmi * cxb[m][j] * wg;
+					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
 			}
 		}
+
+		memcpy(Ae, TAe, npedim2 * sizeof(double));
 	}
 }
 
@@ -350,7 +356,7 @@ void micropp<3>::assembly_mat()
 
 	ell_set_zero_mat(&A);
 
-	double Ae[3 * 8 * 3 * 8];
+	double Ae[npe * dim * npe * dim];
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {

@@ -222,7 +222,8 @@ void micropp<tdim>::get_elem_nodes(int n[8], int ex, int ey, int ez) const
 
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
-		double *elem_disp, int ex, int ey, int ez) const
+                                   double elem_disp[npe *dim],
+                                   int ex, int ey, int ez) const
 {
 	int n[8] ;
 	get_elem_nodes(n, ex, ey, ez);
@@ -237,10 +238,10 @@ template <int tdim>
 void micropp<tdim>::get_strain(int gp, double *strain_gp,
 		int ex, int ey, int ez) const
 {
-	double elem_disp[3 * 8];
+	double elem_disp[npe * dim];
 	get_elem_displ(u, elem_disp, ex, ey, ez);
 
-	double bmat[6][3 * 8];
+	double bmat[nvoi][npe * dim];
 	calc_bmat(gp, bmat);
 
 	memset(strain_gp, 0, nvoi * sizeof(double));

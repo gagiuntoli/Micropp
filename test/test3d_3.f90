@@ -99,6 +99,8 @@ program test3d_3
      write(*,'(A)', advance="no") 'sig = '
      write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)
      write(*,'(F12.2,F12.2,F12.2,A)') sig(4), sig(5), sig(6)
+
+     write(*,*) ""
      call micro%output(t, 0);
   end do
 

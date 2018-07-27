@@ -63,7 +63,7 @@ class micropp {
 
 	private:
 		// Variables (static constexpr)
-		static constexpr int dim = tdim;
+		static constexpr int dim = tdim;                  // 2, 3
 		static constexpr int npe = mypow(2, dim);         // 4, 8
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 
@@ -140,17 +140,18 @@ class micropp {
 		int get_elem_type(int ex, int ey, int ez);
 
 		template <typename... Rest>
-		void get_elem_rhs(double *be, Rest...) const;
+		void get_elem_rhs(double be[npe * dim],
+		                  int ex, int ey, Rest...) const;
 
 		template <typename... Rest>
-		void get_elem_mat(Rest...) const;
+		void get_elem_mat(double Ae[npe * dim *npe * dim],
+		                  int ex, int ey, Rest...) const;
 
 		void set_displ_bc(const double *eps);
 		double assembly_rhs();
 		void assembly_mat();
 
-		template <typename T>
-		void calc_bmat(int gp, T bmat) const;
+		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 
 		int newton_raphson(double *_err);
 
