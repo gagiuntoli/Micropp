@@ -25,7 +25,7 @@ using namespace std;
 
 
 template <int tdim>
-int micropp<tdim>::newton_raphson(double *err_)
+int micropp<tdim>::newton_raphson(double *_err)
 {
 	INST_START;
 
@@ -50,7 +50,7 @@ int micropp<tdim>::newton_raphson(double *err_)
 
 	} while (lits < NR_MAX_ITS);
 
-	*err_ = lerr;
+	*_err = lerr;
 	return lits;
 }
 

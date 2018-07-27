@@ -33,7 +33,7 @@ micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	lx(_micro_params[0]), ly(_micro_params[1]),	lz(0.0),
 	dx(lx / nex), dy(ly / ney), dz(0),
 
-	width(_micro_params[3]), inv_tol(_micro_params[4]),
+	width(_micro_params[3]), inv_tol(_micro_params[4]), wg(dx * dy / npe),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
 	initialize(_micro_params, _materials);
@@ -150,31 +150,6 @@ void micropp<2>::calc_bmat(int gp, double bmat[nvoi][npe *dim])	const
 
 
 template <>
-template <>
-void micropp<2>::get_elem_rhs(double be[npe * dim],
-                              int ex, int ey) const
-{
-	constexpr int npedim = npe * dim;
-	double bmat[nvoi][npedim], strain_gp[nvoi], stress_gp[nvoi];
-	const double wg = dx * dy / npe;
-
-	memset(be, 0, npedim * sizeof(double));
-
-	for (int gp = 0; gp < npe; ++gp) {
-
-		calc_bmat(gp, bmat);
-
-		get_strain(gp, strain_gp, ex, ey);
-		get_stress(gp, strain_gp, stress_gp, ex, ey);
-
-		for (int i = 0; i < npe * dim; i++)
-			for (int j = 0; j < nvoi; j++)
-				be[i] += bmat[j][i] * stress_gp[j] * wg;
-	}
-}
-
-
-template <>
 double micropp<2>::assembly_rhs()
 {
 	INST_START;
@@ -241,7 +216,6 @@ void micropp<2>::get_elem_mat(double Ae[npe * dim * npe * dim],
 	INST_START;
 	const int e = glo_elem(ex, ey, 0);
 	const material_t material = get_material(e);
-	const double wg = (1 / 4.0) * dx * dy;
 
 	const double E = material.E;
 	const double nu = material.nu;
@@ -308,7 +282,6 @@ void micropp<2>::assembly_mat()
 template <>
 void micropp<2>::calc_ave_stress(double stress_ave[6]) const
 {
-	const double wg = 0.25 * dx * dy;
 	memset(stress_ave, 0, nvoi * sizeof(double));
 
 	for (int ex = 0; ex < nex; ++ex) {
@@ -338,7 +311,6 @@ void micropp<2>::calc_ave_stress(double stress_ave[6]) const
 template <>
 void micropp<2>::calc_ave_strain(double strain_ave[6]) const
 {
-	const double wg = 0.25 * dx * dy;
 	memset(strain_ave, 0, nvoi * sizeof(double));
 
 	for (int ex = 0; ex < nex; ++ex) {
@@ -368,7 +340,6 @@ template <>
 void micropp<2>::calc_fields()
 {
 	const double ivol = 1.0 / (dx * dy);
-	const double wg = 0.25 * dx * dy;
 
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {

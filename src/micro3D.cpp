@@ -33,7 +33,7 @@ micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	lx(_micro_params[0]), ly(_micro_params[1]),	lz(_micro_params[2]),
 	dx(lx / nex), dy(ly / ney),	dz(lz / nez),
 
-	width(_micro_params[3]), inv_tol(_micro_params[4]),
+	width(_micro_params[3]), inv_tol(_micro_params[4]),	wg(dx * dy * dz / npe),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
 	initialize(_micro_params, _materials);
@@ -183,31 +183,6 @@ void micropp<3>::calc_bmat(int gp, double bmat[nvoi][npe * dim]) const
 }
 
 
-template <>
-template <>
-void micropp<3>::get_elem_rhs(double be[npe * dim],
-                              int ex, int ey, int ez) const
-{
-	constexpr int npedim = npe * dim;
-	double bmat[nvoi][npe * dim], stress_gp[nvoi], strain_gp[nvoi];
-	const double wg = dx * dy * dz / npe;
-
-	memset(be, 0, npedim * sizeof(double));
-
-	for (int gp = 0; gp < npe; ++gp) {
-
-		calc_bmat(gp, bmat);
-
-		get_strain(gp, strain_gp, ex, ey, ez);
-		get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
-
-		for (int i = 0; i < npe * dim; i++)
-			for (int j = 0; j < nvoi; j++)
-				be[i] += bmat[j][i] * stress_gp[j] * wg;
-	}
-}
-
-
 template<>
 double micropp<3>::assembly_rhs()
 {
@@ -305,7 +280,6 @@ void micropp<3>::get_elem_mat(double Ae[npe * dim * npe * dim],
 	double ctan[nvoi][nvoi];
 	constexpr int npedim = npe * dim;
 	constexpr int npedim2 = npedim * npedim;
-	const double wg = (1. / 8.) * dx * dy * dz;
 
 	double TAe[npedim2] = { 0.0 };
 
@@ -372,8 +346,6 @@ void micropp<3>::assembly_mat()
 template <>
 void micropp<3>::calc_ave_stress(double stress_ave[6]) const
 {
-	const double wg = (1. / 8.) * dx * dy * dz;
-
 	memset(stress_ave, 0, nvoi * sizeof(double));
 
 	for (int ex = 0; ex < nex; ++ex) {
@@ -407,7 +379,6 @@ void micropp<3>::calc_ave_stress(double stress_ave[6]) const
 template <>
 void micropp<3>::calc_ave_strain(double strain_ave[6]) const
 {
-	const double wg = (1. / 8.) * dx * dy * dz;
 	memset(strain_ave, 0, nvoi * sizeof(double));
 
 	for (int ex = 0; ex < nex; ++ex) {
@@ -439,7 +410,6 @@ template<>
 void micropp<3>::calc_fields()
 {
 	const double ivol = 1. / (dx * dy * dz);
-	const double wg = (1. / 8.) * dx * dy * dz;
 
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
