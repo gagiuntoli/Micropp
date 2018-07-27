@@ -59,7 +59,36 @@ int main (int argc, char *argv[])
 	test_t<2> test(size, micro_params, mat_params);
 
 	int n[8];
+
 	test.public_get_elem_nodes(n, 0, 0, 0);
+	int n_1_exact[8] = { 0, 1, 6, 5, 25, 26, 31, 30 };
+
+    for (int i = 0; i < 8; ++i)
+		assert(n[i] == n_1_exact[i]);
+
+    for (int i = 0; i < 8; ++i)
+		cout << n[i] << " ";
+	cout << endl;
+
+	test.public_get_elem_nodes(n, 0, 1, 0);
+	int n_2_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
+
+    for (int i = 0; i < 8; ++i)
+		assert(n[i] == n_2_exact[i]);
+
+    for (int i = 0; i < 8; ++i)
+		cout << n[i] << " ";
+	cout << endl;
+
+	test.public_get_elem_nodes(n, 0, 1);
+	int n_3_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
+
+    for (int i = 0; i < 8; ++i)
+		assert(n[i] == n_3_exact[i]);
+
+    for (int i = 0; i < 8; ++i)
+		cout << n[i] << " ";
+	cout << endl;
 
 	return 0;
 }

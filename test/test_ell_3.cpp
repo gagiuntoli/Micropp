@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 	const int nz = (argc > 3) ? atoi(argv[3]) : 1;
 	const int dim = (argc > 3) ? 3 : 2;
 
-	assert(nx > 1 && ny > 1 && nz > 1);
+	assert(nx > 1 && ny > 1 && nz > 0);
 
 	const int nex = nx - 1;
 	const int ney = ny - 1;
@@ -50,11 +50,6 @@ int main (int argc, char *argv[])
 	const int nfield = 1;
 
 	ell_matrix A1;
-	const double Ae[4 * 4] = {
-		2,  0, -2, 0,
-		0,  2, 0, -2,
-		-2, 0, 2,  0,
-		0,  -2, 0, 2 };
 
 	int cg_its;
 	double cg_err;
@@ -70,15 +65,26 @@ int main (int argc, char *argv[])
 				A1.ncol == (nx * ny) && 
 				A1.nnz == nfield * 9 );
 
+		const double Ae[4 * 4] = {
+			10.6667,   -2.6667,   -5.3333,   -2.6667,
+			-2.6667,   10.6667,   -2.6667,   -5.3333,
+			-5.3333,   -2.6667,   10.6667,   -2.6667,
+			-2.6667,   -5.3333,   -2.6667,   10.6667 };
+
 		ell_set_zero_mat(&A1);
 		for (int ex = 0; ex < nex; ++ex)
 			for (int ey = 0; ey < ney; ++ey)
 				ell_add_2D(&A1, ex, ey, Ae);
 
 		ell_set_bc_2D(&A1);
+		for (int i = 0; i < A1.nrow; ++i) {
+			for (int j = 0; j < 9; ++j)
+				cout << A1.vals[i * A1.nnz + j] << " ";
+			cout << endl;
+		}
 
-		double *x = (double *)calloc(A1.nrow, sizeof(double));
-		double *b = (double *)malloc(A1.nrow * sizeof(double));
+		double *x = (double *)malloc(A1.nrow * sizeof(double));
+		double *b = (double *)calloc(A1.nrow, sizeof(double));
 		for (int i = 0; i < A1.nrow; ++i)
 			b[i] = 1.0;
 
