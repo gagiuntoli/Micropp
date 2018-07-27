@@ -79,8 +79,18 @@ options if you want.
 
 To build the optimized version proceed like before but change step 5 for:
 
+```bash
 cmake -DCMAKE\_BUILD\_TYPE=Release ..
+```
 
 Other possible options are: Debug, Release, RelWithDebInfo, MinSizeRel. Read CMake documentation for more information.
+
+An option **TIMER** was added to insert time measure instrumentation for the execution. You can enable the option during cmake configuration time.
+
+```bash
+cmake -DTIMER=on ..
+```
+
+The new option is independent of Debug or release mode. But remember that any 
 
 

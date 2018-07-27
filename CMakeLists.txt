@@ -1,5 +1,4 @@
 
-
 cmake_minimum_required(VERSION 3.0)
 
 project(MicroPP VERSION 0.1
@@ -13,6 +12,12 @@ if (CMAKE_VERSION VERSION_LESS "3.1")
 else ()
   set (CMAKE_CXX_STANDARD 11)
 endif ()
+
+option(TIMER "Enable time benchmarks instrumentation" OFF)
+
+if (TIMER)
+  add_definitions(-DTIMER)
+endif()
 
 # Include Directories (for all targets)
 include_directories(include ${CMAKE_BINARY_DIR})

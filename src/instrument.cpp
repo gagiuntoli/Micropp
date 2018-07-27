@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef NDEBUG // For optimized compilation
+#ifdef TIMER // For optimized compilation
 
 #include "instrument.hpp"
 #include <iomanip>      // std::setw
@@ -79,4 +79,4 @@ void instrument::finalize()
 	}
 }
 
-#endif // NDEBUG
+#endif // TIMER

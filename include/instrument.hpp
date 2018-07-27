@@ -23,17 +23,19 @@
 #ifndef INSTRUMENT_HPP
 #define INSTRUMENT_HPP
 
-#ifdef NDEBUG // For optimized compilation
+#ifndef TIMER
 
 #define INST_CONSTRUCT
 #define INST_DESTRUCT
 #define INST_START
+#define INST_CUSTOM(strname)
 
-#else // For debug compilation
+#else // For time benchmarks
 
 #define INST_CONSTRUCT instrument::initialize()
 #define INST_DESTRUCT instrument::finalize()
 #define INST_START instrument __timer__(__FUNCTION__)
+#define INST_CUSTOM(strname) instrument __custom__(strname)
 
 #include <chrono>
 #include <unordered_map>
@@ -80,7 +82,7 @@ class instrument {
 		static void finalize();
 };
 
-#endif // NDEBUG
+#endif // TIMER
 
 #endif //INSTRUMENT_HPP
 
