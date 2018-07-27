@@ -94,8 +94,8 @@ void micropp<tdim>::homogenize()
 			memcpy(gp_ptr->u_k, gp_ptr->u_n, nn * dim * sizeof(double));
 			set_displ_bc(gp_ptr->macro_strain);
 
-			int nr_its; double nr_err;
-			newton_raphson(&nr_its, &nr_err);
+			double nr_err;
+			int nr_its = newton_raphson(&nr_err);
 			gp_ptr->nr_its[0] = nr_its;
 			gp_ptr->nr_err[0] = nr_err;
 
@@ -123,7 +123,7 @@ void micropp<tdim>::homogenize()
 
 				set_displ_bc(eps_1);
 
-				newton_raphson(&nr_its, &nr_err);
+				nr_its = newton_raphson(&nr_err);
 				gp_ptr->nr_its[i + 1] = nr_its;
 				gp_ptr->nr_err[i + 1] = nr_err;
 

@@ -44,7 +44,6 @@ int main (int argc, char *argv[])
 		-5.3333,   -2.6667,   10.6667,   -2.6667,
 		-2.6667,   -5.3333,   -2.6667,   10.6667 };
 
-	int cg_its;
 	double cg_err;
 
 	const int ns[3] = { nx, ny, 0 };
@@ -102,7 +101,7 @@ int main (int argc, char *argv[])
 	double *b = (double *)calloc(A1.nrow, sizeof(double));
 	b[4] = 1.0;
 
-	ell_solve_cgpd(&A1, b, x, &cg_err, &cg_its);
+	int cg_its = ell_solve_cgpd(&A1, b, x, &cg_err);
 
 	const double x_sol[9] = { 0, 0, 0, 0, 0.0234374, 0, 0, 0, 0 };
 	for (int j = 0; j < 9; ++j)

@@ -71,7 +71,7 @@ class micropp {
 		const int ngp, nx, ny, nz, nn;
 		const int nex, ney, nez, nelem;
 		const double lx, ly, lz;
-		const double dx, dy, dz, dxi, dyi, dzi;
+		const double dx, dy, dz;
 		const double width, inv_tol;
 
 		const int micro_type, num_int_vars;
@@ -137,8 +137,7 @@ class micropp {
 		                double stress_gp[nvoi], int ex, int ey, int ez = 0) const;
 
 		// Specialized
-		template <typename... Rest>
-		int get_elem_type(Rest...);
+		int get_elem_type(int ex, int ey, int ez);
 
 		template <typename... Rest>
 		void get_elem_rhs(double *be, Rest...) const;
@@ -153,7 +152,7 @@ class micropp {
 		template <typename T>
 		void calc_bmat(int gp, T bmat) const;
 
-		void newton_raphson(int *_its, double *_err);
+		int newton_raphson(double *_err);
 
 		void calc_ave_stress(double stress_ave[nvoi]) const;
 		void calc_ave_strain(double strain_ave[nvoi]) const;

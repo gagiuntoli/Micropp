@@ -23,12 +23,13 @@
 
 using namespace std;
 
+
 template <int tdim>
-void micropp<tdim>::newton_raphson(int *its_, double *err_)
+int micropp<tdim>::newton_raphson(double *err_)
 {
 	INST_START;
 
-	int lits = 0, cg_its;
+	int lits = 0;
 	double lerr = 0.0, cg_err;
 
 	do {
@@ -40,7 +41,7 @@ void micropp<tdim>::newton_raphson(int *its_, double *err_)
 		assembly_mat();   // Acts on A
 
 		// in(b) inout
-		ell_solve_cgpd(&A, b, du, &cg_err, &cg_its);
+		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
@@ -49,8 +50,8 @@ void micropp<tdim>::newton_raphson(int *its_, double *err_)
 
 	} while (lits < NR_MAX_ITS);
 
-	*its_ = lits;
 	*err_ = lerr;
+	return lits;
 }
 
 

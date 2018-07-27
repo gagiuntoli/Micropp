@@ -32,6 +32,7 @@ using namespace std;
 
 #define dim 3
 #define nmaterials 2
+#define D_EPS 0.01
 
 int main(int argc, char **argv)
 {
@@ -63,7 +64,6 @@ int main(int argc, char **argv)
 	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
 	int dir = 2;
-	double d_eps = 0.01;
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi], (*sig_test)[nvoi];
 	double ctan[nvoi * nvoi], (*ctan_test)[nvoi * nvoi];
@@ -75,17 +75,15 @@ int main(int argc, char **argv)
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
+
 		cout << "Time step = " << t << endl;
-		if (t < 30)
-			eps[dir] += d_eps;
-		else if (t < 80)
-			eps[dir] -= d_eps;
-		else if (t < 130)
-			eps[dir] += d_eps;
-		else if (t < 250)
-			eps[dir] -= d_eps;
+
+		if (t < 20)
+			eps[dir] += D_EPS;
+		else if (t < 40)
+			eps[dir] -= D_EPS;
 		else
-			eps[dir] += d_eps;
+			eps[dir] += D_EPS;
 
 		cout << "setting strains ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {

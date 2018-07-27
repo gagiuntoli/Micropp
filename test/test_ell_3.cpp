@@ -51,7 +51,6 @@ int main (int argc, char *argv[])
 
 	ell_matrix A1;
 
-	int cg_its;
 	double cg_err;
 
 	if (dim == 2) {
@@ -88,7 +87,7 @@ int main (int argc, char *argv[])
 		for (int i = 0; i < A1.nrow; ++i)
 			b[i] = 1.0;
 
-		ell_solve_cgpd(&A1, b, x, &cg_err, &cg_its);
+		int cg_its = ell_solve_cgpd(&A1, b, x, &cg_err);
 		cout << "Err =\t" << cg_err << "\tIts =\t" << cg_its << endl;
 
 	} else if (dim == 3) {

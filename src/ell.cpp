@@ -158,7 +158,7 @@ void ell_mvp(const ell_matrix *m, const double *x, double *y)
 }
 
 int ell_solve_cgpd(const ell_matrix *m, const double *b,
-		double *x, double *err_, int *its_)
+		double *x, double *err_)
 {
 	INST_START;
 
@@ -238,8 +238,8 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	} while (its < m->max_its);
 
 	*err_ = err;
-	*its_ = its;
-	return 0;
+
+	return its;
 }
 
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)

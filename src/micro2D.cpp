@@ -21,31 +21,6 @@
 
 #include "micro.hpp"
 
-template<>
-template<>
-int micropp<2>::get_elem_type(int ex, int ey)
-{
-	assert(micro_type == 0 || micro_type == 1);
-
-	if (micro_type == 0) {
-		// esfera en matriz
-		const double x1 = ex * dx + dx / 2;
-		const double y1 = ey * dy + dy / 2;
-		const double x2 = lx / 2;
-		const double y2 = ly / 2;
-		const double rad = micro_params[3];
-		return ((x2 - x1) * (x2 - x1) +
-		        (y2 - y1) * (y2 - y1) < width * width);
-
-	} else if (micro_type == 1) {
-		const double y = ey * dy + dy / 2;
-		return (y < width);
-	}
-
-	cerr << "Invalid micro_type = " << micro_type << endl;
-	return -1;
-}
-
 
 template<>
 micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
@@ -57,24 +32,40 @@ micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nelem(nex * ney * nez),
 	lx(_micro_params[0]), ly(_micro_params[1]),	lz(0.0),
 	dx(lx / nex), dy(ly / ney), dz(0),
-	dxi(1 / dx), dyi(1 / dy), dzi(0),
 
 	width(_micro_params[3]), inv_tol(_micro_params[4]),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
-	assert(dim == 2);
-
 	initialize(_micro_params, _materials);
+}
 
-	for (int ex = 0; ex < nx - 1; ex++)
-		for (int ey = 0; ey < ny - 1; ey++)
-			elem_type[glo_elem(ex, ey, 0)] = get_elem_type(ex, ey);
 
-	const int ns[3] = { nx, ny, nz };
-	const int nfield = dim;
-	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
+template<>
+int micropp<2>::get_elem_type(int ex, int ey, int ez)
+{
+	assert(micro_type == 0 || micro_type == 1);
 
-	calc_ctan_lin();
+	if (micro_type == 0) { // circle in the center
+
+		const double coor[2] = {
+			ex * dx + dx / 2,
+			ey * dy + dy / 2 };
+		const double center[2] = { lx / 2, ly / 2 };
+		const double rad = micro_params[2];
+		double tmp = 0.;
+		for (int i = 0; i < 2; ++i)
+			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
+
+		return (tmp < rad * rad);
+
+	} else if (micro_type == 1) { // 2 flat layers in y dir
+
+		const double y = ey * dy + dy / 2;
+		return (y < width);
+	}
+
+	cerr << "Invalid micro_type = " << micro_type << endl;
+	return -1;
 }
 
 
@@ -84,31 +75,27 @@ void micropp<2>::set_displ_bc(const double *eps)
 	const double eps_t[2][2] = {
 		{ eps[0], 0.5 * eps[2] },
 		{ 0.5 * eps[2], eps[1] } };
-
-	// y = 0
+	
 	for (int i = 0; i < nx; i++) {
-		const int n = nod_index(i, 0, 0);
+		const int n = nod_index(i, 0, 0); // y = 0
 		const double coor[2] = { i * dx, 0 };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}
-
-	// y = ly
+	
 	for (int i = 0; i < nx; i++) {
-		const int n = nod_index(i, ny - 1, 0);
+		const int n = nod_index(i, ny - 1, 0); // y = ly
 		const double coor[2] = { i * dx, ly };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}
 
-	// x = 0
 	for (int j = 1; j < ny - 1; j++) {
-		const int n = nod_index(0, j, 0);
+		const int n = nod_index(0, j, 0); // x = 0
 		const double coor[2] = { 0, j * dy };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}
 
-	// x = lx
 	for (int j = 1; j < ny - 1; j++) {
-		const int n = nod_index(nx - 1, j, 0);
+		const int n = nod_index(nx - 1, j, 0); // x = lx
 		const double coor[2] = { lx, j * dy };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}

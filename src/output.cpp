@@ -39,10 +39,9 @@ void micropp<tdim>::output(int time_step, int gp_id)
 		for (int i = 0; i < num_int_vars; ++i)
 			vars_old[i] = 0.0;
 
-	int nr_its;
 	double nr_err;
 	set_displ_bc(gp_list[gp_id].macro_strain);
-	newton_raphson(&nr_its, &nr_err);
+	int nr_its = newton_raphson(&nr_err);
 
 	calc_fields();
 	write_vtu(time_step, gp_id);
@@ -245,11 +244,11 @@ void micropp<tdim>::write_info_files()
 	file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
 	for (int igp = 0 ; igp < ngp; ++igp) {
 		for (int i = 0; i < 6; ++i)
-			file << setw(14) << gp_list[igp].macro_strain[i] << " ";
+			file << setw(14) << gp_list[igp].macro_strain[i] << "\t";
 		for (int i = 0; i < 6; ++i)
-			file << setw(14) << gp_list[igp].macro_stress[i] << " ";
+			file << setw(14) << gp_list[igp].macro_stress[i] << "\t";
 		for (int i = 0; i < 36; ++i)
-			file << setw(14) << gp_list[igp].macro_ctan[i] << " ";
+			file << setw(14) << gp_list[igp].macro_ctan[i] << "\t";
 		file << " | ";
 	}
 	file << endl;
@@ -262,7 +261,7 @@ void micropp<tdim>::write_info_files()
 				file << setw(14) << gp_list[igp].int_vars_n[i] << " ";
 			else
 				file << setw(14) << 0.0 << " ";
-		file << " | ";
+		file << "\t|\t";
 	}
 	file << endl;
 	file.close();

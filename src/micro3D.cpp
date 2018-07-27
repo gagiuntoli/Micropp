@@ -21,34 +21,6 @@
 
 #include "micro.hpp"
 
-template<>
-template<>
-int micropp<3>::get_elem_type(int ex, int ey, int ez)
-{
-	assert(micro_type == 0 || micro_type == 1);
-
-	if (micro_type == 0) {
-		// esfera en matriz
-		const double x1 = ex * dx + dx / 2;
-		const double y1 = ey * dy + dy / 2;
-		const double z1 = ez * dz + dz / 2;
-		const double x2 = lx / 2;
-		const double y2 = ly / 2;
-		const double z2 = lz / 2;
-		const double rad = micro_params[3];
-		return ((x2 - x1) * (x2 - x1) +
-		        (y2 - y1) * (y2 - y1) +
-		        (z2 - z1) * (z2 - z1) < width * width);
-
-	} else if (micro_type == 1) {
-		const double y = ey * dy + dy / 2;
-		return (y < width);
-	}
-
-	cerr << "Invalid micro_type = " << micro_type << endl;
-	return -1;
-}
-
 
 template<>
 micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
@@ -60,26 +32,43 @@ micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nelem(nex * ney * nez),
 	lx(_micro_params[0]), ly(_micro_params[1]),	lz(_micro_params[2]),
 	dx(lx / nex), dy(ly / ney),	dz(lz / nez),
-	dxi(1 / dx), dyi(1 / dy), dzi(1 / dz),
 
 	width(_micro_params[3]), inv_tol(_micro_params[4]),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
-	assert(dim == 3);
-
 	initialize(_micro_params, _materials);
-
-	for (int ex = 0; ex < nx - 1; ex++)
-		for (int ey = 0; ey < ny - 1; ey++)
-			for (int ez = 0; ez < nz - 1; ez++)
-				elem_type[glo_elem(ex, ey, ez)] = get_elem_type(ex, ey, ez);
-
-	const int ns[3] = { nx, ny, nz };
-	const int nfield = dim;
-	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
-
-	calc_ctan_lin();
 }
+
+
+template<>
+int micropp<3>::get_elem_type(int ex, int ey, int ez)
+{
+	assert(micro_type == 0 || micro_type == 1);
+
+	if (micro_type == 0) { // sphere in the center
+
+		const double coor[3] = {
+			ex * dx + dx / 2,
+			ey * dy + dy / 2,
+			ez * dz + dz / 2 };
+		const double center[3] = { lx / 2, ly / 2, lz / 2 };
+		const double rad = micro_params[3];
+		double tmp = 0.;
+		for (int i = 0; i < 3; ++i)
+			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
+
+		return (tmp < rad * rad);
+
+	} else if (micro_type == 1) { // 2 flat layers in y dir
+
+		const double y = ey * dy + dy / 2;
+		return (y < width);
+	}
+
+	cerr << "Invalid micro_type = " << micro_type << endl;
+	return -1;
+}
+
 
 template <>
 void micropp<3>::set_displ_bc(const double *eps)
@@ -144,35 +133,31 @@ template <>
 template <>
 void micropp<3>::calc_bmat(int gp, double bmat[6][3 * 8]) const
 {
-    const double wxi = 0.25 * dxi;
-    const double wyi = 0.25 * dyi;
-    const double wzi = 0.25 * dzi;
-
 	const double dsh[8][3] = {
-		{ -(1 - xg[gp][1]) * (1 - xg[gp][2]) * wxi,
-		  -(1 - xg[gp][0]) * (1 - xg[gp][2]) * wyi,
-		  -(1 - xg[gp][0]) * (1 - xg[gp][1]) * wzi },
-		{ +(1 - xg[gp][1]) * (1 - xg[gp][2]) * wxi,
-		  -(1 + xg[gp][0]) * (1 - xg[gp][2]) * wyi,
-		  -(1 + xg[gp][0]) * (1 - xg[gp][1]) * wzi },
-		{ +(1 + xg[gp][1]) * (1 - xg[gp][2]) * wxi,
-		  +(1 + xg[gp][0]) * (1 - xg[gp][2]) * wyi,
-		  -(1 + xg[gp][0]) * (1 + xg[gp][1]) * wzi },
-		{ -(1 + xg[gp][1]) * (1 - xg[gp][2]) * wxi,
-		  +(1 - xg[gp][0]) * (1 - xg[gp][2]) * wyi,
-		  -(1 - xg[gp][0]) * (1 + xg[gp][1]) * wzi },
-		{ -(1 - xg[gp][1]) * (1 + xg[gp][2]) * wxi,
-		  -(1 - xg[gp][0]) * (1 + xg[gp][2]) * wyi,
-		  +(1 - xg[gp][0]) * (1 - xg[gp][1]) * wzi },
-		{ +(1 - xg[gp][1]) * (1 + xg[gp][2]) * wxi,
-		  -(1 + xg[gp][0]) * (1 + xg[gp][2]) * wyi,
-		  +(1 + xg[gp][0]) * (1 - xg[gp][1]) * wzi },
-		{ +(1 + xg[gp][1]) * (1 + xg[gp][2]) * wxi,
-		  +(1 + xg[gp][0]) * (1 + xg[gp][2]) * wyi,
-		  +(1 + xg[gp][0]) * (1 + xg[gp][1]) * wzi },
-		{ -(1 + xg[gp][1]) * (1 + xg[gp][2]) * wxi,
-		  +(1 - xg[gp][0]) * (1 + xg[gp][2]) * wyi,
-		  +(1 - xg[gp][0]) * (1 + xg[gp][1]) * wzi } };
+		{ -(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
+		  -(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
+		  -(1 - xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+		{ +(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
+		  -(1 + xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
+		  -(1 + xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+		{ +(1 + xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
+		  +(1 + xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
+		  -(1 + xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz },
+		{ -(1 + xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,
+		  +(1 - xg[gp][0]) * (1 - xg[gp][2]) / 8. * 2. / dy,
+		  -(1 - xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz },
+		{ -(1 - xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
+		  -(1 - xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
+		  +(1 - xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+		{ +(1 - xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
+		  -(1 + xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
+		  +(1 + xg[gp][0]) * (1 - xg[gp][1]) / 8. * 2. / dz },
+		{ +(1 + xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
+		  +(1 + xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
+		  +(1 + xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz },
+		{ -(1 + xg[gp][1]) * (1 + xg[gp][2]) / 8. * 2. / dx,
+		  +(1 - xg[gp][0]) * (1 + xg[gp][2]) / 8. * 2. / dy,
+		  +(1 - xg[gp][0]) * (1 + xg[gp][1]) / 8. * 2. / dz } };
 
 	for (int i = 0; i < 8; ++i) {
 		bmat[0][i * dim    ] = dsh[i][0];
@@ -305,6 +290,7 @@ double micropp<3>::assembly_rhs()
 
 	return norm;
 }
+
 
 template <>
 template <>

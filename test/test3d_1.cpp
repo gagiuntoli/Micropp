@@ -29,6 +29,8 @@
 
 using namespace std;
 
+#define D_EPS 0.01
+
 int main (int argc, char *argv[])
 {
 	const int dim = 3;
@@ -64,22 +66,18 @@ int main (int argc, char *argv[])
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 
 	double sig[6], ctan[36];
-	double eps[6] = { 0 };
-	double d_eps = 0.01;
+	double eps[6] = { 0. };
 
 	for (int t = 0; t < time_steps; ++t) {
 
 		cout << "time step = " << t << endl;
-		if (t<30)
-			eps[dir] += d_eps;
-		else if (t<80)
-			eps[dir] -= d_eps;
-		else if (t<130)
-			eps[dir] += d_eps;
-		else if (t<250)
-			eps[dir] -= d_eps;
+
+		if (t < 20)
+			eps[dir] += D_EPS;
+		else if (t < 40)
+			eps[dir] -= D_EPS;
 		else
-			eps[dir] += d_eps;
+			eps[dir] += D_EPS;
 
 		micro.set_macro_strain(0, eps);
 		micro.homogenize();

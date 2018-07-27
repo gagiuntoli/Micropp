@@ -76,6 +76,21 @@ void micropp<tdim>::initialize(const double *_micro_params,
 		     << material_list[i].Sy << " " << material_list[i].Ka << endl;
 	}
 
+	for (int ez = 0; ez < nez; ez++) {
+		for (int ey = 0; ey < ney; ey++) {
+			for (int ex = 0; ex < nex; ex++) {
+				const int e_i = glo_elem(ex, ey, ez);
+				elem_type[e_i] = get_elem_type(ex, ey, ez);
+			}
+		}
+	}
+
+	const int ns[3] = { nx, ny, nz };
+	const int nfield = dim;
+	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
+
+	calc_ctan_lin();
+
 	file.close();
 
 	file.open("micropp_convergence.dat");
@@ -126,9 +141,9 @@ void micropp<tdim>::calc_ctan_lin()
         double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		int nr_its; double nr_err;
+		double nr_err;
 		set_displ_bc(eps_1);
-		newton_raphson(&nr_its, &nr_err);
+		newton_raphson(&nr_err);
 
 		double sig_1[6];
 		calc_ave_stress(sig_1);
