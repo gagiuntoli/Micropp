@@ -24,7 +24,7 @@
 
 template<int tdim>
 void micropp<tdim>::initialize(const double *_micro_params,
-		const int *_mat_types, const double *_params)
+                               const material_t *_materials)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -69,32 +69,13 @@ void micropp<tdim>::initialize(const double *_micro_params,
 	file.open("micropp_materials.dat");
 	file << scientific;
 	for (int i = 0; i < numMaterials; i++) {
-		material_list[i].E  = _params[i * MAX_MAT_PARAM + 0];
-		material_list[i].nu = _params[i * MAX_MAT_PARAM + 1];
-		material_list[i].Sy = _params[i * MAX_MAT_PARAM + 2];
-		material_list[i].Ka = _params[i * MAX_MAT_PARAM + 3];
+		material_list[i] = _materials[i];
 
-		material_list[i].k = material_list[i].E / (3 * (1 - 2 * material_list[i].nu));
-		material_list[i].mu = material_list[i].E / (2 * (1 + material_list[i].nu));
-		material_list[i].lambda = (material_list[i].nu * material_list[i].E) /
-			((1 + material_list[i].nu) * (1 - 2 * material_list[i].nu));	// lambda
-
-		if (_mat_types[i] == 0) {
-			// lineal
-			material_list[i].plasticity = false;
-			material_list[i].damage = false;
-		} else if (_mat_types[i] == 1) {
-			// con plasticidad
-			material_list[i].plasticity = true;
-			material_list[i].damage = false;
-		} else if (_mat_types[i] == 2) {
-			// con daño
-			material_list[i].plasticity = false;
-			material_list[i].damage = true;
-		}
-		file << setw(14) << material_list[i].E << " " << material_list[i].nu
-		     << " " << material_list[i].Sy << " " << material_list[i].Ka << endl;
+		file << setw(14)
+		     << material_list[i].E << " " << material_list[i].nu << " "
+		     << material_list[i].Sy << " " << material_list[i].Ka << endl;
 	}
+
 	file.close();
 
 	file.open("micropp_convergence.dat");

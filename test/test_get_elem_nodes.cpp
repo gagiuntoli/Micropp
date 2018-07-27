@@ -33,14 +33,14 @@ template <int tdim>
 class test_t : public micropp<tdim> {
 
 	public:
-		test_t(const int size[3], const double mat_params[20],
-		       const int micro_types[2], const double params[5])
-			: micropp<tdim> (4, size, 1, mat_params, micro_types, params)
+		test_t(const int size[3], const double micro_params[5],
+		       const material_t mat_params[2])
+			:micropp<tdim> (4, size, 1, micro_params, mat_params)
 		{};
 
 		~test_t() {};
 
-        void public_get_elem_nodes(int n[8], int ex, int ey, int ez = 0)
+		void public_get_elem_nodes(int n[8], int ex, int ey, int ez = 0)
 		{
 			micropp<tdim>::get_elem_nodes(n, ex, ey, ez);
 		};
@@ -49,21 +49,14 @@ class test_t : public micropp<tdim> {
 int main (int argc, char *argv[])
 {
 	const int size[3] = { 5, 5, 5 };
-	double mat_params[20];
-	mat_params[0 * MAX_MAT_PARAM + 0] = 1.0e6; // E
-	mat_params[0 * MAX_MAT_PARAM + 1] = 0.3;   // nu
-	mat_params[0 * MAX_MAT_PARAM + 2] = 5.0e4; // Sy
-	mat_params[0 * MAX_MAT_PARAM + 3] = 5.0e4; // Ka
 
-	mat_params[1 * MAX_MAT_PARAM + 0] = 1.0e6;
-	mat_params[1 * MAX_MAT_PARAM + 1] = 0.3;
-	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
-	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
+	const double micro_params[5] = { 1., 1., 1., .1, 0. };
 
-	const int micro_types[2] = { 1, 0 };
-	const double params[5] = { 1., 1., 1., .1, 0. };
+	material_t mat_params[2];
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
+	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
-	test_t<2> test(size, mat_params, micro_types, params);
+	test_t<2> test(size, micro_params, mat_params);
 
 	int n[8];
 	test.public_get_elem_nodes(n, 0, 0, 0);

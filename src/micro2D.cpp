@@ -49,8 +49,7 @@ int micropp<2>::get_elem_type(int ex, int ey)
 
 template<>
 micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
-                    const double *_micro_params, const int *_mat_types,
-                    const double *_params):
+                    const double *_micro_params, const material_t *_materials):
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]), nz(1),
 	nn(nx * ny),
@@ -65,7 +64,7 @@ micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
 {
 	assert(dim == 2);
 
-	initialize(_micro_params, _mat_types, _params);
+	initialize(_micro_params, _materials);
 
 	for (int ex = 0; ex < nx - 1; ex++)
 		for (int ey = 0; ey < ny - 1; ey++)

@@ -19,6 +19,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#ifndef MICRO_HPP
+#define MICRO_HPP
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -30,6 +33,7 @@
 
 #include "util.hpp"
 #include "ell.hpp"
+#include "material.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
 
@@ -53,19 +57,6 @@
 #define intvar_ix(e,gp,var)  ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
 
 using namespace std;
-
-struct material_t {
-	double E;
-	double nu;
-	double k;
-	double mu;
-	double lambda;
-	double Ka;
-	double Sy;
-	bool plasticity;
-	bool damage;
-};
-
 
 template <int tdim>
 class micropp {
@@ -126,24 +117,24 @@ class micropp {
 		material_t get_material(const int e) const;
 
 		void get_strain(int gp, double *strain_gp,
-				int ex, int ey, int ez = 0) const;
+		                int ex, int ey, int ez = 0) const;
 
 		void get_elem_nodes(int n[8], int ex, int ey, int ez = 0) const;
 
 		void get_elem_displ(const double *u, double *elem_disp,
-				int ex, int ey, int ez = 0) const;
+		                    int ex, int ey, int ez = 0) const;
 
 		void isolin_get_stress(
-				const material_t *material, const double eps[6],
-				double stress[6]) const;
+			const material_t *material, const double eps[6],
+			double stress[6]) const;
 
 		void plastic_get_stress(
-				const material_t *material, const double eps[6],
-				const double eps_p_old[6], double alpha_old,
-				double stress[6]) const;
+			const material_t *material, const double eps[6],
+			const double eps_p_old[6], double alpha_old,
+			double stress[6]) const;
 
 		void get_stress(int gp, const double eps[nvoi],
-				double stress_gp[nvoi], int ex, int ey, int ez = 0) const;
+		                double stress_gp[nvoi], int ex, int ey, int ez = 0) const;
 
 		// Specialized
 		template <typename... Rest>
@@ -178,32 +169,29 @@ class micropp {
 		void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
 
 		bool plastic_law(
-				const material_t *material, const double eps[6],
-				const double eps_p_old[6], double alpha_old,
-				double *_dl, double _normal[6], double _s_trial[6]) const;
+			const material_t *material, const double eps[6],
+			const double eps_p_old[6], double alpha_old,
+			double *_dl, double _normal[6], double _s_trial[6]) const;
 
 		void plastic_get_ctan(
-				const material_t *material, const double eps[6],
-				const double eps_p_old[6], double alpha_old,
-				double ctan[6][6]) const;
+			const material_t *material, const double eps[6],
+			const double eps_p_old[6], double alpha_old,
+			double ctan[6][6]) const;
 
 		bool plastic_evolute(
-				const material_t *material, const double eps[6],
-				const double eps_p_old[6], double alpha_old, 
-				double *eps_p_new, double *alpha_new) const;
+			const material_t *material, const double eps[6],
+			const double eps_p_old[6], double alpha_old, 
+			double *eps_p_new, double *alpha_new) const;
 
-		void isolin_get_ctan(
-				const material_t *material, double ctan[6][6]) const;
+		void isolin_get_ctan(const material_t *material, double ctan[6][6]) const;
 
-		void initialize(const double *micro_params, const int *mat_types,
-				const double *params);
+		void initialize(const double *micro_params, const material_t *mats);
 
 	public:
 		micropp() = delete;
 
 		micropp(const int ngp, const int size[3], const int micro_type,
-		        const double *micro_params, const int *mat_types,
-		        const double *params);
+		        const double *micro_params, const material_t *materials);
 
 		~micropp();
 
@@ -219,3 +207,5 @@ class micropp {
 		void update_vars();
 		void print_info() const;
 };
+
+#endif // MICRO_HPP

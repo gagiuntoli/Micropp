@@ -59,18 +59,9 @@ int main(int argc, char **argv)
 	                          0.1,		// layer width
 	                          1.0e-5};	// inv_max
 
-	int mat_types[nmaterials] = {1, 0};	// dos materiales lineales (type = 0)
-
-	double mat_params[2 * MAX_MAT_PARAM];
-	mat_params[0 * MAX_MAT_PARAM + 0] = 1.0e6; // E
-	mat_params[0 * MAX_MAT_PARAM + 1] = 0.3;   // nu
-	mat_params[0 * MAX_MAT_PARAM + 2] = 5.0e4; // Sy
-	mat_params[0 * MAX_MAT_PARAM + 3] = 5.0e4; // Ka
-
- 	mat_params[1 * MAX_MAT_PARAM + 0] = 1.0e6;
-	mat_params[1 * MAX_MAT_PARAM + 1] = 0.3;
-	mat_params[1 * MAX_MAT_PARAM + 2] = 1.0e4;
-	mat_params[1 * MAX_MAT_PARAM + 3] = 0.0e-1;
+	material_t mat_params[2];
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
+	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
 	int dir = 2;
 	const double d_eps_1 = 0.01, d_eps_2 = -0.008;;
@@ -79,7 +70,7 @@ int main(int argc, char **argv)
 
     sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
 
-    micropp<dim> micro(ngp, size, micro_type, micro_params, mat_types, mat_params);
+    micropp<dim> micro(ngp, size, micro_type, micro_params, mat_params);
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;

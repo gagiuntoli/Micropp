@@ -57,16 +57,11 @@ int main (int argc, char *argv[])
 
 	int mat_types[2] = { 1, 0 }; // dos materiales lineales (type = 0)
 
-	double mat_params[2*MAX_MAT_PARAM];
-	mat_params[0*MAX_MAT_PARAM + 0] = 1.0e6; // E
-	mat_params[0*MAX_MAT_PARAM + 1] = 0.25;  // nu
-	mat_params[0*MAX_MAT_PARAM + 2] = 1.0e2; // Sy
-	mat_params[0*MAX_MAT_PARAM + 3] = 2.0e5; // Ka
+	material_t mat_params[2];
+	mat_params[0].set(1.0e6, 0.25, 1.0e2, 2.0e5, 1);
+	mat_params[1].set(1.0e6, 0.25, 1.0e2, 2.0e5, 1);
 
-	mat_params[1*MAX_MAT_PARAM + 0] = 1.0e6; // E
-	mat_params[1*MAX_MAT_PARAM + 1] = 0.25;  // nu
-
-	micropp<3> micro(1, size, micro_type, micro_params, mat_types, mat_params);
+	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 
 	double sig[6], ctan[36];
 	double eps[6] = { 0 };

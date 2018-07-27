@@ -24,7 +24,7 @@ program test3d_3
   ! access computing environment
   use ISO_FORTRAN_ENV, only : ERROR_UNIT
   use libmicropp
-  
+
   implicit none
 
   integer, parameter :: MAX_MAT_PARAM = 10
@@ -32,13 +32,15 @@ program test3d_3
   integer :: argc, t
   character(len=32) :: arg
   integer :: sizes(3), time_steps
-  integer, parameter :: micro_type = 1
-  integer, dimension (1:2) :: mat_types = (/ 1, 0 /)
 
+  integer, parameter :: micro_type = 1
   real(8), parameter :: d_eps = 0.01
   integer, parameter :: dir = 3;
+
   real(8), dimension(*) :: eps(6), sig(6)
-  real(8) :: micro_params(5), mat_params(2 * MAX_MAT_PARAM)
+
+  real(8) :: micro_params(5)
+  type(material_t) :: mat_params(2)
 
   argc = command_argument_count()
 
@@ -62,23 +64,12 @@ program test3d_3
      time_steps = 10
   end if
 
-  micro_params(1) = 1.0; ! lx
-  micro_params(2) = 1.0; ! ly
-  micro_params(3) = 1.0; ! lz
-  micro_params(4) = 0.1; ! grosor capa de abajo
-  micro_params(5) = 0.0; ! I max
+  micro_params = (/ 1.0, 1.0, 1.0, 0.1, 0.0 /)
 
-  mat_params(0 * MAX_MAT_PARAM + 1) = 1.0e6; ! E
-  mat_params(0 * MAX_MAT_PARAM + 2) = 0.3;   ! nu
-  mat_params(0 * MAX_MAT_PARAM + 3) = 5.0e4; ! Sy
-  mat_params(0 * MAX_MAT_PARAM + 4) = 5.0e4; ! Ka(
-  
-  mat_params(1 * MAX_MAT_PARAM + 1) = 1.0e6;
-  mat_params(1 * MAX_MAT_PARAM + 2) = 0.3;
-  mat_params(1 * MAX_MAT_PARAM + 3) = 1.0e4;
-  mat_params(1 * MAX_MAT_PARAM + 4) = 0.0e-1;
+  call set(mat_params(1), 1.0e6, 0.3, 5.0e4, 5.0e4, 1)
+  call set(mat_params(2), 1.0e6, 0.3, 1.0e4, 0.0e-1, 0)
 
-  micro = micropp3(1, sizes, micro_type, micro_params, mat_types, mat_params)
+  micro = micropp3(1, sizes, micro_type, micro_params, mat_params)
 
   eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
   sig = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
@@ -107,8 +98,8 @@ program test3d_3
      write(*,'(A,F12.2)') "eps = ", eps(dir)
      write(*,'(A)', advance="no") 'sig = '
      write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)
-     WRITE(*,'(F12.2,F12.2,F12.2,A)') sig(4), sig(5), sig(6)
-!     call micro%output(t, 0);
+     write(*,'(F12.2,F12.2,F12.2,A)') sig(4), sig(5), sig(6)
+     call micro%output(t, 0);
   end do
 
   call free(micro)

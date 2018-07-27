@@ -23,12 +23,18 @@
 
 extern "C" {
 
-	micropp<3> *init3_(int *ngp, const int size[3], const int *micro_type,
-	                   const double *micro_params, const int *mat_types,
-	                   const double *params)
+	void material_set_(material_t *in, const double *E,
+	                   const double *nu, const double *Ka,
+	                   const double *Sy, const int *type)
 	{
-		return new micropp<3>(*ngp, size, *micro_type, micro_params,
-		                      mat_types, params);
+		in->set(*E, *nu, *Ka, *Sy, *type);
+	}
+
+	//  Micro type functions
+	micropp<3> *init3_(int *ngp, const int size[3], const int *micro_type,
+	                   const double *micro_params, const material_t *materials)
+	{
+		return new micropp<3>(*ngp, size, *micro_type, micro_params, materials);
 	}
 
 	void free3_(micropp<3> **in)

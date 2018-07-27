@@ -16,10 +16,12 @@
 !
 
 module libmicropp
+  use libmaterial
+  
   implicit none
 
   private :: new_micropp3, set_macro_strain, homogenize, &
-       get_macro_stress, update_vars, write_info_files
+       get_macro_stress, update_vars, write_info_files, output
 
   public :: micropp3, free
 
@@ -28,7 +30,7 @@ module libmicropp
      integer(8) :: ptr ! pointer
    contains
      procedure :: print_info, set_macro_strain, homogenize,&
-          get_macro_stress, update_vars, write_info_files
+          get_macro_stress, update_vars, write_info_files, output
   end type micropp3
 
   interface micropp3
@@ -39,19 +41,16 @@ module libmicropp
   external init3
 
 contains
-  function new_micropp3(ngp, size, micro_type, micro_params,&
-       mat_types, params)
+  function new_micropp3(ngp, size, micro_type, micro_params, params)
     implicit none
     type(micropp3) :: new_micropp3
     integer, intent(in) :: ngp
     integer, intent(in) :: size(3)
     integer, intent(in) :: micro_type
     real(8), intent(in), dimension (*) :: micro_params
-    integer, intent(in), dimension (*) :: mat_types
-    real(8), intent(in), dimension (*) :: params
+    type(material_t), intent(in), dimension (*) :: params
 
-    new_micropp3%ptr = init3(ngp, size, micro_type, micro_params, &
-         mat_types, params)
+    new_micropp3%ptr = init3(ngp, size, micro_type, micro_params, params)
 
   end function new_micropp3
 
@@ -93,5 +92,11 @@ contains
     class(micropp3) :: this
     call print_info3(this%ptr)
   end subroutine print_info
+
+  subroutine output(this, tstep, gp_id)
+    class(micropp3) :: this
+    integer, intent(in) :: tstep, gp_id
+    call output3(this%ptr)
+  end subroutine output
 
 end module libmicropp
