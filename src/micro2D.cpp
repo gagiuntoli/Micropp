@@ -31,70 +31,42 @@ micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nex(nx - 1), ney(ny - 1), nez(1),
 	nelem(nex * ney * nez),
 	lx(_micro_params[0]), ly(_micro_params[1]),	lz(0.0),
-	dx(lx / nex), dy(ly / ney), dz(0),
+	dx(lx / nex), dy(ly / ney), dz(0.0),
 
-	width(_micro_params[3]), inv_tol(_micro_params[4]), wg(dx * dy / npe),
+	width(_micro_params[3]), inv_tol(_micro_params[4]),
+	wg(dx * dy / npe), ivol(1.0 / (dx * dy)),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
 	initialize(_micro_params, _materials);
 }
 
 
-template<>
-int micropp<2>::get_elem_type(int ex, int ey, int ez)
-{
-	assert(micro_type == 0 || micro_type == 1);
-
-	if (micro_type == 0) { // circle in the center
-
-		const double coor[2] = {
-			ex * dx + dx / 2,
-			ey * dy + dy / 2 };
-		const double center[2] = { lx / 2, ly / 2 };
-		const double rad = micro_params[2];
-		double tmp = 0.;
-		for (int i = 0; i < 2; ++i)
-			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
-
-		return (tmp < rad * rad);
-
-	} else if (micro_type == 1) { // 2 flat layers in y dir
-
-		const double y = ey * dy + dy / 2;
-		return (y < width);
-	}
-
-	cerr << "Invalid micro_type = " << micro_type << endl;
-	return -1;
-}
-
-
 template <>
 void micropp<2>::set_displ_bc(const double *eps)
 {
-	const double eps_t[2][2] = {
-		{ eps[0], 0.5 * eps[2] },
-		{ 0.5 * eps[2], eps[1] } };
-	
-	for (int i = 0; i < nx; i++) {
+	const double eps_t[dim][dim] =
+		{ {       eps[0], 0.5 * eps[2] },
+		  { 0.5 * eps[2],       eps[1] } };
+
+	for (int i = 0; i < nx; ++i) {
 		const int n = nod_index(i, 0, 0); // y = 0
 		const double coor[2] = { i * dx, 0 };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}
-	
-	for (int i = 0; i < nx; i++) {
+
+	for (int i = 0; i < nx; ++i) {
 		const int n = nod_index(i, ny - 1, 0); // y = ly
 		const double coor[2] = { i * dx, ly };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}
 
-	for (int j = 1; j < ny - 1; j++) {
+	for (int j = 1; j < ny - 1; ++j) {
 		const int n = nod_index(0, j, 0); // x = 0
 		const double coor[2] = { 0, j * dy };
 		mvp_2(eps_t, coor, &u[n * dim]);
 	}
 
-	for (int j = 1; j < ny - 1; j++) {
+	for (int j = 1; j < ny - 1; ++j) {
 		const int n = nod_index(nx - 1, j, 0); // x = lx
 		const double coor[2] = { lx, j * dy };
 		mvp_2(eps_t, coor, &u[n * dim]);
@@ -276,96 +248,6 @@ void micropp<2>::assembly_mat()
 		}
 	}
 	ell_set_bc_2D(&A);
-}
-
-
-template <>
-void micropp<2>::calc_ave_stress(double stress_ave[6]) const
-{
-	memset(stress_ave, 0, nvoi * sizeof(double));
-
-	for (int ex = 0; ex < nex; ++ex) {
-		for (int ey = 0; ey < ney; ++ey) {
-
-			double stress_aux[3] = { 0.0 };
-
-			for (int gp = 0; gp < npe; ++gp) {
-
-				double strain_gp[3], stress_gp[3];
-				get_strain(gp, strain_gp, ex, ey);
-				get_stress(gp, strain_gp, stress_gp, ex, ey);
-				for (int v = 0; v < nvoi; ++v)
-					stress_aux[v] += stress_gp[v] * wg;
-
-			}
-			for (int v = 0; v < nvoi; ++v)
-				stress_ave[v] += stress_aux[v];
-		}
-	}
-
-	for (int v = 0; v < nvoi; ++v)
-		stress_ave[v] /= (lx * ly);
-}
-
-
-template <>
-void micropp<2>::calc_ave_strain(double strain_ave[6]) const
-{
-	memset(strain_ave, 0, nvoi * sizeof(double));
-
-	for (int ex = 0; ex < nex; ++ex) {
-		for (int ey = 0; ey < ney; ++ey) {
-
-			double strain_aux[3] = { 0.0 };
-
-			for (int gp = 0; gp < npe; ++gp) {
-
-				double strain_gp[6];
-				get_strain(gp, strain_gp, ex, ey);
-				for (int v = 0; v < nvoi; ++v)
-					strain_aux[v] += strain_gp[v] * wg;
-			}
-
-			for (int v = 0; v < nvoi; v++)
-				strain_ave[v] += strain_aux[v];
-		}
-	}
-
-	for (int v = 0; v < nvoi; v++)
-		strain_ave[v] /= (lx * ly);
-}
-
-
-template <>
-void micropp<2>::calc_fields()
-{
-	const double ivol = 1.0 / (dx * dy);
-
-	for (int ex = 0; ex < nex; ++ex) {
-		for (int ey = 0; ey < ney; ++ey) {
-
-			double strain_aux[3] = { 0.0 };
-			double stress_aux[3] = { 0.0 };
-
-			for (int gp = 0; gp < npe; ++gp) {
-
-				double stress_gp[3], strain_gp[3];
-				get_strain(gp, strain_gp, ex, ey);
-				get_stress(gp, strain_gp, stress_gp, ex, ey);
-				for (int v = 0; v < nvoi; v++) {
-					strain_aux[v] += strain_gp[v] * wg;
-					stress_aux[v] += stress_gp[v] * wg;
-				}
-
-			}
-
-			const int e = glo_elem(ex, ey, 0);
-			for (int v = 0; v < nvoi; v++) {
-				elem_strain[e * nvoi + v] = strain_aux[v] * ivol;
-				elem_stress[e * nvoi + v] = stress_aux[v] * ivol;
-			}
-		}
-	}
 }
 
 

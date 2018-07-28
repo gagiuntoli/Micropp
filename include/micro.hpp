@@ -72,7 +72,7 @@ class micropp {
 		const int nex, ney, nez, nelem;
 		const double lx, ly, lz;
 		const double dx, dy, dz;
-		const double width, inv_tol, wg;
+		const double width, inv_tol, wg, ivol;
 
 		const int micro_type, num_int_vars;
 		gp_t *gp_list;
@@ -100,14 +100,14 @@ class micropp {
 
 		double inv_max;
 
-		const double xg[8][3] = { {-CONSTXG, -CONSTXG, -CONSTXG},
-		                          {+CONSTXG, -CONSTXG, -CONSTXG},
-		                          {+CONSTXG, +CONSTXG, -CONSTXG},
-		                          {-CONSTXG, +CONSTXG, -CONSTXG},
-		                          {-CONSTXG, -CONSTXG, +CONSTXG},
-		                          {+CONSTXG, -CONSTXG, +CONSTXG},
-		                          {+CONSTXG, +CONSTXG, +CONSTXG},
-		                          {-CONSTXG, +CONSTXG, +CONSTXG} };
+		const double xg[8][3] = { { -CONSTXG, -CONSTXG, -CONSTXG },
+		                          { +CONSTXG, -CONSTXG, -CONSTXG },
+		                          { +CONSTXG, +CONSTXG, -CONSTXG },
+		                          { -CONSTXG, +CONSTXG, -CONSTXG },
+		                          { -CONSTXG, -CONSTXG, +CONSTXG },
+		                          { +CONSTXG, -CONSTXG, +CONSTXG },
+		                          { +CONSTXG, +CONSTXG, +CONSTXG },
+		                          { -CONSTXG, +CONSTXG, +CONSTXG } };
 
 	protected:
 		// Common
@@ -129,17 +129,18 @@ class micropp {
 		                double stress_gp[nvoi],
 		                int ex, int ey, int ez = 0) const;
 
-		// Specialized
-		int get_elem_type(int ex, int ey, int ez);
+		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(double be[npe * dim],
 		                  int ex, int ey, int ez = 0) const;
 
+		// Specialized
 		template <typename... Rest>
 		void get_elem_mat(double Ae[npe * dim * npe * dim],
 		                  int ex, int ey, Rest...) const;
 
 		void set_displ_bc(const double *eps);
+
 		double assembly_rhs();
 		void assembly_mat();
 

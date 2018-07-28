@@ -243,6 +243,37 @@ void micropp<tdim>::get_elem_nodes(int n[8], int ex, int ey, int ez) const
 }
 
 
+template<int tdim>
+int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
+{
+	assert(micro_type == 0 || micro_type == 1);
+
+	if (micro_type == 0) { // sphere in the center
+
+		const double coor[3] = { ex * dx + dx / 2,
+		                         ey * dy + dy / 2,
+		                         ez * dz + dz / 2 };
+
+		const double center[3] = { lx / 2, ly / 2, lz / 2 };
+		const double rad = micro_params[dim];
+
+		double tmp = 0.;
+		for (int i = 0; i < dim; ++i)
+			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
+
+		return (tmp < rad * rad);
+
+	} else if (micro_type == 1) { // 2 flat layers in y dir
+
+		const double y = ey * dy + dy / 2;
+		return (y < width);
+	}
+
+	cerr << "Invalid micro_type = " << micro_type << endl;
+	return -1;
+}
+
+
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
                                    double elem_disp[npe *dim],
@@ -304,6 +335,103 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 	}
 
 }
+
+
+template <int tdim>
+void micropp<tdim>::calc_ave_stress(double stress_ave[nvoi]) const
+{
+	memset(stress_ave, 0, nvoi * sizeof(double));
+
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
+
+				double stress_aux[nvoi] = { 0.0 };
+
+				for (int gp = 0; gp < npe; ++gp) {
+
+					double stress_gp[nvoi], strain_gp[nvoi];
+
+					get_strain(gp, strain_gp, ex, ey, ez);
+					get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
+					for (int v = 0; v < nvoi; ++v)
+						stress_aux[v] += stress_gp[v] * wg;
+
+				}
+				for (int v = 0; v < nvoi; ++v)
+					stress_ave[v] += stress_aux[v];
+			}
+		}
+	}
+
+	for (int v = 0; v < nvoi; ++v)
+		stress_ave[v] /= (lx * ly);
+}
+
+
+template <int tdim>
+void micropp<tdim>::calc_ave_strain(double strain_ave[nvoi]) const
+{
+	memset(strain_ave, 0, nvoi * sizeof(double));
+
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
+
+				double strain_aux[nvoi] = { 0.0 };
+
+				for (int gp = 0; gp < npe; ++gp) {
+					double strain_gp[nvoi];
+
+					get_strain(gp, strain_gp, ex, ey, ez);
+					for (int v = 0; v < nvoi; ++v)
+						strain_aux[v] += strain_gp[v] * wg;
+				}
+
+				for (int v = 0; v < nvoi; v++)
+					strain_ave[v] += strain_aux[v];
+			}
+		}
+	}
+
+	for (int v = 0; v < nvoi; v++)
+		strain_ave[v] /= (lx * ly);
+}
+
+
+template<int tdim>
+void micropp<tdim>::calc_fields()
+{
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
+
+				double strain_aux[nvoi] = { 0.0 };
+				double stress_aux[nvoi] = { 0.0 };
+
+				for (int gp = 0; gp < npe; ++gp) {
+
+					double stress_gp[nvoi], strain_gp[nvoi];
+
+					get_strain(gp, strain_gp, ex, ey, ez);
+					get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
+
+					for (int v = 0; v < nvoi; ++v) {
+						strain_aux[v] += strain_gp[v] * wg;
+						stress_aux[v] += stress_gp[v] * wg;
+					}
+				}
+
+				const int e = glo_elem(ex, ey, ez);
+				for (int v = 0; v < nvoi; v++) {
+					elem_strain[e * nvoi + v] = strain_aux[v] * ivol;
+					elem_stress[e * nvoi + v] = stress_aux[v] * ivol;
+				}
+			}
+		}
+	}
+}
+
 
 // Explicit instantiation
 template class micropp<2>;
