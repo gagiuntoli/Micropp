@@ -120,19 +120,25 @@ class micropp {
 		void get_strain(int gp, double strain_gp[nvoi],
 		                int ex, int ey, int ez = 0) const;
 
-		void get_elem_nodes(int n[8], int ex, int ey, int ez = 0) const;
+		void get_elem_nodes(int n[npe], int ex, int ey, int ez = 0) const;
 
-		void get_elem_displ(const double *u, double *elem_disp,
+		void get_elem_displ(const double *u, double elem_disp[npe * dim],
 		                    int ex, int ey, int ez = 0) const;
 
-		void get_stress(int gp, const double eps[nvoi],
-		                double stress_gp[nvoi],
+		void get_stress(int gp, const double eps[nvoi], double stress_gp[nvoi],
 		                int ex, int ey, int ez = 0) const;
 
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(double be[npe * dim],
 		                  int ex, int ey, int ez = 0) const;
+
+		void calc_ave_stress(double stress_ave[nvoi]) const;
+		void calc_ave_strain(double strain_ave[nvoi]) const;
+
+		void calc_fields();
+
+		int newton_raphson(double *_err);
 
 		// Specialized
 		template <typename... Rest>
@@ -146,14 +152,7 @@ class micropp {
 
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 
-		int newton_raphson(double *_err);
-
-		void calc_ave_stress(double stress_ave[nvoi]) const;
-		void calc_ave_strain(double strain_ave[nvoi]) const;
-
 		bool calc_vars_new();
-
-		void calc_fields();
 
 		void write_vtu(int tstep, int gp_id);
 

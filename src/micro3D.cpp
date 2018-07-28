@@ -24,7 +24,7 @@
 
 template<>
 micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
-                    const double *_micro_params, const material_t *_materials):
+		const double *_micro_params, const material_t *_materials):
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]), nz(size[2]),
 	nn(nx * ny * nz),
@@ -161,14 +161,14 @@ double micropp<3>::assembly_rhs()
 
 	memset(b, 0.0, nn * dim * sizeof(double));
 
-	double be[3 * 8];
-	int index[3 * 8];
+	double be[dim * npe];
+	int index[dim * npe];
 
 	for (int ex = 0; ex < nex; ex++) {
 		for (int ey = 0; ey < ney; ey++) {
 			for (int ez = 0; ez < nez; ez++) {
 
-				int n[8];
+				int n[npe];
 				get_elem_nodes(n, ex, ey, ez);
 
 				for (int j = 0; j < npe; ++j)
@@ -288,7 +288,6 @@ void micropp<3>::get_elem_mat(double Ae[npe * dim * npe * dim],
 					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
 			}
 		}
-
 		memcpy(Ae, TAe, npedim2 * sizeof(double));
 	}
 }

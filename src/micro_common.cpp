@@ -24,7 +24,7 @@
 
 template<int tdim>
 void micropp<tdim>::initialize(const double *_micro_params,
-                               const material_t *_materials)
+		const material_t *_materials)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -228,7 +228,7 @@ void micropp<tdim>::get_elem_rhs(double be[npe * dim],
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_nodes(int n[8], int ex, int ey, int ez) const
+void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 {
 	const int nxny = ny * nx;
 	const int n0 = ez * nxny + ey * nx + ex;
@@ -236,10 +236,13 @@ void micropp<tdim>::get_elem_nodes(int n[8], int ex, int ey, int ez) const
 	n[1] = n0 + 1;
 	n[2] = n0 + nx + 1;
 	n[3] = n0 + nx;
-	n[4] = n[0] + nxny;
-	n[5] = n[1] + nxny;
-	n[6] = n[2] + nxny;
-	n[7] = n[3] + nxny;
+
+	if (dim == 3) {
+		n[4] = n[0] + nxny;
+		n[5] = n[1] + nxny;
+		n[6] = n[2] + nxny;
+		n[7] = n[3] + nxny;
+	}
 }
 
 
@@ -252,9 +255,12 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		const double coor[3] = { ex * dx + dx / 2,
 		                         ey * dy + dy / 2,
-		                         ez * dz + dz / 2 };
+		                         ez * dz + dz / 2 }; // 2D -> dz = 0
 
-		const double center[3] = { lx / 2, ly / 2, lz / 2 };
+		const double center[3] = { lx / 2,
+		                           ly / 2,
+		                           lz / 2 }; // 2D -> lz = 0
+
 		const double rad = micro_params[dim];
 
 		double tmp = 0.;
@@ -276,10 +282,10 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
-                                   double elem_disp[npe *dim],
-                                   int ex, int ey, int ez) const
+		double elem_disp[npe * dim],
+		int ex, int ey, int ez) const
 {
-	int n[8] ;
+	int n[npe] ;
 	get_elem_nodes(n, ex, ey, ez);
 
 	for (int i = 0 ; i < npe; ++i)

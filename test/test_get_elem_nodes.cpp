@@ -31,7 +31,6 @@ using namespace std;
 
 template <int tdim>
 class test_t : public micropp<tdim> {
-
 	public:
 		test_t(const int size[3], const double micro_params[5],
 		       const material_t mat_params[2])
@@ -49,46 +48,39 @@ class test_t : public micropp<tdim> {
 int main (int argc, char *argv[])
 {
 	const int size[3] = { 5, 5, 5 };
+	const double micro_params[5] = { 1., 1., 1., 0.1, 0. };
 
-	const double micro_params[5] = { 1., 1., 1., .1, 0. };
+	int n[8];
 
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
 	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
-	test_t<2> test(size, micro_params, mat_params);
-
-	int n[8];
+	test_t<3> test(size, micro_params, mat_params);
 
 	test.public_get_elem_nodes(n, 0, 0, 0);
-	int n_1_exact[8] = { 0, 1, 6, 5, 25, 26, 31, 30 };
+	const int n_1_exact[8] = { 0, 1, 6, 5, 25, 26, 31, 30 };
 
-    for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 8; ++i) {
+		printf("Asserting: n[%d] = %d == %d\n", i, n[i], n_1_exact[i]);
 		assert(n[i] == n_1_exact[i]);
-
-    for (int i = 0; i < 8; ++i)
-		cout << n[i] << " ";
-	cout << endl;
+	}
 
 	test.public_get_elem_nodes(n, 0, 1, 0);
-	int n_2_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
+	const int n_2_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
 
-    for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 8; ++i) {
+		printf("Asserting: n[%d] = %d == %d\n", i, n[i], n_2_exact[i]);
 		assert(n[i] == n_2_exact[i]);
-
-    for (int i = 0; i < 8; ++i)
-		cout << n[i] << " ";
-	cout << endl;
+	}
 
 	test.public_get_elem_nodes(n, 0, 1);
-	int n_3_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
+	const int n_3_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
 
-    for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < 8; ++i) {
+		printf("Asserting: n[%d] = %d == %d\n", i, n[i], n_3_exact[i]);
 		assert(n[i] == n_3_exact[i]);
-
-    for (int i = 0; i < 8; ++i)
-		cout << n[i] << " ";
-	cout << endl;
+	}
 
 	return 0;
 }
