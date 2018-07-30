@@ -38,10 +38,7 @@
 #include "instrument.hpp"
 
 #define MAX_DIM         3
-#define MAX_MAT_PARAM   10
 #define MAX_MATS        10
-#define MAX_GP_VARS     10
-#define INT_VARS_GP     7  // [eps_p_1(gp1), alpha_1(gp1), eps_p_1(gp2), ...]
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
 #define CG_MIN_ERR      1.0e-8
@@ -54,7 +51,7 @@
 #define CONSTXG         0.577350269189626
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
-#define intvar_ix(e,gp,var)  ((e) * 8 * INT_VARS_GP + (gp) * INT_VARS_GP + (var))
+#define intvar_ix(e,gp,var)  ((e) * 8 * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
 
 using namespace std;
 

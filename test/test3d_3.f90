@@ -27,7 +27,6 @@ program test3d_3
 
   implicit none
 
-  integer, parameter :: MAX_MAT_PARAM = 10
   type(micropp3) :: micro
   integer :: argc, t
   character(len=32) :: arg

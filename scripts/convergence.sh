@@ -16,6 +16,8 @@ cd $out_folder
 
 function generic {
 
+# Increases the size independently as nx , ny , nz
+
 nx_size=( 2 4 12 )
 ny_size=( 2 4 12 16 )
 nz_size=( 2 4 )
@@ -47,6 +49,8 @@ done
 }
 
 function uniform {
+
+# Increases the size as nx = ny = nz = nn
 
 nn_size=( 2 4 6 8 )
 dires=( 0 1 2 3 4 5 ) # sigxx[0] sigyy[1] sigzz[2] sigxy[3] sigxz[4] sigyz[5] 

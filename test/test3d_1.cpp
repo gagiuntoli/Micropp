@@ -44,18 +44,10 @@ int main (int argc, char *argv[])
 	const int nz = atoi(argv[3]);
 	const int dir = atoi(argv[4]);
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
-	int size[3];
-	size[0] = nx;
-	size[1] = ny;
-	size[2] = nz;
+	int size[3] = { nx, ny, nz };
 
-	int micro_type = 1; // 2 materiales matriz y fibra (3D esfera en matriz)
-	double micro_params[5];
-	micro_params[0] = 1.0; // lx
-	micro_params[1] = 1.0; // ly
-	micro_params[2] = 1.0; // lz
-	micro_params[3] = 0.1; // grosor capa de abajo
-	micro_params[4] = 0.0; // inv_tol
+	int micro_type = 1; // 2 capas
+	double micro_params[5] = { 1., 1., 1., .5, 0. };
 
 	int mat_types[2] = { 1, 0 }; // dos materiales lineales (type = 0)
 
@@ -84,8 +76,10 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 		micro.get_macro_ctan(0, ctan);
 
-		micro.update_vars();
+		micro.output (t, 0);
 		micro.write_info_files ();
+
+		micro.update_vars();
 
 		cout << "eps =\t";
 		for (int i = 0; i < 6; ++i)
@@ -103,7 +97,6 @@ int main (int argc, char *argv[])
 		cout << endl;
 
 		cout << endl;
-		micro.output (t, 0);
 	}
 	return 0;
 }

@@ -68,7 +68,7 @@ void micropp<tdim>::initialize(const double *_micro_params,
 	ofstream file;
 	file.open("micropp_materials.dat");
 	file << scientific;
-	for (int i = 0; i < numMaterials; i++) {
+	for (int i = 0; i < numMaterials; ++i) {
 		material_list[i] = _materials[i];
 
 		file << setw(14)
@@ -76,9 +76,9 @@ void micropp<tdim>::initialize(const double *_micro_params,
 		     << material_list[i].Sy << " " << material_list[i].Ka << endl;
 	}
 
-	for (int ez = 0; ez < nez; ez++) {
-		for (int ey = 0; ey < ney; ey++) {
-			for (int ex = 0; ex < nex; ex++) {
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex) {
 				const int e_i = glo_elem(ex, ey, ez);
 				elem_type[e_i] = get_elem_type(ex, ey, ez);
 			}
@@ -408,9 +408,9 @@ void micropp<tdim>::calc_ave_strain(double strain_ave[nvoi]) const
 template<int tdim>
 void micropp<tdim>::calc_fields()
 {
-	for (int ex = 0; ex < nex; ++ex) {
+	for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
 		for (int ey = 0; ey < ney; ++ey) {
-			for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
+			for (int ex = 0; ex < nex; ++ex) {
 
 				double strain_aux[nvoi] = { 0.0 };
 				double stress_aux[nvoi] = { 0.0 };
@@ -429,7 +429,7 @@ void micropp<tdim>::calc_fields()
 				}
 
 				const int e = glo_elem(ex, ey, ez);
-				for (int v = 0; v < nvoi; v++) {
+				for (int v = 0; v < nvoi; ++v) {
 					elem_strain[e * nvoi + v] = strain_aux[v] * ivol;
 					elem_stress[e * nvoi + v] = stress_aux[v] * ivol;
 				}

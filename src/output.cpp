@@ -32,16 +32,17 @@ void micropp<tdim>::output(int time_step, int gp_id)
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	if (gp_list[gp_id].allocated)
-		for (int i = 0; i < num_int_vars; ++i)
-			vars_old[i] = gp_list[gp_id].int_vars_n[i];
-	else
-		for (int i = 0; i < num_int_vars; ++i)
-			vars_old[i] = 0.0;
 
-	double nr_err;
-	set_displ_bc(gp_list[gp_id].macro_strain);
-	int nr_its = newton_raphson(&nr_err);
+	if (!gp_list[gp_id].allocated) {
+		vars_old = vars_old_aux;
+		vars_new = vars_new_aux;
+		memset(vars_old, 0, num_int_vars * sizeof(double));
+	} else {
+		vars_old = gp_list[gp_id].int_vars_n;
+		vars_new = gp_list[gp_id].int_vars_k;
+	}
+
+	u = gp_list[gp_id].u_k;
 
 	calc_fields();
 	write_vtu(time_step, gp_id);
@@ -68,35 +69,27 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 	     << "<Points>\n"
 	     << "<DataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
-	for (int k = 0; k < nz; k++) {
-		for (int j = 0; j < ny; j++) {
-			for (int i = 0; i < nx; i++) {
-				const double x = i * dx;
-				const double y = j * dy;
-				const double z = k * dz;
-				file << x << " " << y << " " << z << endl;
+	for (int k = 0; k < nz; ++k) {
+		for (int j = 0; j < ny; ++j) {
+			for (int i = 0; i < nx; ++i) {
+				const double coor[3] = { i * dx, j * dy, k * dz };
+				for (int d = 0; d < 3; d++)
+					file << coor[d] << " ";
+				file << endl;
 			}
 		}
 	}
 	file << "</DataArray>\n</Points>\n<Cells>" << endl;
 
 	file << "<DataArray type=\"Int32\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-	for (int ez = 0; ez < nez; ez++) {
-		for (int ey = 0; ey < ney; ey++) {
-			for (int ex = 0; ex < nex; ex++) {
-				const int n[] {
- 					ez * (nx * ny) + ey * nx + ex,
-					   ez * (nx * ny) + ey * nx + ex + 1,
-					   ez * (nx * ny) + (ey + 1) * nx + ex + 1,
-					   ez * (nx * ny) + (ey + 1) * nx + ex,
-					   n[0] + (nx * ny),
-					   n[1] + (nx * ny),
-					   n[2] + (nx * ny),
-					   n[3] + (nx * ny) } ;
-
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex) {
+				int n[8];
+				get_elem_nodes(n, ex, ey, ez);
 				for (int i = 0; i < npe; ++i)
-        			file << n[i] << ' ';
-        		file << endl;
+					file << n[i] << ' ';
+				file << endl;
 			}
 		}
 	}
@@ -104,7 +97,7 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 
 	int ce = npe;
 	file << "<DataArray type=\"Int32\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-	for (int e = 0; e < nelem; e++) {
+	for (int e = 0; e < nelem; ++e) {
 		file << ce << " ";
 		ce += npe;
 	}
@@ -112,14 +105,14 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 
 	file << "<DataArray type=\"UInt8\"  Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	const int vtk_code = (dim == 2) ? 9 : 12;
-	for (int e = 0; e < nelem; e++)
+	for (int e = 0; e < nelem; ++e)
 		file << vtk_code << " ";
 	file << "\n</DataArray>" << endl;
 	file << "</Cells>" << endl;
 
 	file << "<PointData Vectors=\"displ,b\" >>" << endl;	// Vectors inside is a filter we should not use this here
 	file << "<DataArray type=\"Float64\" Name=\"displ\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
-	for (int n = 0; n < nn; n++) {
+	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
 			file << (dim == 2 && d == 2 ? 0.0 : u[n * dim + d]) << " ";
  		file << endl;
@@ -127,7 +120,7 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 	file << "</DataArray>" << endl;
 
 	file << "<DataArray type=\"Float64\" Name=\"b\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
-	for (int n = 0; n < nn; n++) {
+	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
 			file << (dim == 2 && d == 2 ? 0.0 : b[n * dim + d]) << " ";
  		file << endl;
@@ -137,51 +130,46 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 
 	file << "<CellData>" << endl;
 	file << "<DataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
-	for (int e = 0; e < nelem; e++) {
-		for (int v = 0; v < nvoi; v++)
+	for (int e = 0; e < nelem; ++e) {
+		for (int v = 0; v < nvoi; ++v)
 			file << elem_strain[e * nvoi + v] << " ";
 		file << endl;
 	}
 	file << "</DataArray>";
 
 	file << "<DataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
-	for (int e = 0; e < nelem; e++) {
-		for (int v = 0; v < nvoi; v++)
+	for (int e = 0; e < nelem; ++e) {
+		for (int v = 0; v < nvoi; ++v)
 			file << elem_stress[e * nvoi + v] << " ";
 		file << endl;
 	}
 	file << "</DataArray>";
 
 	file << "<DataArray type=\"Int32\" Name=\"elem_type\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-	for (int e = 0; e < nelem; e++) {
+	for (int e = 0; e < nelem; ++e) {
 		file << elem_type[e] << " ";
 	}
 	file << "\n</DataArray>" << endl;
 
 	file << "<DataArray type=\"Float64\" Name=\"plasticity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-	for (int e = 0; e < nelem; e++) {
-		double plasticity = 0.0;
-		if (vars_old != NULL)
-			for (int gp = 0; gp < 8; gp++) {
-				plasticity +=
-					sqrt(vars_old[intvar_ix(e, gp, 0)] * vars_old[intvar_ix(e, gp, 0)] +
-						    vars_old[intvar_ix(e, gp, 1)] * vars_old[intvar_ix(e, gp, 1)] +
-						    vars_old[intvar_ix(e, gp, 2)] * vars_old[intvar_ix(e, gp, 2)] +
-						    2 * vars_old[intvar_ix(e, gp, 3)] * vars_old[intvar_ix(e, gp, 3)] + 
-							2 * vars_old[intvar_ix(e, gp, 4)] * vars_old[intvar_ix(e, gp, 4)] + 
-							2 * vars_old[intvar_ix(e, gp, 5)] * vars_old[intvar_ix(e, gp, 5)]);
-			}
-		file << plasticity / 8 << " ";
+	for (int e = 0; e < nelem; ++e) {
+		double plasticity = 0.;
+		for (int gp = 0; gp < npe; ++gp) {
+			double tmp = 0.0;
+			for (int v = 0; v < nvoi; ++v)
+				tmp += vars_old[intvar_ix(e, gp, v)] * vars_old[intvar_ix(e, gp, v)];
+			plasticity += sqrt(tmp);
+		}
+		file << plasticity / npe << " ";
 	}
 	file << "\n</DataArray>" << endl;
 
 	file << "<DataArray type=\"Float64\" Name=\"hardening\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
-	for (int e = 0; e < nelem; e++) {
-		double hardening = 0.0;
-		if (vars_old != NULL)
-			for (int gp = 0; gp < 8; gp++)
-				hardening += vars_old[intvar_ix(e, gp, 6)];
-		file << hardening / 8 << " ";
+	for (int e = 0; e < nelem; ++e) {
+		double hardening = 0.;
+		for (int gp = 0; gp < npe; ++gp)
+			hardening += vars_old[intvar_ix(e, gp, 6)];
+		file << hardening / npe << " ";
 	}
 	file << "\n</DataArray>" << endl;
 	file << "</CellData>" << endl;
