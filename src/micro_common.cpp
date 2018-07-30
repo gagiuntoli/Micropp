@@ -42,7 +42,7 @@ void micropp<tdim>::initialize(const double *_micro_params,
 	elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
 	elem_strain = (double *) malloc(nelem * nvoi * sizeof(double));
 	vars_old_aux = (double *) calloc(num_int_vars, sizeof(double));
-	vars_new_aux = (double *) malloc(num_int_vars* sizeof(double));
+	vars_new_aux = (double *) malloc(num_int_vars * sizeof(double));
 
 	assert(b && du && u_aux && elem_stress && elem_strain &&
 			elem_type && vars_old_aux && vars_new_aux);
@@ -348,9 +348,9 @@ void micropp<tdim>::calc_ave_stress(double stress_ave[nvoi]) const
 {
 	memset(stress_ave, 0, nvoi * sizeof(double));
 
-	for (int ex = 0; ex < nex; ++ex) {
+	for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
 		for (int ey = 0; ey < ney; ++ey) {
-			for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
+			for (int ex = 0; ex < nex; ++ex) {
 
 				double stress_aux[nvoi] = { 0.0 };
 
@@ -371,7 +371,7 @@ void micropp<tdim>::calc_ave_stress(double stress_ave[nvoi]) const
 	}
 
 	for (int v = 0; v < nvoi; ++v)
-		stress_ave[v] /= (lx * ly);
+		stress_ave[v] /= vol_tot;
 }
 
 
@@ -380,9 +380,9 @@ void micropp<tdim>::calc_ave_strain(double strain_ave[nvoi]) const
 {
 	memset(strain_ave, 0, nvoi * sizeof(double));
 
-	for (int ex = 0; ex < nex; ++ex) {
+	for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
 		for (int ey = 0; ey < ney; ++ey) {
-			for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
+			for (int ex = 0; ex < nex; ++ex) {
 
 				double strain_aux[nvoi] = { 0.0 };
 
@@ -401,7 +401,7 @@ void micropp<tdim>::calc_ave_strain(double strain_ave[nvoi]) const
 	}
 
 	for (int v = 0; v < nvoi; v++)
-		strain_ave[v] /= (lx * ly);
+		strain_ave[v] /= vol_tot;
 }
 
 

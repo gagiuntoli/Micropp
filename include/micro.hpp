@@ -69,6 +69,7 @@ class micropp {
 		const int nex, ney, nez, nelem;
 		const double lx, ly, lz;
 		const double dx, dy, dz;
+		const double vol_tot;
 		const double width, inv_tol, wg, ivol;
 
 		const int micro_type, num_int_vars;

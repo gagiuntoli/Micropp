@@ -34,7 +34,7 @@ micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	dx(lx / nex), dy(ly / ney), dz(0.0),
 
 	width(_micro_params[3]), inv_tol(_micro_params[4]),
-	wg(dx * dy / npe), ivol(1.0 / (dx * dy)),
+	wg(dx * dy / npe), vol_tot(lx * ly),  ivol(1.0 / (dx * dy)),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
 	initialize(_micro_params, _materials);

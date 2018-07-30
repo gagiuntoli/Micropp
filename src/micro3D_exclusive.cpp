@@ -46,8 +46,9 @@ bool micropp<3>::plastic_law(
 		const double eps_p_old[6], double alpha_old,
 		double *_dl, double _normal[6], double _s_trial[6]) const
 {
-	double eps_dev[6];
-	double eps_p_dev_1[6];
+	/* Calculates _dl, _normal and _s_trial */
+
+	double eps_dev[6], eps_p_dev_1[6];
 
 	get_dev_tensor(eps_p_old, eps_p_dev_1);
 	get_dev_tensor(eps, eps_dev);
@@ -65,19 +66,17 @@ bool micropp<3>::plastic_law(
 
 	double f_trial = s_norm - sqrt(2. / 3.) * (material->Sy + material->Ka * alpha_old);
 
-	if (f_trial > 0) {
+	if (f_trial > 0 && material->plasticity) {
 
 		for (int i = 0; i < 6; ++i)
 			_normal[i] = _s_trial[i] / s_norm;
 		*_dl = f_trial / (2. * material->mu * (1. + (0. * material->Ka) / (3. * material->mu)));
-
         return true;
 
 	} else {
 
 		memset(_normal, 0, 6 * sizeof(double));
 		*_dl = 0;
-
 		return false;
 	}
 }
@@ -94,8 +93,7 @@ void micropp<3>::plastic_get_stress(
 			&dl, normal, s_trial);
 
 	//sig_2 = s_trial + K * tr(eps) * 1 - 2 * mu * dl * normal;
-	for (int i = 0; i < 6; ++i)
-		stress[i] = s_trial[i];
+	memcpy(stress, s_trial, 6 * sizeof(double));
 
 	for (int i = 0; i < 3; ++i)
 		stress[i] += material->k * (eps[0] + eps[1] + eps[2]);

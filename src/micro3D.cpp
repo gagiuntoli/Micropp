@@ -34,7 +34,7 @@ micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	dx(lx / nex), dy(ly / ney),	dz(lz / nez),
 
 	width(_micro_params[3]), inv_tol(_micro_params[4]),
-	wg(dx * dy * dz / npe), ivol(1.0 / (dx * dy * dz)),
+	wg(dx * dy * dz / npe), vol_tot(lx * ly * lz), ivol(1.0 / (dx * dy * dz)),
 	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
 	initialize(_micro_params, _materials);
@@ -164,9 +164,9 @@ double micropp<3>::assembly_rhs()
 	double be[dim * npe];
 	int index[dim * npe];
 
-	for (int ex = 0; ex < nex; ex++) {
-		for (int ey = 0; ey < ney; ey++) {
-			for (int ez = 0; ez < nez; ez++) {
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex) {
 
 				int n[npe];
 				get_elem_nodes(n, ex, ey, ez);
@@ -320,20 +320,20 @@ bool micropp<3>::calc_vars_new()
 
     bool nl_flag = false;
 
-	for (int ex = 0; ex < nex; ex++) {
-		for (int ey = 0; ey < ney; ey++) {
-			for (int ez = 0; ez < nez; ez++) {
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex){
 
-				for (int gp = 0; gp < 8; gp++) {
+				const int e = glo_elem(ex, ey, ez);
+				const material_t material = get_material(e);
 
-					int e = glo_elem(ex, ey, ez);
-					const material_t material = get_material(e);
+				for (int gp = 0; gp < npe; ++gp) {
 
 					const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
 					double alpha_old = vars_old[intvar_ix(e, gp, 6)];
 					double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
 					double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
-					double eps[6];
+					double eps[nvoi];
 					get_strain(gp, eps, ex, ey, ez);
 
 					nl_flag |= plastic_evolute(
