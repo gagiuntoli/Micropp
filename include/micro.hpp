@@ -70,7 +70,7 @@ class micropp {
 		const double lx, ly, lz;
 		const double dx, dy, dz;
 		const double vol_tot;
-		const double width, inv_tol, wg, ivol;
+		const double special_param, inv_tol, wg, ivol;
 
 		const int micro_type, num_int_vars;
 		gp_t *gp_list;
@@ -109,7 +109,6 @@ class micropp {
 
 	protected:
 		// Common
-		void initialize(const double *micro_params, const material_t *mats);
 		void calc_ctan_lin();
 		bool is_linear(const double *macro_strain);
 		double get_inv_1(const double *tensor) const;

@@ -21,10 +21,28 @@
 
 #include "micro.hpp"
 
-
 template<int tdim>
-void micropp<tdim>::initialize(const double *_micro_params,
-		const material_t *_materials)
+micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
+		const double _micro_params[5], const material_t *_materials):
+	ngp(_ngp),
+	nx(size[0]), ny(size[1]),
+	nz((tdim == 3) ? size[2] : 1),
+
+	nn(nx * ny * nz),
+	nex(nx - 1), ney(ny - 1),
+	nez((tdim == 3) ? (nz - 1) : 1),
+
+	nelem(nex * ney * nez),
+	lx(_micro_params[0]), ly(_micro_params[1]),
+	lz((tdim == 3) ? _micro_params[2] : 0.0),
+	dx(lx / nex), dy(ly / ney),	dz((tdim == 3) ? lz / nez : 0.0),
+
+	special_param(_micro_params[3]), inv_tol(_micro_params[4]),
+
+	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
+	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
+	ivol(1.0 / (wg * npe)),
+	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -259,7 +277,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		                           ly / 2,
 		                           lz / 2 }; // 2D -> lz = 0
 
-		const double rad = micro_params[dim];
+		const double rad = special_param;
 
 		double tmp = 0.;
 		for (int i = 0; i < dim; ++i)
@@ -270,6 +288,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 	} else if (micro_type == 1) { // 2 flat layers in y dir
 
 		const double y = ey * dy + dy / 2;
+		const double width = special_param;
 		return (y < width);
 	}
 
@@ -314,7 +333,7 @@ void micropp<tdim>::print_info() const
 {
 	printf("micropp%d\n", dim);
 	printf("ngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
-	printf("l = [%lf, %lf, %lf]; width = %lf\n", lx, ly, lz, width);
+	printf("l = [%lf, %lf, %lf]; width = %lf\n", lx, ly, lz, special_param);
 }
 
 

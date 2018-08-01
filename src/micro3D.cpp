@@ -22,25 +22,6 @@
 #include "micro.hpp"
 
 
-template<>
-micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
-		const double *_micro_params, const material_t *_materials):
-	ngp(_ngp),
-	nx(size[0]), ny(size[1]), nz(size[2]),
-	nn(nx * ny * nz),
-	nex(nx - 1), ney(ny - 1), nez(nz - 1),
-	nelem(nex * ney * nez),
-	lx(_micro_params[0]), ly(_micro_params[1]),	lz(_micro_params[2]),
-	dx(lx / nex), dy(ly / ney),	dz(lz / nez),
-
-	width(_micro_params[3]), inv_tol(_micro_params[4]),
-	wg(dx * dy * dz / npe), vol_tot(lx * ly * lz), ivol(1.0 / (dx * dy * dz)),
-	micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
-{
-	initialize(_micro_params, _materials);
-}
-
-
 template <>
 void micropp<3>::set_displ_bc(const double eps[nvoi], double *u)
 {
