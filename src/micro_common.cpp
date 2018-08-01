@@ -133,7 +133,6 @@ int micropp<tdim>::get_nl_flag(int gp_id) const
 template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
-	u = u_aux;
 	vars_old = vars_old_aux;
 
 	for (int i = 0; i < nvoi; ++i) {
@@ -142,11 +141,10 @@ void micropp<tdim>::calc_ctan_lin()
 		eps_1[i] += D_EPS_CTAN_AVE;
 
 		double nr_err;
-		set_displ_bc(eps_1);
-		newton_raphson(&nr_err);
+		newton_raphson(eps_1, u_aux, &nr_err);
 
 		double sig_1[6];
-		calc_ave_stress(sig_1);
+		calc_ave_stress(u_aux, sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
@@ -205,8 +203,8 @@ material_t micropp<tdim>::get_material(const int e) const
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_rhs(double be[npe * dim],
-                                 int ex, int ey, int ez) const
+void micropp<tdim>::get_elem_rhs(const double *u, double be[npe * dim],
+		int ex, int ey, int ez) const
 {
 	constexpr int npedim = npe * dim;
 	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
@@ -217,7 +215,7 @@ void micropp<tdim>::get_elem_rhs(double be[npe * dim],
 
 		calc_bmat(gp, bmat);
 
-		get_strain(gp, strain_gp, ex, ey, ez);
+		get_strain(u, gp, strain_gp, ex, ey, ez);
 		get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
@@ -295,7 +293,7 @@ void micropp<tdim>::get_elem_displ(const double *u,
 
 
 template <int tdim>
-void micropp<tdim>::get_strain(int gp, double *strain_gp,
+void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 		int ex, int ey, int ez) const
 {
 	double elem_disp[npe * dim];
@@ -344,7 +342,8 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 
 
 template <int tdim>
-void micropp<tdim>::calc_ave_stress(double stress_ave[nvoi]) const
+void micropp<tdim>::calc_ave_stress(const double *u,
+		double stress_ave[nvoi]) const
 {
 	memset(stress_ave, 0, nvoi * sizeof(double));
 
@@ -358,7 +357,7 @@ void micropp<tdim>::calc_ave_stress(double stress_ave[nvoi]) const
 
 					double stress_gp[nvoi], strain_gp[nvoi];
 
-					get_strain(gp, strain_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, ex, ey, ez);
 					get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v)
 						stress_aux[v] += stress_gp[v] * wg;
@@ -376,7 +375,8 @@ void micropp<tdim>::calc_ave_stress(double stress_ave[nvoi]) const
 
 
 template <int tdim>
-void micropp<tdim>::calc_ave_strain(double strain_ave[nvoi]) const
+void micropp<tdim>::calc_ave_strain(const double *u,
+		double strain_ave[nvoi]) const
 {
 	memset(strain_ave, 0, nvoi * sizeof(double));
 
@@ -389,7 +389,7 @@ void micropp<tdim>::calc_ave_strain(double strain_ave[nvoi]) const
 				for (int gp = 0; gp < npe; ++gp) {
 					double strain_gp[nvoi];
 
-					get_strain(gp, strain_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v)
 						strain_aux[v] += strain_gp[v] * wg;
 				}
@@ -419,7 +419,7 @@ void micropp<tdim>::calc_fields()
 
 					double stress_gp[nvoi], strain_gp[nvoi];
 
-					get_strain(gp, strain_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, ex, ey, ez);
 					get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
 
 					for (int v = 0; v < nvoi; ++v) {

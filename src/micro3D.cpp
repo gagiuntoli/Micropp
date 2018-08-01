@@ -42,7 +42,7 @@ micropp<3>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 
 template <>
-void micropp<3>::set_displ_bc(const double *eps)
+void micropp<3>::set_displ_bc(const double eps[nvoi], double *u)
 {
 	const double eps_t[dim][dim] = {
 		{       eps[0], 0.5 * eps[3], 0.5 * eps[4] },
@@ -155,7 +155,7 @@ void micropp<3>::calc_bmat(int gp, double bmat[nvoi][npe * dim]) const
 
 
 template<>
-double micropp<3>::assembly_rhs()
+double micropp<3>::assembly_rhs(const double *u)
 {
 	INST_START;
 
@@ -175,7 +175,7 @@ double micropp<3>::assembly_rhs()
 					for (int d = 0; d < dim; ++d)
 						index[j * dim + d] = n[j] * dim + d;
 
-				get_elem_rhs(be, ex, ey, ez);
+				get_elem_rhs(u, be, ex, ey, ez);
 
 				for (int i = 0; i < npe * dim; ++i)
 					b[index[i]] += be[i];
@@ -241,8 +241,8 @@ double micropp<3>::assembly_rhs()
 
 template <>
 template <>
-void micropp<3>::get_elem_mat(double Ae[npe * dim * npe * dim],
-		int ex, int ey, int ez) const
+void micropp<3>::get_elem_mat(const double *u,
+		double Ae[npe * dim * npe * dim], int ex, int ey, int ez) const
 {
 	INST_START;
 	const int e = glo_elem(ex, ey, ez);
@@ -259,7 +259,7 @@ void micropp<3>::get_elem_mat(double Ae[npe * dim * npe * dim],
 	for (int gp = 0; gp < npe; ++gp) {
 
 		double eps[6];
-		get_strain(gp, eps, ex, ey, ez);
+		get_strain(u, gp, eps, ex, ey, ez);
 		const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
 		double alpha_old = vars_old[intvar_ix(e, gp, 6)];
 
@@ -294,7 +294,7 @@ void micropp<3>::get_elem_mat(double Ae[npe * dim * npe * dim],
 
 
 template <>
-void micropp<3>::assembly_mat()
+void micropp<3>::assembly_mat(const double *u)
 {
 	INST_START;
 
@@ -304,7 +304,7 @@ void micropp<3>::assembly_mat()
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
-				get_elem_mat(Ae, ex, ey, ez);
+				get_elem_mat(u, Ae, ex, ey, ez);
 				ell_add_3D(&A, ex, ey, ez, Ae);
 			}
 		}
@@ -314,7 +314,7 @@ void micropp<3>::assembly_mat()
 
 
 template<>
-bool micropp<3>::calc_vars_new()
+bool micropp<3>::calc_vars_new(const double *u)
 {
 	INST_START;
 
@@ -334,7 +334,7 @@ bool micropp<3>::calc_vars_new()
 					double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
 					double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
 					double eps[nvoi];
-					get_strain(gp, eps, ex, ey, ez);
+					get_strain(u, gp, eps, ex, ey, ez);
 
 					nl_flag |= plastic_evolute(
 							&material, eps, eps_p_old, alpha_old, 

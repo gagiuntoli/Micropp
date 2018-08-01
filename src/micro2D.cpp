@@ -42,7 +42,7 @@ micropp<2>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 
 template <>
-void micropp<2>::set_displ_bc(const double *eps)
+void micropp<2>::set_displ_bc(const double eps[nvoi], double *u)
 {
 	const double eps_t[dim][dim] =
 		{ {       eps[0], 0.5 * eps[2] },
@@ -122,7 +122,7 @@ void micropp<2>::calc_bmat(int gp, double bmat[nvoi][npe *dim])	const
 
 
 template <>
-double micropp<2>::assembly_rhs()
+double micropp<2>::assembly_rhs(const double *u)
 {
 	INST_START;
 
@@ -141,7 +141,7 @@ double micropp<2>::assembly_rhs()
 				for (int d = 0; d < dim; ++d)
 					index[j * dim + d] = n[j] * dim + d;
 
-			get_elem_rhs(be, ex, ey);
+			get_elem_rhs(u, be, ex, ey);
 
 			for (int i = 0; i < npe * dim; ++i)
 				b[index[i]] += be[i];
@@ -181,8 +181,8 @@ double micropp<2>::assembly_rhs()
 
 template <>
 template <>
-void micropp<2>::get_elem_mat(double Ae[npe * dim * npe * dim],
-		int ex, int ey) const
+void micropp<2>::get_elem_mat(const double *u,
+		double Ae[npe * dim * npe * dim], int ex, int ey) const
 {
 	INST_START;
 	const int e = glo_elem(ex, ey, 0);
@@ -233,7 +233,7 @@ void micropp<2>::get_elem_mat(double Ae[npe * dim * npe * dim],
 
 
 template <>
-void micropp<2>::assembly_mat()
+void micropp<2>::assembly_mat(const double *u)
 {
 	INST_START;
 
@@ -242,7 +242,7 @@ void micropp<2>::assembly_mat()
 	double Ae[npe * dim * npe * dim];
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
-			get_elem_mat(Ae, ex, ey);
+			get_elem_mat(u, Ae, ex, ey);
 			ell_add_2D(&A, ex, ey, Ae);
 		}
 	}
@@ -251,7 +251,7 @@ void micropp<2>::assembly_mat()
 
 
 template<>
-bool micropp<2>::calc_vars_new()
+bool micropp<2>::calc_vars_new(const double *u)
 {
     return false;
 }

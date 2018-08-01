@@ -115,42 +115,42 @@ class micropp {
 		double get_inv_1(const double *tensor) const;
 		material_t get_material(const int e) const;
 
-		void get_strain(int gp, double strain_gp[nvoi],
-		                int ex, int ey, int ez = 0) const;
+		void get_strain(const double *u, int gp, double strain_gp[nvoi],
+				int ex, int ey, int ez = 0) const;
 
 		void get_elem_nodes(int n[npe], int ex, int ey, int ez = 0) const;
 
 		void get_elem_displ(const double *u, double elem_disp[npe * dim],
-		                    int ex, int ey, int ez = 0) const;
+				int ex, int ey, int ez = 0) const;
 
 		void get_stress(int gp, const double eps[nvoi], double stress_gp[nvoi],
-		                int ex, int ey, int ez = 0) const;
+				int ex, int ey, int ez = 0) const;
 
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
-		void get_elem_rhs(double be[npe * dim],
-		                  int ex, int ey, int ez = 0) const;
+		void get_elem_rhs(const double *u, double be[npe * dim],
+				int ex, int ey, int ez = 0) const;
 
-		void calc_ave_stress(double stress_ave[nvoi]) const;
-		void calc_ave_strain(double strain_ave[nvoi]) const;
+		void calc_ave_stress(const double *u, double stress_ave[nvoi]) const;
+		void calc_ave_strain(const double *u, double strain_ave[nvoi]) const;
 
 		void calc_fields();
 
-		int newton_raphson(double *_err);
+		int newton_raphson(const double strain[nvoi], double *u, double *_err);
 
 		// Specialized
 		template <typename... Rest>
-		void get_elem_mat(double Ae[npe * dim * npe * dim],
-		                  int ex, int ey, Rest...) const;
+		void get_elem_mat(const double *u, double Ae[npe * dim * npe * dim],
+				int ex, int ey, Rest...) const;
 
-		void set_displ_bc(const double *eps);
+		void set_displ_bc(const double strain[nvoi], double *u);
 
-		double assembly_rhs();
-		void assembly_mat();
+		double assembly_rhs(const double *u);
+		void assembly_mat(const double *u);
 
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 
-		bool calc_vars_new();
+		bool calc_vars_new(const double *u);
 
 		void write_vtu(int tstep, int gp_id);
 
