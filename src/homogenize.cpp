@@ -57,7 +57,7 @@ void micropp<tdim>::homogenize()
 	INST_START;
 
 	for (int igp = 0; igp < ngp; ++igp) {
-		gp_t * const gp_ptr = &gp_list[igp];
+		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		inv_max = -1.0e10;
 
@@ -89,7 +89,7 @@ void micropp<tdim>::homogenize()
 			}
 
 			// SIGMA (1 Newton-Raphson)
-			memcpy(gp_ptr->u_k, gp_ptr->u_n, nn * dim * sizeof(double));
+			memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
 			double nr_err;
 			int nr_its = newton_raphson(gp_ptr->macro_strain, gp_ptr->u_k, &nr_err);
@@ -108,7 +108,7 @@ void micropp<tdim>::homogenize()
 			}
 
 			// CTAN (6 Newton-Raphson's)
-			memcpy(u_aux, gp_ptr->u_k, nn * dim * sizeof(double));
+			memcpy(u_aux, gp_ptr->u_k, nndim * sizeof(double));
 			double eps_1[6], sig_0[6], sig_1[6];
 			memcpy(sig_0, gp_ptr->macro_stress, nvoi * sizeof(double));
 

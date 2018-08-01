@@ -107,7 +107,7 @@ double micropp<2>::assembly_rhs(const double *u)
 {
 	INST_START;
 
-	memset(b, 0.0, nn * dim * sizeof(double));
+	memset(b, 0, nndim * sizeof(double));
 
 	double be[dim * npe];
 	int index[dim * npe];
@@ -148,11 +148,11 @@ double micropp<2>::assembly_rhs(const double *u)
 	}
 
 	// Common part
-	for (int i = 0; i < nn * dim; ++i)
+	for (int i = 0; i < nndim; ++i)
 		b[i] = -b[i];
 
 	double norm = 0.0;
-	for (int i = 0; i < nn * dim; ++i)
+	for (int i = 0; i < nndim; ++i)
 		norm += b[i] * b[i];
 	norm = sqrt(norm);
 

@@ -19,12 +19,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cassert>
+#include <cstdlib>
 
+template <int dim>
 class gp_t {
+		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 	public:
-		double macro_strain[6];
-		double macro_stress[6];
-		double macro_ctan[36];
+		double macro_strain[nvoi];
+		double macro_stress[nvoi];
+		double macro_ctan[nvoi * nvoi];
 
 		bool allocated; // flag for memory optimization
 
@@ -33,8 +37,8 @@ class gp_t {
 		double *u_n;
 		double *u_k;
 
-		int nr_its[7]; // measurements
-		double nr_err[7];
+		int nr_its[nvoi + 1]; // measurements
+		double nr_err[nvoi + 1];
 		double inv_max;
 
 		gp_t():

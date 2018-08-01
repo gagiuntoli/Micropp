@@ -65,7 +65,7 @@ class micropp {
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 
 		// Constants only vars
-		const int ngp, nx, ny, nz, nn;
+		const int ngp, nx, ny, nz, nn, nndim;
 		const int nex, ney, nez, nelem;
 		const double lx, ly, lz;
 		const double dx, dy, dz;
@@ -73,7 +73,7 @@ class micropp {
 		const double special_param, inv_tol, wg, ivol;
 
 		const int micro_type, num_int_vars;
-		gp_t *gp_list;
+		gp_t<tdim> *gp_list;
 
 		// Other variables
 		bool output_files_header;

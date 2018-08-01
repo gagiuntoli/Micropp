@@ -29,6 +29,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nz((tdim == 3) ? size[2] : 1),
 
 	nn(nx * ny * nz),
+	nndim(nn * dim),
+
 	nex(nx - 1), ney(ny - 1),
 	nez((tdim == 3) ? (nz - 1) : 1),
 
@@ -46,15 +48,15 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
-	gp_list = new gp_t[ngp]();
+	gp_list = new gp_t<tdim>[ngp]();
 	for (int gp = 0; gp < ngp; gp++) {
-		gp_list[gp].u_n = (double *) calloc(nn * dim, sizeof(double));
-		gp_list[gp].u_k = (double *) malloc(nn * dim * sizeof(double));
+		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
+		gp_list[gp].u_k = (double *) malloc(nndim * sizeof(double));
 	}
 
-	b = (double *) malloc(nn * dim * sizeof(double));
-	du = (double *) malloc(nn * dim * sizeof(double));
-	u_aux = (double *) malloc(nn * dim * sizeof(double));
+	b = (double *) malloc(nndim * sizeof(double));
+	du = (double *) malloc(nndim * sizeof(double));
+	u_aux = (double *) malloc(nndim * sizeof(double));
 
 	elem_type = (int *) malloc(nelem * sizeof(int));
 	elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
