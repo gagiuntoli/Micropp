@@ -42,15 +42,15 @@ void micropp<tdim>::output(int time_step, int gp_id)
 		vars_new = gp_list[gp_id].int_vars_k;
 	}
 
-	u = gp_list[gp_id].u_k;
+	double *u = gp_list[gp_id].u_k;
 
-	calc_fields();
-	write_vtu(time_step, gp_id);
+	calc_fields(u);
+	write_vtu(u, time_step, gp_id);
 }
 
 
 template <int tdim>
-void micropp<tdim>::write_vtu(int time_step, int gp_id)
+void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
@@ -110,7 +110,7 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 	file << "\n</DataArray>" << endl;
 	file << "</Cells>" << endl;
 
-	file << "<PointData Vectors=\"displ,b\" >>" << endl;	// Vectors inside is a filter we should not use this here
+	file << "<PointData Vectors=\"displ\" >>" << endl;	// Vectors inside is a filter we should not use this here
 	file << "<DataArray type=\"Float64\" Name=\"displ\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
 	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
@@ -119,13 +119,7 @@ void micropp<tdim>::write_vtu(int time_step, int gp_id)
 	}
 	file << "</DataArray>" << endl;
 
-	file << "<DataArray type=\"Float64\" Name=\"b\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
-	for (int n = 0; n < nn; ++n) {
-		for (int d = 0; d < MAX_DIM; ++d)
-			file << (dim == 2 && d == 2 ? 0.0 : b[n * dim + d]) << " ";
- 		file << endl;
-	}
-	file << "</DataArray>" << endl;
+	//  Deleted here
 	file << "</PointData>" << endl;
 
 	file << "<CellData>" << endl;
@@ -192,7 +186,8 @@ void micropp<tdim>::write_info_files()
 		file << "# gp_id : ";
 		for (int igp = 0 ; igp < ngp; ++igp)
 			file << igp << " ";
-		file << "\n# nl_flag [1] # inv_max [2] # inv_tol [3]" << endl << "# nr_its  [4] # nr_tol  [5]" << endl;
+		file << "\n# nl_flag [1] # inv_max [2] # inv_tol [3]\n"
+		     << "# nr_its  [4] # nr_tol  [5]" << endl;
 		file.close();
 
 		file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
@@ -231,11 +226,11 @@ void micropp<tdim>::write_info_files()
 
 	file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
 	for (int igp = 0 ; igp < ngp; ++igp) {
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < nvoi; ++i)
 			file << setw(14) << gp_list[igp].macro_strain[i] << "\t";
-		for (int i = 0; i < 6; ++i)
+		for (int i = 0; i < nvoi; ++i)
 			file << setw(14) << gp_list[igp].macro_stress[i] << "\t";
-		for (int i = 0; i < 36; ++i)
+		for (int i = 0; i < nvoi * nvoi; ++i)
 			file << setw(14) << gp_list[igp].macro_ctan[i] << "\t";
 		file << " | ";
 	}
@@ -244,11 +239,13 @@ void micropp<tdim>::write_info_files()
 
 	file.open("micropp_int_vars_n.dat", std::ios_base::app);
 	for (int igp = 0 ; igp < ngp; ++igp) {
-		for (int i = 0; i < num_int_vars; ++i)
+		printf("igp = %d\n", igp);
+		for (int i = 0; i < num_int_vars; ++i) {
 			if (gp_list[igp].allocated)
 				file << setw(14) << gp_list[igp].int_vars_n[i] << " ";
 			else
 				file << setw(14) << 0.0 << " ";
+		}
 		file << "\t|\t";
 	}
 	file << endl;

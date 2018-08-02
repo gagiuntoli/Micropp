@@ -427,7 +427,7 @@ void micropp<tdim>::calc_ave_strain(const double *u,
 
 
 template<int tdim>
-void micropp<tdim>::calc_fields()
+void micropp<tdim>::calc_fields(const double *u)
 {
 	for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
 		for (int ey = 0; ey < ney; ++ey) {

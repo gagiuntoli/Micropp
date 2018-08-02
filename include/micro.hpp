@@ -133,7 +133,7 @@ class micropp {
 		void calc_ave_stress(const double *u, double stress_ave[nvoi]) const;
 		void calc_ave_strain(const double *u, double strain_ave[nvoi]) const;
 
-		void calc_fields();
+		void calc_fields(const double *u);
 
 		int newton_raphson(const double strain[nvoi], double *u, double *_err);
 
@@ -151,7 +151,7 @@ class micropp {
 
 		bool calc_vars_new(const double *u);
 
-		void write_vtu(int tstep, int gp_id);
+		void write_vtu(const double *u, int tstep, int gp_id);
 
 		// Functions Only for 3D
 
