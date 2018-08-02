@@ -50,8 +50,8 @@ int main (int argc, char *argv[])
 	double micro_params[5] = { 1., 1., 1., .5, 0. };
 
 	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.25, 1.0e2, 2.0e5, 1);
-	mat_params[1].set(1.0e6, 0.25, 1.0e2, 2.0e5, 0);
+	mat_params[0].set(1.0e6, 0.25, 1.0e5, 2.0e5, 1);
+	mat_params[1].set(1.0e6, 0.25, 1.0e5, 2.0e5, 0);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 
@@ -62,9 +62,9 @@ int main (int argc, char *argv[])
 
 		cout << "time step = " << t << endl;
 
-		if (t < 20)
+		if (t < 80)
 			eps[dir] += D_EPS;
-		else if (t < 40)
+		else if (t < 160)
 			eps[dir] -= D_EPS;
 		else
 			eps[dir] += D_EPS;
