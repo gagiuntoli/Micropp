@@ -239,7 +239,6 @@ void micropp<tdim>::write_info_files()
 
 	file.open("micropp_int_vars_n.dat", std::ios_base::app);
 	for (int igp = 0 ; igp < ngp; ++igp) {
-		printf("igp = %d\n", igp);
 		for (int i = 0; i < num_int_vars; ++i) {
 			if (gp_list[igp].allocated)
 				file << setw(14) << gp_list[igp].int_vars_n[i] << " ";

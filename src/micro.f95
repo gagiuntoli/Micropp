@@ -29,8 +29,10 @@ module libmicropp
      private
      integer(8) :: ptr ! pointer
    contains
-     procedure :: print_info, set_macro_strain, homogenize,&
-          get_macro_stress, update_vars, write_info_files, output
+     procedure :: set_macro_strain, homogenize,&
+          get_macro_stress, get_macro_ctan, &
+          update_vars, write_info_files, output, &
+          print_info
   end type micropp3
 
   interface micropp3
@@ -77,6 +79,13 @@ contains
     real(8), intent(in), dimension(*) :: macro_stress
     call get_macro_stress3(this%ptr, gp_id, macro_stress)
   end subroutine get_macro_stress
+
+  subroutine get_macro_ctan(this, gp_id, macro_ctan)
+    class(micropp3) :: this
+    integer, intent(in) :: gp_id
+    real(8), intent(in), dimension(*) :: macro_ctan
+    call get_macro_ctan3(this%ptr, gp_id, macro_ctan)
+  end subroutine get_macro_ctan
 
   subroutine update_vars(this)
     class(micropp3) :: this
