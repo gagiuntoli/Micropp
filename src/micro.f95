@@ -21,7 +21,8 @@ module libmicropp
   implicit none
 
   private :: new_micropp3, set_macro_strain, homogenize, &
-       get_macro_stress, update_vars, write_info_files, output
+       get_macro_stress, get_macro_ctan, update_vars, &
+       get_nl_flag, write_info_files, output
 
   public :: micropp3, free
 
@@ -29,10 +30,9 @@ module libmicropp
      private
      integer(8) :: ptr ! pointer
    contains
-     procedure :: set_macro_strain, homogenize,&
-          get_macro_stress, get_macro_ctan, &
-          update_vars, write_info_files, output, &
-          print_info
+     procedure :: set_macro_strain, homogenize, &
+          get_macro_stress, get_macro_ctan, update_vars, &
+          get_nl_flag, write_info_files, output, print_info
   end type micropp3
 
   interface micropp3
@@ -43,6 +43,10 @@ module libmicropp
   external init3
 
 contains
+
+  !------------------------------------------------------------
+  ! Constructors
+
   function new_micropp3(ngp, size, micro_type, micro_params, params)
     implicit none
     type(micropp3) :: new_micropp3
@@ -60,6 +64,9 @@ contains
     class(micropp3) :: this
     call free3(this%ptr)
   end subroutine free
+
+  !------------------------------------------------------------
+  ! Main Calculation
 
   subroutine set_macro_strain(this, gp_id, macro_strain)
     class(micropp3), intent(inout) :: this
@@ -91,6 +98,17 @@ contains
     class(micropp3) :: this
     call update_vars3(this%ptr)
   end subroutine update_vars
+
+  !------------------------------------------------------------
+  ! Output
+
+  subroutine get_nl_flag(this, gp_id, nl_flag)
+    implicit none
+    class(micropp3), intent(inout) :: this
+    integer, intent(in) :: gp_id
+    integer, intent(out) :: nl_flag
+    call get_nl_flag3(this%ptr, gp_id, nl_flag)
+  end subroutine
 
   subroutine write_info_files(this)
     class(micropp3) :: this

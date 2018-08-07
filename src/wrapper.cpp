@@ -42,9 +42,9 @@ extern "C" {
 		delete (*in);
 	}
 
-	int get_nl_flag3_(const micropp<3> **self,int *gp_id)
+	void get_nl_flag3_(const micropp<3> **self, int *gp_id, int *nl_flag)
 	{
-		return (*self)->get_nl_flag(*gp_id);
+		(*nl_flag) = (*self)->get_nl_flag(*gp_id);
 	}
 
 	void set_macro_strain3_(micropp<3> **self, const int *gp_id,

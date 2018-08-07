@@ -31,7 +31,9 @@ program test3d_3
   integer :: argc, t
   character(len=32) :: arg
   integer :: sizes(3), time_steps
+  integer :: nl_flag
 
+  integer, parameter :: gp_id = 0
   integer, parameter :: micro_type = 1
   real(8), parameter :: d_eps = 0.01
   integer, parameter :: dir = 3;
@@ -92,8 +94,10 @@ program test3d_3
      call micro%get_macro_stress(0, sig)
 
      call micro%update_vars()
-     call micro%write_info_files();
+     call micro%write_info_files()
+     call micro%get_nl_flag(gp_id, nl_flag)
 
+     write(*,'(A,2I5)') "nl = ", nl_flag
      write(*,'(A,F12.2)') "eps = ", eps(dir)
      write(*,'(A)', advance="no") 'sig = '
      write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)

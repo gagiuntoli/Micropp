@@ -27,5 +27,6 @@ extract_data.py
 compile_commands.json
 scripts/output*
 
-#*#
+\#*
+.#*
 *.swp
