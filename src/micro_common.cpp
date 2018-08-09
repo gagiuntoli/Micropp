@@ -301,8 +301,8 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
-		double elem_disp[npe * dim],
-		int ex, int ey, int ez) const
+								   double elem_disp[npe * dim],
+								   int ex, int ey, int ez) const
 {
 	int n[npe] ;
 	get_elem_nodes(n, ex, ey, ez);
@@ -315,7 +315,7 @@ void micropp<tdim>::get_elem_displ(const double *u,
 
 template <int tdim>
 void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
-		int ex, int ey, int ez) const
+							   int ex, int ey, int ez) const
 {
 	double elem_disp[npe * dim];
 	get_elem_displ(u, elem_disp, ex, ey, ez);
@@ -341,7 +341,8 @@ void micropp<tdim>::print_info() const
 
 template <int tdim>
 void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
-		double stress_gp[nvoi], int ex, int ey, int ez) const
+							   double stress_gp[nvoi],
+							   int ex, int ey, int ez) const
 {
 	const int e = glo_elem(ex, ey, ez);
 	const material_t material = get_material(e);
@@ -364,7 +365,7 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 
 template <int tdim>
 void micropp<tdim>::calc_ave_stress(const double *u,
-		double stress_ave[nvoi]) const
+									double stress_ave[nvoi]) const
 {
 	memset(stress_ave, 0, nvoi * sizeof(double));
 

@@ -223,7 +223,8 @@ double micropp<3>::assembly_rhs(const double *u)
 template <>
 template <>
 void micropp<3>::get_elem_mat(const double *u,
-		double Ae[npe * dim * npe * dim], int ex, int ey, int ez) const
+							  double Ae[npe * dim * npe * dim],
+							  int ex, int ey, int ez) const
 {
 	INST_START;
 	const int e = glo_elem(ex, ey, ez);

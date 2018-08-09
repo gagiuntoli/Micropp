@@ -26,7 +26,8 @@
 #include "micro.hpp"
 
 template <int tdim>
-void micropp<tdim>::set_macro_strain(const int gp_id, const double *const macro_strain)
+void micropp<tdim>::set_macro_strain(const int gp_id,
+									 const double *macro_strain)
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
@@ -35,7 +36,8 @@ void micropp<tdim>::set_macro_strain(const int gp_id, const double *const macro_
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_stress(const int gp_id, double *macro_stress) const
+void micropp<tdim>::get_macro_stress(const int gp_id,
+									 double *macro_stress) const
 {
 	assert(gp_id < ngp);
 	assert(ngp > 0);
@@ -92,7 +94,8 @@ void micropp<tdim>::homogenize()
 			memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
 			double nr_err;
-			int nr_its = newton_raphson(gp_ptr->macro_strain, gp_ptr->u_k, &nr_err);
+			int nr_its = newton_raphson(gp_ptr->macro_strain,
+										gp_ptr->u_k, &nr_err);
 			gp_ptr->nr_its[0] = nr_its;
 			gp_ptr->nr_err[0] = nr_err;
 
@@ -103,7 +106,8 @@ void micropp<tdim>::homogenize()
 			if (nl_flag) {
 				if (!gp_ptr->allocated) {
 					gp_ptr->allocate(num_int_vars);
-					memcpy(gp_ptr->int_vars_k, vars_new, num_int_vars * sizeof(double));
+					memcpy(gp_ptr->int_vars_k, vars_new,
+						   num_int_vars * sizeof(double));
 				}
 			}
 
@@ -124,7 +128,8 @@ void micropp<tdim>::homogenize()
 				calc_ave_stress(u_aux, sig_1);
 
 				for (int v = 0; v < nvoi; ++v)
-					gp_ptr->macro_ctan[v * nvoi + i] = (sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
+					gp_ptr->macro_ctan[v * nvoi + i] =
+						(sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
 
 			}
 		}
