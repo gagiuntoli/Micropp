@@ -295,39 +295,5 @@ void micropp<3>::assembly_mat(const double *u)
 }
 
 
-template<>
-bool micropp<3>::calc_vars_new(const double *u)
-{
-	INST_START;
-
-    bool nl_flag = false;
-
-	for (int ez = 0; ez < nez; ++ez) {
-		for (int ey = 0; ey < ney; ++ey) {
-			for (int ex = 0; ex < nex; ++ex){
-
-				const int e = glo_elem(ex, ey, ez);
-				const material_t material = get_material(e);
-
-				for (int gp = 0; gp < npe; ++gp) {
-
-					const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
-					double alpha_old = vars_old[intvar_ix(e, gp, 6)];
-					double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
-					double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
-					double eps[nvoi];
-					get_strain(u, gp, eps, ex, ey, ez);
-
-					nl_flag |= plastic_evolute(
-							&material, eps, eps_p_old, alpha_old, 
-							eps_p_new, alpha_new);
-				}
-			}
-		}
-	}
-
-	return nl_flag;
-}
-
 // Explicit instantiation
 template class micropp<3>;

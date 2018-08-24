@@ -17,7 +17,7 @@
 
 module libmicropp
   use libmaterial
-  
+
   implicit none
 
   private :: new_micropp3, set_macro_strain, homogenize, &

@@ -54,6 +54,7 @@ int main (int argc, char *argv[])
 	mat_params[1].set(3.0e7, 0.25, 1.0e5, 2.0e5, 0);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
+	micro.print_info();
 
 	double sig[6], ctan[36];
 	double eps[6] = { 0. };

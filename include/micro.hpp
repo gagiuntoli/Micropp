@@ -156,10 +156,9 @@ class micropp {
 
 		// Functions Only for 3D
 
-		void plastic_get_stress(
-			const material_t *material, const double eps[6],
-			const double eps_p_old[6], double alpha_old,
-			double stress[6]) const;
+		void plastic_get_stress(const material_t *material, const double eps[6],
+								const double eps_p_old[6], double alpha_old,
+								double stress[6]) const;
 
      	void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
 

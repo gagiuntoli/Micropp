@@ -231,10 +231,16 @@ void micropp<2>::assembly_mat(const double *u)
 }
 
 
-template<>
-bool micropp<2>::calc_vars_new(const double *u)
+template <>
+bool micropp<2>::plastic_law(const material_t *material,
+							 const double eps[6],
+							 const double eps_p_old[6],
+							 double alpha_old,
+							 double *_dl,
+							 double _normal[6],
+							 double _s_trial[6]) const
 {
-    return false;
+	return false;
 }
 
 
@@ -244,6 +250,18 @@ void micropp<2>::plastic_get_stress(
 		const double eps_p_old[6], double alpha_old,
 		double stress[6]) const
 {
+}
+
+
+template <>
+bool micropp<2>::plastic_evolute(const material_t *material,
+								 const double eps[6],
+								 const double eps_p_old[6],
+								 double alpha_old, 
+								 double *eps_p_new,
+								 double *alpha_new) const
+{
+	return false;
 }
 
 // Explicit instantiation

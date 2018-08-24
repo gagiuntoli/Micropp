@@ -71,11 +71,12 @@ program test3d_3
   call set(mat_params(2), 1.0e6, 0.3, 1.0e4, 0.0e-1, 0)
 
   micro = micropp3(1, sizes, micro_type, micro_params, mat_params)
+  call micro%print_info()
 
   eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
   sig = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
   do t = 0, time_steps - 1
-     write (*,*) "time step = ", t
+     write (*,'(A,2I5)') "time step = ", t
      if (t < 30) then
         eps(dir) = eps(dir) + d_eps;
      else if (t < 80) then

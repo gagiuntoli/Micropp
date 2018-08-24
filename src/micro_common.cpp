@@ -23,7 +23,8 @@
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
-		const double _micro_params[5], const material_t *_materials):
+					   const double _micro_params[5],
+					   const material_t *_materials):
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
 	nz((tdim == 3) ? size[2] : 1),
@@ -85,16 +86,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int i = 0; i < nParams; i++)
 		micro_params[i] = _micro_params[i];
 
-	ofstream file;
-	file.open("micropp_materials.dat");
-	file << scientific;
-	for (int i = 0; i < numMaterials; ++i) {
+	for (int i = 0; i < numMaterials; ++i)
 		material_list[i] = _materials[i];
-
-		file << setw(14)
-		     << material_list[i].E << " " << material_list[i].nu << " "
-		     << material_list[i].Sy << " " << material_list[i].Ka << endl;
-	}
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -111,8 +104,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	calc_ctan_lin();
 
-	file.close();
-
+	ofstream file;
 	file.open("micropp_convergence.dat");
 	file.close();
 	file.open("micropp_eps_sig_ctan.dat");
@@ -224,7 +216,7 @@ material_t micropp<tdim>::get_material(const int e) const
 
 template <int tdim>
 void micropp<tdim>::get_elem_rhs(const double *u, double be[npe * dim],
-		int ex, int ey, int ez) const
+								 int ex, int ey, int ez) const
 {
 	constexpr int npedim = npe * dim;
 	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
@@ -335,7 +327,13 @@ void micropp<tdim>::print_info() const
 {
 	printf("micropp%d\n", dim);
 	printf("ngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
-	printf("l = [%lf, %lf, %lf]; width = %lf\n", lx, ly, lz, special_param);
+	printf("l = [%lf, %lf, %lf]; param = %lf\n", lx, ly, lz, special_param);
+	for (int i = 0; i < numMaterials; ++i) {
+		printf("Type = %d, E = %e, nu = %e, Sy = %e, Ka = %e, plast = %d\n",
+		       material_list[i].type, material_list[i].E, material_list[i].nu,
+		       material_list[i].Sy, material_list[i].Ka,
+		       material_list[i].plasticity);
+	}
 }
 
 
@@ -398,7 +396,7 @@ void micropp<tdim>::calc_ave_stress(const double *u,
 
 template <int tdim>
 void micropp<tdim>::calc_ave_strain(const double *u,
-		double strain_ave[nvoi]) const
+									double strain_ave[nvoi]) const
 {
 	memset(strain_ave, 0, nvoi * sizeof(double));
 
@@ -458,6 +456,41 @@ void micropp<tdim>::calc_fields(const double *u)
 			}
 		}
 	}
+}
+
+
+template<int tdim>
+bool micropp<tdim>::calc_vars_new(const double *u)
+{
+	INST_START;
+
+    bool nl_flag = false;
+
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex){
+
+				const int e = glo_elem(ex, ey, ez);
+				const material_t material = get_material(e);
+
+				for (int gp = 0; gp < npe; ++gp) {
+
+					const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
+					double alpha_old = vars_old[intvar_ix(e, gp, 6)];
+					double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
+					double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
+					double eps[nvoi];
+					get_strain(u, gp, eps, ex, ey, ez);
+
+					nl_flag |= plastic_evolute(
+							&material, eps, eps_p_old, alpha_old,
+							eps_p_new, alpha_new);
+				}
+			}
+		}
+	}
+
+	return nl_flag;
 }
 
 
