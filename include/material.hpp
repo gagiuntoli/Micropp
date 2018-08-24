@@ -45,9 +45,9 @@ struct material_t {
 		Sy = _Sy;
 		type = _type;
 
-		k = E / (3 * (1 - 2 * nu));
-		mu = E / (2 * (1 + nu));
-		lambda = nu * E;
+		k = E / (3. * (1. - 2. * nu));
+		mu = E / (2. * (1. + nu));
+		lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
 
 		if (type == 0) {        // lineal
 			plasticity = false;

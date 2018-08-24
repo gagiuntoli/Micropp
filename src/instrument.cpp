@@ -28,7 +28,7 @@ using namespace std;
 
 atomic<size_t> instrument::instances(0);
 uint64_t instrument::initialTime(0);
-unordered_map<string, timevect> instrument::times;                   // Final register time
+unordered_map<string, timevect> instrument::times; // Final register time
 
 void instrument::initialize()
 {

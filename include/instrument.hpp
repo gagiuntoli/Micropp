@@ -55,9 +55,9 @@ class instrument {
 		const uint64_t start_time_;
 		const string funct_;
 
-		static atomic<size_t> instances;                     // Counter
-		static uint64_t initialTime;                         // Time collection
-		static unordered_map<string, timevect> times;        // Final register time
+		static atomic<size_t> instances;               // Counter
+		static uint64_t initialTime;                   // Time collection
+		static unordered_map<string, timevect> times;  // Final register time
 
 		static inline uint64_t take_time_stamp()
 		{

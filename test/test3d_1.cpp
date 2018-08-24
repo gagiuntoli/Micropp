@@ -89,10 +89,12 @@ int main (int argc, char *argv[])
 			cout << setw(14) << sig[i] << "\t";
 		cout << endl;
 
-		cout << "ctan =\t";
-		for (int i = 0; i < 6; ++i)
-			cout << setw(14) << ctan[i] << "\t";
-		cout << endl;
+		cout << "ctan =\n";
+		for (int i = 0; i < 6; ++i) {
+		  	for (int j = 0; j < 6; ++j)
+				cout << setw(14) << ctan[i * 6 + j] << "\t";
+			cout << endl;
+		}
 
 		cout << endl;
 	}
