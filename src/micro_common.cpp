@@ -50,7 +50,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
 	gp_list = new gp_t<tdim>[ngp]();
-	for (int gp = 0; gp < ngp; gp++) {
+	for (int gp = 0; gp < ngp; ++gp) {
 		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
 		gp_list[gp].u_k = (double *) malloc(nndim * sizeof(double));
 	}
@@ -103,6 +103,9 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
 
 	calc_ctan_lin();
+
+	for (int gp = 0; gp < ngp; ++gp)
+		memcpy(gp_list[gp].macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 
 	ofstream file;
 	file.open("micropp_convergence.dat");
