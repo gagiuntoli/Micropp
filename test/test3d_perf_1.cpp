@@ -58,6 +58,8 @@ int main (int argc, char *argv[])
 
 	double sig[6], ctan[36];
 	double eps[6] = { 0. };
+	int nr_its, sigma_solver_its[NR_MAX_ITS];
+	double nr_err, sigma_solver_err[NR_MAX_ITS];
 
 	for (int t = 0; t < time_steps; ++t) {
 
@@ -74,6 +76,17 @@ int main (int argc, char *argv[])
 		micro.homogenize();
 		micro.get_macro_stress(0, sig);
 		micro.get_macro_ctan(0, ctan);
+		micro.get_sigma_solver_its(0, sigma_solver_its);
+		micro.get_sigma_solver_err(0, sigma_solver_err);
+
+		cout << "SIGMA SOLVER" << endl;
+		for (int i = 0; i < 6; ++i) {
+			cout
+				<< "NR_IT :" << i << setw(14)
+				<< " SOLVER ITS: " << sigma_solver_its[i]
+				<< " SOLVER ERR: " << sigma_solver_err[i] << endl;
+		}
+
 
 		micro.update_vars();
 

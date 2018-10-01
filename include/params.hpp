@@ -19,52 +19,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "micro.hpp"
-
-using namespace std;
-
-
-template <int tdim>
-int micropp<tdim>::newton_raphson(const double strain[nvoi],
-								  double *u, double *_err,
-								  int solver_its[NR_MAX_ITS],
-								  double solver_err[NR_MAX_ITS])
-{
-	INST_START;
-
-	set_displ_bc(strain, u);
-
-	int lits = 0;
-	double lerr = 0.0, cg_err;
-
-	memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
-	memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
-
-	do {
-		lerr = assembly_rhs(u);  // Acts on b
-
-		if (lerr < NR_MAX_TOL)
-			break;
-
-		assembly_mat(u);   // Acts on A
-
-		// in(b) inout
-		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-		solver_its[lits] = cg_its;
-		solver_err[lits] = cg_err;
-
-		for (int i = 0; i < nn * dim; ++i)
-			u[i] += du[i];
-
-		lits++;
-
-	} while (lits < NR_MAX_ITS);
-
-	*_err = lerr;
-	return lits;
-}
-
-
-// Explicit instantiation
-template class micropp<2>;
-template class micropp<3>;
+#define CG_MIN_ERR      1.0e-2
+#define CG_MAX_ITS      2000
+#define NR_MAX_TOL      1.0e-5
+#define NR_MAX_ITS      5

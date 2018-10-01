@@ -36,15 +36,12 @@
 #include "material.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
+#include "params.hpp"
 
 #define MAX_DIM         3
 #define MAX_MATS        10
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
-#define CG_MIN_ERR      1.0e-8
-#define CG_MAX_ITS      2000
-#define NR_MAX_TOL      1.0e-5
-#define NR_MAX_ITS      40
 #define D_EPS_CTAN      1.0e-8
 #define D_EPS_CTAN_AVE  1.0e-8
 
@@ -136,7 +133,9 @@ class micropp {
 
 		void calc_fields(const double *u);
 
-		int newton_raphson(const double strain[nvoi], double *u, double *_err);
+		int newton_raphson(const double strain[nvoi], double *u, double *_err,
+						   int solver_its[NR_MAX_ITS],
+						   double solver_err[NR_MAX_ITS]);
 
 		// Specialized
 		template <typename... Rest>
@@ -201,6 +200,10 @@ class micropp {
 		// common Functions
 
 		int get_nl_flag(const int gp_id) const;
+		void get_sigma_solver_its(int gp_id,
+								  int sigma_solver_err[NR_MAX_ITS]) const;
+		void get_sigma_solver_err(int gp_id,
+								  double sigma_solver_err[NR_MAX_ITS]) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
 		void get_macro_stress(const int gp_id, double *macro_stress) const;
 		void get_macro_ctan(const int gp_id, double *macro_ctan) const;

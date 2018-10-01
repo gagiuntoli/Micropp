@@ -31,8 +31,8 @@ void micropp<tdim>::set_macro_strain(const int gp_id,
 {
 	INST_START;
 
+	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	assert(ngp > 0);
 	memcpy(gp_list[gp_id].macro_strain, macro_strain, nvoi * sizeof(double));
 }
 
@@ -43,8 +43,8 @@ void micropp<tdim>::get_macro_stress(const int gp_id,
 {
 	INST_START;
 
+	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	assert(ngp > 0);
 	memcpy(macro_stress, gp_list[gp_id].macro_stress, nvoi * sizeof(double));
 }
 
@@ -54,15 +54,20 @@ void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan) const
 {
 	INST_START;
 
+	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	assert(ngp > 0);
 	memcpy(macro_ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
 }
+
 
 template <int tdim>
 void micropp<tdim>::homogenize()
 {
 	INST_START;
+
+	int nr_its, solver_its[NR_MAX_ITS];
+	double nr_err, solver_err[NR_MAX_ITS];
+	bool nl_flag;
 
 	for (int igp = 0; igp < ngp; ++igp) {
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
@@ -96,18 +101,22 @@ void micropp<tdim>::homogenize()
 				vars_new = gp_ptr->int_vars_k;
 			}
 
-			// SIGMA (1 Newton-Raphson)
+			// SIGMA 1 Newton-Raphson
 			memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
-			double nr_err;
-			int nr_its = newton_raphson(gp_ptr->macro_strain,
-										gp_ptr->u_k, &nr_err);
+			nr_its = newton_raphson(gp_ptr->macro_strain, gp_ptr->u_k, &nr_err,
+									solver_its, solver_err);
+
 			gp_ptr->nr_its[0] = nr_its;
 			gp_ptr->nr_err[0] = nr_err;
+			memcpy(gp_ptr->sigma_solver_its, solver_its,
+				   NR_MAX_ITS*sizeof(int));
+			memcpy(gp_ptr->sigma_solver_err, solver_err,
+				   NR_MAX_ITS*sizeof(double));
 
 			calc_ave_stress(gp_ptr->u_k, gp_ptr->macro_stress);
 
-			bool nl_flag = calc_vars_new(gp_ptr->u_k);
+			nl_flag = calc_vars_new(gp_ptr->u_k);
 
 			if (nl_flag) {
 				if (!gp_ptr->allocated) {
@@ -119,9 +128,10 @@ void micropp<tdim>::homogenize()
 
 			if (gp_ptr->allocated) {
 
-				// CTAN (6 Newton-Raphson's)
-				memcpy(u_aux, gp_ptr->u_k, nndim * sizeof(double));
+				// CTAN 3/6 Newton-Raphsons in 2D/3D
 				double eps_1[6], sig_0[6], sig_1[6];
+
+				memcpy(u_aux, gp_ptr->u_k, nndim * sizeof(double));
 				memcpy(sig_0, gp_ptr->macro_stress, nvoi * sizeof(double));
 
 				for (int i = 0; i < nvoi; ++i) {
@@ -129,7 +139,8 @@ void micropp<tdim>::homogenize()
 					memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 					eps_1[i] += D_EPS_CTAN_AVE;
 
-					nr_its = newton_raphson(eps_1, u_aux, &nr_err);
+					nr_its = newton_raphson(eps_1, u_aux, &nr_err,
+											solver_its, solver_err);
 					gp_ptr->nr_its[i + 1] = nr_its;
 					gp_ptr->nr_err[i + 1] = nr_err;
 
@@ -146,6 +157,7 @@ void micropp<tdim>::homogenize()
 	}
 }
 
+
 template <int tdim>
 void micropp<tdim>::update_vars()
 {
@@ -154,6 +166,7 @@ void micropp<tdim>::update_vars()
 	for (int igp = 0; igp < ngp; ++igp)
 		gp_list[igp].update_vars();
 }
+
 
 // Explicit instantiation
 template class micropp<2>;

@@ -22,6 +22,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "params.hpp"
+
 template <int dim>
 class gp_t {
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
@@ -39,6 +41,8 @@ class gp_t {
 
 		int nr_its[nvoi + 1]; // measurements
 		double nr_err[nvoi + 1];
+		int sigma_solver_its[NR_MAX_ITS];
+		double sigma_solver_err[NR_MAX_ITS];
 		double inv_max;
 
 		gp_t():

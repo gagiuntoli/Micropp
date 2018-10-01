@@ -146,19 +146,44 @@ int micropp<tdim>::get_nl_flag(int gp_id) const
 
 
 template <int tdim>
+void micropp<tdim>::get_sigma_solver_its(int gp_id,
+										 int sigma_solver_its[NR_MAX_ITS])
+	const
+{
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+	memcpy(sigma_solver_its, gp_list[gp_id].sigma_solver_its,
+		   NR_MAX_ITS * sizeof(int));
+}
+
+
+template <int tdim>
+void micropp<tdim>::get_sigma_solver_err(int gp_id,
+										double sigma_solver_err[NR_MAX_ITS])
+	const
+{
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+	memcpy(sigma_solver_err, gp_list[gp_id].sigma_solver_err,
+		   NR_MAX_ITS * sizeof(double));
+}
+
+
+template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
 	vars_old = vars_old_aux;
+	int nr_its, solver_its[NR_MAX_ITS];
+	double nr_err, solver_err[NR_MAX_ITS];
+	double sig_1[6];
 
 	for (int i = 0; i < nvoi; ++i) {
 
         double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		double nr_err;
-		newton_raphson(eps_1, u_aux, &nr_err);
+		newton_raphson(eps_1, u_aux, &nr_err, solver_its, solver_err);
 
-		double sig_1[6];
 		calc_ave_stress(u_aux, sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
