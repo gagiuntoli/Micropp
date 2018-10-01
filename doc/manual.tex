@@ -18,13 +18,14 @@
 
 \begin{document}
 
-\title{MicroPP}
+\title{MicroPP: Reference Manual}
 
-\author{\IEEEauthorblockN{Guido Giuntoli\IEEEauthorrefmark{1}\IEEEauthorrefmark{2},
-Miguel Zavalla\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}}
+\author{\IEEEauthorblockN{
+	Guido Giuntoli\IEEEauthorrefmark{1}\IEEEauthorrefmark{2},
+	Jimmy Aguilar\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}}
 \IEEEauthorblockA{\IEEEauthorrefmark{1}Barcelona Supercomputing Center}
 \IEEEauthorblockA{\IEEEauthorrefmark{2}guido.giuntoli@bsc.es}
-\IEEEauthorblockA{\IEEEauthorrefmark{3}miguel.zavalla@bsc.es}}
+\IEEEauthorblockA{\IEEEauthorrefmark{3}jimmy.aguilar@bsc.es}}
 
 \maketitle
 
@@ -37,15 +38,21 @@ Miguel Zavalla\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}}
 
 \hfill August 26, 2015
 
-\subsection{Implementation}
+\section{Implementation}
 
-The Voigth convention used here is the same as in Ref.~\cite{simo}.
+The Voigt convention used here is the same as in Ref.~\cite{simo}.
 \begin{equation}
 \epsilon = \left[\epsilon_{11} \quad \epsilon_{22} \quad \epsilon_{33} \quad \epsilon_{12} \quad \epsilon_{13} \quad \epsilon_{23} \right]^T
 \end{equation}
 
+\section{Geometries}
+
+\section{Material Models}
+
 \subsubsection{Plasticity Model}
+
 MicroPP has a J2 plasticity model with isotropic hardening.
+
 \begin {equation}
 \left\{
 \begin{array}{ll}

@@ -30,6 +30,8 @@ using namespace std;
 template <int tdim>
 void micropp<tdim>::output(int time_step, int gp_id)
 {
+	INST_START;
+
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
 
@@ -63,11 +65,14 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	file.open(fname_vtu);
 
 	file << "<?xml version=\"1.0\"?>\n"
-	     <<	"<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n"
+	     <<	"<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" "
+	     << "byte_order=\"LittleEndian\">\n"
 	     << "<UnstructuredGrid>\n"
-	     << "<Piece NumberOfPoints=\"" << nn << "\" NumberOfCells=\"" << nelem << "\">\n"
+	     << "<Piece NumberOfPoints=\"" << nn << "\" NumberOfCells=\""
+	     << nelem << "\">\n"
 	     << "<Points>\n"
-	     << "<DataArray type=\"Float32\" Name=\"Position\" NumberOfComponents=\"3\" format=\"ascii\">" << endl;
+	     << "<DataArray type=\"Float32\" Name=\"Position\" "
+	     << "NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
 	for (int k = 0; k < nz; ++k) {
 		for (int j = 0; j < ny; ++j) {
@@ -81,7 +86,9 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	}
 	file << "</DataArray>\n</Points>\n<Cells>" << endl;
 
-	file << "<DataArray type=\"Int32\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Int32\" Name=\"connectivity\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ex = 0; ex < nex; ++ex) {
@@ -96,22 +103,28 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	file << "</DataArray>" << endl;
 
 	int ce = npe;
-	file << "<DataArray type=\"Int32\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Int32\" Name=\"offsets\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		file << ce << " ";
 		ce += npe;
 	}
 	file << "\n</DataArray>" << endl;
 
-	file << "<DataArray type=\"UInt8\"  Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"UInt8\"  Name=\"types\" NumberOfComponents=\"1\" "
+		<< "format=\"ascii\">" << endl;
 	const int vtk_code = (dim == 2) ? 9 : 12;
 	for (int e = 0; e < nelem; ++e)
 		file << vtk_code << " ";
 	file << "\n</DataArray>" << endl;
 	file << "</Cells>" << endl;
 
-	file << "<PointData Vectors=\"displ\" >>" << endl;	// Vectors inside is a filter we should not use this here
-	file << "<DataArray type=\"Float64\" Name=\"displ\" NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
+	file << "<PointData Vectors=\"displ\" >>" << endl;
+	file
+		<< "<DataArray type=\"Float64\" Name=\"displ\" "
+		<< "NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
 	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
 			file << (dim == 2 && d == 2 ? 0.0 : u[n * dim + d]) << " ";
@@ -123,7 +136,9 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	file << "</PointData>" << endl;
 
 	file << "<CellData>" << endl;
-	file << "<DataArray type=\"Float64\" Name=\"strain\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Float64\" Name=\"strain\" "
+		<< "NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
 			file << elem_strain[e * nvoi + v] << " ";
@@ -131,7 +146,9 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	}
 	file << "</DataArray>";
 
-	file << "<DataArray type=\"Float64\" Name=\"stress\" NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Float64\" Name=\"stress\" "
+		<< "NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
 			file << elem_stress[e * nvoi + v] << " ";
@@ -139,26 +156,33 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	}
 	file << "</DataArray>";
 
-	file << "<DataArray type=\"Int32\" Name=\"elem_type\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Int32\" Name=\"elem_type\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		file << elem_type[e] << " ";
 	}
 	file << "\n</DataArray>" << endl;
 
-	file << "<DataArray type=\"Float64\" Name=\"plasticity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Float64\" Name=\"plasticity\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		double plasticity = 0.;
 		for (int gp = 0; gp < npe; ++gp) {
 			double tmp = 0.0;
 			for (int v = 0; v < nvoi; ++v)
-				tmp += vars_old[intvar_ix(e, gp, v)] * vars_old[intvar_ix(e, gp, v)];
+				tmp += vars_old[intvar_ix(e, gp, v)] *\
+					   vars_old[intvar_ix(e, gp, v)];
 			plasticity += sqrt(tmp);
 		}
 		file << plasticity / npe << " ";
 	}
 	file << "\n</DataArray>" << endl;
 
-	file << "<DataArray type=\"Float64\" Name=\"hardening\" NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	file
+		<< "<DataArray type=\"Float64\" Name=\"hardening\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		double hardening = 0.;
 		for (int gp = 0; gp < npe; ++gp)
@@ -178,6 +202,8 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 template <int tdim>
 void micropp<tdim>::write_info_files()
 {
+	INST_START;
+
 	ofstream file;
 	if (output_files_header == false) {
 		output_files_header = true;
@@ -195,8 +221,10 @@ void micropp<tdim>::write_info_files()
 		for (int igp = 0 ; igp < ngp; ++igp)
 			file << igp << " ";
 		file
-			<< "\n# epsxx [1] # epsyy [2] # epszz[3] # epsxy[4]  # epsxz[5]  # epsyz[6]"
-			<< "\n# sigxx [7] # sigyy [8] # sigzz[9] # sigxy[10] # sigxz[11] # sigyz[12]" << endl;
+			<< "\n# epsxx [1] # epsyy [2] # epszz[3]"
+			<< "# epsxy[4]  # epsxz[5]  # epsyz[6]"
+			<< "\n# sigxx [7] # sigyy [8] # sigzz[9]"
+			<< "# sigxy[10] # sigxz[11] # sigyz[12]" << endl;
 		file.close();
 
 		file.open("micropp_int_vars_n.dat", std::ios_base::app);
@@ -205,7 +233,9 @@ void micropp<tdim>::write_info_files()
 			file << igp << " ";
 
 		file
-			<< "\n# eps_p_xx [1]  # eps_p_yy [2]  # eps_p_zz[3] # eps_p_xy[4]  # eps_p_xz[5]  # eps_p_yz[6]  # alpha[7]"  << endl;
+			<< "\n# eps_p_xx [1]  # eps_p_yy [2]  # eps_p_zz[3] "
+			<< "# eps_p_xy[4]  # eps_p_xz[5]  # eps_p_yz[6]"
+			<< "# alpha[7]"  << endl;
 
 		file.close();
 	}

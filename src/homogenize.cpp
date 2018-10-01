@@ -29,6 +29,8 @@ template <int tdim>
 void micropp<tdim>::set_macro_strain(const int gp_id,
 									 const double *macro_strain)
 {
+	INST_START;
+
 	assert(gp_id < ngp);
 	assert(ngp > 0);
 	memcpy(gp_list[gp_id].macro_strain, macro_strain, nvoi * sizeof(double));
@@ -39,6 +41,8 @@ template <int tdim>
 void micropp<tdim>::get_macro_stress(const int gp_id,
 									 double *macro_stress) const
 {
+	INST_START;
+
 	assert(gp_id < ngp);
 	assert(ngp > 0);
 	memcpy(macro_stress, gp_list[gp_id].macro_stress, nvoi * sizeof(double));
@@ -48,6 +52,8 @@ void micropp<tdim>::get_macro_stress(const int gp_id,
 template <int tdim>
 void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan) const
 {
+	INST_START;
+
 	assert(gp_id < ngp);
 	assert(ngp > 0);
 	memcpy(macro_ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
@@ -143,6 +149,8 @@ void micropp<tdim>::homogenize()
 template <int tdim>
 void micropp<tdim>::update_vars()
 {
+	INST_START;
+
 	for (int igp = 0; igp < ngp; ++igp)
 		gp_list[igp].update_vars();
 }
