@@ -133,7 +133,8 @@ class micropp {
 
 		void calc_fields(const double *u);
 
-		int newton_raphson(const double strain[nvoi], double *u, double *_err,
+		int newton_raphson(const double strain[nvoi], double *u,
+						   double err[NR_MAX_ITS],
 						   int solver_its[NR_MAX_ITS],
 						   double solver_err[NR_MAX_ITS]);
 
@@ -204,6 +205,9 @@ class micropp {
 								  int sigma_solver_err[NR_MAX_ITS]) const;
 		void get_sigma_solver_err(int gp_id,
 								  double sigma_solver_err[NR_MAX_ITS]) const;
+		void get_sigma_newton_err(int gp_id,
+							  double sigma_nr_err[NR_MAX_ITS]) const;
+		int get_sigma_newton_its(int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
 		void get_macro_stress(const int gp_id, double *macro_stress) const;
 		void get_macro_ctan(const int gp_id, double *macro_ctan) const;

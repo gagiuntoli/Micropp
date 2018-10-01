@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-4
+#define D_EPS 5.0e-6
 
 int main (int argc, char *argv[])
 {
@@ -58,8 +58,8 @@ int main (int argc, char *argv[])
 
 	double sig[6], ctan[36];
 	double eps[6] = { 0. };
-	int nr_its, sigma_solver_its[NR_MAX_ITS];
-	double nr_err, sigma_solver_err[NR_MAX_ITS];
+	int sigma_newton_its, sigma_solver_its[NR_MAX_ITS];
+	double sigma_newton_err[NR_MAX_ITS], sigma_solver_err[NR_MAX_ITS];
 
 	for (int t = 0; t < time_steps; ++t) {
 
@@ -78,13 +78,16 @@ int main (int argc, char *argv[])
 		micro.get_macro_ctan(0, ctan);
 		micro.get_sigma_solver_its(0, sigma_solver_its);
 		micro.get_sigma_solver_err(0, sigma_solver_err);
+		sigma_newton_its = micro.get_sigma_newton_its(0);
+		micro.get_sigma_newton_err(0, sigma_newton_err);
 
-		cout << "SIGMA SOLVER" << endl;
-		for (int i = 0; i < 6; ++i) {
+		cout << "SIGMA SOLVER - NR ITS :\t " << sigma_newton_its << endl;
+		for (int i = 0; i < NR_MAX_ITS; ++i) {
 			cout
-				<< "NR_IT :" << i << setw(14)
-				<< " SOLVER ITS: " << sigma_solver_its[i]
-				<< " SOLVER ERR: " << sigma_solver_err[i] << endl;
+				<< "NR_IT :\t" << i << scientific
+				<< "\tSOLVER ITS:\t" << sigma_solver_its[i]
+				<< "\tSOLVER ERR:\t" << sigma_solver_err[i]
+				<< "\tNEWTON ERR:\t" << sigma_newton_err[i] << endl;
 		}
 
 

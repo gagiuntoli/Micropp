@@ -21,5 +21,5 @@
 
 #define CG_MIN_ERR      1.0e-2
 #define CG_MAX_ITS      2000
-#define NR_MAX_TOL      1.0e-5
+#define NR_MAX_TOL      1.0e-2
 #define NR_MAX_ITS      5
