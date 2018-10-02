@@ -42,9 +42,9 @@ class gp_t {
 		int nr_its[nvoi + 1]; // measurements
 		double nr_err[nvoi + 1];
 		int sigma_solver_its[NR_MAX_ITS];
-		int sigma_nr_its;
+		int sigma_newton_its;
 		double sigma_solver_err[NR_MAX_ITS];
-		double sigma_nr_err[NR_MAX_ITS];
+		double sigma_newton_err[NR_MAX_ITS];
 		double inv_max;
 
 		gp_t():

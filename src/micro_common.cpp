@@ -171,11 +171,11 @@ void micropp<tdim>::get_sigma_solver_err(int gp_id,
 
 template <int tdim>
 void micropp<tdim>::get_sigma_newton_err(int gp_id,
-									 double sigma_nr_err[NR_MAX_ITS]) const
+									 double sigma_newton_err[NR_MAX_ITS]) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	memcpy(sigma_nr_err, gp_list[gp_id].sigma_nr_err,
+	memcpy(sigma_newton_err, gp_list[gp_id].sigma_newton_err,
 		   NR_MAX_ITS * sizeof(double));
 }
 
@@ -185,7 +185,7 @@ int micropp<tdim>::get_sigma_newton_its(int gp_id) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	return gp_list[gp_id].sigma_nr_its;
+	return gp_list[gp_id].sigma_newton_its;
 }
 
 
