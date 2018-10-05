@@ -1,0 +1,84 @@
+\section{Coding Style}
+
+The coding style should be follow in all .cpp, .hpp, and .f95 files that are present in the code.
+
+\subsection{License}
+
+All source files should have the GPL License header with the corresponding contributors.
+
+\begin{lstlisting}
+
+/*
+ *  This source code is part of MicroPP: a finite element library
+ *  to solve microstructural problems for composite materials.
+ *
+ *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+\end{lstlisting}
+
+\subsection{Functions Definitions}
+
+Most of the functions in the code are templates. This was done to separate 2D from 3D cases and to produce a more readable code. Functions' arguments can have the \verb const at the beginning but we don't we try to not use it in does cases where it is obvious that the two arguments are not going to be modified. In some cases it it useful if it is applied to pointers like {\verb#int const * a#}.
+
+\begin{lstlisting}
+
+template <int tdim>
+int micropp<tdim>::calc_average(const int gp,
+                                 double * array
+				 int n)
+{
+	INST_START; /* This is to instrument this function */
+
+	int average = gp + 2.3 / 9.;
+	for(int i = 0; i < n / 2; ++i)
+		array[i] = average;
+	return average;
+}
+\end{lstlisting}
+
+\subsection{Control Flow Statements}
+
+
+The \verb if  statements should be written:
+
+\begin{lstlisting}
+
+if(a == 3 && b < 4.) {
+    calc_average(a, array, n);
+} else if(k % 3 = 2) {
+    calc_average(c, array, n);
+}
+
+if(calc_average(c, array, n))
+    exit(0);
+
+\end{lstlisting}
+
+The \verb for  statements should be written:
+
+\begin{lstlisting}
+
+for(int i = 0; i < n; ++i) {
+    a += array[i] + 9.4;
+}
+
+for(int i = 0; i < n; ++i)
+    for(int j = 0; j < n; ++j)
+        array[i * n + j] = A[i][j];
+
+\end{lstlisting}

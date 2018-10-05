@@ -1,4 +1,4 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[conference, onecolumn]{IEEEtran}
 % \usepackage[pdftex]{graphicx}
 % \usepackage[dvips]{graphicx}
 %\usepackage{amsmath}
@@ -10,9 +10,38 @@
 %\usepackage{stfloats}
 %\usepackage{url}
 \usepackage{amsmath}
-\usepackage{amsfonts}
 \usepackage{amssymb}
+\RequirePackage{amsfonts}
+\RequirePackage{standalone}
+\RequirePackage{tikz}
+\usetikzlibrary{matrix,backgrounds,calc,shapes,arrows,arrows.meta,fit,positioning}                                                                
+\usetikzlibrary{chains,shapes.multipart}                                                                                                          
+\usetikzlibrary{shapes,calc} 
 
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+language=C,
+aboveskip=3mm,
+belowskip=3mm,
+showstringspaces=false,
+basicstyle={\small\ttfamily},
+numbers=none,
+numberstyle=\tiny\color{gray},
+keywordstyle=\color{blue},
+commentstyle=\color{dkgreen},
+stringstyle=\color{mauve},
+breaklines=true,
+breakatwhitespace=true,
+tabsize=4
+}
+
+%columns=flexible,
 \hyphenation{op-tical net-works semi-conduc-tor}
 
 
@@ -38,7 +67,16 @@
 
 \hfill August 26, 2015
 
+\input{governing_equations_and_fe.tex}
+
 \section{Implementation}
+
+\begin{figure}[!hhh]
+	\centering
+	\resizebox{5cm}{!}{\input{figures/work_basis.tikz}}
+	\vspace{0.5cm}
+	\caption{\label{fig:comp_scheme}}
+\end{figure}
 
 The Voigt convention used here is the same as in Ref.~\cite{simo}.
 \begin{equation}
@@ -149,6 +187,7 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \end{algorithmic}
 \end{algorithm}
 
+\input{coding_style.tex}
 
 \section{Conclusion}
 The conclusion goes here.
