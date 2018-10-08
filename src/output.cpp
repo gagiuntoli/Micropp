@@ -209,11 +209,9 @@ void micropp<tdim>::write_info_files()
 		output_files_header = true;
 
 		file.open("micropp_convergence.dat", std::ios_base::app);
-		file << "# gp_id : ";
-		for (int igp = 0 ; igp < ngp; ++igp)
-			file << igp << " ";
-		file << "\n# nl_flag [1] # inv_max [2] # inv_tol [3]\n"
-		     << "# nr_its  [4] # nr_tol  [5]" << endl;
+		file
+			<< "# gp_id    non-linear   sigma-newton-its  sigma-newton-tol"
+		    << endl;
 		file.close();
 
 		file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
@@ -239,20 +237,6 @@ void micropp<tdim>::write_info_files()
 
 		file.close();
 	}
-
-	file.open("micropp_convergence.dat", std::ios_base::app);
-	for (int igp = 0 ; igp < ngp; ++igp) {
-		file << scientific;
-		file << setw(3) << ((gp_list[igp].allocated) ? 1 : 0) << " ";
-		file << setw(14) << gp_list[igp].inv_max << " ";
-		for (int i = 0; i < (1 + nvoi); ++i) {
-			file << setw(14) << gp_list[igp].nr_its[i] << " ";
-			file << setw(14) << gp_list[igp].nr_err[i] << " ";
-		}
-		file << " | ";
-	}
-	file << endl;
-	file.close();
 
 	file.open("micropp_eps_sig_ctan.dat", std::ios_base::app);
 	for (int igp = 0 ; igp < ngp; ++igp) {
@@ -282,6 +266,26 @@ void micropp<tdim>::write_info_files()
 }
 
 
-// Explicit instantiation
+template <int tdim>
+void micropp<tdim>::write_convergence_file(int tstep, int rank)
+{
+	ofstream file;
+	file.open("micropp_convergence_" + std::to_string(rank) + ".dat",
+			  std::ios_base::app);
+    file << "Time Step : " << setw(3) << tstep << endl;
+	for (int gp = 0 ; gp < ngp; ++gp) {
+		file
+			<< gp << "\t"
+			<< ((gp_list[gp].allocated) ? 1 : 0) << "\t"
+			<< gp_list[gp].sigma_newton_its << "\t"
+			<< setw(14) << scientific
+			<< gp_list[gp].sigma_newton_err[gp_list[gp].sigma_newton_its]
+			<< endl;
+	}
+	file << endl;
+	file.close();
+}
+
+
 template class micropp<2>;
 template class micropp<3>;

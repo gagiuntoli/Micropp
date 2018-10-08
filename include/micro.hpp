@@ -56,12 +56,10 @@ template <int tdim>
 class micropp {
 
 	private:
-		// Variables (static constexpr)
 		static constexpr int dim = tdim;                  // 2, 3
 		static constexpr int npe = mypow(2, dim);         // 4, 8
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 
-		// Constants only vars
 		const int ngp, nx, ny, nz, nn, nndim;
 		const int nex, ney, nez, nelem;
 		const double lx, ly, lz;
@@ -72,7 +70,6 @@ class micropp {
 		const int micro_type, num_int_vars;
 		gp_t<tdim> *gp_list;
 
-		// Other variables
 		bool output_files_header;
 
 		double micro_params[5];
@@ -105,7 +102,6 @@ class micropp {
 		                          { -CONSTXG, +CONSTXG, +CONSTXG } };
 
 	protected:
-		// Common
 		void calc_ctan_lin();
 		bool is_linear(const double *macro_strain);
 		double get_inv_1(const double *tensor) const;
@@ -138,7 +134,6 @@ class micropp {
 						   int solver_its[NR_MAX_ITS],
 						   double solver_err[NR_MAX_ITS]);
 
-		// Specialized
 		template <typename... Rest>
 		void get_elem_mat(const double *u, double Ae[npe * dim * npe * dim],
 						  int ex, int ey, Rest...) const;
@@ -153,8 +148,6 @@ class micropp {
 		bool calc_vars_new(const double *u);
 
 		void write_vtu(const double *u, int tstep, int gp_id);
-
-		// Functions Only for 3D
 
 		void plastic_get_stress(const material_t *material, const double eps[6],
 								const double eps_p_old[6], double alpha_old,
@@ -198,8 +191,6 @@ class micropp {
 
 		~micropp();
 
-		// common Functions
-
 		int get_nl_flag(const int gp_id) const;
 		void get_sigma_solver_its(int gp_id,
 								  int sigma_solver_err[NR_MAX_ITS]) const;
@@ -214,8 +205,9 @@ class micropp {
 		void homogenize();
 		void output(int tstep, int gp_id);
 		void write_info_files();
+		void write_convergence_file(int tstep, int rank);
 		void update_vars();
 		void print_info() const;
 };
 
-#endif // MICRO_HPP
+#endif

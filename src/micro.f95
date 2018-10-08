@@ -22,7 +22,8 @@ module libmicropp
 
   private :: new_micropp3, set_macro_strain, homogenize, &
        get_macro_stress, get_macro_ctan, update_vars, &
-       get_nl_flag, write_info_files, output
+       get_nl_flag, write_info_files, &
+       write_convergence_file, output
 
   public :: micropp3, free
 
@@ -32,7 +33,9 @@ module libmicropp
    contains
      procedure :: set_macro_strain, homogenize, &
           get_macro_stress, get_macro_ctan, update_vars, &
-          get_nl_flag, write_info_files, output, print_info
+          get_nl_flag, write_info_files, &
+          write_convergence_file, &
+          output, print_info
   end type micropp3
 
   interface micropp3
@@ -114,6 +117,12 @@ contains
     class(micropp3) :: this
     call write_info_files3(this%ptr)
   end subroutine write_info_files
+
+  subroutine write_convergence_file(this, tstep, rank)
+    class(micropp3) :: this
+    integer, intent(in) :: tstep, rank
+    call write_convergence_file3(this%ptr, tstep, rank)
+  end subroutine write_convergence_file
 
   subroutine print_info(this)
     class(micropp3) :: this
