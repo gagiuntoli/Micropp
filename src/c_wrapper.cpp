@@ -25,7 +25,7 @@
 
 
 #define MAT_NUM 2
-static micropp<3>* micro = NULL;
+static micropp<3>* micro3 = NULL;
 static material_t *materials[MAT_NUM];
 
 
@@ -50,15 +50,35 @@ extern "C" {
 
 	void micropp_C_create3(int ngp, int size[3], int type, double *params)
 	{
-		micro = new micropp<3>(ngp, size, type, params, *materials);
+		micro3 = new micropp<3>(ngp, size, type, params, *materials);
+	}
+
+	void micropp_C_set_strain3(int gp, double strain[6])
+	{
+	   	micro3->set_macro_strain(gp, strain);
+	}
+
+	void micropp_C_get_stress3(int gp, double stress[6])
+	{
+	   	micro3->get_macro_stress(gp, stress);
+	}
+
+	void micropp_C_get_ctan3(int gp, double ctan[36])
+	{
+	   	micro3->get_macro_ctan(gp, ctan);
+	}
+
+	void micropp_C_homogenize()
+	{
+	   	micro3->homogenize();
+	}
+
+	void micropp_C_destroy3()
+	{
+	   	delete micro3;
 	}
 
 	/*
-	   micropp<3> *micropp_C_create3(int ngp, int size[3], int micro_type,
-	   double *micro_params, material_t *materials)
-	   {
-	   return new micropp<3>(ngp, size, micro_type, micro_params, materials);
-	   }
 
 	   void free3_(micropp<3> **in)
 	   {
@@ -68,29 +88,6 @@ extern "C" {
 	   void get_nl_flag3_(const micropp<3> **self, int *gp_id, int *nl_flag)
 	   {
 	   (*nl_flag) = (*self)->get_nl_flag(*gp_id);
-	   }
-
-	   void set_macro_strain3_(micropp<3> **self, const int *gp_id,
-	   const double *macro_strain)
-	   {
-	   (*self)->set_macro_strain(*gp_id, macro_strain);
-	   }
-
-	   void get_macro_stress3_(const micropp<3> **self,
-	   const int *gp_id, double *macro_stress)
-	   {
-	   (*self)->get_macro_stress(*gp_id, macro_stress);
-	   }
-
-	   void get_macro_ctan3_(const micropp<3> **self, const int *gp_id,
-	   double *macro_ctan)
-	   {
-	   (*self)->get_macro_ctan(*gp_id, macro_ctan);
-	   }
-
-	   void homogenize3_(micropp<3> **self)
-	   {
-	   (*self)->homogenize();
 	   }
 
 	   void update_vars3_(micropp<3> **self)
