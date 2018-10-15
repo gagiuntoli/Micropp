@@ -20,17 +20,28 @@
  */
 
 #include "micro.hpp"
+#include "micropp_c_wrapper.h"
 
 extern "C" {
 
-	void material_set_(material_t *in, const double *E,
-	                   const double *nu, const double *Ka,
-	                   const double *Sy, const int *type)
+	material_t* micropp_C_material_create()
 	{
-		in->set(*E, *nu, *Ka, *Sy, *type);
+		return new material_t;
+	}
+
+	void micropp_C_material_set(material_t *in, double E, double nu, double Ka,
+	                   			double Sy, int type)
+	{
+		in->set(E, nu, Ka, Sy, type);
+	}
+
+	void micropp_C_material_print(material_t *in)
+	{
+		in->print();
 	}
 
 	//  Micro type functions
+	/*
 	micropp<3> *init3_(int *ngp, const int size[3], const int *micro_type,
 	                   const double *micro_params, const material_t *materials)
 	{
@@ -95,4 +106,6 @@ extern "C" {
 		printf("ptr2 %p\n", self);
 		(*self)->print_info();
 	}
+	*/
+
 }

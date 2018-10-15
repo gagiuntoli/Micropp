@@ -36,10 +36,16 @@ This will build the examples and the library in debug mode. CMake does not touch
 the original sources and you can have many build directories with different
 options if you want.
 
-To build the optimized version proceed like before but change step 5 for:
+To build the optimized version:
 
 ```bash
 cmake -DCMAKE_BUILD_TYPE=Release ..
+```
+
+and the debug version:
+
+```bash
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
 Other possible options are: Debug, Release, RelWithDebInfo, MinSizeRel. Read CMake documentation for more information.

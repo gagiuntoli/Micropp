@@ -25,9 +25,10 @@
 
 using namespace std;
 
-static micropp_t* micro = NULL;
+static micropp<3>* micro = NULL;
 
 extern "C" {
+	/*
 	void micropp_construct_(int *dim, int *ngp, int size[3], int *micro_type,
 	                        double *micro_params, int *mat_types, double *params)
 	{
@@ -73,4 +74,5 @@ extern "C" {
 	{
 		micro->write_info_files ();
 	}
+	*/
 }
