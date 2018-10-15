@@ -19,93 +19,105 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "micro.hpp"
 #include "micropp_c_wrapper.h"
 
+
+#define MAT_NUM 2
+static micropp<3>* micro = NULL;
+static material_t *materials[MAT_NUM];
+
+
 extern "C" {
 
-	material_t* micropp_C_material_create()
+	void micropp_C_material_create()
 	{
-		return new material_t;
+		for(int i = 0; i < MAT_NUM; ++i)
+			materials[i] = new material_t;
 	}
 
-	void micropp_C_material_set(material_t *in, double E, double nu, double Ka,
+	void micropp_C_material_set(int num_mat, double E, double nu, double Ka,
 	                   			double Sy, int type)
 	{
-		in->set(E, nu, Ka, Sy, type);
+		materials[num_mat]->set(E, nu, Ka, Sy, type);
 	}
 
-	void micropp_C_material_print(material_t *in)
+	void micropp_C_material_print(int num_mat)
 	{
-		in->print();
+		materials[num_mat]->print();
 	}
 
-	//  Micro type functions
+	void micropp_C_create3(int ngp, int size[3], int type, double *params)
+	{
+		micro = new micropp<3>(ngp, size, type, params, *materials);
+	}
+
 	/*
-	micropp<3> *init3_(int *ngp, const int size[3], const int *micro_type,
-	                   const double *micro_params, const material_t *materials)
-	{
-		return new micropp<3>(*ngp, size, *micro_type, micro_params, materials);
-	}
+	   micropp<3> *micropp_C_create3(int ngp, int size[3], int micro_type,
+	   double *micro_params, material_t *materials)
+	   {
+	   return new micropp<3>(ngp, size, micro_type, micro_params, materials);
+	   }
 
-	void free3_(micropp<3> **in)
-	{
-		delete (*in);
-	}
+	   void free3_(micropp<3> **in)
+	   {
+	   delete (*in);
+	   }
 
-	void get_nl_flag3_(const micropp<3> **self, int *gp_id, int *nl_flag)
-	{
-		(*nl_flag) = (*self)->get_nl_flag(*gp_id);
-	}
+	   void get_nl_flag3_(const micropp<3> **self, int *gp_id, int *nl_flag)
+	   {
+	   (*nl_flag) = (*self)->get_nl_flag(*gp_id);
+	   }
 
-	void set_macro_strain3_(micropp<3> **self, const int *gp_id,
-	                        const double *macro_strain)
-	{
-		(*self)->set_macro_strain(*gp_id, macro_strain);
-	}
+	   void set_macro_strain3_(micropp<3> **self, const int *gp_id,
+	   const double *macro_strain)
+	   {
+	   (*self)->set_macro_strain(*gp_id, macro_strain);
+	   }
 
-	void get_macro_stress3_(const micropp<3> **self,
-	                        const int *gp_id, double *macro_stress)
-	{
-		(*self)->get_macro_stress(*gp_id, macro_stress);
-	}
+	   void get_macro_stress3_(const micropp<3> **self,
+	   const int *gp_id, double *macro_stress)
+	   {
+	   (*self)->get_macro_stress(*gp_id, macro_stress);
+	   }
 
-	void get_macro_ctan3_(const micropp<3> **self, const int *gp_id,
-	                     double *macro_ctan)
-	{
-		(*self)->get_macro_ctan(*gp_id, macro_ctan);
-	}
+	   void get_macro_ctan3_(const micropp<3> **self, const int *gp_id,
+	   double *macro_ctan)
+	   {
+	   (*self)->get_macro_ctan(*gp_id, macro_ctan);
+	   }
 
-	void homogenize3_(micropp<3> **self)
-	{
-		(*self)->homogenize();
-	}
+	   void homogenize3_(micropp<3> **self)
+	   {
+	   (*self)->homogenize();
+	   }
 
-	void update_vars3_(micropp<3> **self)
-	{
-		(*self)->update_vars();
-	}
+	   void update_vars3_(micropp<3> **self)
+	   {
+	   (*self)->update_vars();
+	   }
 
-	void output3_(micropp<3> **self, int *tstep, int *gp_id)
-	{
-		(*self)->output(*tstep, *gp_id);
-	}
+	   void output3_(micropp<3> **self, int *tstep, int *gp_id)
+	   {
+	   (*self)->output(*tstep, *gp_id);
+	   }
 
-	void write_info_files3_(micropp<3> **self)
-	{
-		(*self)->write_info_files();
-	}
+	   void write_info_files3_(micropp<3> **self)
+	   {
+	   (*self)->write_info_files();
+	   }
 
-	void write_convergence_file3_(micropp<3> **self, int *tstep, int *rank)
-	{
-		(*self)->write_convergence_file(*tstep, *rank);
-	}
+	   void write_convergence_file3_(micropp<3> **self, int *tstep, int *rank)
+	   {
+	   (*self)->write_convergence_file(*tstep, *rank);
+	   }
 
-	void print_info3_(micropp<3> **self)
-	{
-		printf("ptr2 %p\n", self);
-		(*self)->print_info();
-	}
-	*/
+	   void print_info3_(micropp<3> **self)
+	   {
+	   printf("ptr2 %p\n", self);
+	   (*self)->print_info();
+	   }
+	   */
 
 }
