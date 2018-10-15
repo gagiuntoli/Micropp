@@ -13,8 +13,8 @@ extern "C" {
 	void micropp_C_create3(int ngp, int size[3], int type, double *params);
 	void micropp_C_destroy3();
 	void micropp_C_set_strain3(int gp, double strain[6]);
-	void micropp_C_get_stress(int gp, double stress[6]);
-	void micropp_C_get_ctan(int gp, double ctan[36]);
+	void micropp_C_get_stress3(int gp, double stress[6]);
+	void micropp_C_get_ctan3(int gp, double ctan[36]);
 	void micropp_C_homogenize();
 
 #ifdef __cplusplus
