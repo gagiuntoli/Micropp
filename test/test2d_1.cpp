@@ -85,7 +85,6 @@ int main (int argc, char *argv[])
 		micro.get_macro_ctan(0, ctan);
 
 		micro.update_vars();
-		micro.write_info_files ();
 
 		cout << "eps =\t";
 		for (int i = 0; i < 3; ++i)

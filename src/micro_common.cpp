@@ -107,13 +107,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int gp = 0; gp < ngp; ++gp)
 		memcpy(gp_list[gp].macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 
-	ofstream file;
-	file.open("micropp_convergence.dat");
-	file.close();
-	file.open("micropp_eps_sig_ctan.dat");
-	file.close();
-	file.open("micropp_int_vars_n.dat");
-	file.close();
 }
 
 template <int tdim>

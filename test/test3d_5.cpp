@@ -125,7 +125,6 @@ int main(int argc, char **argv)
 
 		micro.update_vars();
 		micro.output (t, 1);
-		micro.write_info_files();
 		cout << endl;
 	}
 	return 0;

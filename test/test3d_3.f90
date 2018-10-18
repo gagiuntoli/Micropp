@@ -95,8 +95,6 @@ program test3d_3
      call micro%get_macro_stress(0, sig)
 
      call micro%update_vars()
-     call micro%write_info_files()
-     call micro%write_convergence_file(t, 0)
      call micro%get_nl_flag(gp_id, nl_flag)
 
      write(*,'(A,2I5)') "nl = ", nl_flag

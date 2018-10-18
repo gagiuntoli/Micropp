@@ -77,7 +77,6 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 
 		micro.update_vars();
-		micro.write_info_files();
 
 		cout << "eps = " << eps[dir] << endl;
 		cout

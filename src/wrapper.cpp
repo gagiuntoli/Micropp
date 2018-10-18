@@ -80,16 +80,6 @@ extern "C" {
 		(*self)->output(*tstep, *gp_id);
 	}
 
-	void write_info_files3_(micropp<3> **self)
-	{
-		(*self)->write_info_files();
-	}
-
-	void write_convergence_file3_(micropp<3> **self, int *tstep, int *rank)
-	{
-		(*self)->write_convergence_file(*tstep, *rank);
-	}
-
 	void print_info3_(micropp<3> **self)
 	{
 		printf("ptr2 %p\n", self);

@@ -204,8 +204,6 @@ class micropp {
 		void get_macro_ctan(const int gp_id, double *macro_ctan) const;
 		void homogenize();
 		void output(int tstep, int gp_id);
-		void write_info_files();
-		void write_convergence_file(int tstep, int rank);
 		void update_vars();
 		void print_info() const;
 };

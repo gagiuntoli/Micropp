@@ -76,8 +76,6 @@ int main (int argc, char *argv[])
 		micro.get_macro_ctan(0, ctan);
 
 		micro.output(t, 0);
-		micro.write_info_files();
-		micro.write_convergence_file(t, 0);
 
 		micro.update_vars();
 

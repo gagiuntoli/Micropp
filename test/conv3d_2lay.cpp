@@ -63,8 +63,6 @@ int main (int argc, char *argv[])
 			micro.set_macro_strain(0, eps);
 			micro.homogenize();
 
-			micro.write_info_files ();
-
 			micro.update_vars();
 
 		}
