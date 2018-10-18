@@ -41,7 +41,6 @@ int main (int argc, char *argv[])
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
 
-    micropp_C_material_create();
     micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
     micropp_C_material_set(1, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
     micropp_C_material_print(0);

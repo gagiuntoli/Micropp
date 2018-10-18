@@ -26,31 +26,25 @@
 
 #define MAT_NUM 2
 static micropp<3>* micro3 = NULL;
-static material_t *materials[MAT_NUM];
+static material_t materials[MAT_NUM];
 
 
 extern "C" {
 
-    void micropp_C_material_create()
-    {
-        for(int i = 0; i < MAT_NUM; ++i)
-            materials[i] = new material_t;
-    }
-
     void micropp_C_material_set(int num_mat, double E, double nu, double Ka,
                                 double Sy, int type)
     {
-        materials[num_mat]->set(E, nu, Ka, Sy, type);
+        materials[num_mat].set(E, nu, Ka, Sy, type);
     }
 
     void micropp_C_material_print(int num_mat)
     {
-        materials[num_mat]->print();
+        materials[num_mat].print();
     }
 
     void micropp_C_create3(int ngp, int size[3], int type, double *params)
     {
-        micro3 = new micropp<3>(ngp, size, type, params, *materials);
+        micro3 = new micropp<3>(ngp, size, type, params, materials);
     }
 
     void micropp_C_set_strain3(int gp, double strain[6])

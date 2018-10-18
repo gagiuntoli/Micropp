@@ -5,7 +5,6 @@
 extern "C" {
 #endif
 
-    void micropp_C_material_create();
     void micropp_C_material_set(int num_mat, const double E, double nu,
                                 double Ka, double Sy, int type);
     void micropp_C_material_print(int num_mat);

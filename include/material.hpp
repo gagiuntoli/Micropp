@@ -26,6 +26,7 @@
 #include <cstdio>
 
 struct material_t {
+
 	double E, nu, Ka, Sy;
 	double k, mu, lambda;
 	int type;
@@ -69,4 +70,4 @@ struct material_t {
 };
 
 
-#endif // MATERIA_HPP
+#endif
