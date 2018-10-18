@@ -3,28 +3,29 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # The test files I care only (create a list)
 set(testsources
-  test2d_1.cpp
-  test3d_1.cpp
-  test3d_2.cpp
-  test3d_3.f90
-  test3d_4.cpp
-  test3d_5.cpp
-  test3d_perf_1.cpp
-  test_get_elem_nodes.cpp
-  test_ell_1.cpp
-  test_ell_2.cpp
-  test_ell_3.cpp
-  conv3d_2lay.cpp
-  test_util_1.cpp)
+	test2d_1.cpp
+	test3d_1.cpp
+	test3d_2.cpp
+	test3d_3.f90
+	test3d_4.cpp
+	test3d_5.cpp
+	test3d_6.c
+	test3d_perf_1.cpp
+	test_get_elem_nodes.cpp
+	test_ell_1.cpp
+	test_ell_2.cpp
+	test_ell_3.cpp
+	conv3d_2lay.cpp
+	test_util_1.cpp)
 
 # Iterate over the list above
 foreach (testfile ${testsources})
-  # Delete File extensions (test_i.cpp -> test_i)
-  get_filename_component(testname ${testfile} NAME_WE)
+	# Delete File extensions (test_i.cpp -> test_i)
+	get_filename_component(testname ${testfile} NAME_WE)
 
-  # Create the executable test_i and link.
-  add_executable(${testname} ${testfile})
-  target_link_libraries(${testname} micropp)
+	# Create the executable test_i and link.
+	add_executable(${testname} ${testfile})
+	target_link_libraries(${testname} micropp)
 endforeach ()
 
 # As some tests will require commands and could be executed in loops we add the
