@@ -30,7 +30,6 @@ extern "C" {
 		in->set(*E, *nu, *Ka, *Sy, *type);
 	}
 
-	//  Micro type functions
 	micropp<3> *init3_(int *ngp, const int size[3], const int *micro_type,
 	                   const double *micro_params, const material_t *materials)
 	{
