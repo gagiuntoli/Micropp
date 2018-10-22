@@ -71,7 +71,7 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	     << "<Piece NumberOfPoints=\"" << nn << "\" NumberOfCells=\""
 	     << nelem << "\">\n"
 	     << "<Points>\n"
-	     << "<DataArray type=\"Float32\" Name=\"Position\" "
+	     << "<DataArray type=\"Float64\" Name=\"Position\" "
 	     << "NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
 	for (int k = 0; k < nz; ++k) {
@@ -84,7 +84,7 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 			}
 		}
 	}
-	file << "</DataArray>\n</Points>\n<Cells>" << endl;
+	file << "</DataArray>\n</Points>\n<Cells>\n" << endl;
 
 	file
 		<< "<DataArray type=\"Int32\" Name=\"connectivity\" "
@@ -121,7 +121,7 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 	file << "\n</DataArray>" << endl;
 	file << "</Cells>" << endl;
 
-	file << "<PointData Vectors=\"displ\" >>" << endl;
+	file << "<PointData Vectors=\"displ\" >" << endl;
 	file
 		<< "<DataArray type=\"Float64\" Name=\"displ\" "
 		<< "NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
@@ -144,7 +144,7 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 			file << elem_strain[e * nvoi + v] << " ";
 		file << endl;
 	}
-	file << "</DataArray>";
+	file << "</DataArray>\n";
 
 	file
 		<< "<DataArray type=\"Float64\" Name=\"stress\" "
@@ -154,7 +154,7 @@ void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
 			file << elem_stress[e * nvoi + v] << " ";
 		file << endl;
 	}
-	file << "</DataArray>";
+	file << "</DataArray>\n";
 
 	file
 		<< "<DataArray type=\"Int32\" Name=\"elem_type\" "

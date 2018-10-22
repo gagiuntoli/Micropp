@@ -68,8 +68,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
     assert(b && du && u_aux && elem_stress && elem_strain &&
            elem_type && vars_old_aux && vars_new_aux);
 
-    output_files_header = false;
-
     int nParams;
     if (micro_type == 0) {
         // mat 1 = matrix

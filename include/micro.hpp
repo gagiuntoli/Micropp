@@ -70,8 +70,6 @@ class micropp {
 		const int micro_type, num_int_vars;
 		gp_t<tdim> *gp_list;
 
-		bool output_files_header;
-
 		double micro_params[5];
 		int numMaterials;
 		material_t material_list[MAX_MATS];
