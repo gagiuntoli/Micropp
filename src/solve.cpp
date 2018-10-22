@@ -26,42 +26,42 @@ using namespace std;
 
 template <int tdim>
 int micropp<tdim>::newton_raphson(const double strain[nvoi],
-								  double *u, double newton_err[NR_MAX_ITS],
-								  int solver_its[NR_MAX_ITS],
-								  double solver_err[NR_MAX_ITS])
+                                  double *u, double newton_err[NR_MAX_ITS],
+                                  int solver_its[NR_MAX_ITS],
+                                  double solver_err[NR_MAX_ITS])
 {
-	INST_START;
+    INST_START;
 
-	set_displ_bc(strain, u);
+    set_displ_bc(strain, u);
 
-	int lits = 0;
-	double lerr = 0.0, cg_err;
+    int lits = 0;
+    double lerr = 0.0, cg_err;
 
-	memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
-	memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
-	memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
+    memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
+    memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
+    memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
 
-	do {
-		lerr = assembly_rhs(u);
-		newton_err[lits] = lerr;
+    do {
+        lerr = assembly_rhs(u);
+        newton_err[lits] = lerr;
 
-		if (lerr < NR_MAX_TOL)
-			break;
+        if (lerr < NR_MAX_TOL)
+            break;
 
-		assembly_mat(u);
+        assembly_mat(u);
 
-		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-		solver_its[lits] = cg_its;
-		solver_err[lits] = cg_err;
+        int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+        solver_its[lits] = cg_its;
+        solver_err[lits] = cg_err;
 
-		for (int i = 0; i < nn * dim; ++i)
-			u[i] += du[i];
+        for (int i = 0; i < nn * dim; ++i)
+            u[i] += du[i];
 
-		lits++;
+        lits++;
 
-	} while (lits < NR_MAX_ITS);
+    } while (lits < NR_MAX_ITS);
 
-	return lits;
+    return lits;
 }
 
 
