@@ -182,6 +182,15 @@ int micropp<tdim>::get_sigma_newton_its(int gp_id) const
 
 
 template <int tdim>
+int micropp<tdim>::get_sigma_cost(int gp_id) const
+{
+    assert(gp_id < ngp);
+    assert(gp_id >= 0);
+    return gp_list[gp_id].sigma_cost;
+}
+
+
+template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
     vars_old = vars_old_aux;

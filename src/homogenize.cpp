@@ -74,6 +74,7 @@ void micropp<tdim>::homogenize()
         gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
         inv_max = -1.0e10;
+        gp_ptr->sigma_cost = 0;
 
         if (is_linear(gp_ptr->macro_strain) && (!gp_ptr->allocated)) {
 
@@ -114,6 +115,9 @@ void micropp<tdim>::homogenize()
                    NR_MAX_ITS * sizeof(int));
             memcpy(gp_ptr->sigma_solver_err, solver_err,
                    NR_MAX_ITS * sizeof(double));
+
+            for (int i = 0; i < newton_its; ++i)
+                gp_ptr->sigma_cost += solver_its[i];
 
             calc_ave_stress(gp_ptr->u_k, gp_ptr->macro_stress);
 

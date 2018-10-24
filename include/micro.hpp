@@ -197,6 +197,7 @@ class micropp {
 		void get_sigma_newton_err(int gp_id,
 							  double sigma_nr_err[NR_MAX_ITS]) const;
 		int get_sigma_newton_its(int gp_id) const;
+		int get_sigma_cost(int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
 		void get_macro_stress(const int gp_id, double *macro_stress) const;
 		void get_macro_ctan(const int gp_id, double *macro_ctan) const;

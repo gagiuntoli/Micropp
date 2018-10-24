@@ -72,6 +72,7 @@ int main (int argc, char *argv[])
 		micropp_C_homogenize();
 		micropp_C_get_stress3(0, sig);
 		micropp_C_get_ctan3(0, ctan);
+		int sigma_cost = micropp_C_get_sigma_cost3(0);
 
 		micropp_C_update_vars();
 
@@ -84,6 +85,8 @@ int main (int argc, char *argv[])
 		for (i = 0; i < 6; ++i)
 			printf("%e\t", sig[i]);
         printf("\n");
+
+        printf("\nsigma_cost = %d\n", sigma_cost);
 
         printf("\nctan =\n");
         for (i = 0; i < 6; ++i) {

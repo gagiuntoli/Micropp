@@ -46,6 +46,7 @@ class gp_t {
 		double sigma_solver_err[NR_MAX_ITS];
 		double sigma_newton_err[NR_MAX_ITS];
 		double inv_max;
+		long int sigma_cost;
 
 		gp_t():
 			int_vars_n(nullptr),

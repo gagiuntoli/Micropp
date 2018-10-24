@@ -17,6 +17,7 @@ extern "C" {
     void micropp_C_update_vars();
     void micropp_C_homogenize();
     void micropp_C_print_info();
+    int micropp_C_get_sigma_cost3(int gp);
 
 #ifdef __cplusplus
 }

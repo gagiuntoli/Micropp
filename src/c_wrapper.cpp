@@ -83,4 +83,9 @@ extern "C" {
         delete micro3;
     }
 
+    int micropp_C_get_sigma_cost3(int gp)
+    {
+        return micro3->get_sigma_cost(gp);
+    }
+
 }
