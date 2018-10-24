@@ -23,7 +23,7 @@
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
-                       const double _micro_params[5],
+                       const double _micro_params[4],
                        const material_t *_materials):
     ngp(_ngp),
     nx(size[0]), ny(size[1]),
@@ -40,7 +40,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
     lz((tdim == 3) ? _micro_params[2] : 0.0),
     dx(lx / nex), dy(ly / ney),	dz((tdim == 3) ? lz / nez : 0.0),
 
-    special_param(_micro_params[3]), inv_tol(_micro_params[4]),
+    special_param(_micro_params[3]),
 
     wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
     vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
@@ -210,36 +210,6 @@ void micropp<tdim>::calc_ctan_lin()
         for (int v = 0; v < nvoi; ++v)
             ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
     }
-}
-
-
-template <int tdim>
-bool micropp<tdim>::is_linear(const double *macro_strain)
-{
-    double macro_stress[6] = { 0.0 };
-    for (int i = 0; i < nvoi; ++i)
-        for (int j = 0; j < nvoi; ++j)
-            macro_stress[i] += ctan_lin[i * nvoi + j] * macro_strain[j];
-
-    const double inv = get_inv_1(macro_stress);
-    if (fabs(inv) > inv_max)
-        inv_max = fabs(inv);
-
-    return (fabs(inv) < inv_tol);
-}
-
-
-template <int tdim>
-double micropp<tdim>::get_inv_1(const double *tensor) const
-{
-    assert(dim == 2 || dim == 3);
-
-    const double ret = tensor[0] + tensor[1];
-
-    if (dim == 2)
-        return ret;
-
-    return ret + tensor[2];
 }
 
 
