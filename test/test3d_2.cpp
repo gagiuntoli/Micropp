@@ -37,18 +37,17 @@ int main (int argc, char *argv[])
 		return(1);
 	}
 
-	const int size[3] = { atoi(argv[1]),
-	                      atoi(argv[2]),
-	                      atoi(argv[3]) };
+	const int size[3] = { atoi(argv[1]), atoi(argv[2]), atoi(argv[3]) };
+
 	// Optional value
 	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);
 
-	// 2 materiales matriz y fibra (3D esfera en matriz)
-	const int micro_type = 1;
+	// 2 materiales matriz y fibra (cilindro en z)
+	const int micro_type = 3;
 	const double d_eps = 0.01;
 	const int dir = 2;
 
-	double micro_params[5] = { 1.0, 1.0, 1.0, 0.1, 0.0 }; // INV_MAX
+	double micro_params[4] = { 1.0, 1.0, 1.0, 0.15 };
 
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);

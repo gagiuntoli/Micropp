@@ -73,12 +73,22 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
         // mat 1 = matrix
         // mat 2 = sphere
         numMaterials = 2;
-        nParams = 5;
+        nParams = 4;
     } else if (micro_type == 1) {
         // mat 1 = layer 1
         // mat 2 = layer 2
         numMaterials = 2;
-        nParams = 5;
+        nParams = 4;
+    } else if (micro_type == 2) {
+        // mat 1 = matrix
+        // mat 2 = cilinder
+        numMaterials = 2;
+        nParams = 4;
+    } else if (micro_type == 3) {
+        // mat 1 = matrix
+        // mat 2 = cilinder
+        numMaterials = 2;
+        nParams = 4;
     }
 
     for (int i = 0; i < nParams; i++)
@@ -229,6 +239,18 @@ material_t micropp<tdim>::get_material(const int e) const
         else
             mat_num = 1;
 
+    else if (micro_type == 2)
+        if (elem_type[e] == 0)
+            mat_num = 0;
+        else
+            mat_num = 1;
+
+    else if (micro_type == 3)
+        if (elem_type[e] == 0)
+            mat_num = 0;
+        else
+            mat_num = 1;
+
     return material_list[mat_num];
 }
 
@@ -278,20 +300,19 @@ void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 template<int tdim>
 int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 {
-    assert(micro_type == 0 || micro_type == 1);
+    assert(micro_type == 0 || micro_type == 1 || 
+           micro_type == 2 || micro_type == 3);
+
+    const double coor[3] = {
+        ex * dx + dx / 2.,
+        ey * dy + dy / 2.,
+        ez * dz + dz / 2. }; // 2D -> dz = 0
+
 
     if (micro_type == 0) { // sphere in the center
 
-        const double coor[3] = { ex * dx + dx / 2,
-            ey * dy + dy / 2,
-            ez * dz + dz / 2 }; // 2D -> dz = 0
-
-        const double center[3] = { lx / 2,
-            ly / 2,
-            lz / 2 }; // 2D -> lz = 0
-
         const double rad = special_param;
-
+        const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D -> lz = 0
         double tmp = 0.;
         for (int i = 0; i < dim; ++i)
             tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
@@ -300,9 +321,36 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
     } else if (micro_type == 1) { // 2 flat layers in y dir
 
-        const double y = ey * dy + dy / 2;
         const double width = special_param;
-        return (y < width);
+        return (coor[1] < width);
+
+    } else if (micro_type == 2) { // a cilindrical fiber in z dir
+
+        const double rad = special_param;
+        const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D -> lz = 0
+        double tmp = 0.;
+        for (int i = 0; i < 2; ++i)
+            tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
+
+        return (tmp < rad * rad);
+
+    } else if (micro_type == 3) { // 2 cilindrical fibers one in x and z dirs
+
+        const double rad = special_param;
+        const double cen_1[3] = { lx / 2., ly * .25, lz / 2. };
+        double tmp_1 = 0.;
+        for (int i = 0; i < 2; ++i)
+            tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
+
+        const double cen_2[3] = { lx / 2., ly * .25, lz / 2. };
+        double tmp_2 = 0.;
+        for (int i = 1; i < 3; ++i)
+            tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
+
+        cout << tmp_1 - rad * rad << endl;
+        cout << tmp_2 - rad * rad << endl;
+
+        return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
     }
 
     cerr << "Invalid micro_type = " << micro_type << endl;
