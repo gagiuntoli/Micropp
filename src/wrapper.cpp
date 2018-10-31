@@ -74,9 +74,9 @@ extern "C" {
 		(*self)->update_vars();
 	}
 
-	void output3_(micropp<3> **self, int *tstep, int *gp_id)
+	void output3_(micropp<3> **self, int *gp_id, const char *filename)
 	{
-		(*self)->output(*tstep, *gp_id);
+		(*self)->output(*gp_id, filename);
 	}
 
 	void print_info3_(micropp<3> **self)

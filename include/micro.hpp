@@ -142,7 +142,7 @@ class micropp {
 
         bool calc_vars_new(const double *u);
 
-        void write_vtu(const double *u, int tstep, int gp_id);
+        void write_vtu(const double *u, const char *filename);
 
         void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
 
@@ -200,7 +200,7 @@ class micropp {
         void get_macro_stress(const int gp_id, double *macro_stress) const;
         void get_macro_ctan(const int gp_id, double *macro_ctan) const;
         void homogenize();
-        void output(int tstep, int gp_id);
+        void output(int gp_id, const char *filename);
         void update_vars();
         void print_info() const;
 };

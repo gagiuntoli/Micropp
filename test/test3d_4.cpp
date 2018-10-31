@@ -135,7 +135,10 @@ int main(int argc, char **argv)
 		cout << "Diff ctan:\t" << diff_sum_ctan << endl;
 
 		micro.update_vars();
-		micro.output (t, 1);
+
+	    char filename[128];
+	    snprintf(filename, 128, "micropp_%d", t); 
+		micro.output (1, filename);
 		cout << endl;
 	}
 	return 0;

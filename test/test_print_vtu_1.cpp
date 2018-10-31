@@ -36,59 +36,25 @@ int main (int argc, char *argv[])
 		cerr << "Usage: " << argv[0] << " nx ny nz [steps]" << endl;
 		return(1);
 	}
-
 	const int size[3] = { atoi(argv[1]), atoi(argv[2]), atoi(argv[3]) };
 
-	// Optional value
-	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);
-
-	// 2 materiales matriz y fibra (cilindro en z)
-	const int micro_type = 3;
-	const double d_eps = 0.01;
-	const int dir = 2;
-
-	double micro_params[4] = { 1.0, 1.0, 1.0, 0.15 };
-
+	double micro_params[4] = { 1.0, 1.0, 1.0, 0.11 };
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
 	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
+	for(int micro_type = 0; micro_type < 4; ++micro_type) {
 
-	double eps[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	double sig[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-	for (int t = 0; t < time_steps; ++t) {
-		cout << "time step = " << t << endl;
-		if (t < 30)
-			eps[dir] += d_eps;
-		else if (t < 80)
-			eps[dir] -= d_eps;
-		else if (t < 130)
-			eps[dir] += d_eps;
-		else if (t < 250)
-			eps[dir] -= d_eps;
-		else
-			eps[dir] += d_eps;
+	    cout << "Plotting Micro Type : " << micro_type << endl;
+	    micropp<3> *micro = new micropp<3>(1, size, micro_type, 
+	                                       micro_params, mat_params);
 
-		micro.set_macro_strain(0, eps);
-		micro.homogenize();
-
-		micro.get_macro_stress(0, sig);
-
-		micro.update_vars();
-
-		cout << "eps = " << eps[dir] << endl;
-		cout
-			<< "sig = "
-			<< sig[0] << " " << sig[1] << " " << sig[2] << " "
-			<< sig[3] << " " << sig[4] << " " << sig[5]
-			<< endl;
-
-		cout << endl;
 
 	    char filename[128];
 	    snprintf(filename, 128, "micro_type_%d", micro_type); 
-		micro.output (0, filename);
+	    micro->output (0, filename);
+	    delete micro;
 	}
+
 	return 0;
 }

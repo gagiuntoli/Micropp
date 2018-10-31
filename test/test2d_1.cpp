@@ -101,7 +101,9 @@ int main (int argc, char *argv[])
 			cout << setw(14) << ctan[i] << "\t";
 		cout << endl;
 
-		micro.output (t, 0);
+	    char filename[128];
+	    snprintf(filename, 128, "micropp_%d", t); 
+		micro.output(0, filename);
 	}
 	return 0;
 }

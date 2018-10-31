@@ -16,6 +16,7 @@ set(testsources
 	test_ell_2.cpp
 	test_ell_3.cpp
 	conv3d_2lay.cpp
+        test_print_vtu_1.cpp
 	test_util_1.cpp)
 
 # Iterate over the list above

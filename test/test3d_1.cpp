@@ -75,7 +75,9 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 		micro.get_macro_ctan(0, ctan);
 
-		micro.output(t, 0);
+	    char filename[128];
+	    snprintf(filename, 128, "micro_type_%d", micro_type); 
+	    micro.output (0, filename);
 
 		micro.update_vars();
 

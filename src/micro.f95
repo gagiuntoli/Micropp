@@ -115,10 +115,11 @@ contains
     call print_info3(this%ptr)
   end subroutine print_info
 
-  subroutine output(this, tstep, gp_id)
+  subroutine output(this, gp_id, filename)
     class(micropp3) :: this
-    integer, intent(in) :: tstep, gp_id
-    call output3(this%ptr)
+    integer, intent(in) :: gp_id
+    Character(128), intent(in) :: filename
+    call output3(this%ptr, gp_id, filename)
   end subroutine output
 
 end module libmicropp

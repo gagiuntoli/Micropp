@@ -337,7 +337,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
     } else if (micro_type == 3) { // 2 cilindrical fibers one in x and z dirs
 
         const double rad = special_param;
-        const double cen_1[3] = { lx / 2., ly * .25, lz / 2. };
+        const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
         double tmp_1 = 0.;
         for (int i = 0; i < 2; ++i)
             tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
@@ -346,9 +346,6 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
         double tmp_2 = 0.;
         for (int i = 1; i < 3; ++i)
             tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
-
-        cout << tmp_1 - rad * rad << endl;
-        cout << tmp_2 - rad * rad << endl;
 
         return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
     }

@@ -37,6 +37,8 @@ program test3d_3
   integer, parameter :: micro_type = 1
   real(8), parameter :: d_eps = 0.01
   integer, parameter :: dir = 3;
+  Character(len = 128) :: filename
+  Character(len = 16) :: time_char
 
   real(8), dimension(*) :: eps(6), sig(6)
 
@@ -76,7 +78,7 @@ program test3d_3
   eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
   sig = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
   do t = 0, time_steps - 1
-     write (*,'(A,2I5)') "time step = ", t
+     write (*,'(A,I5)') "time step = ", t
      if (t < 30) then
         eps(dir) = eps(dir) + d_eps;
      else if (t < 80) then
@@ -104,7 +106,11 @@ program test3d_3
      write(*,'(F12.2,F12.2,F12.2,A)') sig(4), sig(5), sig(6)
 
      write(*,*) ""
-     call micro%output(t, 0);
+
+     write(time_char, '(I5)') t
+     filename = 'micropp_fortran_' // adjustl(time_char)
+     call micro%output(0, trim(filename));
+
   end do
 
   call free(micro)

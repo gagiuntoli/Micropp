@@ -28,7 +28,7 @@
 using namespace std;
 
 template <int tdim>
-void micropp<tdim>::output(int time_step, int gp_id)
+void micropp<tdim>::output(int gp_id, const char *filename)
 {
 	INST_START;
 
@@ -47,18 +47,15 @@ void micropp<tdim>::output(int time_step, int gp_id)
 	double *u = gp_list[gp_id].u_k;
 
 	calc_fields(u);
-	write_vtu(u, time_step, gp_id);
+	write_vtu(u, filename);
 }
 
 
 template <int tdim>
-void micropp<tdim>::write_vtu(const double *u, int time_step, int gp_id)
+void micropp<tdim>::write_vtu(const double *u, const char *filename)
 {
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-
 	std::stringstream fname_vtu_s;
-	fname_vtu_s << "micropp_" << gp_id << "_" << time_step << ".vtu";
+	fname_vtu_s << filename << ".vtu";
 	std::string fname_vtu = fname_vtu_s.str();
 
 	ofstream file;
