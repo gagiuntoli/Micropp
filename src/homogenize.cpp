@@ -128,9 +128,6 @@ void micropp<tdim>::homogenize()
                 newton_its = newton_raphson(eps_1, u_aux, newton_err,
                                             solver_its, solver_err);
 
-                gp_ptr->nr_its[i + 1] = newton_its;
-                gp_ptr->nr_err[i + 1] = newton_err[0];
-
                 calc_ave_stress(u_aux, sig_1);
 
                 for (int v = 0; v < nvoi; ++v)

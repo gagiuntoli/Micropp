@@ -26,11 +26,14 @@
 
 template <int dim>
 class gp_t {
+
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
+
 	public:
+
 		double macro_strain[nvoi];
 		double macro_stress[nvoi];
-		double macro_ctan[nvoi * nvoi];
+		double *macro_ctan;
 
 		bool allocated; // flag for memory optimization
 
@@ -39,19 +42,15 @@ class gp_t {
 		double *u_n;
 		double *u_k;
 
-		int nr_its[nvoi + 1]; // measurements
-		double nr_err[nvoi + 1];
 		int sigma_solver_its[NR_MAX_ITS];
 		int sigma_newton_its;
 		double sigma_solver_err[NR_MAX_ITS];
 		double sigma_newton_err[NR_MAX_ITS];
-		double inv_max;
 		long int sigma_cost;
 
 		gp_t():
 			int_vars_n(nullptr),
 			int_vars_k(nullptr),
-			inv_max(-1.0),
 			allocated(false)
 		{}
 
@@ -59,6 +58,7 @@ class gp_t {
 		{
 			free(u_n);
 			if (allocated) {
+				free(macro_ctan);
 				free(int_vars_n);
 				free(int_vars_k);
 			}
@@ -68,6 +68,7 @@ class gp_t {
 		{
 			assert(!allocated);
 
+			macro_ctan = (double *) malloc(nvoi * nvoi * sizeof(double));
 			int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
 			int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
 

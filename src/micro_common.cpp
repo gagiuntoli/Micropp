@@ -93,7 +93,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
     calc_ctan_lin();
 
     for (int gp = 0; gp < ngp; ++gp)
-        memcpy(gp_list[gp].macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
+        gp_list[gp].macro_ctan = ctan_lin;
 
 }
 
