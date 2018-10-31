@@ -15,12 +15,13 @@ Code to localize and average strain and stress over a micro structure.
 
 `MicroPP` can simulate different kind of microstructures in 2D and 3D 
 
-`MicroPP` has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the
-Barcelona Supercomputing center ([BSC](https://www.bsc.es/)) to performed **FE2** calculations.
+<img src="./pics/micros.png" alt="drawing" width="300"/>
 
-`MicroPP` has its own ELL matrix format routines optimized for the structured grid geometries that it has to manage.
-This allows to reach a really good performance in the assembly stage of the matrix.
-The relation between the assembly time and the solving time can be below than 1% depending on the problem size.
+`MicroPP` has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the Barcelona Supercomputing center ([BSC](https://www.bsc.es/)) to performed **FE2** calculations. Also it was coupled with [MacroC](https://github.com/GG1991/macroc), a FE code that uses PETSc library on structured meshes. With this good performance was reach until 30720 processors on Marenostrum IV supercomputer.
+
+<img src="./pics/scala.png" alt="drawing" width="350"/>
+
+`MicroPP` has its own ELL matrix format routines optimized for the structured grid geometries that it has to manage. This allows to reach a really good performance in the assembly stage of the matrix. The relation between the assembly time and the solving time can be below than 1% depending on the problem size. The solving algorithm for the linear system of equations consists on a Conjugate Gradient algorithm with diagonal preconditioner.
 
 Build steps with CMake:
 -----------------------
