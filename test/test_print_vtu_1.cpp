@@ -38,14 +38,15 @@ int main (int argc, char *argv[])
 	}
 	const int size[3] = { atoi(argv[1]), atoi(argv[2]), atoi(argv[3]) };
 
-	double micro_params[4] = { 1.0, 1.0, 1.0, 0.11 };
+    const double special_param[5] = { .11, .11, .11, .11, .15 };
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
 	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
-	for(int micro_type = 0; micro_type < 4; ++micro_type) {
+	for(int micro_type = 0; micro_type < 5; ++micro_type) {
 
 	    cout << "Plotting Micro Type : " << micro_type << endl;
+	    double micro_params[4] = { 1.0, 1.0, 1.0, special_param[micro_type] };
 	    micropp<3> *micro = new micropp<3>(1, size, micro_type, 
 	                                       micro_params, mat_params);
 

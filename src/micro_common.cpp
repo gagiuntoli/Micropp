@@ -68,28 +68,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
     assert(b && du && u_aux && elem_stress && elem_strain &&
            elem_type && vars_old_aux && vars_new_aux);
 
-    int nParams;
-    if (micro_type == 0) {
-        // mat 1 = matrix
-        // mat 2 = sphere
-        numMaterials = 2;
-        nParams = 4;
-    } else if (micro_type == 1) {
-        // mat 1 = layer 1
-        // mat 2 = layer 2
-        numMaterials = 2;
-        nParams = 4;
-    } else if (micro_type == 2) {
-        // mat 1 = matrix
-        // mat 2 = cilinder
-        numMaterials = 2;
-        nParams = 4;
-    } else if (micro_type == 3) {
-        // mat 1 = matrix
-        // mat 2 = cilinder
-        numMaterials = 2;
-        nParams = 4;
-    }
+    int nParams = 4;
+    numMaterials = 2;
 
     for (int i = 0; i < nParams; i++)
         micro_params[i] = _micro_params[i];
@@ -226,32 +206,7 @@ void micropp<tdim>::calc_ctan_lin()
 template <int tdim>
 material_t micropp<tdim>::get_material(const int e) const
 {
-    int mat_num;
-    if (micro_type == 0)
-        if (elem_type[e] == 0)
-            mat_num = 0;
-        else
-            mat_num = 1;
-
-    else if (micro_type == 1)
-        if (elem_type[e] == 0)
-            mat_num = 0;
-        else
-            mat_num = 1;
-
-    else if (micro_type == 2)
-        if (elem_type[e] == 0)
-            mat_num = 0;
-        else
-            mat_num = 1;
-
-    else if (micro_type == 3)
-        if (elem_type[e] == 0)
-            mat_num = 0;
-        else
-            mat_num = 1;
-
-    return material_list[mat_num];
+    return material_list[elem_type[e]];
 }
 
 
@@ -300,14 +255,12 @@ void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 template<int tdim>
 int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 {
-    assert(micro_type == 0 || micro_type == 1 || 
-           micro_type == 2 || micro_type == 3);
+    assert(0 <= micro_type  && micro_type <=4);
 
     const double coor[3] = {
         ex * dx + dx / 2.,
         ey * dy + dy / 2.,
         ez * dz + dz / 2. }; // 2D -> dz = 0
-
 
     if (micro_type == 0) { // sphere in the center
 
@@ -348,6 +301,25 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
             tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
 
         return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
+
+    } else if (micro_type == 4) { // 3 quad fibers in x, y and z dirs
+
+        const double width = special_param;
+        const double center[3] = { lx / 2., ly / 2., lz / 2. };
+
+        if (fabs(coor[0] - center[0]) < width &&
+            fabs(coor[1] - center[1]) < width)
+            return 1;
+
+        if (fabs(coor[0] - center[0]) < width &&
+            fabs(coor[2] - center[2]) < width)
+            return 1;
+
+        if (fabs(coor[1] - center[1]) < width &&
+            fabs(coor[2] - center[2]) < width)
+            return 1;
+
+        return 0;
     }
 
     cerr << "Invalid micro_type = " << micro_type << endl;
