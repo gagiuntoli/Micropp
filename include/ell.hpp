@@ -40,9 +40,9 @@ typedef struct {
 	int nn;
 	int dim;
 	int nfield;
-	int nrow;		// number of rows
-	int ncol;		// number of columns
-	int nnz;		// non zeros per row
+	int nrow; // number of rows
+	int ncol; // number of columns
+	int nnz; // non zeros per row
 	int *cols = NULL;
 	double *vals = NULL;
 
@@ -53,12 +53,12 @@ typedef struct {
 } ell_matrix;
 
 void ell_init(ell_matrix *m, const int nfield, const int dim,
-		const int ns[3], const double min_err, const int max_its);
+	      const int ns[3], const double min_err, const int max_its);
 
 void ell_mvp(const ell_matrix *m, const double *x, double *y);
 
 int ell_solve_cgpd(const ell_matrix *m, const double *b,
-		double *x, double *err_);
+		   double *x, double *err_);
 
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae);
 

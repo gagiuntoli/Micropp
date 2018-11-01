@@ -24,14 +24,14 @@
 extern "C" {
 
 	void material_set_(material_t *in, const double *E,
-	                   const double *nu, const double *Ka,
-	                   const double *Sy, const int *type)
+			   const double *nu, const double *Ka,
+			   const double *Sy, const int *type)
 	{
 		in->set(*E, *nu, *Ka, *Sy, *type);
 	}
 
 	micropp<3> *init3_(int *ngp, const int size[3], const int *micro_type,
-	                   const double *micro_params, const material_t *materials)
+			   const double *micro_params, const material_t *materials)
 	{
 		return new micropp<3>(*ngp, size, *micro_type, micro_params, materials);
 	}
@@ -47,19 +47,19 @@ extern "C" {
 	}
 
 	void set_macro_strain3_(micropp<3> **self, const int *gp_id,
-	                        const double *macro_strain)
+				const double *macro_strain)
 	{
 		(*self)->set_macro_strain(*gp_id, macro_strain);
 	}
 
 	void get_macro_stress3_(const micropp<3> **self,
-	                        const int *gp_id, double *macro_stress)
+				const int *gp_id, double *macro_stress)
 	{
 		(*self)->get_macro_stress(*gp_id, macro_stress);
 	}
 
 	void get_macro_ctan3_(const micropp<3> **self, const int *gp_id,
-	                     double *macro_ctan)
+			      double *macro_ctan)
 	{
 		(*self)->get_macro_ctan(*gp_id, macro_ctan);
 	}

@@ -39,27 +39,29 @@ void instrument::initialize()
 void instrument::finalize()
 {
 	if (0 == --instances) {
-		const uint64_t elapsed = (take_time_stamp() - initialTime) * 1E-3;
+		const uint64_t elapsed = (take_time_stamp() - initialTime) \
+					 * 1E-3;
 
 		size_t cont = 0;
-		cout << "# Final execution report: total time = " << elapsed << endl;
+		cout << "# Final execution report: total time = " << elapsed
+			<< endl;
 		cout << setw(6) << left << "#No"
-		     << setw(25) << "function"
-		     << setw(8) << right << "calls"
-		     << setw(16) << "total time"
-		     << setw(16) << "percent"
-		     << setw(16) << "mean"
-		     << setw(16) << "stdev"
-		     << setw(16) << "relative"
-		     << endl;
+			<< setw(25) << "function"
+			<< setw(8) << right << "calls"
+			<< setw(16) << "total time"
+			<< setw(16) << "percent"
+			<< setw(16) << "mean"
+			<< setw(16) << "stdev"
+			<< setw(16) << "relative"
+			<< endl;
 
 		cout.precision(2);
 		cout << fixed;
 
 		for (auto const &f : times) {
 			const uint64_t total = accumulate(f.second.begin(),
-			                                  f.second.end(),
-			                                  0.0);
+							  f.second.end(),
+							  0.0);
 			const size_t entries = f.second.size();
 			const uint64_t mean = total / entries;
 			const double percent = double(total) * 100 / elapsed;
@@ -67,14 +69,14 @@ void instrument::finalize()
 			const double relative = double(stdev) * 100 / mean;
 
 			cout << setw(6) << left << cont++
-			     << setw(25) << f.first
-			     << setw(8) << right << entries
-			     << setw(16) << total
-			     << setw(16) << percent
-			     << setw(16) << mean
-			     << setw(16) << stdev
-			     << setw(16) << relative
-			     << endl;
+				<< setw(25) << f.first
+				<< setw(8) << right << entries
+				<< setw(16) << total
+				<< setw(16) << percent
+				<< setw(16) << mean
+				<< setw(16) << stdev
+				<< setw(16) << relative
+				<< endl;
 		}
 	}
 
@@ -97,7 +99,8 @@ void instrument::finalize()
 		/ (t_sol + t_ass_mat + t_ass_rhs) << " \%" << endl;
 	cout
 		<< "SOLVE        :: "
-		<< 1. * t_sol * 100 / (t_sol + t_ass_mat + t_ass_rhs) << " \%" << endl;
+		<< 1. * t_sol * 100 / (t_sol + t_ass_mat + t_ass_rhs) << " \%"
+		<< endl;
 }
 
 #endif // TIMER

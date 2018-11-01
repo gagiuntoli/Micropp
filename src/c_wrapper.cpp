@@ -31,61 +31,61 @@ static material_t materials[MAT_NUM];
 
 extern "C" {
 
-    void micropp_C_material_set(int num_mat, double E, double nu, double Ka,
-                                double Sy, int type)
-    {
-        materials[num_mat].set(E, nu, Ka, Sy, type);
-    }
+	void micropp_C_material_set(int num_mat, double E, double nu, double Ka,
+				    double Sy, int type)
+	{
+		materials[num_mat].set(E, nu, Ka, Sy, type);
+	}
 
-    void micropp_C_material_print(int num_mat)
-    {
-        materials[num_mat].print();
-    }
+	void micropp_C_material_print(int num_mat)
+	{
+		materials[num_mat].print();
+	}
 
-    void micropp_C_create3(int ngp, int size[3], int type, double *params)
-    {
-        micro3 = new micropp<3>(ngp, size, type, params, materials);
-    }
+	void micropp_C_create3(int ngp, int size[3], int type, double *params)
+	{
+		micro3 = new micropp<3>(ngp, size, type, params, materials);
+	}
 
-    void micropp_C_set_strain3(int gp, double strain[6])
-    {
-        micro3->set_macro_strain(gp, strain);
-    }
+	void micropp_C_set_strain3(int gp, double strain[6])
+	{
+		micro3->set_macro_strain(gp, strain);
+	}
 
-    void micropp_C_get_stress3(int gp, double stress[6])
-    {
-        micro3->get_macro_stress(gp, stress);
-    }
+	void micropp_C_get_stress3(int gp, double stress[6])
+	{
+		micro3->get_macro_stress(gp, stress);
+	}
 
-    void micropp_C_get_ctan3(int gp, double ctan[36])
-    {
-        micro3->get_macro_ctan(gp, ctan);
-    }
+	void micropp_C_get_ctan3(int gp, double ctan[36])
+	{
+		micro3->get_macro_ctan(gp, ctan);
+	}
 
-    void micropp_C_update_vars()
-    {
-        micro3->update_vars();
-    }
+	void micropp_C_update_vars()
+	{
+		micro3->update_vars();
+	}
 
-    void micropp_C_print_info()
-    {
-        printf("ptr2 %p\n", micro3);
-        micro3->print_info();
-    }
+	void micropp_C_print_info()
+	{
+		printf("ptr2 %p\n", micro3);
+		micro3->print_info();
+	}
 
-    void micropp_C_homogenize()
-    {
-        micro3->homogenize();
-    }
+	void micropp_C_homogenize()
+	{
+		micro3->homogenize();
+	}
 
-    void micropp_C_destroy3()
-    {
-        delete micro3;
-    }
+	void micropp_C_destroy3()
+	{
+		delete micro3;
+	}
 
-    int micropp_C_get_sigma_cost3(int gp)
-    {
-        return micro3->get_sigma_cost(gp);
-    }
+	int micropp_C_get_sigma_cost3(int gp)
+	{
+		return micro3->get_sigma_cost(gp);
+	}
 
 }

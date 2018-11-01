@@ -62,14 +62,14 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 	file.open(fname_vtu);
 
 	file << "<?xml version=\"1.0\"?>\n"
-	     <<	"<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" "
-	     << "byte_order=\"LittleEndian\">\n"
-	     << "<UnstructuredGrid>\n"
-	     << "<Piece NumberOfPoints=\"" << nn << "\" NumberOfCells=\""
-	     << nelem << "\">\n"
-	     << "<Points>\n"
-	     << "<DataArray type=\"Float64\" Name=\"Position\" "
-	     << "NumberOfComponents=\"3\" format=\"ascii\">" << endl;
+		<<	"<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" "
+		<< "byte_order=\"LittleEndian\">\n"
+		<< "<UnstructuredGrid>\n"
+		<< "<Piece NumberOfPoints=\"" << nn << "\" NumberOfCells=\""
+		<< nelem << "\">\n"
+		<< "<Points>\n"
+		<< "<DataArray type=\"Float64\" Name=\"Position\" "
+		<< "NumberOfComponents=\"3\" format=\"ascii\">" << endl;
 
 	for (int k = 0; k < nz; ++k) {
 		for (int j = 0; j < ny; ++j) {
@@ -125,8 +125,8 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
 			file << (dim == 2 && d == 2 ? 0.0 : \
-			         ((isnan(u[n * dim + d]) ? -1 : u[n * dim + d]))) << " ";
- 		file << endl;
+				 ((isnan(u[n * dim + d]) ? -1 : u[n * dim + d]))) << " ";
+		file << endl;
 	}
 	file << "</DataArray>" << endl;
 
@@ -140,7 +140,7 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
 			file << ((isnan(elem_strain[e * nvoi + v]) ? -1 : \
-			          elem_strain[e * nvoi + v])) << " ";
+				  elem_strain[e * nvoi + v])) << " ";
 		file << endl;
 	}
 	file << "</DataArray>\n";
@@ -151,7 +151,7 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
 			file << ((isnan(elem_stress[e * nvoi + v]) ? -1 : \
-			          elem_stress[e * nvoi + v])) << " ";
+				  elem_stress[e * nvoi + v])) << " ";
 		file << endl;
 	}
 	file << "</DataArray>\n";
@@ -173,7 +173,7 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 			double tmp = 0.0;
 			for (int v = 0; v < nvoi; ++v)
 				tmp += vars_old[intvar_ix(e, gp, v)] *\
-					   vars_old[intvar_ix(e, gp, v)];
+				       vars_old[intvar_ix(e, gp, v)];
 			plasticity += sqrt(tmp);
 		}
 		file << plasticity / npe << " ";

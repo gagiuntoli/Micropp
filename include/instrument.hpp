@@ -62,14 +62,14 @@ class instrument {
 		static inline uint64_t take_time_stamp()
 		{
 			return uint64_t(
-				chrono::high_resolution_clock::now().time_since_epoch().count());
+					chrono::high_resolution_clock::now().time_since_epoch().count());
 		}
 
 	public:
 
 		instrument(const string funct):
 			funct_(funct), start_time_(take_time_stamp())
-		{}
+	{}
 
 		~instrument()
 		{
