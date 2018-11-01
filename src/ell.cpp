@@ -441,6 +441,16 @@ void ell_free(ell_matrix *m)
         free(m->cols);
     if (m->vals != NULL)
         free(m->vals);
+    if (m->k != NULL)
+        free(m->k);
+    if (m->r != NULL)
+        free(m->r);
+    if (m->z != NULL)
+        free(m->z);
+    if (m->p != NULL)
+        free(m->p);
+    if (m->q != NULL)
+        free(m->q);
 }
 
 void print_ell(const ell_matrix *A)

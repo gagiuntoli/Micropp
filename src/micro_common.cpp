@@ -45,25 +45,25 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
     wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
     vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
     ivol(1.0 / (wg * npe)),
-    micro_type(_micro_type), num_int_vars(nelem * 8 * NUM_VAR_GP)
+    micro_type(_micro_type), num_int_vars(nelem * npe * NUM_VAR_GP)
 {
     INST_CONSTRUCT; // Initialize the Intrumentation
 
     gp_list = new gp_t<tdim>[ngp]();
     for (int gp = 0; gp < ngp; ++gp) {
         gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
-        gp_list[gp].u_k = (double *) malloc(nndim * sizeof(double));
+        gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));
     }
 
-    b = (double *) malloc(nndim * sizeof(double));
-    du = (double *) malloc(nndim * sizeof(double));
-    u_aux = (double *) malloc(nndim * sizeof(double));
+    b = (double *) calloc(nndim, sizeof(double));
+    du = (double *) calloc(nndim, sizeof(double));
+    u_aux = (double *) calloc(nndim, sizeof(double));
 
-    elem_type = (int *) malloc(nelem * sizeof(int));
-    elem_stress = (double *) malloc(nelem * nvoi * sizeof(double));
-    elem_strain = (double *) malloc(nelem * nvoi * sizeof(double));
+    elem_type = (int *) calloc(nelem, sizeof(int));
+    elem_stress = (double *) calloc(nelem * nvoi, sizeof(double));
+    elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
     vars_old_aux = (double *) calloc(num_int_vars, sizeof(double));
-    vars_new_aux = (double *) malloc(num_int_vars * sizeof(double));
+    vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
 
     assert(b && du && u_aux && elem_stress && elem_strain &&
            elem_type && vars_old_aux && vars_new_aux);
@@ -184,8 +184,6 @@ template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
     vars_old = vars_old_aux;
-    int nr_its, solver_its[NR_MAX_ITS];
-    double nr_err[NR_MAX_ITS], solver_err[NR_MAX_ITS];
     double sig_1[6];
 
     for (int i = 0; i < nvoi; ++i) {
@@ -193,7 +191,7 @@ void micropp<tdim>::calc_ctan_lin()
         double eps_1[nvoi] = { 0.0 };
         eps_1[i] += D_EPS_CTAN_AVE;
 
-        newton_raphson(eps_1, u_aux, nr_err, solver_its, solver_err);
+        newton_raphson(eps_1, u_aux, NULL, NULL, NULL);
 
         calc_ave_stress(u_aux, sig_1);
 

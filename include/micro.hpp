@@ -48,7 +48,7 @@
 #define CONSTXG         0.577350269189626
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
-#define intvar_ix(e,gp,var)  ((e) * 8 * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
+#define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
 
 using namespace std;
 
@@ -146,14 +146,16 @@ class micropp {
 
         void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
 
-        void plastic_get_stress(const material_t *material, const double eps[6],
-                                const double eps_p_old[6], double alpha_old,
+        void plastic_get_stress(const material_t *material,
+                                const double eps[6],
+                                const double eps_p_old[6],
+                                const double alpha_old,
                                 double stress[6]) const;
 
         bool plastic_law(const material_t *material,
                          const double eps[6],
                          const double eps_p_old[6],
-                         double alpha_old,
+                         const double alpha_old,
                          double *_dl,
                          double _normal[6],
                          double _s_trial[6]) const;
@@ -161,13 +163,13 @@ class micropp {
         void plastic_get_ctan(const material_t *material,
                               const double eps[6],
                               const double eps_p_old[6],
-                              double alpha_old,
+                              const double alpha_old,
                               double ctan[6][6]) const;
 
         bool plastic_evolute(const material_t *material,
                              const double eps[6],
                              const double eps_p_old[6],
-                             double alpha_old,
+                             const double alpha_old,
                              double eps_p_new[6],
                              double *alpha_new) const;
 

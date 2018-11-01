@@ -148,7 +148,7 @@ double micropp<3>::assembly_rhs(const double *u)
 {
     INST_START;
 
-    memset(b, 0, nndim * sizeof(double));
+    memset(b, 0., nndim * sizeof(double));
 
     double be[dim * npe];
     int index[dim * npe];
@@ -176,42 +176,42 @@ double micropp<3>::assembly_rhs(const double *u)
     for (int i = 0; i < nx; ++i) {
         for (int j = 0; j < ny; ++j) {
             const int n = nod_index3D(i, j, 0); // z = 0
-            memset(&b[n * dim], 0, dim * sizeof(double));
+            memset(&b[n * dim], 0., dim * sizeof(double));
         }
     }
 
     for (int i = 0; i < nx; ++i) {
         for (int j = 0; j < ny; ++j) {
             const int n = nod_index3D(i, j, nz - 1); // z = lx
-            memset(&b[n * dim], 0, dim * sizeof(double));
+            memset(&b[n * dim], 0., dim * sizeof(double));
         }
     }
 
     for (int i = 0; i < nx; ++i) {
         for (int k = 1; k < nz - 1; ++k) {
             const int n = nod_index3D(i, 0, k); // y = 0
-            memset(&b[n * dim], 0, dim * sizeof(double));
+            memset(&b[n * dim], 0., dim * sizeof(double));
         }
     }
 
     for (int i = 0; i < nx; ++i) {
         for (int k = 1; k < nz - 1; ++k) {
             const int n = nod_index3D(i, ny - 1, k); // y = ly
-            memset(&b[n * dim], 0, dim * sizeof(double));
+            memset(&b[n * dim], 0., dim * sizeof(double));
         }
     }
 
     for (int j = 1; j < ny - 1; ++j) {
         for (int k = 1; k < nz - 1; ++k) {
             const int n = nod_index3D(0, j, k); // x = 0
-            memset(&b[n * dim], 0, dim * sizeof(double));
+            memset(&b[n * dim], 0., dim * sizeof(double));
         }
     }
 
     for (int j = 1; j < ny - 1; j++) {
         for (int k = 1; k < nz - 1; ++k) {
             const int n = nod_index3D(nx - 1, j, k); // x = lx
-            memset(&b[n * dim], 0, dim * sizeof(double));
+            memset(&b[n * dim], 0., dim * sizeof(double));
         }
     }
 

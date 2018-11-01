@@ -43,7 +43,7 @@ template <>
 bool micropp<3>::plastic_law(const material_t *material,
                              const double eps[6],
                              const double eps_p_old[6],
-                             double alpha_old,
+                             const double alpha_old,
                              double *_dl,
                              double _normal[6],
                              double _s_trial[6]) const
@@ -90,7 +90,7 @@ template <>
 void micropp<3>::plastic_get_stress(const material_t *material,
                                     const double eps[6],
                                     const double eps_p_old[6],
-                                    double alpha_old,
+                                    const double alpha_old,
                                     double stress[6]) const
 {
     double dl, normal[6], s_trial[6];
@@ -112,7 +112,7 @@ template <>
 void micropp<3>::plastic_get_ctan(const material_t *material,
                                   const double eps[6],
                                   const double eps_p_old[6],
-                                  double alpha_old,
+                                  const double alpha_old,
                                   double ctan[6][6]) const
 {
     INST_START;
@@ -139,7 +139,7 @@ template <>
 bool micropp<3>::plastic_evolute(const material_t *material,
                                  const double eps[6],
                                  const double eps_p_old[6],
-                                 double alpha_old, 
+                                 const double alpha_old,
                                  double *eps_p_new,
                                  double *alpha_new) const
 {

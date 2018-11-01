@@ -27,64 +27,67 @@
 template <int dim>
 class gp_t {
 
-		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
+    static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 
-	public:
+    public:
 
-		double macro_strain[nvoi];
-		double macro_stress[nvoi];
-		double *macro_ctan;
+    double macro_strain[nvoi];
+    double macro_stress[nvoi];
+    double *macro_ctan;
 
-		bool allocated; // flag for memory optimization
+    bool allocated; // flag for memory optimization
 
-		double *int_vars_n; // vectors for calculations
-		double *int_vars_k;
-		double *u_n;
-		double *u_k;
+    double *int_vars_n; // vectors for calculations
+    double *int_vars_k;
+    double *u_n;
+    double *u_k;
 
-		int sigma_solver_its[NR_MAX_ITS];
-		int sigma_newton_its;
-		double sigma_solver_err[NR_MAX_ITS];
-		double sigma_newton_err[NR_MAX_ITS];
-		long int sigma_cost;
+    int sigma_solver_its[NR_MAX_ITS];
+    int sigma_newton_its;
+    double sigma_solver_err[NR_MAX_ITS];
+    double sigma_newton_err[NR_MAX_ITS];
+    long int sigma_cost;
 
-		gp_t():
-			int_vars_n(nullptr),
-			int_vars_k(nullptr),
-			allocated(false)
-		{}
+    gp_t():
+        u_n(nullptr),
+        u_k(nullptr),
+        int_vars_n(nullptr),
+        int_vars_k(nullptr),
+        allocated(false)
+    {}
 
-		~gp_t()
-		{
-			free(u_n);
-			if (allocated) {
-				free(macro_ctan);
-				free(int_vars_n);
-				free(int_vars_k);
-			}
-		}
+    ~gp_t()
+    {
+        free(u_n);
+        free(u_k);
+        if (allocated) {
+            free(macro_ctan);
+            free(int_vars_n);
+            free(int_vars_k);
+        }
+    }
 
-		void allocate(const int num_int_vars)
-		{
-			assert(!allocated);
+    void allocate(const int num_int_vars)
+    {
+        assert(!allocated);
 
-			macro_ctan = (double *) malloc(nvoi * nvoi * sizeof(double));
-			int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
-			int_vars_k = (double *) malloc(num_int_vars * sizeof(double));
+        macro_ctan = (double *) calloc(nvoi * nvoi, sizeof(double));
+        int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
+        int_vars_k = (double *) calloc(num_int_vars, sizeof(double));
 
-			allocated = (int_vars_n && int_vars_k);
-			assert(allocated);
-		}
+        allocated = (int_vars_n && int_vars_k);
+        assert(allocated);
+    }
 
 
-		void update_vars()
-		{
-			double *tmp = int_vars_n;
-			int_vars_n = int_vars_k;
-			int_vars_k = tmp;
+    void update_vars()
+    {
+        double *tmp = int_vars_n;
+        int_vars_n = int_vars_k;
+        int_vars_k = tmp;
 
-			tmp = u_n;
-			u_n = u_k;
-			u_k = tmp;
-		}
+        tmp = u_n;
+        u_n = u_k;
+        u_k = tmp;
+    }
 };

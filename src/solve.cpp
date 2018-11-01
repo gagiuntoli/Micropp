@@ -37,13 +37,14 @@ int micropp<tdim>::newton_raphson(const double strain[nvoi],
     int lits = 0;
     double lerr = 0.0, cg_err;
 
-    memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
-    memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
-    memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
+    if (solver_its != NULL) memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
+    if (solver_err != NULL) memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
+    if (newton_err != NULL) memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
 
     do {
         lerr = assembly_rhs(u);
-        newton_err[lits] = lerr;
+
+        if (newton_err != NULL) newton_err[lits] = lerr;
 
         if (lerr < NR_MAX_TOL)
             break;
@@ -51,8 +52,9 @@ int micropp<tdim>::newton_raphson(const double strain[nvoi],
         assembly_mat(u);
 
         int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-        solver_its[lits] = cg_its;
-        solver_err[lits] = cg_err;
+
+        if (solver_its != NULL) solver_its[lits] = cg_its;
+        if (solver_err != NULL) solver_err[lits] = cg_err;
 
         for (int i = 0; i < nn * dim; ++i)
             u[i] += du[i];
