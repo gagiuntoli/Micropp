@@ -1,4 +1,4 @@
-## Micropp
+# Micropp
 
 Code to localize and average strain and stress over a micro structure.
 
