@@ -35,24 +35,14 @@ void micropp<tdim>::output(int gp_id, const char *filename)
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
 
-	if (!gp_list[gp_id].allocated) {
-		vars_old = vars_old_aux;
-		vars_new = vars_new_aux;
-		memset(vars_old, 0, num_int_vars * sizeof(double));
-	} else {
-		vars_old = gp_list[gp_id].int_vars_n;
-		vars_new = gp_list[gp_id].int_vars_k;
-	}
-
-	double *u = gp_list[gp_id].u_k;
-
-	calc_fields(u);
-	write_vtu(u, filename);
+	calc_fields(gp_list[gp_id].u_k, gp_list[gp_id].int_vars_n);
+	write_vtu(gp_list[gp_id].u_k, gp_list[gp_id].int_vars_n, filename);
 }
 
 
 template <int tdim>
-void micropp<tdim>::write_vtu(const double *u, const char *filename)
+void micropp<tdim>::write_vtu(double *u, double *int_vars_old,
+			      const char *filename)
 {
 	std::stringstream fname_vtu_s;
 	fname_vtu_s << filename << ".vtu";
@@ -171,9 +161,14 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 		double plasticity = 0.;
 		for (int gp = 0; gp < npe; ++gp) {
 			double tmp = 0.0;
-			for (int v = 0; v < nvoi; ++v)
-				tmp += vars_old[intvar_ix(e, gp, v)] *\
-				       vars_old[intvar_ix(e, gp, v)];
+			for (int v = 0; v < nvoi; ++v) {
+				if (int_vars_old != NULL) {
+					tmp += int_vars_old[intvar_ix(e, gp, v)] *\
+					       int_vars_old[intvar_ix(e, gp, v)];
+				} else {
+					tmp += 0.0;
+				}
+			}
 			plasticity += sqrt(tmp);
 		}
 		file << plasticity / npe << " ";
@@ -185,8 +180,13 @@ void micropp<tdim>::write_vtu(const double *u, const char *filename)
 		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		double hardening = 0.;
-		for (int gp = 0; gp < npe; ++gp)
-			hardening += vars_old[intvar_ix(e, gp, 6)];
+		for (int gp = 0; gp < npe; ++gp) {
+			if (int_vars_old != NULL) {
+				hardening += int_vars_old[intvar_ix(e, gp, 6)];
+			} else {
+				hardening += 0.0;
+			}
+		}
 		file << hardening / npe << " ";
 	}
 	file << "\n</DataArray>" << endl;

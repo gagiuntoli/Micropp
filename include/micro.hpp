@@ -85,10 +85,10 @@ class micropp {
 		int *elem_type;
 		double *elem_stress;
 		double *elem_strain;
-		double *vars_old_aux, *vars_old;
-		double *vars_new_aux, *vars_new;
+		double *vars_new_aux;
 
-		const double xg[8][3] = { { -CONSTXG, -CONSTXG, -CONSTXG },
+		const double xg[8][3] = {
+			{ -CONSTXG, -CONSTXG, -CONSTXG },
 			{ +CONSTXG, -CONSTXG, -CONSTXG },
 			{ +CONSTXG, +CONSTXG, -CONSTXG },
 			{ -CONSTXG, +CONSTXG, -CONSTXG },
@@ -111,38 +111,48 @@ class micropp {
 		void get_elem_displ(const double *u, double elem_disp[npe * dim],
 				    int ex, int ey, int ez = 0) const;
 
-		void get_stress(int gp, const double eps[nvoi], double stress_gp[nvoi],
+		void get_stress(int gp, const double eps[nvoi],
+				double *int_vars_old,
+				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
-		void get_elem_rhs(const double *u, double be[npe * dim],
+		void get_elem_rhs(double *u,
+				  double *int_vars_old,
+				  double be[npe * dim],
 				  int ex, int ey, int ez = 0) const;
+		void calc_ave_stress(double *u,
+				     double *int_vars_old,
+				     double stress_ave[nvoi]) const;
+		void calc_ave_strain(const double *u,
+				     double strain_ave[nvoi]) const;
 
-		void calc_ave_stress(const double *u, double stress_ave[nvoi]) const;
-		void calc_ave_strain(const double *u, double strain_ave[nvoi]) const;
+		void calc_fields(double *u, double *int_vars_old);
 
-		void calc_fields(const double *u);
-
-		int newton_raphson(const double strain[nvoi], double *u,
+		int newton_raphson(double strain[nvoi],
+				   double *int_vars_old,
+				   double *u,
 				   double err[NR_MAX_ITS],
 				   int solver_its[NR_MAX_ITS],
 				   double solver_err[NR_MAX_ITS]);
 
 		template <typename... Rest>
-			void get_elem_mat(const double *u, double Ae[npe * dim * npe * dim],
+			void get_elem_mat(double *u,
+					  double *int_vars_old,
+					  double Ae[npe * dim * npe * dim],
 					  int ex, int ey, Rest...) const;
 
 		void set_displ_bc(const double strain[nvoi], double *u);
 
-		double assembly_rhs(const double *u);
-		void assembly_mat(const double *u);
-
+		double assembly_rhs(double *u, double *int_vars_old);
+		void assembly_mat(double *u, double *int_vars_old);
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
+		bool calc_vars_new(double *u, double *int_vars_old,
+				   double *int_vars_new);
 
-		bool calc_vars_new(const double *u);
-
-		void write_vtu(const double *u, const char *filename);
+		void write_vtu(double *u, double *int_vars_old,
+			       const char *filename);
 
 		void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
 

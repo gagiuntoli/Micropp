@@ -46,6 +46,9 @@ int main (int argc, char *argv[])
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
 
+	ofstream file;
+	file.open("result.dat");
+
 	int micro_type = 1; // 2 capas
 	double micro_params[5] = { 1., 1., 1., .5, 0. };
 
@@ -76,7 +79,7 @@ int main (int argc, char *argv[])
 		micro.get_macro_ctan(0, ctan);
 
 	    char filename[128];
-	    snprintf(filename, 128, "micro_type_%d", micro_type); 
+	    snprintf(filename, 128, "micro_type_%d", micro_type);
 	    micro.output (0, filename);
 
 		micro.update_vars();
@@ -99,6 +102,9 @@ int main (int argc, char *argv[])
 		}
 
 		cout << endl;
+		file << setw(14) << eps[dir] << "\t" << sig[dir] << "\t" << endl;
 	}
+
+	file.close();
 	return 0;
 }

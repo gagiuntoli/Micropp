@@ -144,7 +144,7 @@ void micropp<3>::calc_bmat(int gp, double bmat[nvoi][npe * dim]) const
 
 
 template<>
-double micropp<3>::assembly_rhs(const double *u)
+double micropp<3>::assembly_rhs(double *u, double *int_vars_old)
 {
 	INST_START;
 
@@ -162,10 +162,9 @@ double micropp<3>::assembly_rhs(const double *u)
 
 				for (int j = 0; j < npe; ++j)
 					for (int d = 0; d < dim; ++d)
-						index[j * dim + d] = n[j] * dim \
-								     + d;
+						index[j * dim + d] = n[j] * dim + d;
 
-				get_elem_rhs(u, be, ex, ey, ez);
+				get_elem_rhs(u, int_vars_old, be, ex, ey, ez);
 
 				for (int i = 0; i < npe * dim; ++i)
 					b[index[i]] += be[i];
@@ -231,7 +230,8 @@ double micropp<3>::assembly_rhs(const double *u)
 
 template <>
 template <>
-void micropp<3>::get_elem_mat(const double *u,
+void micropp<3>::get_elem_mat(double *u,
+			      double *int_vars_old,
 			      double Ae[npe * dim * npe * dim],
 			      int ex, int ey, int ez) const
 {
@@ -244,19 +244,26 @@ void micropp<3>::get_elem_mat(const double *u,
 	constexpr int npedim2 = npedim * npedim;
 
 	double TAe[npedim2] = { 0.0 };
-
-	// memset(Ae, 0, npedim2 * sizeof(double));
+	double zero_nvoi[nvoi] = { 0.0 };
 
 	for (int gp = 0; gp < npe; ++gp) {
 
 		double eps[6];
 		get_strain(u, gp, eps, ex, ey, ez);
-		const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
-		double alpha_old = vars_old[intvar_ix(e, gp, 6)];
+
+		double *eps_p_old;
+		double alpha_old ;
+
+		if (int_vars_old != NULL) {
+			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
+			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
+		} else {
+			eps_p_old = zero_nvoi;
+			alpha_old = 0.0;
+		}
 
 		if (material.plasticity)
-			plastic_get_ctan(&material, eps, eps_p_old,
-					 alpha_old, ctan);
+			plastic_get_ctan(&material, eps, eps_p_old, alpha_old, ctan);
 		else
 			isolin_get_ctan(&material, ctan);
 
@@ -277,8 +284,7 @@ void micropp<3>::get_elem_mat(const double *u,
 				const int inpedim = i * npedim;
 				const double bmatmi = bmat[m][i];
 				for (int j = 0; j < npedim; ++j)
-					TAe[inpedim + j] += bmatmi * \
-							    cxb[m][j] * wg;
+					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
 			}
 		}
 		memcpy(Ae, TAe, npedim2 * sizeof(double));
@@ -287,7 +293,7 @@ void micropp<3>::get_elem_mat(const double *u,
 
 
 template <>
-void micropp<3>::assembly_mat(const double *u)
+void micropp<3>::assembly_mat(double *u, double *int_vars_old)
 {
 	INST_START;
 
@@ -297,7 +303,7 @@ void micropp<3>::assembly_mat(const double *u)
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
-				get_elem_mat(u, Ae, ex, ey, ez);
+				get_elem_mat(u, int_vars_old, Ae, ex, ey, ez);
 				ell_add_3D(&A, ex, ey, ez, Ae);
 			}
 		}

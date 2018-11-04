@@ -75,40 +75,36 @@ void micropp<tdim>::homogenize()
 
         gp_ptr->sigma_cost = 0;
 
-        if (!gp_ptr->allocated) {
-            vars_old = vars_old_aux;
-            vars_new = vars_new_aux;
-            memset(vars_old, 0, num_int_vars * sizeof(double));
-        } else {
-            vars_old = gp_ptr->int_vars_n;
+	double *vars_new;
+        if (gp_ptr->allocated) {
             vars_new = gp_ptr->int_vars_k;
+        } else {
+            vars_new = vars_new_aux;
         }
 
         // SIGMA 1 Newton-Raphson
         memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
-        newton_its = newton_raphson(gp_ptr->macro_strain, gp_ptr->u_k,
+        newton_its = newton_raphson(gp_ptr->macro_strain, gp_ptr->int_vars_n,
+				    gp_ptr->u_k,
                                     newton_err, solver_its, solver_err);
 
         gp_ptr->sigma_newton_its = newton_its;
         memcpy(gp_ptr->sigma_newton_err, newton_err, NR_MAX_ITS * sizeof(double));
-        memcpy(gp_ptr->sigma_solver_its, solver_its,
-               NR_MAX_ITS * sizeof(int));
-        memcpy(gp_ptr->sigma_solver_err, solver_err,
-               NR_MAX_ITS * sizeof(double));
+        memcpy(gp_ptr->sigma_solver_its, solver_its, NR_MAX_ITS * sizeof(int));
+        memcpy(gp_ptr->sigma_solver_err, solver_err, NR_MAX_ITS * sizeof(double));
 
         for (int i = 0; i < newton_its; ++i)
             gp_ptr->sigma_cost += solver_its[i];
 
-        calc_ave_stress(gp_ptr->u_k, gp_ptr->macro_stress);
+        calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
 
-        nl_flag = calc_vars_new(gp_ptr->u_k);
+        nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new);
 
-        if (nl_flag) {
-            if (!gp_ptr->allocated) {
+        if (nl_flag == true) {
+            if (gp_ptr->allocated == false) {
                 gp_ptr->allocate(num_int_vars);
-                memcpy(gp_ptr->int_vars_k, vars_new,
-                       num_int_vars * sizeof(double));
+                memcpy(gp_ptr->int_vars_k, vars_new, num_int_vars * sizeof(double));
             }
         }
 
@@ -125,10 +121,10 @@ void micropp<tdim>::homogenize()
                 memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
                 eps_1[i] += D_EPS_CTAN_AVE;
 
-                newton_its = newton_raphson(eps_1, u_aux, newton_err,
-                                            solver_its, solver_err);
+                newton_its = newton_raphson(eps_1, gp_ptr->int_vars_n, u_aux,
+					    newton_err, solver_its, solver_err);
 
-                calc_ave_stress(u_aux, sig_1);
+                calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);
 
                 for (int v = 0; v < nvoi; ++v)
                     gp_ptr->macro_ctan[v * nvoi + i] =

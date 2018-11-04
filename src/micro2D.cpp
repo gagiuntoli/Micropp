@@ -102,7 +102,7 @@ void micropp<2>::calc_bmat(int gp, double bmat[nvoi][npe *dim])	const
 
 
 template <>
-double micropp<2>::assembly_rhs(const double *u)
+double micropp<2>::assembly_rhs(double *u, double *int_vars_old)
 {
 	INST_START;
 
@@ -121,7 +121,7 @@ double micropp<2>::assembly_rhs(const double *u)
 				for (int d = 0; d < dim; ++d)
 					index[j * dim + d] = n[j] * dim + d;
 
-			get_elem_rhs(u, be, ex, ey);
+			get_elem_rhs(u, int_vars_old, be, ex, ey);
 
 			for (int i = 0; i < npe * dim; ++i)
 				b[index[i]] += be[i];
@@ -161,7 +161,8 @@ double micropp<2>::assembly_rhs(const double *u)
 
 template <>
 template <>
-void micropp<2>::get_elem_mat(const double *u,
+void micropp<2>::get_elem_mat(double *u,
+			      double *int_vars_old,
 			      double Ae[npe * dim * npe * dim], int ex, int ey) const
 {
 	INST_START;
@@ -174,9 +175,10 @@ void micropp<2>::get_elem_mat(const double *u,
 	constexpr int npedim = npe * dim;
 	constexpr int npedim2 = npedim * npedim;
 
-	double ctan[nvoi][nvoi] = {{(1 - nu),     nu,             0 },
-		{      nu, (1 - nu),           0 },
-		{       0,   0, (1 - 2 * nu) / 2 }};
+	double ctan[nvoi][nvoi] = {
+		{(1 - nu),       nu,                0 },
+		{      nu, (1 - nu),                0 },
+		{       0,        0, (1 - 2 * nu) / 2 }};
 
 	for (int i = 0; i < nvoi; i++)
 		for (int j = 0; j < nvoi; j++)
@@ -212,8 +214,8 @@ void micropp<2>::get_elem_mat(const double *u,
 }
 
 
-	template <>
-void micropp<2>::assembly_mat(const double *u)
+template <>
+void micropp<2>::assembly_mat(double *u, double *int_vars_old)
 {
 	INST_START;
 
@@ -222,7 +224,7 @@ void micropp<2>::assembly_mat(const double *u)
 	double Ae[npe * dim * npe * dim];
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
-			get_elem_mat(u, Ae, ex, ey);
+			get_elem_mat(u, int_vars_old, Ae, ex, ey);
 			ell_add_2D(&A, ex, ey, Ae);
 		}
 	}

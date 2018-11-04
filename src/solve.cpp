@@ -25,8 +25,10 @@ using namespace std;
 
 
 template <int tdim>
-int micropp<tdim>::newton_raphson(const double strain[nvoi],
-				  double *u, double newton_err[NR_MAX_ITS],
+int micropp<tdim>::newton_raphson(double strain[nvoi],
+				  double *int_vars_old,
+				  double *u,
+				  double newton_err[NR_MAX_ITS],
 				  int solver_its[NR_MAX_ITS],
 				  double solver_err[NR_MAX_ITS])
 {
@@ -42,14 +44,14 @@ int micropp<tdim>::newton_raphson(const double strain[nvoi],
 	if (newton_err != NULL) memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
 
 	do {
-		lerr = assembly_rhs(u);
+		lerr = assembly_rhs(u, int_vars_old);
 
 		if (newton_err != NULL) newton_err[lits] = lerr;
 
 		if (lerr < NR_MAX_TOL)
 			break;
 
-		assembly_mat(u);
+		assembly_mat(u, int_vars_old);
 
 		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
 

@@ -62,11 +62,10 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	elem_type = (int *) calloc(nelem, sizeof(int));
 	elem_stress = (double *) calloc(nelem * nvoi, sizeof(double));
 	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
-	vars_old_aux = (double *) calloc(num_int_vars, sizeof(double));
 	vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
 
-	assert(b && du && u_aux && elem_stress && elem_strain &&
-	       elem_type && vars_old_aux && vars_new_aux);
+	assert(b && du && u_aux && elem_stress
+	       && elem_strain && elem_type && vars_new_aux);
 
 	int nParams = 4;
 	numMaterials = 2;
@@ -111,7 +110,6 @@ micropp<tdim>::~micropp()
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
-	free(vars_old_aux);
 	free(vars_new_aux);
 
 	delete [] gp_list;
@@ -181,10 +179,9 @@ int micropp<tdim>::get_sigma_cost(int gp_id) const
 }
 
 
-	template <int tdim>
+template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
-	vars_old = vars_old_aux;
 	double sig_1[6];
 
 	for (int i = 0; i < nvoi; ++i) {
@@ -192,9 +189,9 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		newton_raphson(eps_1, u_aux, NULL, NULL, NULL);
+		newton_raphson(eps_1, NULL, u_aux, NULL, NULL, NULL);
 
-		calc_ave_stress(u_aux, sig_1);
+		calc_ave_stress(u_aux, NULL, sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
@@ -210,7 +207,9 @@ material_t micropp<tdim>::get_material(const int e) const
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_rhs(const double *u, double be[npe * dim],
+void micropp<tdim>::get_elem_rhs(double *u,
+				 double *int_vars_old,
+				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
 	constexpr int npedim = npe * dim;
@@ -223,7 +222,7 @@ void micropp<tdim>::get_elem_rhs(const double *u, double be[npe * dim],
 		calc_bmat(gp, bmat);
 
 		get_strain(u, gp, strain_gp, ex, ey, ez);
-		get_stress(gp, strain_gp, stress_gp, ex, ey, ez);
+		get_stress(gp, strain_gp, int_vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
@@ -376,20 +375,29 @@ void micropp<tdim>::print_info() const
 
 template <int tdim>
 void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
+			       double *int_vars_old,
 			       double stress_gp[nvoi],
 			       int ex, int ey, int ez) const
 {
 	const int e = glo_elem(ex, ey, ez);
 	const material_t material = get_material(e);
 	const double mu = material.mu;
+	double zero_nvoi[nvoi] = { 0.0 };
 
 	if (material.plasticity == true) {
 
-		const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
-		const double alpha_old = vars_old[intvar_ix(e, gp, 6)];
+		double *eps_p_old;
+		double alpha_old ;
 
-		plastic_get_stress(&material, eps, eps_p_old,
-				   alpha_old, stress_gp);
+		if (int_vars_old != NULL) {
+			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
+			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
+		} else {
+			eps_p_old = zero_nvoi;
+			alpha_old = 0.0;
+		}
+
+		plastic_get_stress(&material, eps, eps_p_old, alpha_old, stress_gp);
 
 	} else {
 
@@ -400,7 +408,7 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 
 
 template <int tdim>
-void micropp<tdim>::calc_ave_stress(const double *u,
+void micropp<tdim>::calc_ave_stress(double *u, double *int_vars_old,
 				    double stress_ave[nvoi]) const
 {
 	memset(stress_ave, 0, nvoi * sizeof(double));
@@ -416,11 +424,10 @@ void micropp<tdim>::calc_ave_stress(const double *u,
 					double stress_gp[nvoi], strain_gp[nvoi];
 
 					get_strain(u, gp, strain_gp, ex, ey, ez);
-					get_stress(gp, strain_gp, stress_gp,
-						   ex, ey, ez);
+					get_stress(gp, strain_gp, int_vars_old,
+						   stress_gp, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v)
-						stress_aux[v] += stress_gp[v] \
-								 * wg;
+						stress_aux[v] += stress_gp[v] * wg;
 
 				}
 				for (int v = 0; v < nvoi; ++v)
@@ -467,7 +474,7 @@ void micropp<tdim>::calc_ave_strain(const double *u,
 
 
 template<int tdim>
-void micropp<tdim>::calc_fields(const double *u)
+void micropp<tdim>::calc_fields(double *u, double *int_vars_old)
 {
 	for (int ez = 0; ez < nez; ++ez) { // 2D -> nez = 1
 		for (int ey = 0; ey < ney; ++ey) {
@@ -481,8 +488,8 @@ void micropp<tdim>::calc_fields(const double *u)
 					double stress_gp[nvoi], strain_gp[nvoi];
 
 					get_strain(u, gp, strain_gp, ex, ey, ez);
-					get_stress(gp, strain_gp, stress_gp,
-						   ex, ey, ez);
+					get_stress(gp, strain_gp, int_vars_old,
+						   stress_gp, ex, ey, ez);
 
 					for (int v = 0; v < nvoi; ++v) {
 						eps_a[v] += strain_gp[v] * wg;
@@ -502,11 +509,13 @@ void micropp<tdim>::calc_fields(const double *u)
 
 
 template<int tdim>
-bool micropp<tdim>::calc_vars_new(const double *u)
+bool micropp<tdim>::calc_vars_new(double *u, double *int_vars_old,
+				  double *int_vars_new)
 {
 	INST_START;
 
 	bool nl_flag = false;
+	double zero_nvoi[nvoi] = { 0.0 };
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -517,18 +526,28 @@ bool micropp<tdim>::calc_vars_new(const double *u)
 
 				for (int gp = 0; gp < npe; ++gp) {
 
-					const double *eps_p_old = &vars_old[intvar_ix(e, gp, 0)];
-					double alpha_old = vars_old[intvar_ix(e, gp, 6)];
-					double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
-					double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
-					double eps[nvoi];
-					get_strain(u, gp, eps, ex, ey, ez);
+					if (material.plasticity == true) {
 
-					nl_flag |= plastic_evolute(&material,
-								   eps, eps_p_old,
-								   alpha_old,
-								   eps_p_new,
-								   alpha_new);
+						double *eps_p_old;
+						double alpha_old;
+						if (int_vars_old != NULL) {
+							eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
+							alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
+						} else {
+							eps_p_old = zero_nvoi;
+							alpha_old = 0.0;
+						}
+						double *eps_p_new = &int_vars_new[intvar_ix(e, gp, 0)];
+						double *alpha_new = &int_vars_new[intvar_ix(e, gp, 6)];
+						double eps[nvoi];
+						get_strain(u, gp, eps, ex, ey, ez);
+
+						nl_flag |= plastic_evolute(&material,
+									   eps, eps_p_old,
+									   alpha_old,
+									   eps_p_new,
+									   alpha_new);
+					}
 				}
 			}
 		}
