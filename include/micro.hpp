@@ -76,6 +76,7 @@ class micropp {
 		double ctan_lin[nvoi * nvoi];
 
 		ell_matrix A;
+		ell_matrix Ae;
 
 		double *b;
 		double *du;
@@ -146,7 +147,7 @@ class micropp {
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(double *u, double *int_vars_old);
-		void assembly_mat(double *u, double *int_vars_old);
+		void assembly_mat(ell_matrix *A, double *u, double *int_vars_old);
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 		bool calc_vars_new(double *u, double *int_vars_old,
 				   double *int_vars_new);

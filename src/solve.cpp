@@ -51,7 +51,7 @@ int micropp<tdim>::newton_raphson(double strain[nvoi],
 		if (lerr < NR_MAX_TOL)
 			break;
 
-		assembly_mat(u, int_vars_old);
+		assembly_mat(&A, u, int_vars_old);
 
 		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
 
