@@ -25,9 +25,7 @@ include_directories(include ${CMAKE_BINARY_DIR})
 # wildcard all the sources in src
 file(GLOB SOURCESLIB src/*.cpp src/*.f95)
 
-# Library
 add_library(micropp ${SOURCESLIB})
 
-# Enable auto create tests
 enable_testing()
 add_subdirectory(test)
