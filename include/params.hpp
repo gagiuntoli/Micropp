@@ -19,7 +19,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#define CG_MIN_ERR      1.0e-0
-#define CG_MAX_ITS      50
+#define CG_MIN_ERR      1.0e-3
+#define CG_MAX_ITS      100
 #define NR_MAX_TOL      1.0e-1
 #define NR_MAX_ITS      4

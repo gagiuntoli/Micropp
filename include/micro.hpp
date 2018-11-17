@@ -131,7 +131,8 @@ class micropp {
 
 		void calc_fields(double *u, double *int_vars_old);
 
-		int newton_raphson(double strain[nvoi],
+		int newton_raphson(bool non_linear,
+				   double strain[nvoi],
 				   double *int_vars_old,
 				   double *u,
 				   double err[NR_MAX_ITS],

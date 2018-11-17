@@ -25,7 +25,8 @@ using namespace std;
 
 
 template <int tdim>
-int micropp<tdim>::newton_raphson(double strain[nvoi],
+int micropp<tdim>::newton_raphson(bool non_linear,
+				  double strain[nvoi],
 				  double *int_vars_old,
 				  double *u,
 				  double newton_err[NR_MAX_ITS],
@@ -51,9 +52,17 @@ int micropp<tdim>::newton_raphson(double strain[nvoi],
 		if (lerr < NR_MAX_TOL)
 			break;
 
-		assembly_mat(&A, u, int_vars_old);
+		int cg_its;
+		if (non_linear || lits > 0) {
 
-		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+			assembly_mat(&A, u, int_vars_old);
+			cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+
+		} else {
+
+			cg_its = ell_solve_cgpd(&Ae, b, du, &cg_err);
+
+		}
 
 		if (solver_its != NULL) solver_its[lits] = cg_its;
 		if (solver_err != NULL) solver_err[lits] = cg_err;

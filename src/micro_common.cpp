@@ -192,7 +192,7 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		newton_raphson(eps_1, NULL, u_aux, NULL, NULL, NULL);
+		newton_raphson(false, eps_1, NULL, u_aux, NULL, NULL, NULL);
 
 		calc_ave_stress(u_aux, NULL, sig_1);
 

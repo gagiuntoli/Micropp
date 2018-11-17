@@ -77,13 +77,16 @@ int main (int argc, char *argv[])
 		micro.homogenize();
 		micro.get_macro_stress(0, sig);
 		micro.get_macro_ctan(0, ctan);
+		int newton_its = micro.get_sigma_newton_its(0);
+		int non_linear = micro.get_nl_flag(0);
 
-	    char filename[128];
-	    snprintf(filename, 128, "micro_type_%d", micro_type);
-	    micro.output (0, filename);
+		char filename[128];
+		snprintf(filename, 128, "micro_type_%d", micro_type);
+		micro.output (0, filename);
 
 		micro.update_vars();
 
+		cout << "non_linear = \t" << non_linear << "\tnewton its =\t" << newton_its << endl;
 		cout << "eps =\t";
 		for (int i = 0; i < 6; ++i)
 			cout << setw(14) << eps[i] << "\t";
