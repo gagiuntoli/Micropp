@@ -60,7 +60,7 @@ int micropp<tdim>::newton_raphson(bool non_linear,
 
 		} else {
 
-			cg_its = ell_solve_cgpd(&Ae, b, du, &cg_err);
+			cg_its = ell_solve_cgpd(&A0, b, du, &cg_err);
 
 		}
 

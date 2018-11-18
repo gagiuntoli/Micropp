@@ -88,8 +88,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = dim;
 	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
-	ell_init(&Ae, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
-	assembly_mat(&Ae, u_aux, NULL);
+	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
+	assembly_mat(&A0, u_aux, NULL);
 
 	calc_ctan_lin();
 
@@ -105,7 +105,7 @@ micropp<tdim>::~micropp()
 	INST_DESTRUCT;
 
 	ell_free(&A);
-	ell_free(&Ae);
+	ell_free(&A0);
 
 	free(b);
 	free(du);

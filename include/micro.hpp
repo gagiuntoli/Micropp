@@ -75,8 +75,8 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix A;
-		ell_matrix Ae;
+		ell_matrix A;  // Non - Linear Jacobian
+		ell_matrix A0; // Linear Jacobian (constant)
 
 		double *b;
 		double *du;
