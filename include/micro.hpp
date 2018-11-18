@@ -202,12 +202,9 @@ class micropp {
 		~micropp();
 
 		int get_nl_flag(const int gp_id) const;
-		void get_sigma_solver_its(int gp_id,
-					  int sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_solver_err(int gp_id,
-					  double sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_newton_err(int gp_id,
-					  double sigma_nr_err[NR_MAX_ITS]) const;
+		void get_sigma_solver_its(int gp_id, int sigma_solver_err[NR_MAX_ITS]) const;
+		void get_sigma_solver_err(int gp_id, double sigma_solver_err[NR_MAX_ITS]) const;
+		void get_sigma_newton_err(int gp_id, double sigma_nr_err[NR_MAX_ITS]) const;
 		int get_sigma_newton_its(int gp_id) const;
 		int get_sigma_cost(int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);
