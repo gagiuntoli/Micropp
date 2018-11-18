@@ -199,6 +199,8 @@ void micropp<tdim>::calc_ctan_lin()
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
 	}
+	for (int i = 0; i < nvoi * nvoi; ++i)
+		ctan_lin[i] = (fabs(ctan_lin[i]) > 1.0e-5) ? ctan_lin[i] : 0.0;
 }
 
 
