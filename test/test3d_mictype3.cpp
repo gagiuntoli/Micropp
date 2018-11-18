@@ -45,16 +45,17 @@ int main (int argc, char *argv[])
 	const int dir = atoi(argv[4]);
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
+	char filename[128];
 
 	ofstream file;
 	file.open("result.dat");
 
-	int micro_type = 1; // 2 flat layers
-	double micro_params[4] = { 1., 1., 1., .5 };
+	int micro_type = 3; // 2 fibers at 90 deg
+	double micro_params[4] = { 1., 1., 1., .15 };
 
 	material_t mat_params[2];
 	mat_params[0].set(3.0e7, 0.25, 1.0e0, 2.0e5, 1);
-	mat_params[1].set(3.0e7, 0.25, 1.0e5, 2.0e5, 0);
+	mat_params[1].set(3.0e8, 0.25, 1.0e5, 2.0e5, 0);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();
@@ -80,9 +81,8 @@ int main (int argc, char *argv[])
 		int newton_its = micro.get_sigma_newton_its(0);
 		int non_linear = micro.get_nl_flag(0);
 
-		char filename[128];
-		snprintf(filename, 128, "micro_type_%d", micro_type);
-		micro.output (0, filename);
+		snprintf(filename, 128, "micropp_%d", t);
+		micro.output(0, filename);
 
 		micro.update_vars();
 
