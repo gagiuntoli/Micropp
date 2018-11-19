@@ -25,7 +25,8 @@ using namespace std;
 
 
 template <int tdim>
-int micropp<tdim>::newton_raphson(double strain[nvoi],
+int micropp<tdim>::newton_raphson(bool non_linear,
+				  double strain[nvoi],
 				  double *int_vars_old,
 				  double *u,
 				  double newton_err[NR_MAX_ITS],
@@ -37,7 +38,7 @@ int micropp<tdim>::newton_raphson(double strain[nvoi],
 	set_displ_bc(strain, u);
 
 	int lits = 0;
-	double lerr = 0.0, cg_err;
+	double lerr = 0.0, lerr0, cg_err;
 
 	if (solver_its != NULL) memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
 	if (solver_err != NULL) memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
@@ -46,14 +47,25 @@ int micropp<tdim>::newton_raphson(double strain[nvoi],
 	do {
 		lerr = assembly_rhs(u, int_vars_old);
 
+		if (lits == 0)
+			lerr0 = lerr;
+
 		if (newton_err != NULL) newton_err[lits] = lerr;
 
-		if (lerr < NR_MAX_TOL)
+		if (lerr < NR_MAX_TOL || lerr < lerr0 * NR_REL_TOL)
 			break;
 
-		assembly_mat(u, int_vars_old);
+		int cg_its;
+		if (non_linear || lits > 0) {
 
-		int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+			assembly_mat(&A, u, int_vars_old);
+			cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+
+		} else {
+
+			cg_its = ell_solve_cgpd(&A0, b, du, &cg_err);
+
+		}
 
 		if (solver_its != NULL) solver_its[lits] = cg_its;
 		if (solver_err != NULL) solver_err[lits] = cg_err;

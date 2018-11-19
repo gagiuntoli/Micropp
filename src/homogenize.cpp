@@ -85,8 +85,8 @@ void micropp<tdim>::homogenize()
         // SIGMA 1 Newton-Raphson
         memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
-        newton_its = newton_raphson(gp_ptr->macro_strain, gp_ptr->int_vars_n,
-				    gp_ptr->u_k,
+        newton_its = newton_raphson(gp_ptr->allocated, gp_ptr->macro_strain,
+				    gp_ptr->int_vars_n, gp_ptr->u_k,
                                     newton_err, solver_its, solver_err);
 
         gp_ptr->sigma_newton_its = newton_its;
@@ -121,7 +121,8 @@ void micropp<tdim>::homogenize()
                 memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
                 eps_1[i] += D_EPS_CTAN_AVE;
 
-                newton_its = newton_raphson(eps_1, gp_ptr->int_vars_n, u_aux,
+                newton_its = newton_raphson(true, eps_1, gp_ptr->int_vars_n,
+					    u_aux,
 					    newton_err, solver_its, solver_err);
 
                 calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);

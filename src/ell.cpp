@@ -195,15 +195,20 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 		m->r[i] -= b[i];
 
 	int its = 0;
-	double rho_0, rho_1, err;
+	double rho_0, rho_1, err, err0;
 
 	do {
 		err = 0.0;
 		for (int i = 0; i < m->nrow; i++)
 			err += m->r[i] * m->r[i];
 		err = sqrt(err);
-		if (err < m->min_err)
+
+		if (its == 0)
+			err0 = err;
+
+		if (err < m->min_err || err < err0 * 1.0e-10)
 			break;
+
 
 		for (int i = 0; i < m->nrow; i++)
 			m->z[i] = m->k[i] * m->r[i];

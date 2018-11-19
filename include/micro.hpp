@@ -75,7 +75,8 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix A;
+		ell_matrix A;  // Non - Linear Jacobian
+		ell_matrix A0; // Linear Jacobian (constant)
 
 		double *b;
 		double *du;
@@ -130,7 +131,8 @@ class micropp {
 
 		void calc_fields(double *u, double *int_vars_old);
 
-		int newton_raphson(double strain[nvoi],
+		int newton_raphson(bool non_linear,
+				   double strain[nvoi],
 				   double *int_vars_old,
 				   double *u,
 				   double err[NR_MAX_ITS],
@@ -146,7 +148,7 @@ class micropp {
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(double *u, double *int_vars_old);
-		void assembly_mat(double *u, double *int_vars_old);
+		void assembly_mat(ell_matrix *A, double *u, double *int_vars_old);
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 		bool calc_vars_new(double *u, double *int_vars_old,
 				   double *int_vars_new);
@@ -200,12 +202,9 @@ class micropp {
 		~micropp();
 
 		int get_nl_flag(const int gp_id) const;
-		void get_sigma_solver_its(int gp_id,
-					  int sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_solver_err(int gp_id,
-					  double sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_newton_err(int gp_id,
-					  double sigma_nr_err[NR_MAX_ITS]) const;
+		void get_sigma_solver_its(int gp_id, int sigma_solver_err[NR_MAX_ITS]) const;
+		void get_sigma_solver_err(int gp_id, double sigma_solver_err[NR_MAX_ITS]) const;
+		void get_sigma_newton_err(int gp_id, double sigma_nr_err[NR_MAX_ITS]) const;
 		int get_sigma_newton_its(int gp_id) const;
 		int get_sigma_cost(int gp_id) const;
 		void set_macro_strain(const int gp_id, const double *macro_strain);

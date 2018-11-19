@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-4
+#define D_EPS 5.0e-5
 
 int main (int argc, char *argv[])
 {
@@ -45,33 +45,35 @@ int main (int argc, char *argv[])
 	const int dir = atoi(argv[4]);
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
+	char filename[128];
 
 	ofstream file;
 	file.open("result.dat");
 
-	int micro_type = 1; // 2 flat layers
-	double micro_params[4] = { 1., 1., 1., .5 };
+	int micro_type = 3; // 2 fibers at 90 deg
+	double micro_params[4] = { 1., 1., 1., .15 };
 
 	material_t mat_params[2];
-	mat_params[0].set(3.0e7, 0.25, 1.0e0, 2.0e5, 1);
-	mat_params[1].set(3.0e7, 0.25, 1.0e5, 2.0e5, 0);
+	mat_params[0].set(3.0e7, 0.25, 1.0e4, 1.0e5, 1);
+	mat_params[1].set(3.0e8, 0.25, 1.0e5, 1.0e5, 0);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();
 
 	double sig[6], ctan[36];
 	double eps[6] = { 0. };
+	int sigma_solver_its[NR_MAX_ITS];
+	double sigma_solver_err[NR_MAX_ITS];
+	double sigma_nr_err[NR_MAX_ITS];
 
 	for (int t = 0; t < time_steps; ++t) {
 
 		cout << "time step = " << t << endl;
 
-		if (t < 80)
+		if (t < time_steps / 2)
 			eps[dir] += D_EPS;
-		else if (t < 160)
-			eps[dir] -= D_EPS;
 		else
-			eps[dir] += D_EPS;
+			eps[dir] -= D_EPS;
 
 		micro.set_macro_strain(0, eps);
 		micro.homogenize();
@@ -79,14 +81,22 @@ int main (int argc, char *argv[])
 		micro.get_macro_ctan(0, ctan);
 		int newton_its = micro.get_sigma_newton_its(0);
 		int non_linear = micro.get_nl_flag(0);
+		micro.get_sigma_solver_its(0, sigma_solver_its);
+		micro.get_sigma_solver_err(0, sigma_solver_err);
+		micro.get_sigma_newton_err(0, sigma_nr_err);
 
-		char filename[128];
-		snprintf(filename, 128, "micro_type_%d", micro_type);
-		micro.output (0, filename);
+		snprintf(filename, 128, "micropp_%d", t);
+		micro.output(0, filename);
 
 		micro.update_vars();
 
 		cout << "non_linear = \t" << non_linear << "\tnewton its =\t" << newton_its << endl;
+		for (int i = 0; i < newton_its + 1; ++i)
+			cout    << " nr : " << i
+				<< " nr_err : " << scientific << sigma_nr_err[i]
+				<< " cg_its : " << sigma_solver_its[i]
+				<< " cg_err : " << scientific << sigma_solver_err[i] << endl;
+
 		cout << "eps =\t";
 		for (int i = 0; i < 6; ++i)
 			cout << setw(14) << eps[i] << "\t";

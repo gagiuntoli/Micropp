@@ -11,6 +11,7 @@ set(testsources
 	test3d_5.cpp
 	test3d_6.c
 	test3d_perf_1.cpp
+	test3d_mictype3.cpp
 	test_get_elem_nodes.cpp
 	test_ell_1.cpp
 	test_ell_2.cpp
@@ -43,4 +44,4 @@ add_test(NAME test_ell_1 COMMAND test_ell_1)
 add_test(NAME test_ell_2 COMMAND test_ell_2)
 add_test(NAME test_ell_3 COMMAND test_ell_3 5 5)
 add_test(NAME test_util_1 COMMAND test_util_1)
-add_test(NAME test_get_elem_nodes COMMAND test_get_elem_nodes)
+#add_test(NAME test_get_elem_nodes COMMAND test_get_elem_nodes)
