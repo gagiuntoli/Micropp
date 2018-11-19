@@ -38,7 +38,7 @@ int micropp<tdim>::newton_raphson(bool non_linear,
 	set_displ_bc(strain, u);
 
 	int lits = 0;
-	double lerr = 0.0, cg_err;
+	double lerr = 0.0, lerr0, cg_err;
 
 	if (solver_its != NULL) memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
 	if (solver_err != NULL) memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
@@ -47,9 +47,12 @@ int micropp<tdim>::newton_raphson(bool non_linear,
 	do {
 		lerr = assembly_rhs(u, int_vars_old);
 
+		if (lits == 0)
+			lerr0 = lerr;
+
 		if (newton_err != NULL) newton_err[lits] = lerr;
 
-		if (lerr < NR_MAX_TOL)
+		if (lerr < NR_MAX_TOL || lerr < lerr0 * NR_REL_TOL)
 			break;
 
 		int cg_its;
