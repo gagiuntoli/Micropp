@@ -22,7 +22,7 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "params.hpp"
+#define GP_NR_MAX_ITS 4
 
 template <int dim>
 class gp_t {
@@ -42,10 +42,10 @@ class gp_t {
 	double *u_n;
 	double *u_k;
 
-	int sigma_solver_its[NR_MAX_ITS];
+	int sigma_solver_its[GP_NR_MAX_ITS];
 	int sigma_newton_its;
-	double sigma_solver_err[NR_MAX_ITS];
-	double sigma_newton_err[NR_MAX_ITS];
+	double sigma_solver_err[GP_NR_MAX_ITS];
+	double sigma_newton_err[GP_NR_MAX_ITS];
 	long int sigma_cost;
 
 	gp_t():

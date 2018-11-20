@@ -125,6 +125,9 @@ void micropp<tdim>::homogenize()
 					    u_aux,
 					    newton_err, solver_its, solver_err);
 
+		for (int i = 0; i < newton_its; ++i)
+			gp_ptr->sigma_cost += solver_its[i];
+
                 calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);
 
                 for (int v = 0; v < nvoi; ++v)
