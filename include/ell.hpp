@@ -36,42 +36,35 @@ using namespace std;
 
 typedef struct {
 
-	int n[3];       // nx ny nz
+	int n[3];          // nx ny nz
 	int nn;
 	int dim;
 	int nfield;
-	int nrow; // number of rows
-	int ncol; // number of columns
-	int nnz; // non zeros per row
+	int nrow;          // number of rows
+	int ncol;          // number of columns
+	int nnz;           // non zeros per row
 	int *cols = NULL;
 	double *vals = NULL;
 
-	int max_its;
-	double min_err;
+	int max_its;       // maximun number of iterations
+	double min_err;    // minimun error (absolute)
+	double rel_err;    // relative error
 	double *k, *r, *z, *p, *q;
 
 } ell_matrix;
 
 void ell_init(ell_matrix *m, const int nfield, const int dim,
-	      const int ns[3], const double min_err, const int max_its);
+	      const int ns[3],
+	      const double min_err, const double rel_err, const int max_its);
 
 void ell_mvp(const ell_matrix *m, const double *x, double *y);
-
-int ell_solve_cgpd(const ell_matrix *m, const double *b,
-		   double *x, double *err_);
-
+int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err_);
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae);
-
 void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae);
-
 void ell_set_zero_mat(ell_matrix *m);
-
 void ell_set_bc_2D(ell_matrix *m);
-
 void ell_set_bc_3D(ell_matrix *m);
-
 void ell_free(ell_matrix *m);
-
 void print_ell(const ell_matrix *A);
 
 #endif

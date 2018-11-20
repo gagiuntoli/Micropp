@@ -29,8 +29,8 @@
 using namespace std;
 
 
-void ell_init(ell_matrix *m, const int nfield, const int dim,
-	      const int ns[3], const double min_err, const int max_its)
+void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
+	      const double min_err, const double rel_err, const int max_its)
 {
 	memcpy(m->n, ns, 3 * sizeof(int));
 	assert(ns[0] >= 0 && ns[1] >= 0 && ns[2] >= 0);
@@ -59,6 +59,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim,
 
 	m->max_its = max_its;
 	m->min_err = min_err;
+	m->rel_err = rel_err;
 	m->k = (double *) malloc(nn * nfield * sizeof(double));
 	m->r = (double *) malloc(nn * nfield * sizeof(double));
 	m->z = (double *) malloc(nn * nfield * sizeof(double));
@@ -183,9 +184,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	for (int i = 0; i < nn; i++) {
 		for (int d = 0; d < nfield; d++)
 			m->k[i * nfield + d] = 1 / m->vals[i * nfield * m->nnz
-				+ shift * nfield
-				+ d * m->nnz
-				+ d];
+				+ shift * nfield + d * m->nnz + d];
 	}
 
 	memset(x, 0.0, m->nrow * sizeof(double));
@@ -206,7 +205,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 		if (its == 0)
 			err0 = err;
 
-		if (err < m->min_err || err < err0 * 1.0e-10)
+		if (err < m->min_err || err < err0 * m->rel_err)
 			break;
 
 
@@ -259,7 +258,8 @@ void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 	const int nfield = m->nfield;
 	const int npe = 4;
 	const int nnz = m->nnz;
-	const int cols_row[4][4] = { { 4, 5, 8, 7 },
+	const int cols_row[4][4] = {
+		{ 4, 5, 8, 7 },
 		{ 3, 4, 7, 6 },
 		{ 0, 1, 4, 3 },
 		{ 1, 2, 5, 4 } };
@@ -296,7 +296,8 @@ void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae)
 	const int nfield = m->nfield;
 	const int npe = 8;
 	const int nnz = m->nnz;
-	const int cols_row[8][8] = { { 13, 14, 17, 16, 22, 23, 26, 25 },
+	const int cols_row[8][8] = {
+		{ 13, 14, 17, 16, 22, 23, 26, 25 },
 		{ 12, 13, 16, 15, 21, 22, 25, 24 },
 		{ 9,  10, 13, 12, 18, 19, 22, 21 },
 		{ 10, 11, 14, 13, 19, 20, 23, 22 },
@@ -337,7 +338,7 @@ void ell_set_zero_mat(ell_matrix *m)
 
 void ell_set_bc_2D(ell_matrix *m)
 {
-	// Sets 1s on the diagonal of the boundaries and 0s 
+	// Sets 1s on the diagonal of the boundaries and 0s
 	// on the columns corresponding to that values
 	const int nx = m->n[0];
 	const int ny = m->n[1];

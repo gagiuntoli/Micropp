@@ -49,13 +49,13 @@ int main (int argc, char *argv[])
 	const int ns[3] = { nx, ny, 0 };
 	const int nfield = 1;
 	const int dim = 2;
-	ell_init(&A1, nfield, dim, ns, 1.0e-5, 50);
+	ell_init(&A1, nfield, dim, ns, 1.0e-5, 1.0e-5, 50);
 
 	cout << "A1.nrow =\t" << A1.nrow << endl;
 	cout << "A1.ncol =\t" << A1.ncol << endl;
 	cout << "A1.nnz =\t" << A1.nnz << endl;
-	assert( A1.nrow == (nx * ny) && 
-			A1.ncol == (nx * ny) && 
+	assert( A1.nrow == (nx * ny) &&
+			A1.ncol == (nx * ny) &&
 			A1.nnz == nfield * 9 );
 
     const int cols_sol[9 * 9] = {
@@ -68,12 +68,12 @@ int main (int argc, char *argv[])
 		0, 3, 4, 0, 6, 7, 0, 0, 0,
 		3, 4, 5, 6, 7, 8, 0, 0, 0,
 		4, 5, 0, 7, 8, 0, 0, 0, 0 };
-   
+
 	for (int i = 0; i < 9 * 9; ++i)
 		assert (A1.cols[i] == cols_sol[i]);
 
-	assert( A1.nrow == (nx * ny) && 
-			A1.ncol == (nx * ny) && 
+	assert( A1.nrow == (nx * ny) &&
+			A1.ncol == (nx * ny) &&
 			A1.nnz == nfield * 9 );
 
 	ell_set_zero_mat(&A1);

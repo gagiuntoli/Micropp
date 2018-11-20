@@ -42,12 +42,12 @@ int main (int argc, char *argv[])
 	const double Ae[8 * 8] = {
 		3,   1,  -1,   1,   1,  -1,  -3,  -1,
 		1,   3,   1,  -1,  -1,   1,  -1,  -3,
-	   -1,   1,   3,   1,   1,  -1,  -3,  -1,
+		-1,   1,   3,   1,   1,  -1,  -3,  -1,
 		1,  -1,  -1,   3,   1,  -1,  -3,  -1,
 		1,  -1,  -1,   1,   3,  -1,  -3,  -1,
-	   -1,   1,  -1,   1,   1,   3,  -3,  -1,
-	   -3,  -1,  -1,   1,   1,  -1,   3,  -1,
-	   -1,  -3,  -1,   1,   1,  -1,  -3,   3 };
+		-1,   1,  -1,   1,   1,   3,  -3,  -1,
+		-3,  -1,  -1,   1,   1,  -1,   3,  -1,
+		-1,  -3,  -1,   1,   1,  -1,  -3,   3 };
 
 	int cg_its;
 	double cg_err;
@@ -55,50 +55,14 @@ int main (int argc, char *argv[])
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = 1;
 	const int dim = 3;
-	ell_init(&A1, nfield, dim, ns, 1.0e-5, 20);
+	ell_init(&A1, nfield, dim, ns, 1.0e-5, 1.0e-5, 20);
 
 	cout << "A1.nrow =\t" << A1.nrow << endl;
 	cout << "A1.ncol =\t" << A1.ncol << endl;
 	cout << "A1.nnz =\t" << A1.nnz << endl;
-	assert( A1.nrow == (nx * ny * nz) && 
-			A1.ncol == (nx * ny * nz) && 
-			A1.nnz == nfield * 27 );
-
-//    const int cols_sol [9 * 9] = {
-//		0, 0, 0, 0, 0, 1, 0, 3, 4,
-//		0, 0, 0, 0, 1, 2, 3, 4, 5,
-//		0, 0, 0, 1, 2, 0, 4, 5, 0,
-//		0, 0, 1, 0, 3, 4, 0, 6, 7,
-//		0, 1, 2, 3, 4, 5, 6, 7, 8,
-//		1, 2, 0, 4, 5, 0, 7, 8, 0,
-//		0, 3, 4, 0, 6, 7, 0, 0, 0,
-//		3, 4, 5, 6, 7, 8, 0, 0, 0,
-//		4, 5, 0, 7, 8, 0, 0, 0, 0 };
-//   
-//	for (int i = 0; i < 9 * 9; ++i)
-//		assert (A1.cols[i] == cols_sol[i]);
-//
-//	assert( A1.nrow == (nx * ny) && 
-//			A1.ncol == (nx * ny) && 
-//			A1.nnz == nfield * 9 );
-//
-//	ell_set_zero_mat(&A1);
-//	for (int ex = 0; ex < nex; ++ex)
-//		for (int ey = 0; ey < ney; ++ey)
-//			ell_add_struct2D(&A1, ex, ey, Ae);
-//
-//	ell_set_bc_2D(&A1);
-//
-//	double *x = (double *)calloc(A1.nrow, sizeof(double));
-//	double *b = (double *)malloc(A1.nrow * sizeof(double));
-//	for (int i = 0; i < A1.nrow; ++i)
-//		b[i] = 1.0;
-//
-//	ell_solve_cgpd(&A1, b, x, &cg_err, &cg_its);
-//
-//	cout << "Err =\t" << cg_err << "\tIts =\t" << cg_its << endl;
-//
-//	ell_free(&A1);
+	assert( A1.nrow == (nx * ny * nz) &&
+		A1.ncol == (nx * ny * nz) &&
+		A1.nnz == nfield * 27 );
 
 	return 0;
 }
