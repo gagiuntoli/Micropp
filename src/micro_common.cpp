@@ -400,8 +400,36 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 template <int tdim>
 void micropp<tdim>::print_info() const
 {
-	printf("micropp%d\n", dim);
-	printf("ngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
+	printf("\nmicropp%d\n", dim);
+
+	printf("Micro-structure = ");
+	switch(micro_type) {
+		case(MIC_SPHERE):
+			printf("MIC_SPHERE");
+			break;
+		case(MIC_LAYER_Y):
+			printf("MIC_LAYER_Y");
+			break;
+		case(MIC_CILI_FIB_Z):
+			printf("MIC_CILI_FIB_Z");
+			break;
+		case(MIC_CILI_FIB_XZ):
+			printf("MIC_CILI_FIB_XZ");
+			break;
+		case(MIC_QUAD_FIB_XYZ):
+			printf("MIC_QUAD_FIB_XYZ");
+			break;
+		case(MIC_QUAD_FIB_XZ):
+			printf("MIC_QUAD_FIB_XZ");
+			break;
+		case(MIC_QUAD_FIB_XZ_BROKEN_X):
+			printf("MIC_QUAD_FIB_XZ_BROKEN_X");
+			break;
+		default:
+			break;
+	}
+       	
+	printf("\nngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
 	printf("l = [%lf, %lf, %lf]; param = %lf\n", lx, ly, lz, special_param);
 	for (int i = 0; i < numMaterials; ++i) {
 		printf("Type = %d, E = %e, nu = %e, Sy = %e, Ka = %e, \
@@ -411,6 +439,7 @@ void micropp<tdim>::print_info() const
 		       material_list[i].Sy, material_list[i].Ka,
 		       material_list[i].plasticity);
 	}
+	printf("\n");
 }
 
 
