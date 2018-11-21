@@ -13,6 +13,7 @@ set(testsources
 	test3d_perf_1.cpp
 	test_mictype_3.cpp
 	test_MIC_QUAD_FIB_XZ.cpp
+	test_MIC_QUAD_FIB_XZ_BROKEN_X.cpp
 	test_get_elem_nodes.cpp
 	test_ell_1.cpp
 	test_ell_2.cpp

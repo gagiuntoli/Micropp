@@ -304,7 +304,9 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
 
-	} else if (micro_type == MIC_QUAD_FIB_XYZ) { // 3 quad fibers in x, y and z dirs
+	} else if (micro_type == MIC_QUAD_FIB_XYZ) {
+
+	       	/* 3 quad fibers in x, y and z dirs */
 
 		const double width = special_param;
 		const double center[3] = { lx / 2., ly / 2., lz / 2. };
@@ -323,7 +325,9 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return 0;
 
-	} else if (micro_type == MIC_QUAD_FIB_XZ) { // 2 quad fibers in x and z dirs
+	} else if (micro_type == MIC_QUAD_FIB_XZ) {
+
+	       	/* 2 quad fibers in x and z dirs */
 
 		const double width = special_param;
 		const double center[3] = { lx / 2., ly / 2., lz / 2. };
@@ -334,6 +338,24 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		if (fabs(coor[1] - center[1]) < width &&
 		    fabs(coor[2] - center[2]) < width)
+			return 1;
+
+		return 0;
+
+	} else if (micro_type == MIC_QUAD_FIB_XZ_BROKEN_X) {
+
+	       	/* 2 quad fibers in x and z dirs and the one in x is broken */
+
+		const double width = special_param;
+		const double center[3] = { lx / 2., ly / 2., lz / 2. };
+
+		if (fabs(coor[0] - center[0]) < width &&
+		    fabs(coor[1] - center[1]) < width)
+			return 1;
+
+		if (fabs(coor[1] - center[1]) < width &&
+		    fabs(coor[2] - center[2]) < width &&
+		    (coor[0] < lx * .8 || coor[0] > lx * .9))
 			return 1;
 
 		return 0;
