@@ -29,17 +29,21 @@
 #define dprintf(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
+
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <numeric>
+
 
 #include <cmath>
 #include <ctime>
 #include <cstring>
 #include <cassert>
 
+
 using namespace std;
+
 
 inline uint64_t devest(const vector<uint64_t>  &in, const uint64_t mean)
 {
@@ -52,10 +56,24 @@ inline uint64_t devest(const vector<uint64_t>  &in, const uint64_t mean)
 	return sqrt(out / in.size());
 }
 
+
+inline void filter(double *arr, int n, double rel_tol)
+{
+	double max = arr[0];
+	for (int i = 1; i < n; ++i)
+		if (arr[i] > max)
+			max = arr[i];
+
+	for (int i = 0; i < n; ++i)
+		arr[i] = (fabs(arr[i]) > max * rel_tol) ? arr[i] : 0.0;
+}
+
+
 constexpr int mypow(int v, int e)
 {
 	return (e == 0) ? 1 : v * mypow(v, e - 1);
 }
+
 
 inline void print_vec(const double *vec, int n, const char file_name[])
 {
@@ -64,6 +82,7 @@ inline void print_vec(const double *vec, int n, const char file_name[])
 		fprintf(file, "[%lf]\n", vec[i]);
 	fclose(file);
 }
+
 
 inline void mvp_2(const double m[2][2], const double x[2], double y[2])
 {
@@ -75,6 +94,7 @@ inline void mvp_2(const double m[2][2], const double x[2], double y[2])
 	}
 }
 
+
 inline void mvp_3(const double m[2][2], const double x[2], double y[2])
 {
 	for (int i = 0; i < 2; ++i) {
@@ -84,6 +104,7 @@ inline void mvp_3(const double m[2][2], const double x[2], double y[2])
 		y[i] = tmp;
 	}
 }
+
 
 inline void mvp_3(const double m[3][3], const double x[3], double y[3])
 {

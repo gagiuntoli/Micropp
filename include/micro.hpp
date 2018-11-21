@@ -36,11 +36,17 @@
 #include "material.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
-#include "params.hpp"
 
 #define MAX_DIM         3
 #define MAX_MATS        10
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
+
+#define CG_MIN_ERR      1.0e-1
+#define CG_MAX_ITS      100
+#define CG_REL_ERR      1.0e-3
+#define NR_MAX_TOL      1.0e-10
+#define NR_MAX_ITS      4
+#define NR_REL_TOL      1.0e-3 // factor against first residual
 
 #define D_EPS_CTAN      1.0e-8
 #define D_EPS_CTAN_AVE  1.0e-8
@@ -49,6 +55,16 @@
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
+
+enum {
+       	MIC_SPHERE,
+       	MIC_LAYER_Y,
+       	MIC_CILI_FIB_Z,
+       	MIC_CILI_FIB_XZ,
+       	MIC_QUAD_FIB_XYZ,
+       	MIC_QUAD_FIB_XZ,
+       	MIC_QUAD_FIB_XZ_BROKEN_X
+};
 
 using namespace std;
 

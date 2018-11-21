@@ -87,8 +87,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = dim;
-	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
-	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_MAX_ITS);
+	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 	assembly_mat(&A0, u_aux, NULL);
 
 	calc_ctan_lin();
@@ -199,13 +199,7 @@ void micropp<tdim>::calc_ctan_lin()
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
 	}
-	double max = ctan_lin[0];
-	for (int i = 1; i < nvoi * nvoi; ++i)
-		if (ctan_lin[i] > max)
-			max = ctan_lin[i];
-
-	for (int i = 0; i < nvoi * nvoi; ++i)
-		ctan_lin[i] = (fabs(ctan_lin[i]) > max * 1.0e-3) ? ctan_lin[i] : 0.0;
+	filter(ctan_lin, nvoi * nvoi, 1.0e-3);
 }
 
 
@@ -270,7 +264,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		ey * dy + dy / 2.,
 		ez * dz + dz / 2. }; // 2D -> dz = 0
 
-	if (micro_type == 0) { // sphere in the center
+	if (micro_type == MIC_SPHERE) { // sphere in the center
 
 		const double rad = special_param;
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
@@ -280,12 +274,12 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return (tmp < rad * rad);
 
-	} else if (micro_type == 1) { // 2 flat layers in y dir
+	} else if (micro_type == MIC_LAYER_Y) { // 2 flat layers in y dir
 
 		const double width = special_param;
 		return (coor[1] < width);
 
-	} else if (micro_type == 2) { // a cilindrical fiber in z dir
+	} else if (micro_type == MIC_CILI_FIB_Z) { // a cilindrical fiber in z dir
 
 		const double rad = special_param;
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
@@ -295,7 +289,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return (tmp < rad * rad);
 
-	} else if (micro_type == 3) { // 2 cilindrical fibers one in x and z dirs
+	} else if (micro_type == MIC_CILI_FIB_XZ) { // 2 cilindrical fibers one in x and z dirs
 
 		const double rad = special_param;
 		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
@@ -310,7 +304,9 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
 
-	} else if (micro_type == 4) { // 3 quad fibers in x, y and z dirs
+	} else if (micro_type == MIC_QUAD_FIB_XYZ) {
+
+	       	/* 3 quad fibers in x, y and z dirs */
 
 		const double width = special_param;
 		const double center[3] = { lx / 2., ly / 2., lz / 2. };
@@ -325,6 +321,41 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		if (fabs(coor[1] - center[1]) < width &&
 		    fabs(coor[2] - center[2]) < width)
+			return 1;
+
+		return 0;
+
+	} else if (micro_type == MIC_QUAD_FIB_XZ) {
+
+	       	/* 2 quad fibers in x and z dirs */
+
+		const double width = special_param;
+		const double center[3] = { lx / 2., ly / 2., lz / 2. };
+
+		if (fabs(coor[0] - center[0]) < width &&
+		    fabs(coor[1] - center[1]) < width)
+			return 1;
+
+		if (fabs(coor[1] - center[1]) < width &&
+		    fabs(coor[2] - center[2]) < width)
+			return 1;
+
+		return 0;
+
+	} else if (micro_type == MIC_QUAD_FIB_XZ_BROKEN_X) {
+
+	       	/* 2 quad fibers in x and z dirs and the one in x is broken */
+
+		const double width = special_param;
+		const double center[3] = { lx / 2., ly / 2., lz / 2. };
+
+		if (fabs(coor[0] - center[0]) < width &&
+		    fabs(coor[1] - center[1]) < width)
+			return 1;
+
+		if (fabs(coor[1] - center[1]) < width &&
+		    fabs(coor[2] - center[2]) < width &&
+		    (coor[0] < lx * .8 || coor[0] > lx * .9))
 			return 1;
 
 		return 0;
@@ -369,8 +400,36 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 template <int tdim>
 void micropp<tdim>::print_info() const
 {
-	printf("micropp%d\n", dim);
-	printf("ngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
+	printf("\nmicropp%d\n", dim);
+
+	printf("Micro-structure = ");
+	switch(micro_type) {
+		case(MIC_SPHERE):
+			printf("MIC_SPHERE");
+			break;
+		case(MIC_LAYER_Y):
+			printf("MIC_LAYER_Y");
+			break;
+		case(MIC_CILI_FIB_Z):
+			printf("MIC_CILI_FIB_Z");
+			break;
+		case(MIC_CILI_FIB_XZ):
+			printf("MIC_CILI_FIB_XZ");
+			break;
+		case(MIC_QUAD_FIB_XYZ):
+			printf("MIC_QUAD_FIB_XYZ");
+			break;
+		case(MIC_QUAD_FIB_XZ):
+			printf("MIC_QUAD_FIB_XZ");
+			break;
+		case(MIC_QUAD_FIB_XZ_BROKEN_X):
+			printf("MIC_QUAD_FIB_XZ_BROKEN_X");
+			break;
+		default:
+			break;
+	}
+       	
+	printf("\nngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
 	printf("l = [%lf, %lf, %lf]; param = %lf\n", lx, ly, lz, special_param);
 	for (int i = 0; i < numMaterials; ++i) {
 		printf("Type = %d, E = %e, nu = %e, Sy = %e, Ka = %e, \
@@ -380,6 +439,7 @@ void micropp<tdim>::print_info() const
 		       material_list[i].Sy, material_list[i].Ka,
 		       material_list[i].plasticity);
 	}
+	printf("\n");
 }
 
 
