@@ -257,8 +257,6 @@ void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 template<int tdim>
 int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 {
-	assert(0 <= micro_type  && micro_type <=4);
-
 	const double coor[3] = {
 		ex * dx + dx / 2.,
 		ey * dy + dy / 2.,
