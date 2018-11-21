@@ -56,6 +56,10 @@
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
 
+enum { MIC_SPHERE, MIC_LAYER_Y,
+       	MIC_CILI_FIB_Z, MIC_CILI_FIB_XZ,
+       	MIC_QUAD_FIB_XYZ, MIC_QUAD_FIB_XZ };
+
 using namespace std;
 
 template <int tdim>
