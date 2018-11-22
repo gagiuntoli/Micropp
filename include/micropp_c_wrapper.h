@@ -35,6 +35,7 @@ extern "C" {
 	void micropp_C_set_strain3(int gp, double strain[6]);
 	void micropp_C_get_stress3(int gp, double stress[6]);
 	void micropp_C_get_ctan3(int gp, double ctan[36]);
+	int micropp_C_get_non_linear_gps(void);
 	void micropp_C_update_vars();
 	void micropp_C_homogenize();
 	void micropp_C_print_info();

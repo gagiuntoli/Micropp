@@ -129,6 +129,17 @@ int micropp<tdim>::get_nl_flag(int gp_id) const
 
 
 template <int tdim>
+int micropp<tdim>::get_non_linear_gps(void) const
+{
+	int count = 0;
+	for (int gp = 0; gp < ngp; ++gp)
+		if (gp_list[gp].allocated)
+			count ++;
+	return count;
+}
+
+
+template <int tdim>
 void micropp<tdim>::get_sigma_solver_its(int gp_id,
 					 int sigma_solver_its[NR_MAX_ITS])
 	const
@@ -140,7 +151,7 @@ void micropp<tdim>::get_sigma_solver_its(int gp_id,
 }
 
 
-	template <int tdim>
+template <int tdim>
 void micropp<tdim>::get_sigma_solver_err(int gp_id,
 					 double sigma_solver_err[NR_MAX_ITS])
 	const
