@@ -217,7 +217,7 @@ class micropp {
 
 		~micropp();
 
-		int get_nl_flag(const int gp_id) const;
+		int is_non_linear(const int gp_id) const;
 		int get_non_linear_gps(void) const;
 		void get_sigma_solver_its(int gp_id, int sigma_solver_err[NR_MAX_ITS]) const;
 		void get_sigma_solver_err(int gp_id, double sigma_solver_err[NR_MAX_ITS]) const;

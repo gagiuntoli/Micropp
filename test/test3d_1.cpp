@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 		micro.get_macro_ctan(0, ctan);
 		int newton_its = micro.get_sigma_newton_its(0);
-		int non_linear = micro.get_nl_flag(0);
+		int non_linear = micro.is_non_linear(0);
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", micro_type);

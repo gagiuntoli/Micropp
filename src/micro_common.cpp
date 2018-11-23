@@ -120,11 +120,11 @@ micropp<tdim>::~micropp()
 
 
 template <int tdim>
-int micropp<tdim>::get_nl_flag(int gp_id) const
+int micropp<tdim>::is_non_linear(int gp_id) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	return gp_list[gp_id].allocated;
+	return (int) gp_list[gp_id].allocated;
 }
 
 

@@ -43,7 +43,7 @@ extern "C" {
 
 	void get_nl_flag3_(const micropp<3> **self, int *gp_id, int *nl_flag)
 	{
-		(*nl_flag) = (*self)->get_nl_flag(*gp_id);
+		(*nl_flag) = (*self)->is_non_linear(*gp_id);
 	}
 
 	void set_macro_strain3_(micropp<3> **self, const int *gp_id,
