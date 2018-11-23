@@ -62,9 +62,9 @@ struct material_t {
 		}
 	}
 
-	void print()
+	void print() const
 	{
-		printf("E = %lf, nu = %lf,	Ka = %lf, Sy = %lf, type = %d\n",
+		printf("E = %e, nu = %e, Ka = %e, Sy = %e, type = %1d\n",
 		       E, nu , Ka, Sy, type);
 	}
 };

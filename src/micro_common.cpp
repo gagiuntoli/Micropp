@@ -438,16 +438,10 @@ void micropp<tdim>::print_info() const
 			break;
 	}
        	
-	printf("\nngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
-	printf("l = [%lf, %lf, %lf]; param = %lf\n", lx, ly, lz, special_param);
-	for (int i = 0; i < numMaterials; ++i) {
-		printf("Type = %d, E = %e, nu = %e, Sy = %e, Ka = %e, \
-		       plast = %d\n",
-		       material_list[i].type,
-		       material_list[i].E, material_list[i].nu,
-		       material_list[i].Sy, material_list[i].Ka,
-		       material_list[i].plasticity);
-	}
+	printf("\nngp %d\n nx = %d\tny = %d\tnz = %d\tnn = %d\n", ngp, nx, ny, nz, nn);
+	printf("lx = %e\tly = %e\tlz = %e\t\nparam = %e\n", lx, ly, lz, special_param);
+	for (int i = 0; i < numMaterials; ++i)
+		material_list[i].print();
 	printf("\n");
 }
 
