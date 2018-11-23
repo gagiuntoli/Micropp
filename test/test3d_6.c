@@ -19,12 +19,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #include "micropp_c_wrapper.h"
 
+
 #define D_EPS 5.0e-4
+
 
 int main (int argc, char *argv[])
 {
@@ -41,25 +45,25 @@ int main (int argc, char *argv[])
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
 
-    micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
-    micropp_C_material_set(1, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
-    micropp_C_material_print(0);
-    micropp_C_material_print(1);
+	micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 0.0e7, 1);
+	micropp_C_material_set(1, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
+	micropp_C_material_print(0);
+	micropp_C_material_print(1);
 
-    int ngpl = 1;
-    int type = 1;
-    double params[4] = { 1., 1., 1., .5 };
-    micropp_C_create3(ngpl, size, type, params);
-    micropp_C_print_info();
+	int ngpl = 1;
+	int type = 1;
+	double params[4] = { 1., 1., 1., .5 };
+	micropp_C_create3(ngpl, size, type, params);
+	micropp_C_print_info();
 
 
 	double sig[6], ctan[36];
 	double eps[6] = { 0. };
-    int i, j, t;
+	int i, j, t;
 
 	for (t = 0; t < time_steps; ++t) {
 
-        printf("time step = %d\n", t);
+		printf("\nTime step = %d\n", t);
 
 		if (t < 80)
 			eps[dir] += D_EPS;
@@ -73,28 +77,31 @@ int main (int argc, char *argv[])
 		micropp_C_get_stress3(0, sig);
 		micropp_C_get_ctan3(0, ctan);
 		int sigma_cost = micropp_C_get_sigma_cost3(0);
+		int non_linear = micropp_C_is_non_linear(0);
+		int num_non_linear = micropp_C_get_non_linear_gps();
 
 		micropp_C_update_vars();
 
-        printf("\neps =\n");
+		printf("sigma_cost       = %d\n", sigma_cost);
+		printf("Non-Linear       = %d\n", non_linear);
+		printf("Non-Linear Total = %d\n", num_non_linear);
+
+		printf("eps =\n");
 		for (i = 0; i < 6; ++i)
 			printf("%e\t", eps[i]);
-        printf("\n");
 
-        printf("\nsig =\n");
+		printf("\nsig =\n");
 		for (i = 0; i < 6; ++i)
 			printf("%e\t", sig[i]);
-        printf("\n");
 
-        printf("\nsigma_cost = %d\n", sigma_cost);
 
-        printf("\nctan =\n");
-        for (i = 0; i < 6; ++i) {
-            for (j = 0; j < 6; ++j)
-                printf("%e\t", ctan[i * 6 + j]);
-            printf("\n");
-        }
-        printf("\n");
+		printf("\nctan =\n");
+		for (i = 0; i < 6; ++i) {
+			for (j = 0; j < 6; ++j)
+				printf("%e\t", ctan[i * 6 + j]);
+			printf("\n");
+		}
+		printf("\n");
 
 	}
 	return 0;

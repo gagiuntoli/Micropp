@@ -62,6 +62,16 @@ extern "C" {
 		micro3->get_macro_ctan(gp, ctan);
 	}
 
+	int micropp_C_is_non_linear(int gp)
+	{
+		return micro3->get_non_linear_gps();
+	}
+
+	int micropp_C_get_non_linear_gps(void)
+	{
+		return micro3->get_non_linear_gps();
+	}
+
 	void micropp_C_update_vars()
 	{
 		micro3->update_vars();

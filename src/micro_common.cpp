@@ -120,11 +120,22 @@ micropp<tdim>::~micropp()
 
 
 template <int tdim>
-int micropp<tdim>::get_nl_flag(int gp_id) const
+int micropp<tdim>::is_non_linear(int gp_id) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	return gp_list[gp_id].allocated;
+	return (int) gp_list[gp_id].allocated;
+}
+
+
+template <int tdim>
+int micropp<tdim>::get_non_linear_gps(void) const
+{
+	int count = 0;
+	for (int gp = 0; gp < ngp; ++gp)
+		if (gp_list[gp].allocated)
+			count ++;
+	return count;
 }
 
 
@@ -140,7 +151,7 @@ void micropp<tdim>::get_sigma_solver_its(int gp_id,
 }
 
 
-	template <int tdim>
+template <int tdim>
 void micropp<tdim>::get_sigma_solver_err(int gp_id,
 					 double sigma_solver_err[NR_MAX_ITS])
 	const
@@ -257,8 +268,6 @@ void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 template<int tdim>
 int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 {
-	assert(0 <= micro_type  && micro_type <=4);
-
 	const double coor[3] = {
 		ex * dx + dx / 2.,
 		ey * dy + dy / 2.,
@@ -429,16 +438,10 @@ void micropp<tdim>::print_info() const
 			break;
 	}
        	
-	printf("\nngp %d n = [%d, %d, %d] => nn = %d\n", ngp, nx, ny, nz, nn);
-	printf("l = [%lf, %lf, %lf]; param = %lf\n", lx, ly, lz, special_param);
-	for (int i = 0; i < numMaterials; ++i) {
-		printf("Type = %d, E = %e, nu = %e, Sy = %e, Ka = %e, \
-		       plast = %d\n",
-		       material_list[i].type,
-		       material_list[i].E, material_list[i].nu,
-		       material_list[i].Sy, material_list[i].Ka,
-		       material_list[i].plasticity);
-	}
+	printf("\nngp %d\n nx = %d\tny = %d\tnz = %d\tnn = %d\n", ngp, nx, ny, nz, nn);
+	printf("lx = %e\tly = %e\tlz = %e\t\nparam = %e\n", lx, ly, lz, special_param);
+	for (int i = 0; i < numMaterials; ++i)
+		material_list[i].print();
 	printf("\n");
 }
 
