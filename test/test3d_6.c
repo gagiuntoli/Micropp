@@ -45,15 +45,15 @@ int main (int argc, char *argv[])
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
 
-	micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 0.0e7, 1);
+	micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 1.0e4, 1);
 	micropp_C_material_set(1, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
 	micropp_C_material_print(0);
 	micropp_C_material_print(1);
 
 	int ngpl = 1;
-	int type = 1;
-	double params[4] = { 1., 1., 1., .5 };
-	micropp_C_create3(ngpl, size, type, params);
+	int micro_type = 5;
+	double params[4] = { 1., 1., 1., .15 };
+	micropp_C_create3(ngpl, size, micro_type, params);
 	micropp_C_print_info();
 
 
@@ -81,6 +81,10 @@ int main (int argc, char *argv[])
 		int num_non_linear = micropp_C_get_non_linear_gps();
 
 		micropp_C_update_vars();
+
+		char filename[128];
+		sprintf(filename, "test3d_6_%d", t);
+		micropp_C_output(0, filename);
 
 		printf("sigma_cost       = %d\n", sigma_cost);
 		printf("Non-Linear       = %d\n", non_linear);

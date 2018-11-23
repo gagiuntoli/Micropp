@@ -88,6 +88,11 @@ extern "C" {
 		micro3->homogenize();
 	}
 
+	void micropp_C_output(int gp_id, const char *filename)
+	{
+		micro3->output(gp_id, filename);
+	}
+
 	void micropp_C_destroy3()
 	{
 		delete micro3;
