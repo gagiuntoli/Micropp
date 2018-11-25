@@ -64,7 +64,7 @@ extern "C" {
 
 	int micropp_C_is_non_linear(int gp)
 	{
-		return micro3->get_non_linear_gps();
+		return micro3->is_non_linear(gp);
 	}
 
 	int micropp_C_get_non_linear_gps(void)
@@ -86,6 +86,11 @@ extern "C" {
 	void micropp_C_homogenize()
 	{
 		micro3->homogenize();
+	}
+
+	void micropp_C_output(int gp_id, const char *filename)
+	{
+		micro3->output(gp_id, filename);
 	}
 
 	void micropp_C_destroy3()
