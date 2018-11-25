@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
 	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
 
-	for(int micro_type = 0; micro_type < 5; ++micro_type) {
+	for(int micro_type = 0; micro_type < 6; ++micro_type) {
 
 		cout << "Plotting Micro Type : " << micro_type << endl;
 		double micro_params[4] = { 1.0, 1.0, 1.0, special_param[micro_type] };
