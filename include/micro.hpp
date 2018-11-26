@@ -47,6 +47,7 @@
 #define NR_MAX_TOL      1.0e-10
 #define NR_MAX_ITS      4
 #define NR_REL_TOL      1.0e-3 // factor against first residual
+#define FILTER_REL_TOL  1.0e-5
 
 #define D_EPS_CTAN      1.0e-8
 #define D_EPS_CTAN_AVE  1.0e-8

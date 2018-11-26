@@ -14,9 +14,14 @@ else ()
 endif ()
 
 option(TIMER "Enable time benchmarks instrumentation" OFF)
+option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
 
 if (TIMER)
   add_definitions(-DTIMER)
+endif()
+
+if (FILTER)
+	add_definitions(-DFILTER)
 endif()
 
 # Include Directories (for all targets)
