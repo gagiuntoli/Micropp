@@ -157,11 +157,10 @@ class micropp {
 				   int solver_its[NR_MAX_ITS],
 				   double solver_err[NR_MAX_ITS]);
 
-		template <typename... Rest>
-			void get_elem_mat(double *u,
-					  double *int_vars_old,
-					  double Ae[npe * dim * npe * dim],
-					  int ex, int ey, Rest...) const;
+		void get_elem_mat(double *u,
+				  double *int_vars_old,
+				  double Ae[npe * dim * npe * dim],
+				  int ex, int ey, int ez = 0) const;
 
 		void set_displ_bc(const double strain[nvoi], double *u);
 
@@ -199,10 +198,10 @@ class micropp {
 				 double *_f_trial) const;
 
 		void plastic_get_ctan(const material_t *material,
-				      const double eps[6],
-				      const double eps_p_old[6],
+				      const double eps[nvoi],
+				      const double eps_p_old[nvoi],
 				      const double alpha_old,
-				      double ctan[6][6]) const;
+				      double ctan[nvoi][nvoi]) const;
 
 		bool plastic_evolute(const material_t *material,
 				     const double eps[6],
@@ -213,7 +212,7 @@ class micropp {
 				     double *f_trial) const;
 
 		void isolin_get_ctan(const material_t *material,
-				     double ctan[6][6]) const;
+				     double ctan[nvoi][nvoi]) const;
 
 		void isolin_get_stress(const material_t *material,
 				       const double eps[6],
