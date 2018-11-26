@@ -96,6 +96,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int gp = 0; gp < ngp; ++gp)
 		gp_list[gp].macro_ctan = ctan_lin;
 
+	f_trial_max = -1.0e50;
+
 }
 
 
@@ -136,6 +138,13 @@ int micropp<tdim>::get_non_linear_gps(void) const
 		if (gp_list[gp].allocated)
 			count ++;
 	return count;
+}
+
+
+template <int tdim>
+double micropp<tdim>::get_f_trial_max(void) const
+{
+	return f_trial_max;
 }
 
 
@@ -242,6 +251,69 @@ void micropp<tdim>::get_elem_rhs(double *u,
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
 				be[i] += bmat[j][i] * stress_gp[j] * wg;
+	}
+}
+
+
+template <int tdim>
+void micropp<tdim>::get_elem_mat(double *u,
+				 double *int_vars_old,
+				 double Ae[npe * dim * npe * dim],
+				 int ex, int ey, int ez) const
+{
+	INST_START;
+	const int e = glo_elem(ex, ey, ez);
+	const material_t material = get_material(e);
+
+	double ctan[nvoi][nvoi];
+	constexpr int npedim = npe * dim;
+	constexpr int npedim2 = npedim * npedim;
+
+	double TAe[npedim2] = { 0.0 };
+	double zero_nvoi[nvoi] = { 0.0 };
+
+	for (int gp = 0; gp < npe; ++gp) {
+
+		double eps[6];
+		get_strain(u, gp, eps, ex, ey, ez);
+
+		double *eps_p_old;
+		double alpha_old ;
+
+		if (int_vars_old != NULL) {
+			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
+			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
+		} else {
+			eps_p_old = zero_nvoi;
+			alpha_old = 0.0;
+		}
+
+		if (material.plasticity)
+			plastic_get_ctan(&material, eps, eps_p_old, alpha_old, ctan);
+		else
+			isolin_get_ctan(&material, ctan);
+
+		double bmat[nvoi][npedim], cxb[nvoi][npedim];
+		calc_bmat(gp, bmat);
+
+		for (int i = 0; i < nvoi; ++i) {
+			for (int j = 0; j < npedim; ++j) {
+				double tmp = 0.0;
+				for (int k = 0; k < nvoi; ++k)
+					tmp += ctan[i][k] * bmat[k][j];
+				cxb[i][j] = tmp;
+			}
+		}
+
+		for (int m = 0; m < nvoi; ++m) {
+			for (int i = 0; i < npedim; ++i) {
+				const int inpedim = i * npedim;
+				const double bmatmi = bmat[m][i];
+				for (int j = 0; j < npedim; ++j)
+					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
+			}
+		}
+		memcpy(Ae, TAe, npedim2 * sizeof(double));
 	}
 }
 
@@ -581,14 +653,23 @@ void micropp<tdim>::calc_fields(double *u, double *int_vars_old)
 }
 
 
+/*
+ * Evolutes the internal variables for the non-linear material models
+ * Calculates the <f_trial_max> max value.
+ */
+
 template<int tdim>
-bool micropp<tdim>::calc_vars_new(double *u, double *int_vars_old,
-				  double *int_vars_new)
+bool micropp<tdim>::calc_vars_new(const double *u,
+				  double *int_vars_old,
+				  double *int_vars_new,
+				  double *_f_trial_max)
 {
 	INST_START;
 
 	bool nl_flag = false;
 	double zero_nvoi[nvoi] = { 0.0 };
+	double f_trial;
+	double f_trial_max = *_f_trial_max;
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -619,12 +700,18 @@ bool micropp<tdim>::calc_vars_new(double *u, double *int_vars_old,
 									   eps, eps_p_old,
 									   alpha_old,
 									   eps_p_new,
-									   alpha_new);
+									   alpha_new,
+									   &f_trial);
+
+						if (f_trial > f_trial_max)
+							f_trial_max = f_trial;
 					}
 				}
 			}
 		}
 	}
+
+	*_f_trial_max = f_trial_max;
 
 	return nl_flag;
 }

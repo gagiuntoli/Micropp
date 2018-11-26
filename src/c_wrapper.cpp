@@ -72,6 +72,11 @@ extern "C" {
 		return micro3->get_non_linear_gps();
 	}
 
+	double micropp_C_get_f_trial_max(void)
+	{
+		return micro3->get_f_trial_max();
+	}
+
 	void micropp_C_update_vars()
 	{
 		micro3->update_vars();
