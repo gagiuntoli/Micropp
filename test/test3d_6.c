@@ -44,6 +44,7 @@ int main (int argc, char *argv[])
 	const int dir = atoi(argv[4]);
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
+	FILE *file_out = fopen("info.dat", "w");
 
 	micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 1.0e4, 1);
 	micropp_C_material_set(1, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
@@ -91,6 +92,7 @@ int main (int argc, char *argv[])
 		printf("Non-Linear       = %d\n", non_linear);
 		printf("Non-Linear Total = %d\n", num_non_linear);
 		printf("F trial max      = %e\n", f_trial_max);
+		fprintf(file_out, "%d\t%e\t%e\t%d\t%e\n", t, eps[dir], sig[dir], non_linear, f_trial_max);
 
 		printf("eps =\n");
 		for (i = 0; i < 6; ++i)
@@ -110,5 +112,7 @@ int main (int argc, char *argv[])
 		printf("\n");
 
 	}
+
+	fclose(file_out);
 	return 0;
 }

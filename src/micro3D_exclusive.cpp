@@ -69,23 +69,27 @@ bool micropp<3>::plastic_law(const material_t *material,
 		tmp += _s_trial[i] * _s_trial[i];
 	double s_norm = sqrt(tmp);
 
-	double f_trial = s_norm -
-		sqrt(2. / 3.) * (material->Sy + material->Ka * alpha_old);
-
-	if (_f_trial != NULL)
-		*_f_trial = f_trial;
+	double f_trial = s_norm - SQRT_2DIV3 * (material->Sy + material->Ka * alpha_old);
 
 	if (f_trial > 0 && material->plasticity) {
 
 		for (int i = 0; i < 6; ++i)
 			_normal[i] = _s_trial[i] / s_norm;
-		*_dl = f_trial / (2. * material->mu);
+		*_dl = f_trial / (2. * material->mu * (1. + material->Ka / (3. * material->mu)));
+
+		if (_f_trial != NULL)
+			*_f_trial = 0.;
+
 		return true;
 
 	} else {
 
 		memset(_normal, 0, 6 * sizeof(double));
 		*_dl = 0;
+
+		if (_f_trial != NULL)
+			*_f_trial = f_trial;
+
 		return false;
 	}
 }
@@ -157,7 +161,7 @@ bool micropp<3>::plastic_evolute(const material_t *material,
 	for (int i = 0; i < 6; ++i)
 		eps_p_new[i] = eps_p_old[i] + dl * normal[i];
 
-	*alpha_new = alpha_old + sqrt(2. / 3.) * dl;
+	*alpha_new = alpha_old + SQRT_2DIV3 * dl;
 
 	return nl_flag;
 }
