@@ -239,15 +239,15 @@ bool micropp<2>::plastic_law(const material_t *material,
 			     double alpha_old,
 			     double *_dl,
 			     double _normal[6],
-			     double _s_trial[6]) const
+			     double _s_trial[6],
+			     double *_f_trial) const
 {
 	return false;
 }
 
 
 template <>
-void micropp<2>::plastic_get_stress(
-				    const material_t *material, const double eps[6],
+void micropp<2>::plastic_get_stress(const material_t *material, const double eps[6],
 				    const double eps_p_old[6], double alpha_old,
 				    double stress[6]) const
 {
@@ -260,7 +260,8 @@ bool micropp<2>::plastic_evolute(const material_t *material,
 				 const double eps_p_old[6],
 				 double alpha_old,
 				 double *eps_p_new,
-				 double *alpha_new) const
+				 double *alpha_new,
+				 double *f_trial) const
 {
 	return false;
 }

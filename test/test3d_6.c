@@ -27,7 +27,7 @@
 #include "micropp_c_wrapper.h"
 
 
-#define D_EPS 5.0e-4
+#define D_EPS 2.0e-4
 
 
 int main (int argc, char *argv[])
@@ -79,6 +79,7 @@ int main (int argc, char *argv[])
 		int sigma_cost = micropp_C_get_sigma_cost3(0);
 		int non_linear = micropp_C_is_non_linear(0);
 		int num_non_linear = micropp_C_get_non_linear_gps();
+		double f_trial_max = micropp_C_get_f_trial_max();
 
 		micropp_C_update_vars();
 
@@ -89,6 +90,7 @@ int main (int argc, char *argv[])
 		printf("sigma_cost       = %d\n", sigma_cost);
 		printf("Non-Linear       = %d\n", non_linear);
 		printf("Non-Linear Total = %d\n", num_non_linear);
+		printf("F trial max      = %e\n", f_trial_max);
 
 		printf("eps =\n");
 		for (i = 0; i < 6; ++i)

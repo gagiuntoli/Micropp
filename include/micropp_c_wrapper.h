@@ -32,13 +32,16 @@ extern "C" {
 
 	void micropp_C_create3(int ngp, int size[3], int type, double *params);
 	void micropp_C_destroy3();
+
+	void micropp_C_homogenize();
 	void micropp_C_set_strain3(int gp, double strain[6]);
 	void micropp_C_get_stress3(int gp, double stress[6]);
 	void micropp_C_get_ctan3(int gp, double ctan[36]);
+
 	int micropp_C_get_non_linear_gps(void);
 	int micropp_C_is_non_linear(int gp);
+	double micropp_C_get_f_trial_max(void);
 	void micropp_C_update_vars();
-	void micropp_C_homogenize();
 	void micropp_C_print_info();
 	int micropp_C_get_sigma_cost3(int gp);
 	void micropp_C_output(int gp_id, const char *filename);

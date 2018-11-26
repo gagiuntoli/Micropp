@@ -100,7 +100,9 @@ void micropp<tdim>::homogenize()
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
 		filter(gp_ptr->macro_stress, nvoi, 1.0e-3);
 
-		nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new);
+
+		/* Updates <vars_new> and <f_trial_max> */
+		nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new, &f_trial_max);
 
 		if (nl_flag == true) {
 			if (gp_ptr->allocated == false) {

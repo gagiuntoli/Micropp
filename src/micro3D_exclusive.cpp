@@ -46,9 +46,12 @@ bool micropp<3>::plastic_law(const material_t *material,
 			     const double alpha_old,
 			     double *_dl,
 			     double _normal[6],
-			     double _s_trial[6]) const
+			     double _s_trial[6],
+			     double *_f_trial) const
 {
-	/* Calculates _dl, _normal and _s_trial */
+	/* Calculates _dl, _normal and _s_trial
+	 * Optionally  returns f_trial value
+	 */
 
 	double eps_dev[6], eps_p_dev_1[6];
 
@@ -68,6 +71,9 @@ bool micropp<3>::plastic_law(const material_t *material,
 
 	double f_trial = s_norm -
 		sqrt(2. / 3.) * (material->Sy + material->Ka * alpha_old);
+
+	if (_f_trial != NULL)
+		*_f_trial = f_trial;
 
 	if (f_trial > 0 && material->plasticity) {
 
@@ -94,7 +100,7 @@ void micropp<3>::plastic_get_stress(const material_t *material,
 {
 	double dl, normal[6], s_trial[6];
 	bool nl_flag = plastic_law(material, eps, eps_p_old, alpha_old,
-				   &dl, normal, s_trial);
+				   &dl, normal, s_trial, NULL);
 
 	//sig_2 = s_trial + K * tr(eps) * 1 - 2 * mu * dl * normal;
 	memcpy(stress, s_trial, 6 * sizeof(double));
@@ -141,11 +147,12 @@ bool micropp<3>::plastic_evolute(const material_t *material,
 				 const double eps_p_old[6],
 				 const double alpha_old,
 				 double *eps_p_new,
-				 double *alpha_new) const
+				 double *alpha_new,
+				 double *f_trial) const
 {
 	double dl, normal[6], s_trial[6];
 	bool nl_flag = plastic_law(material, eps, eps_p_old, alpha_old,
-				   &dl, normal, s_trial);
+				   &dl, normal, s_trial, f_trial);
 
 	for (int i = 0; i < 6; ++i)
 		eps_p_new[i] = eps_p_old[i] + dl * normal[i];

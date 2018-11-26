@@ -96,6 +96,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int gp = 0; gp < ngp; ++gp)
 		gp_list[gp].macro_ctan = ctan_lin;
 
+	f_trial_max = -1.0e50;
+
 }
 
 
@@ -136,6 +138,13 @@ int micropp<tdim>::get_non_linear_gps(void) const
 		if (gp_list[gp].allocated)
 			count ++;
 	return count;
+}
+
+
+template <int tdim>
+double micropp<tdim>::get_f_trial_max(void) const
+{
+	return f_trial_max;
 }
 
 
@@ -581,14 +590,23 @@ void micropp<tdim>::calc_fields(double *u, double *int_vars_old)
 }
 
 
+/*
+ * Evolutes the internal variables for the non-linear material models
+ * Calculates the <f_trial_max> max value.
+ */
+
 template<int tdim>
-bool micropp<tdim>::calc_vars_new(double *u, double *int_vars_old,
-				  double *int_vars_new)
+bool micropp<tdim>::calc_vars_new(const double *u,
+				  double *int_vars_old,
+				  double *int_vars_new,
+				  double *_f_trial_max)
 {
 	INST_START;
 
 	bool nl_flag = false;
 	double zero_nvoi[nvoi] = { 0.0 };
+	double f_trial;
+	double f_trial_max = *_f_trial_max;
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -619,12 +637,18 @@ bool micropp<tdim>::calc_vars_new(double *u, double *int_vars_old,
 									   eps, eps_p_old,
 									   alpha_old,
 									   eps_p_new,
-									   alpha_new);
+									   alpha_new,
+									   &f_trial);
+
+						if (f_trial > f_trial_max)
+							f_trial_max = f_trial;
 					}
 				}
 			}
 		}
 	}
+
+	*_f_trial_max = f_trial_max;
 
 	return nl_flag;
 }
