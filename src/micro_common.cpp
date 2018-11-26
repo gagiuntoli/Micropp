@@ -219,7 +219,7 @@ void micropp<tdim>::calc_ctan_lin()
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
 	}
-	filter(ctan_lin, nvoi * nvoi, 1.0e-3);
+	filter(ctan_lin, nvoi * nvoi, FILTER_REL_TOL);
 }
 
 

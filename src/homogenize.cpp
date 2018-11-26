@@ -98,7 +98,7 @@ void micropp<tdim>::homogenize()
 			gp_ptr->sigma_cost += solver_its[i];
 
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
-		filter(gp_ptr->macro_stress, nvoi, 1.0e-3);
+		filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
 
 
 		/* Updates <vars_new> and <f_trial_max> */
@@ -138,8 +138,7 @@ void micropp<tdim>::homogenize()
 						(sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
 
 			}
-
-			filter(gp_ptr->macro_ctan, nvoi * nvoi, 1.0e-3);
+			filter(gp_ptr->macro_ctan, nvoi * nvoi, FILTER_REL_TOL);
 		}
 	}
 }
