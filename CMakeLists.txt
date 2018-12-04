@@ -14,10 +14,15 @@ else ()
 endif ()
 
 option(TIMER "Enable time benchmarks instrumentation" OFF)
+option(CGDEBUG "Enable CG algorithm debug" OFF)
 option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
 
 if (TIMER)
-  add_definitions(-DTIMER)
+	add_definitions(-DTIMER)
+endif()
+
+if (CGDEBUG)
+	add_definitions(-DCGDEBUG)
 endif()
 
 if (FILTER)

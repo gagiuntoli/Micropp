@@ -27,6 +27,8 @@
 
 using namespace std;
 
+static int cgdebug_counter = 0; // use for writing debug files
+
 #ifndef ELL_H_
 #define ELL_H_
 

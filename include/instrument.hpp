@@ -68,8 +68,7 @@ class instrument {
 	public:
 
 		instrument(const string funct):
-			funct_(funct), start_time_(take_time_stamp())
-	{}
+			funct_(funct), start_time_(take_time_stamp()){}
 
 		~instrument()
 		{
