@@ -41,9 +41,9 @@
 #define MAX_MATS        10
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
-#define CG_MIN_ERR      1.0e-1
-#define CG_MAX_ITS      100
-#define CG_REL_ERR      1.0e-3
+#define CG_MIN_ERR      1.0e-20
+#define CG_MAX_ITS      500
+#define CG_REL_ERR      1.0e-7
 #define NR_MAX_TOL      1.0e-10
 #define NR_MAX_ITS      4
 #define NR_REL_TOL      1.0e-3 // factor against first residual

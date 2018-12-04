@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-5
+#define D_EPS 1.0e-3
 
 int main (int argc, char *argv[])
 {
@@ -51,11 +51,11 @@ int main (int argc, char *argv[])
 	file.open("result.dat");
 
 	int micro_type = MIC_QUAD_FIB_XZ;
-	double micro_params[4] = { 1., 1., 1., .15 };
+	double micro_params[4] = { 1., 1., 1., 0.166666667 };
 
 	material_t mat_params[2];
-	mat_params[0].set(3.0e7, 0.25, 1.0e4, 1.0e5, 1);
-	mat_params[1].set(3.0e9, 0.25, 1.0e5, 1.0e5, 0);
+	mat_params[0].set(3.0e7, 0.25, 1.0e4, 1.0e5, 0);
+	mat_params[1].set(6.0e7, 0.25, 1.0e5, 1.0e5, 1);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();

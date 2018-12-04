@@ -39,8 +39,7 @@ void instrument::initialize()
 void instrument::finalize()
 {
 	if (0 == --instances) {
-		const uint64_t elapsed = (take_time_stamp() - initialTime) \
-					 * 1E-3;
+		const uint64_t elapsed = (take_time_stamp() - initialTime) * 1E-3;
 
 		size_t cont = 0;
 		cout << "# Final execution report: total time = " << elapsed
@@ -94,12 +93,21 @@ void instrument::finalize()
 	t_sol = accumulate(it->second.begin(), it->second.end(), 0.0);
 
 	cout
-		<< "ASSEMBLY     :: "
+		<< "ASSEMBLY         :: "
 		<< 1. * (t_ass_mat + t_ass_rhs) * 100
-		/ (t_sol + t_ass_mat + t_ass_rhs) << " \%" << endl;
+		/ (t_sol + t_ass_mat + t_ass_rhs) << " \%\t"
+		<< " TIME : " << double(t_ass_mat + t_ass_rhs) / 1.0e3 << " mS"
+		<< endl;
+
 	cout
-		<< "SOLVE        :: "
-		<< 1. * t_sol * 100 / (t_sol + t_ass_mat + t_ass_rhs) << " \%"
+		<< "SOLVE            :: "
+		<< 1. * t_sol * 100 / (t_sol + t_ass_mat + t_ass_rhs) << " \%\t"
+		<< " TIME : " << double(t_sol) / 1.0e3 << " mS"
+		<< endl;
+
+	cout
+		<< "ASSEMBLY + SOLVE :: "
+		<< 1. * (t_sol + t_ass_mat + t_ass_rhs) / 1.0e3 << " mS"
 		<< endl;
 }
 
