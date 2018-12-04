@@ -163,6 +163,12 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 {
 	INST_START;
 
+#ifdef CGDEBUG
+	char filename[128];
+	sprintf(filename, "cgdebug_%d.dat", cgdebug_counter++);
+	FILE *file_cg = fopen(filename, "w");
+#endif
+
 	/* Conjugate Gradient Algorithm (CG) with Jacobi Preconditioner
 	 * r_1 residue in actual iteration
 	 * z_1 = K^-1 * r_0 actual auxiliar vector
@@ -235,6 +241,9 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 			x[i] -= d * m->p[i];
 			m->r[i] -= d * m->q[i];
 		}
+#ifdef CGDEBUG
+		fprintf(file_cg, "%d\t%e\n", its, err);
+#endif
 
 		rho_0 = rho_1;
 		its++;
@@ -242,6 +251,10 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	} while (its < m->max_its);
 
 	*err_ = err;
+
+#ifdef CGDEBUG
+	fclose(file_cg);
+#endif
 
 	return its;
 }
@@ -458,6 +471,7 @@ void ell_free(ell_matrix *m)
 	if (m->q != NULL)
 		free(m->q);
 }
+
 
 void print_ell(const ell_matrix *A)
 {

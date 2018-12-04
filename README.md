@@ -57,6 +57,12 @@ An option **TIMER** was added to insert time measure instrumentation for the exe
 cmake -DTIMER=on ..
 ```
 
+Option **CGDEBUG** was included to study the CG solver and see the convergence under different conditions.
+
+```bash
+cmake -DCGDEBUG=on ..
+```
+
 The new option is independent of Debug or release mode. But remember that any 
 
 
