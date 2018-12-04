@@ -73,7 +73,7 @@ using namespace std;
 template <int tdim>
 class micropp {
 
-	private:
+	protected:
 		static constexpr int dim = tdim;                  // 2, 3
 		static constexpr int npe = mypow(2, dim);         // 4, 8
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
@@ -117,8 +117,6 @@ class micropp {
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
 		double f_trial_max;
-
-	protected:
 
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;
