@@ -25,6 +25,13 @@ template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
 		       const material_t *_materials, double *_ctan_lin):
+	/* 
+	 * The <_ctan_lin> option is intended for cases that we don't want to
+	 * calculate the ctan_lin because of it computational cost. For example,
+	 * for doing profile of the solver.
+	 *
+	 */
+
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
 	nz((tdim == 3) ? size[2] : 1),
@@ -91,7 +98,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 	assembly_mat(&A0, u_aux, NULL);
 
-	if (_ctan_lin != nullptr)
+	if (_ctan_lin == nullptr)
 		calc_ctan_lin();
 
 	for (int gp = 0; gp < ngp; ++gp)

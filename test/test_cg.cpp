@@ -30,6 +30,7 @@
 using namespace std;
 
 const double strain[6] = { 1., 2., 3., 1., 1., 1. };
+double s;
 
 int main (int argc, char *argv[])
 {
@@ -38,7 +39,7 @@ int main (int argc, char *argv[])
 		public:
 			test_t(const int size[3], const int micro_type, const double micro_params[5],
 			       const material_t mat_params[2])
-				:micropp<3> (1, size, micro_type, micro_params, mat_params, nullptr)
+				:micropp<3> (1, size, micro_type, micro_params, mat_params, &s)
 			{};
 
 			~test_t() {};
@@ -54,7 +55,9 @@ int main (int argc, char *argv[])
 
 				assembly_mat(&A, u_aux, vars_new_aux);
 				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-				cout << "|RES| : " << lerr << " CG_ITS : " << cg_its << " CG_TOL : " << cg_err << endl;
+				cout 
+					<< "|RES| : " << lerr << " CG_ITS : "
+					<< cg_its << " CG_TOL : " << cg_err << endl;
 
 			};
 

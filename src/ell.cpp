@@ -201,7 +201,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 	ell_mvp(m, x, m->r);
 	for (int i = 0; i < m->nrow; i++)
-		m->r[i] -= b[i];
+		m->r[i] = b[i] - m->r[i];
 
 	for (int i = 0; i < m->nrow; i++)
 		m->z[i] = m->k[i] * m->r[i];
@@ -210,19 +210,18 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	double rz = get_dot(m->r, m->z, m->nrow);
 
 	int its = 0;
-	double err, err0;
-
+	double rz_0;
 	while (its < m->max_its) {
 
-		err = get_norm(m->r, m->nrow);
 #ifdef CGDEBUG
+		double err = get_norm(m->r, m->nrow);
 		printf("cgpd : its = %-4d |prec res| = %e\t|abs res| = %e\n", its, err, rz);
 #endif
 
 		if (its == 0)
-			err0 = err;
+			rz_0 = rz;
 
-		if (err < m->min_err || err < err0 * m->rel_err)
+		if (rz < m->min_err || rz < rz_0 * m->rel_err)
 			break;
 
 		ell_mvp(m, m->p, m->Ap);
@@ -230,7 +229,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 		const double alpha = rz / pAp;
 		for (int i = 0; i < m->nrow; ++i)
-			x[i] -= alpha * m->p[i];
+			x[i] += alpha * m->p[i];
 
 		for (int i = 0; i < m->nrow; ++i)
 			m->r[i] -= alpha * m->Ap[i];
@@ -249,7 +248,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 	}
 
-	*err_ = err;
+	*err_ = rz;
 
 	return its;
 }
