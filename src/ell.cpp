@@ -145,6 +145,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 
 }
 
+
 void ell_mvp(const ell_matrix *m, const double *x, double *y)
 {
 	INST_START;
@@ -215,7 +216,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 #ifdef CGDEBUG
 		double err = get_norm(m->r, m->nrow);
-		printf("cgpd : its = %-4d |prec res| = %e\t|abs res| = %e\n", its, err, rz);
+		printf("cgpd : its = %-4d |real| = %e\t|precon| = %e\n", its, err, rz);
 #endif
 
 		if (its == 0)
