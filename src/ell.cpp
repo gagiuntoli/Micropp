@@ -64,7 +64,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 	m->r = (double *) malloc(nn * nfield * sizeof(double));
 	m->z = (double *) malloc(nn * nfield * sizeof(double));
 	m->p = (double *) malloc(nn * nfield * sizeof(double));
-	m->q = (double *) malloc(nn * nfield * sizeof(double));
+	m->Ap = (double *) malloc(nn * nfield * sizeof(double));
 
 	if (dim == 2) {
 
@@ -158,27 +158,31 @@ void ell_mvp(const ell_matrix *m, const double *x, double *y)
 	}
 }
 
+
+double get_norm(const double *vector, const int n)
+{
+		double norm = 0.0;
+		for (int i = 0; i < n; ++i)
+			norm += vector[i] * vector[i];
+		return sqrt(norm);
+}
+
+
+double get_dot(const double *v1, const double *v2, const int n)
+{
+		double prod = 0.0;
+		for (int i = 0; i < n; ++i)
+			prod += v1[i] * v2[i];
+		return prod;
+}
+
+
 int ell_solve_cgpd(const ell_matrix *m, const double *b,
 		   double *x, double *err_)
 {
 	INST_START;
 
-#ifdef CGDEBUG
-	char filename[128];
-	sprintf(filename, "cgdebug_%d.dat", cgdebug_counter++);
-	FILE *file_cg = fopen(filename, "w");
-#endif
-
-	/* Conjugate Gradient Algorithm (CG) with Jacobi Preconditioner
-	 * r_1 residue in actual iteration
-	 * z_1 = K^-1 * r_0 actual auxiliar vector
-	 * rho_0 rho_1 = r_0^t * z_1 previous and actual iner products <r_i, K^-1, r_i>
-	 * p_1 actual search direction
-	 * q_1 = A*p_1 auxiliar vector
-	 * d_1 = rho_0 / (p_1^t * q_1) actual step
-	 * x_1 = x_0 - d_1 * p_1
-	 * r_1 = r_0 - d_1 * q_1
-	 */
+	/* Conjugate Gradient Algorithm (CG) with Jacobi Preconditioner */
 
 	if (!m || !b || !x)
 		return 1;
@@ -197,67 +201,58 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 	ell_mvp(m, x, m->r);
 	for (int i = 0; i < m->nrow; i++)
-		m->r[i] -= b[i];
+		m->r[i] = b[i] - m->r[i];
+
+	for (int i = 0; i < m->nrow; i++)
+		m->z[i] = m->k[i] * m->r[i];
+
+	memcpy(m->p, m->z, m->nrow * sizeof(double));
+	double rz = get_dot(m->r, m->z, m->nrow);
 
 	int its = 0;
-	double rho_0, rho_1, err, err0;
+	double rz_0;
+	while (its < m->max_its) {
 
-	do {
-		err = 0.0;
-		for (int i = 0; i < m->nrow; i++)
-			err += m->r[i] * m->r[i];
-		err = sqrt(err);
+#ifdef CGDEBUG
+		double err = get_norm(m->r, m->nrow);
+		printf("cgpd : its = %-4d |prec res| = %e\t|abs res| = %e\n", its, err, rz);
+#endif
 
 		if (its == 0)
-			err0 = err;
+			rz_0 = rz;
 
-		if (err < m->min_err || err < err0 * m->rel_err)
+		if (rz < m->min_err || rz < rz_0 * m->rel_err)
 			break;
 
+		ell_mvp(m, m->p, m->Ap);
+		double pAp = get_dot(m->p, m->Ap, m->nrow);
 
-		for (int i = 0; i < m->nrow; i++)
+		const double alpha = rz / pAp;
+		for (int i = 0; i < m->nrow; ++i)
+			x[i] += alpha * m->p[i];
+
+		for (int i = 0; i < m->nrow; ++i)
+			m->r[i] -= alpha * m->Ap[i];
+
+		for (int i = 0; i < m->nrow; ++i)
 			m->z[i] = m->k[i] * m->r[i];
 
-		rho_1 = 0.0;
-		for (int i = 0; i < m->nrow; i++)
-			rho_1 += m->r[i] * m->z[i];
+		double rz_n = get_dot(m->r, m->z, m->nrow);
 
-		if (its == 0)
-			for (int i = 0; i < m->nrow; i++)
-				m->p[i] = m->z[i];
-		else {
-			const double beta = rho_1 / rho_0;
-			for (int i = 0; i < m->nrow; i++)
-				m->p[i] = m->z[i] + beta * m->p[i];
-		}
-
-		ell_mvp(m, m->p, m->q);
-		double aux = 0;
+		const double beta = rz_n / rz;
 		for (int i = 0; i < m->nrow; ++i)
-			aux += m->p[i] * m->q[i];
+			m->p[i] = m->z[i] + beta * m->p[i];
 
-		const double d = rho_1 / aux;
-		for (int i = 0; i < m->nrow; ++i) {
-			x[i] -= d * m->p[i];
-			m->r[i] -= d * m->q[i];
-		}
-#ifdef CGDEBUG
-		fprintf(file_cg, "%d\t%e\n", its, err);
-#endif
-
-		rho_0 = rho_1;
+		rz = rz_n;
 		its++;
 
-	} while (its < m->max_its);
+	}
 
-	*err_ = err;
-
-#ifdef CGDEBUG
-	fclose(file_cg);
-#endif
+	*err_ = rz;
 
 	return its;
 }
+
 
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 {
@@ -468,8 +463,8 @@ void ell_free(ell_matrix *m)
 		free(m->z);
 	if (m->p != NULL)
 		free(m->p);
-	if (m->q != NULL)
-		free(m->q);
+	if (m->Ap != NULL)
+		free(m->Ap);
 }
 
 

@@ -51,7 +51,7 @@ typedef struct {
 	int max_its;       // maximun number of iterations
 	double min_err;    // minimun error (absolute)
 	double rel_err;    // relative error
-	double *k, *r, *z, *p, *q;
+	double *k, *r, *z, *p, *Ap;
 
 } ell_matrix;
 
@@ -67,6 +67,10 @@ void ell_set_zero_mat(ell_matrix *m);
 void ell_set_bc_2D(ell_matrix *m);
 void ell_set_bc_3D(ell_matrix *m);
 void ell_free(ell_matrix *m);
+
+double get_norm(const double *vector, const int n);
+double get_dot(const double *v1, const double *v2, const int n);
+
 void print_ell(const ell_matrix *A);
 
 #endif

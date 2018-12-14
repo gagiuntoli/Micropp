@@ -29,7 +29,8 @@
 
 using namespace std;
 
-#define D_EPS 1.0e-3
+const double strain[6] = { 1., 2., 3., 1., 1., 1. };
+double s;
 
 int main (int argc, char *argv[])
 {
@@ -38,47 +39,50 @@ int main (int argc, char *argv[])
 		public:
 			test_t(const int size[3], const int micro_type, const double micro_params[5],
 			       const material_t mat_params[2])
-				:micropp<3> (1, size, micro_type, micro_params, mat_params)
+				:micropp<3> (1, size, micro_type, micro_params, mat_params, &s)
 			{};
 
 			~test_t() {};
 
-			void assembly_and_solve(double eps[6])
+			void assembly_and_solve(void)
 			{
 
 				double lerr, cg_err;
 				memset(u_aux, 0.0, nndim * sizeof(double));
 
-				set_displ_bc(eps, u_aux);
+				set_displ_bc(strain, u_aux);
 				lerr = assembly_rhs(u_aux, vars_new_aux);
 
 				assembly_mat(&A, u_aux, vars_new_aux);
 				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-				cout << "|RES| : " << lerr << " CG_ITS : " << cg_its << " CG_TOL : " << cg_err << endl;
+				cout 
+					<< "|RES| : " << lerr << " CG_ITS : "
+					<< cg_its << " CG_TOL : " << cg_err << endl;
 
 			};
 
 	};
 
+	if (argc < 2) {
+		cerr << "Usage: " << argv[0] << " n" << endl;
+		return(1);
+	}
+
 	const int nx = atoi(argv[1]);
-	const int ny = atoi(argv[2]);
-	const int nz = atoi(argv[3]);
-	const int dir = atoi(argv[4]);
+	const int ny = atoi(argv[1]);
+	const int nz = atoi(argv[1]);
 
 	int size[3] = { nx, ny, nz };
 
-	int micro_type = MIC_QUAD_FIB_XZ;
-	double micro_params[4] = { 1., 1., 1., 0.166666667 };
+	int micro_type = 2;
+	double micro_params[4] = { 1., 1., 1., 0.2 };
 
 	material_t mat_params[2];
-	mat_params[0].set(3.0e7, 0.25, 1.0e4, 1.0e5, 0);
-	mat_params[1].set(6.0e7, 0.25, 1.0e5, 1.0e5, 1);
-
-	double eps[6] = { 0. };
-	eps[dir] += D_EPS;
+	mat_params[0].set(1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	mat_params[1].set(1.0e8, 0.25, 1.0e8, 1.0e4, 0);
 
 	test_t test(size, micro_type, micro_params, mat_params);
-	test.assembly_and_solve(eps);
+	test.assembly_and_solve();
 
 	return 0;
 }
