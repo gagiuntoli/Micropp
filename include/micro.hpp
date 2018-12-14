@@ -223,7 +223,8 @@ class micropp {
 		micropp() = delete;
 
 		micropp(const int ngp, const int size[3], const int micro_type,
-			const double *micro_params, const material_t *materials);
+			const double *micro_params, const material_t *materials,
+			double *_ctan_lin = nullptr);
 
 		~micropp();
 
