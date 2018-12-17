@@ -23,15 +23,28 @@
 
 using namespace std;
 
+//template <int tdim>
+//void micropp<tdim>::newton_raphson_1lin_its(bool non_linear,
+//					    double strain[nvoi],
+//					    double *int_vars_old,
+//					    double *u,
+//					    double newton_err[NR_MAX_ITS],
+//					    double solver_err[NR_MAX_ITS])
+//{
+//}
+
 
 template <int tdim>
-int micropp<tdim>::newton_raphson(bool non_linear,
-				  double strain[nvoi],
-				  double *int_vars_old,
-				  double *u,
-				  double newton_err[NR_MAX_ITS],
-				  int solver_its[NR_MAX_ITS],
-				  double solver_err[NR_MAX_ITS])
+int micropp<tdim>::newton_raphson_v(const bool non_linear,
+				    const int newton_max_its,
+				    const int mat_mode,
+				    const double strain[nvoi],
+				    const double *int_vars_old,
+				    double *u,
+				    int *newton_its,
+				    double newton_err[NR_MAX_ITS],
+				    int solver_its[NR_MAX_ITS],
+				    double solver_err[NR_MAX_ITS])
 {
 	INST_START;
 
@@ -39,45 +52,74 @@ int micropp<tdim>::newton_raphson(bool non_linear,
 
 	int lits = 0;
 	double lerr = 0.0, lerr0, cg_err;
+	ell_matrix *A_ptr;
 
-	if (solver_its != NULL) memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
-	if (solver_err != NULL) memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
-	if (newton_err != NULL) memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
+	if (solver_its != nullptr) memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
+	if (solver_err != nullptr) memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
+	if (newton_err != nullptr) memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
 
-	do {
+	while (lits < NR_MAX_ITS) {
+
 		lerr = assembly_rhs(u, int_vars_old);
 
 		if (lits == 0)
 			lerr0 = lerr;
 
-		if (newton_err != NULL) newton_err[lits] = lerr;
+		if (newton_err != nullptr) newton_err[lits] = lerr;
 
 		if (lerr < NR_MAX_TOL || lerr < lerr0 * NR_REL_TOL)
 			break;
 
 		int cg_its;
-		if (non_linear || lits > 0) {
+		switch (mat_mode) {
 
-			assembly_mat(&A, u, int_vars_old);
-			cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+			case MAT_MODE_A0:
 
-		} else {
+				/* Always use A0 */
+				A_ptr = &A0;
+				break;
 
-			cg_its = ell_solve_cgpd(&A0, b, du, &cg_err);
+			case MAT_MODE_A:
 
+				/* Assemblies a new matrix if we are in a
+				 * non-linear situation or if we are in a
+				 * second newton-raphson iteration.
+				 */
+
+				if (non_linear || lits > 0) {
+
+					assembly_mat(&A, u, int_vars_old);
+					A_ptr = &A;
+
+				} else {
+
+					A_ptr = &A0;
+
+				}
+
+				break;
+
+			default:
+				return 1;
+				break;
 		}
 
-		if (solver_its != NULL) solver_its[lits] = cg_its;
-		if (solver_err != NULL) solver_err[lits] = cg_err;
+		cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
+
+		if (solver_its != nullptr) solver_its[lits] = cg_its;
+		if (solver_err != nullptr) solver_err[lits] = cg_err;
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
 		lits++;
 
-	} while (lits < NR_MAX_ITS);
+	}
 
-	return lits;
+	if (newton_its != nullptr)
+		*newton_its = lits;
+
+	return 0;
 }
 
 

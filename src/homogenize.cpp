@@ -66,7 +66,7 @@ void micropp<tdim>::homogenize()
 {
 	INST_START;
 
-	int newton_its, solver_its[NR_MAX_ITS];
+	int err, newton_its, solver_its[NR_MAX_ITS];
 	double newton_err[NR_MAX_ITS], solver_err[NR_MAX_ITS];
 	bool nl_flag;
 
@@ -85,9 +85,16 @@ void micropp<tdim>::homogenize()
 		// SIGMA 1 Newton-Raphson
 		memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
-		newton_its = newton_raphson(gp_ptr->allocated, gp_ptr->macro_strain,
-					    gp_ptr->int_vars_n, gp_ptr->u_k,
-					    newton_err, solver_its, solver_err);
+		err = newton_raphson_v(gp_ptr->allocated,
+				       NR_MAX_ITS,
+				       MAT_MODE_A,
+				       gp_ptr->macro_strain,
+				       gp_ptr->int_vars_n,
+				       gp_ptr->u_k,
+				       &newton_its,
+				       newton_err,
+				       solver_its,
+				       solver_err);
 
 		gp_ptr->sigma_newton_its = newton_its;
 		memcpy(gp_ptr->sigma_newton_err, newton_err, NR_MAX_ITS * sizeof(double));
@@ -124,9 +131,16 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				newton_its = newton_raphson(true, eps_1, gp_ptr->int_vars_n,
-							    u_aux,
-							    newton_err, solver_its, solver_err);
+				err = newton_raphson_v(true,
+						       NR_MAX_ITS,
+						       MAT_MODE_A,
+						       eps_1,
+						       gp_ptr->int_vars_n,
+						       u_aux,
+						       NULL,
+						       NULL,
+						       NULL,
+						       NULL);
 
 				for (int i = 0; i < newton_its; ++i)
 					gp_ptr->sigma_cost += solver_its[i];

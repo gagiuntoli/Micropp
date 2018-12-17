@@ -55,31 +55,35 @@ int main (int argc, char *argv[])
 
 				assembly_mat(&A, u_aux, vars_new_aux);
 				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-				cout 
-					<< "|RES| : " << lerr << " CG_ITS : "
-					<< cg_its << " CG_TOL : " << cg_err << endl;
+				cout
+					<< "|RES| : " << lerr
+					<< " CG_ITS : " << cg_its
+					<< " CG_TOL : " << cg_err << endl;
 
 			};
 
 	};
 
 	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n" << endl;
-		return(1);
+		/* argv[1] (n) : Problem size
+		 * argv[2] (a) : Factor that says Ef = Em x a
+		 */
+		cerr << "Usage: " << argv[0] << " [n = 10] [a = 1]" << endl;
 	}
 
-	const int nx = atoi(argv[1]);
-	const int ny = atoi(argv[1]);
-	const int nz = atoi(argv[1]);
+	const int n = (argc > 1) ? atoi(argv[1]) : 10;
+	const double a = (argc > 2) ? atoi(argv[2]) : 1.0;
 
-	int size[3] = { nx, ny, nz };
+	int size[3] = { n, n, n };
 
 	int micro_type = 2;
 	double micro_params[4] = { 1., 1., 1., 0.2 };
 
+	double Em = 1.0e8;
+
 	material_t mat_params[2];
-	mat_params[0].set(1.0e8, 0.25, 1.0e8, 1.0e4, 0);
-	mat_params[1].set(1.0e8, 0.25, 1.0e8, 1.0e4, 0);
+	mat_params[0].set(Em, 0.25, 1.0e8, 1.0e4, 0);
+	mat_params[1].set(Em * a, 0.25, 1.0e8, 1.0e4, 0);
 
 	test_t test(size, micro_type, micro_params, mat_params);
 	test.assembly_and_solve();

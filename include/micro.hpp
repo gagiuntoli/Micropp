@@ -59,6 +59,7 @@
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
 
+
 enum {
        	MIC_SPHERE,
        	MIC_LAYER_Y,
@@ -68,6 +69,13 @@ enum {
        	MIC_QUAD_FIB_XZ,
        	MIC_QUAD_FIB_XZ_BROKEN_X
 };
+
+
+enum {
+      MAT_MODE_A,
+      MAT_MODE_A0
+};
+
 
 using namespace std;
 
@@ -132,14 +140,14 @@ class micropp {
 				    int ex, int ey, int ez = 0) const;
 
 		void get_stress(int gp, const double eps[nvoi],
-				double *int_vars_old,
+				const double *int_vars_old,
 				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
-		void get_elem_rhs(double *u,
-				  double *int_vars_old,
+		void get_elem_rhs(const double *u,
+				  const double *int_vars_old,
 				  double be[npe * dim],
 				  int ex, int ey, int ez = 0) const;
 		void calc_ave_stress(double *u,
@@ -150,25 +158,28 @@ class micropp {
 
 		void calc_fields(double *u, double *int_vars_old);
 
-		int newton_raphson(bool non_linear,
-				   double strain[nvoi],
-				   double *int_vars_old,
-				   double *u,
-				   double err[NR_MAX_ITS],
-				   int solver_its[NR_MAX_ITS],
-				   double solver_err[NR_MAX_ITS]);
+		int newton_raphson_v(const bool non_linear,
+				     const int newton_max_its,
+				     const int mat_mode,
+				     const double strain[nvoi],
+				     const double *int_vars_old,
+				     double *u,
+				     int *newton_its,
+				     double newton_err[NR_MAX_ITS],
+				     int solver_its[NR_MAX_ITS],
+				     double solver_err[NR_MAX_ITS]);
 
-		void get_elem_mat(double *u,
-				  double *int_vars_old,
+		void get_elem_mat(const double *u,
+				  const double *int_vars_old,
 				  double Ae[npe * dim * npe * dim],
 				  int ex, int ey, int ez = 0) const;
 
 		void set_displ_bc(const double strain[nvoi], double *u);
 
-		double assembly_rhs(double *u, double *int_vars_old);
+		double assembly_rhs(const double *u, const double *int_vars_old);
 
-		void assembly_mat(ell_matrix *A, double *u,
-				  double *int_vars_old);
+		void assembly_mat(ell_matrix *A, const double *u,
+				  const double *int_vars_old);
 
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 

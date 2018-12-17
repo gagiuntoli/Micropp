@@ -19,7 +19,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "micro.hpp"
+
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
@@ -214,13 +216,23 @@ template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
 	double sig_1[6];
+	int err;
 
 	for (int i = 0; i < nvoi; ++i) {
 
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		newton_raphson(false, eps_1, NULL, u_aux, NULL, NULL, NULL);
+		err = newton_raphson_v(false,
+				       NR_MAX_ITS,
+				       MAT_MODE_A,
+				       eps_1,
+				       NULL,
+				       u_aux,
+				       NULL,
+				       NULL,
+				       NULL,
+				       NULL);
 
 		calc_ave_stress(u_aux, NULL, sig_1);
 
@@ -239,8 +251,8 @@ material_t micropp<tdim>::get_material(const int e) const
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_rhs(double *u,
-				 double *int_vars_old,
+void micropp<tdim>::get_elem_rhs(const double *u,
+				 const double *int_vars_old,
 				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
@@ -264,8 +276,8 @@ void micropp<tdim>::get_elem_rhs(double *u,
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_mat(double *u,
-				 double *int_vars_old,
+void micropp<tdim>::get_elem_mat(const double *u,
+				 const double *int_vars_old,
 				 double Ae[npe * dim * npe * dim],
 				 int ex, int ey, int ez) const
 {
@@ -278,23 +290,14 @@ void micropp<tdim>::get_elem_mat(double *u,
 	constexpr int npedim2 = npedim * npedim;
 
 	double TAe[npedim2] = { 0.0 };
-	double zero_nvoi[nvoi] = { 0.0 };
 
 	for (int gp = 0; gp < npe; ++gp) {
 
 		double eps[6];
 		get_strain(u, gp, eps, ex, ey, ez);
 
-		double *eps_p_old;
-		double alpha_old ;
-
-		if (int_vars_old != NULL) {
-			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
-			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
-		} else {
-			eps_p_old = zero_nvoi;
-			alpha_old = 0.0;
-		}
+		const double *eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
+		const double alpha_old  = int_vars_old[intvar_ix(e, gp, 6)];
 
 		if (material.plasticity)
 			plastic_get_ctan(&material, eps, eps_p_old, alpha_old, ctan);
@@ -528,27 +531,18 @@ void micropp<tdim>::print_info() const
 
 template <int tdim>
 void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
-			       double *int_vars_old,
+			       const double *int_vars_old,
 			       double stress_gp[nvoi],
 			       int ex, int ey, int ez) const
 {
 	const int e = glo_elem(ex, ey, ez);
 	const material_t material = get_material(e);
 	const double mu = material.mu;
-	double zero_nvoi[nvoi] = { 0.0 };
 
 	if (material.plasticity == true) {
 
-		double *eps_p_old;
-		double alpha_old ;
-
-		if (int_vars_old != NULL) {
-			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
-			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
-		} else {
-			eps_p_old = zero_nvoi;
-			alpha_old = 0.0;
-		}
+		const double *eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
+		const double alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
 
 		plastic_get_stress(&material, eps, eps_p_old, alpha_old, stress_gp);
 
