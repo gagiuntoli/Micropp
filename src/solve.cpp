@@ -23,15 +23,12 @@
 
 using namespace std;
 
-//template <int tdim>
-//void micropp<tdim>::newton_raphson_1lin_its(bool non_linear,
-//					    double strain[nvoi],
-//					    double *int_vars_old,
-//					    double *u,
-//					    double newton_err[NR_MAX_ITS],
-//					    double solver_err[NR_MAX_ITS])
-//{
-//}
+template <int tdim>
+int micropp<tdim>::newton_raphson_linear(const double strain[nvoi], double *u)
+{
+	return newton_raphson_v(false, 2, MAT_MODE_A0, strain, nullptr, u,
+			       	nullptr);
+}
 
 
 template <int tdim>
