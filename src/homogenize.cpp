@@ -66,11 +66,12 @@ void micropp<tdim>::homogenize()
 {
 	INST_START;
 
-	int err, newton_its, solver_its[NR_MAX_ITS];
-	double newton_err[NR_MAX_ITS], solver_err[NR_MAX_ITS];
+	int ierr;
 	bool nl_flag;
 
 	for (int igp = 0; igp < ngp; ++igp) {
+
+		newton_t newton;
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		gp_ptr->sigma_cost = 0;
@@ -85,28 +86,21 @@ void micropp<tdim>::homogenize()
 		// SIGMA 1 Newton-Raphson
 		memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
-		err = newton_raphson_v(gp_ptr->allocated,
-				       NR_MAX_ITS,
-				       MAT_MODE_A,
-				       gp_ptr->macro_strain,
-				       gp_ptr->int_vars_n,
-				       gp_ptr->u_k,
-				       &newton_its,
-				       newton_err,
-				       solver_its,
-				       solver_err);
+		ierr = newton_raphson_v(gp_ptr->allocated,
+					NR_MAX_ITS,
+					MAT_MODE_A,
+					gp_ptr->macro_strain,
+					gp_ptr->int_vars_n,
+					gp_ptr->u_k,
+					&newton);
 
-		gp_ptr->sigma_newton_its = newton_its;
-		memcpy(gp_ptr->sigma_newton_err, newton_err, NR_MAX_ITS * sizeof(double));
-		memcpy(gp_ptr->sigma_solver_its, solver_its, NR_MAX_ITS * sizeof(int));
-		memcpy(gp_ptr->sigma_solver_err, solver_err, NR_MAX_ITS * sizeof(double));
+		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
 
-		for (int i = 0; i < newton_its; ++i)
-			gp_ptr->sigma_cost += solver_its[i];
+		for (int i = 0; i < newton.its; ++i)
+			gp_ptr->sigma_cost += newton.solver_its[i];
 
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
 		filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
-
 
 		/* Updates <vars_new> and <f_trial_max> */
 		nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new, &f_trial_max);
@@ -131,19 +125,16 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				err = newton_raphson_v(true,
-						       NR_MAX_ITS,
-						       MAT_MODE_A,
-						       eps_1,
-						       gp_ptr->int_vars_n,
-						       u_aux,
-						       NULL,
-						       NULL,
-						       NULL,
-						       NULL);
+				ierr = newton_raphson_v(true,
+							NR_MAX_ITS,
+							MAT_MODE_A,
+							eps_1,
+							gp_ptr->int_vars_n,
+							u_aux,
+							nullptr);
 
-				for (int i = 0; i < newton_its; ++i)
-					gp_ptr->sigma_cost += solver_its[i];
+				for (int i = 0; i < newton.its; ++i)
+					gp_ptr->sigma_cost += newton.solver_its[i];
 
 				calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);
 

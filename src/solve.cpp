@@ -41,33 +41,33 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 				    const double strain[nvoi],
 				    const double *int_vars_old,
 				    double *u,
-				    int *newton_its,
-				    double newton_err[NR_MAX_ITS],
-				    int solver_its[NR_MAX_ITS],
-				    double solver_err[NR_MAX_ITS])
+				    newton_t *newton)
 {
 	INST_START;
 
 	set_displ_bc(strain, u);
 
-	int lits = 0;
-	double lerr = 0.0, lerr0, cg_err;
+	int its = 0;
+	double norm, norm_0, cg_err;
 	ell_matrix *A_ptr;
 
-	if (solver_its != nullptr) memset(solver_its, 0, NR_MAX_ITS * sizeof(int));
-	if (solver_err != nullptr) memset(solver_err, 0, NR_MAX_ITS * sizeof(double));
-	if (newton_err != nullptr) memset(newton_err, 0, NR_MAX_ITS * sizeof(double));
+	if (newton != nullptr) {
+		memset(newton->solver_its, 0, NR_MAX_ITS * sizeof(int));
+		memset(newton->solver_norms, 0, NR_MAX_ITS * sizeof(double));
+		memset(newton->norms, 0, NR_MAX_ITS * sizeof(double));
+	}
 
-	while (lits < NR_MAX_ITS) {
+	while (its < newton_max_its) {
 
-		lerr = assembly_rhs(u, int_vars_old);
+		norm = assembly_rhs(u, int_vars_old);
 
-		if (lits == 0)
-			lerr0 = lerr;
+		if (its == 0)
+			norm_0 = norm;
 
-		if (newton_err != nullptr) newton_err[lits] = lerr;
+		if (newton != nullptr)
+			newton->norms[its] = norm;
 
-		if (lerr < NR_MAX_TOL || lerr < lerr0 * NR_REL_TOL)
+		if (norm < NR_MAX_TOL || norm < norm_0 * NR_REL_TOL)
 			break;
 
 		int cg_its;
@@ -86,7 +86,7 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 				 * second newton-raphson iteration.
 				 */
 
-				if (non_linear || lits > 0) {
+				if (non_linear || its > 0) {
 
 					assembly_mat(&A, u, int_vars_old);
 					A_ptr = &A;
@@ -106,18 +106,20 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 
 		cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 
-		if (solver_its != nullptr) solver_its[lits] = cg_its;
-		if (solver_err != nullptr) solver_err[lits] = cg_err;
+		if (newton != nullptr) {
+			newton->solver_its[its] = cg_its;
+			newton->solver_norms[its] = cg_err;
+		}
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
-		lits++;
+		its++;
 
 	}
 
-	if (newton_its != nullptr)
-		*newton_its = lits;
+	if (newton != nullptr)
+		newton->its = its;
 
 	return 0;
 }

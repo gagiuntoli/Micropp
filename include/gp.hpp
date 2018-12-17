@@ -19,8 +19,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include <cassert>
 #include <cstdlib>
+
+#include "newton.hpp"
 
 #define GP_NR_MAX_ITS 4
 
@@ -42,10 +45,7 @@ class gp_t {
 	double *u_n;
 	double *u_k;
 
-	int sigma_solver_its[GP_NR_MAX_ITS];
-	int sigma_newton_its;
-	double sigma_solver_err[GP_NR_MAX_ITS];
-	double sigma_newton_err[GP_NR_MAX_ITS];
+	newton_t newton;
 	long int sigma_cost;
 
 	gp_t():

@@ -36,6 +36,7 @@
 #include "material.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
+#include "newton.hpp"
 
 #define MAX_DIM         3
 #define MAX_MATS        10
@@ -45,9 +46,6 @@
 #define CG_MAX_ITS      500
 #define CG_REL_ERR      1.0e-10
 
-#define NR_MAX_TOL      1.0e-10
-#define NR_MAX_ITS      4
-#define NR_REL_TOL      1.0e-3 // factor against first residual
 #define FILTER_REL_TOL  1.0e-5
 
 #define D_EPS_CTAN      1.0e-8
@@ -164,10 +162,7 @@ class micropp {
 				     const double strain[nvoi],
 				     const double *int_vars_old,
 				     double *u,
-				     int *newton_its,
-				     double newton_err[NR_MAX_ITS],
-				     int solver_its[NR_MAX_ITS],
-				     double solver_err[NR_MAX_ITS]);
+				     newton_t *newton);
 
 		void get_elem_mat(const double *u,
 				  const double *int_vars_old,
@@ -176,7 +171,8 @@ class micropp {
 
 		void set_displ_bc(const double strain[nvoi], double *u);
 
-		double assembly_rhs(const double *u, const double *int_vars_old);
+		double assembly_rhs(const double *u,
+				    const double *int_vars_old);
 
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *int_vars_old);
