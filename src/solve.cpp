@@ -105,7 +105,13 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 				break;
 		}
 
+		if (print)
+			cout << "SOLVER_START" << endl;
+
 		cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
+
+		if (print)
+			cout << "SOLVER_END ITS = " << cg_its << endl;
 
 		if (newton != nullptr) {
 			newton->solver_its[its] = cg_its;
