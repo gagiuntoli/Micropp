@@ -144,7 +144,7 @@ void micropp<3>::calc_bmat(int gp, double bmat[nvoi][npe * dim]) const
 
 
 template<>
-double micropp<3>::assembly_rhs(double *u, double *int_vars_old)
+double micropp<3>::assembly_rhs(const double *u, const double *int_vars_old)
 {
 	INST_START;
 
@@ -231,7 +231,7 @@ double micropp<3>::assembly_rhs(double *u, double *int_vars_old)
 
 
 template <>
-void micropp<3>::assembly_mat(ell_matrix *A, double *u, double *int_vars_old)
+void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *int_vars_old)
 {
 	INST_START;
 

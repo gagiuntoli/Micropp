@@ -27,6 +27,8 @@
 
 #include "micro.hpp"
 
+#define REPETITIONS 5
+
 using namespace std;
 
 const double strain[6] = { 1., 2., 3., 1., 1., 1. };
@@ -44,21 +46,12 @@ int main (int argc, char *argv[])
 
 			~test_t() {};
 
-			void assembly_and_solve(void)
+			void newton_raphson(void)
 			{
 
 				double lerr, cg_err;
 				memset(u_aux, 0.0, nndim * sizeof(double));
-
-				set_displ_bc(strain, u_aux);
-				lerr = assembly_rhs(u_aux, vars_new_aux);
-
-				assembly_mat(&A, u_aux, vars_new_aux);
-				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
-				cout
-					<< "|RES| : " << lerr
-					<< " CG_ITS : " << cg_its
-					<< " CG_TOL : " << cg_err << endl;
+				newton_raphson_linear(strain, u_aux, true);
 
 			};
 
@@ -86,7 +79,8 @@ int main (int argc, char *argv[])
 	mat_params[1].set(Em * a, 0.25, 1.0e8, 1.0e4, 0);
 
 	test_t test(size, micro_type, micro_params, mat_params);
-	test.assembly_and_solve();
+	for (int i = 0; i < REPETITIONS; ++i)
+		test.newton_raphson();
 
 	return 0;
 }

@@ -102,7 +102,7 @@ void micropp<2>::calc_bmat(int gp, double bmat[nvoi][npe *dim])	const
 
 
 template <>
-double micropp<2>::assembly_rhs(double *u, double *int_vars_old)
+double micropp<2>::assembly_rhs(const double *u, const double *int_vars_old)
 {
 	INST_START;
 
@@ -168,7 +168,7 @@ double micropp<2>::assembly_rhs(double *u, double *int_vars_old)
 
 
 template <>
-void micropp<2>::assembly_mat(ell_matrix *A, double *u, double *int_vars_old)
+void micropp<2>::assembly_mat(ell_matrix *A, const double *u, const double *int_vars_old)
 {
 	INST_START;
 
@@ -188,8 +188,8 @@ void micropp<2>::assembly_mat(ell_matrix *A, double *u, double *int_vars_old)
 template <>
 bool micropp<2>::plastic_law(const material_t *material,
 			     const double eps[6],
-			     const double eps_p_old[6],
-			     double alpha_old,
+			     const double *_eps_p_old,
+			     const double *_alpha_old,
 			     double *_dl,
 			     double _normal[6],
 			     double _s_trial[6],
@@ -200,8 +200,10 @@ bool micropp<2>::plastic_law(const material_t *material,
 
 
 template <>
-void micropp<2>::plastic_get_stress(const material_t *material, const double eps[6],
-				    const double eps_p_old[6], double alpha_old,
+void micropp<2>::plastic_get_stress(const material_t *material,
+				    const double eps[6],
+				    const double *eps_p_old,
+				    const double *alpha_old,
 				    double stress[6]) const
 {
 }
@@ -210,8 +212,8 @@ void micropp<2>::plastic_get_stress(const material_t *material, const double eps
 template <>
 void micropp<2>::plastic_get_ctan(const material_t *material,
 				  const double eps[nvoi],
-				  const double eps_p_old[nvoi],
-				  const double alpha_old,
+				  const double *eps_p_old,
+				  const double *alpha_old,
 				  double ctan[nvoi][nvoi]) const
 {
 	return;
@@ -229,8 +231,8 @@ void micropp<2>::isolin_get_ctan(const material_t *material,
 template <>
 bool micropp<2>::plastic_evolute(const material_t *material,
 				 const double eps[6],
-				 const double eps_p_old[6],
-				 double alpha_old,
+				 const double *eps_p_old,
+				 const double *alpha_old,
 				 double *eps_p_new,
 				 double *alpha_new,
 				 double *f_trial) const

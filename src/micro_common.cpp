@@ -19,7 +19,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "micro.hpp"
+
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
@@ -163,7 +165,7 @@ void micropp<tdim>::get_sigma_solver_its(int gp_id,
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	memcpy(sigma_solver_its, gp_list[gp_id].sigma_solver_its,
+	memcpy(sigma_solver_its, gp_list[gp_id].newton.solver_its,
 	       NR_MAX_ITS * sizeof(int));
 }
 
@@ -175,7 +177,7 @@ void micropp<tdim>::get_sigma_solver_err(int gp_id,
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	memcpy(sigma_solver_err, gp_list[gp_id].sigma_solver_err,
+	memcpy(sigma_solver_err, gp_list[gp_id].newton.solver_norms,
 	       NR_MAX_ITS * sizeof(double));
 }
 
@@ -187,7 +189,7 @@ void micropp<tdim>::get_sigma_newton_err(int gp_id,
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	memcpy(sigma_newton_err, gp_list[gp_id].sigma_newton_err,
+	memcpy(sigma_newton_err, gp_list[gp_id].newton.norms,
 	       NR_MAX_ITS * sizeof(double));
 }
 
@@ -197,7 +199,7 @@ int micropp<tdim>::get_sigma_newton_its(int gp_id) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	return gp_list[gp_id].sigma_newton_its;
+	return gp_list[gp_id].newton.its;
 }
 
 
@@ -214,13 +216,21 @@ template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
 	double sig_1[6];
+	int err;
 
 	for (int i = 0; i < nvoi; ++i) {
 
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		newton_raphson(false, eps_1, NULL, u_aux, NULL, NULL, NULL);
+		err = newton_raphson_v(false,
+				       NR_MAX_ITS,
+				       MAT_MODE_A,
+				       eps_1,
+				       nullptr,
+				       u_aux,
+				       nullptr,
+				       false);
 
 		calc_ave_stress(u_aux, NULL, sig_1);
 
@@ -239,11 +249,13 @@ material_t micropp<tdim>::get_material(const int e) const
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_rhs(double *u,
-				 double *int_vars_old,
+void micropp<tdim>::get_elem_rhs(const double *u,
+				 const double *int_vars_old,
 				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
+	INST_START;
+
 	constexpr int npedim = npe * dim;
 	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
 
@@ -264,8 +276,8 @@ void micropp<tdim>::get_elem_rhs(double *u,
 
 
 template <int tdim>
-void micropp<tdim>::get_elem_mat(double *u,
-				 double *int_vars_old,
+void micropp<tdim>::get_elem_mat(const double *u,
+				 const double *vars_old,
 				 double Ae[npe * dim * npe * dim],
 				 int ex, int ey, int ez) const
 {
@@ -278,28 +290,20 @@ void micropp<tdim>::get_elem_mat(double *u,
 	constexpr int npedim2 = npedim * npedim;
 
 	double TAe[npedim2] = { 0.0 };
-	double zero_nvoi[nvoi] = { 0.0 };
 
 	for (int gp = 0; gp < npe; ++gp) {
 
 		double eps[6];
 		get_strain(u, gp, eps, ex, ey, ez);
 
-		double *eps_p_old;
-		double alpha_old ;
 
-		if (int_vars_old != NULL) {
-			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
-			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
-		} else {
-			eps_p_old = zero_nvoi;
-			alpha_old = 0.0;
-		}
-
-		if (material.plasticity)
+		if (material.plasticity) {
+			const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
+			const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
 			plastic_get_ctan(&material, eps, eps_p_old, alpha_old, ctan);
-		else
+		} else {
 			isolin_get_ctan(&material, ctan);
+		}
 
 		double bmat[nvoi][npedim], cxb[nvoi][npedim];
 		calc_bmat(gp, bmat);
@@ -528,27 +532,18 @@ void micropp<tdim>::print_info() const
 
 template <int tdim>
 void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
-			       double *int_vars_old,
+			       const double *vars_old,
 			       double stress_gp[nvoi],
 			       int ex, int ey, int ez) const
 {
 	const int e = glo_elem(ex, ey, ez);
 	const material_t material = get_material(e);
 	const double mu = material.mu;
-	double zero_nvoi[nvoi] = { 0.0 };
 
 	if (material.plasticity == true) {
 
-		double *eps_p_old;
-		double alpha_old ;
-
-		if (int_vars_old != NULL) {
-			eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
-			alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
-		} else {
-			eps_p_old = zero_nvoi;
-			alpha_old = 0.0;
-		}
+		const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
+		const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
 
 		plastic_get_stress(&material, eps, eps_p_old, alpha_old, stress_gp);
 
@@ -668,16 +663,14 @@ void micropp<tdim>::calc_fields(double *u, double *int_vars_old)
 
 template<int tdim>
 bool micropp<tdim>::calc_vars_new(const double *u,
-				  double *int_vars_old,
-				  double *int_vars_new,
+				  double *vars_old,
+				  double *vars_new,
 				  double *_f_trial_max)
 {
-	INST_START;
-
 	bool nl_flag = false;
-	double zero_nvoi[nvoi] = { 0.0 };
 	double f_trial;
 	double f_trial_max = *_f_trial_max;
+	double eps[nvoi];
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -690,18 +683,11 @@ bool micropp<tdim>::calc_vars_new(const double *u,
 
 					if (material.plasticity == true) {
 
-						double *eps_p_old;
-						double alpha_old;
-						if (int_vars_old != NULL) {
-							eps_p_old = &int_vars_old[intvar_ix(e, gp, 0)];
-							alpha_old = int_vars_old[intvar_ix(e, gp, 6)];
-						} else {
-							eps_p_old = zero_nvoi;
-							alpha_old = 0.0;
-						}
-						double *eps_p_new = &int_vars_new[intvar_ix(e, gp, 0)];
-						double *alpha_new = &int_vars_new[intvar_ix(e, gp, 6)];
-						double eps[nvoi];
+						const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
+						const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
+						double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
+						double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
+
 						get_strain(u, gp, eps, ex, ey, ez);
 
 						nl_flag |= plastic_evolute(&material,
