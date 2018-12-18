@@ -42,8 +42,8 @@ void micropp<3>::get_dev_tensor(const double tensor[6],
 template <>
 bool micropp<3>::plastic_law(const material_t *material,
 			     const double eps[6],
-			     const double eps_p_old[6],
-			     const double alpha_old,
+			     const double *_eps_p_old,
+			     const double *_alpha_old,
 			     double *_dl,
 			     double _normal[6],
 			     double _s_trial[6],
@@ -52,6 +52,10 @@ bool micropp<3>::plastic_law(const material_t *material,
 	/* Calculates _dl, _normal and _s_trial
 	 * Optionally  returns f_trial value
 	 */
+
+	const double zeros[6] = { 0.0 };
+	const double alpha_old = (_alpha_old) ? *_alpha_old : 0;
+	const double *eps_p_old = (_eps_p_old) ? _eps_p_old : zeros;
 
 	double eps_dev[6], eps_p_dev_1[6];
 
@@ -98,8 +102,8 @@ bool micropp<3>::plastic_law(const material_t *material,
 template <>
 void micropp<3>::plastic_get_stress(const material_t *material,
 				    const double eps[6],
-				    const double eps_p_old[6],
-				    const double alpha_old,
+				    const double *eps_p_old,
+				    const double *alpha_old,
 				    double stress[6]) const
 {
 	double dl, normal[6], s_trial[6];
@@ -120,8 +124,8 @@ void micropp<3>::plastic_get_stress(const material_t *material,
 template <>
 void micropp<3>::plastic_get_ctan(const material_t *material,
 				  const double eps[6],
-				  const double eps_p_old[6],
-				  const double alpha_old,
+				  const double *eps_p_old,
+				  const double *alpha_old,
 				  double ctan[6][6]) const
 {
 	INST_START;
@@ -148,8 +152,8 @@ void micropp<3>::plastic_get_ctan(const material_t *material,
 template <>
 bool micropp<3>::plastic_evolute(const material_t *material,
 				 const double eps[6],
-				 const double eps_p_old[6],
-				 const double alpha_old,
+				 const double *eps_p_old,
+				 const double *alpha_old,
 				 double *eps_p_new,
 				 double *alpha_new,
 				 double *f_trial) const
@@ -158,10 +162,12 @@ bool micropp<3>::plastic_evolute(const material_t *material,
 	bool nl_flag = plastic_law(material, eps, eps_p_old, alpha_old,
 				   &dl, normal, s_trial, f_trial);
 
-	for (int i = 0; i < 6; ++i)
-		eps_p_new[i] = eps_p_old[i] + dl * normal[i];
+	if (eps_p_old != nullptr && eps_p_new != nullptr)
+		for (int i = 0; i < 6; ++i)
+			eps_p_new[i] = eps_p_old[i] + dl * normal[i];
 
-	*alpha_new = alpha_old + SQRT_2DIV3 * dl;
+	if (alpha_old != nullptr && alpha_new != nullptr)
+		*alpha_new =  *alpha_old + SQRT_2DIV3 * dl + 0;
 
 	return nl_flag;
 }

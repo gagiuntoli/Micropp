@@ -195,14 +195,14 @@ class micropp {
 
 		void plastic_get_stress(const material_t *material,
 					const double eps[6],
-					const double eps_p_old[6],
-					const double alpha_old,
+					const double *eps_p_old,
+					const double *alpha_old,
 					double stress[6]) const;
 
 		bool plastic_law(const material_t *material,
 				 const double eps[6],
-				 const double eps_p_old[6],
-				 const double alpha_old,
+				 const double *eps_p_old,
+				 const double *alpha_old,
 				 double *_dl,
 				 double _normal[6],
 				 double _s_trial[6],
@@ -210,14 +210,14 @@ class micropp {
 
 		void plastic_get_ctan(const material_t *material,
 				      const double eps[nvoi],
-				      const double eps_p_old[nvoi],
-				      const double alpha_old,
+				      const double *eps_p_old,
+				      const double *alpha_old,
 				      double ctan[nvoi][nvoi]) const;
 
 		bool plastic_evolute(const material_t *material,
 				     const double eps[6],
-				     const double eps_p_old[6],
-				     const double alpha_old,
+				     const double *eps_p_old,
+				     const double *alpha_old,
 				     double eps_p_new[6],
 				     double *alpha_new,
 				     double *f_trial) const;
