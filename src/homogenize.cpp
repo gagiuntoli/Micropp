@@ -86,7 +86,8 @@ void micropp<tdim>::homogenize()
 					gp_ptr->macro_strain,
 					gp_ptr->int_vars_n,
 					gp_ptr->u_k,
-					&newton);
+					&newton,
+					false);
 
 		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
 
@@ -125,7 +126,8 @@ void micropp<tdim>::homogenize()
 							eps_1,
 							gp_ptr->int_vars_n,
 							u_aux,
-							nullptr);
+							nullptr,
+							false);
 
 				for (int i = 0; i < newton.its; ++i)
 					gp_ptr->sigma_cost += newton.solver_its[i];

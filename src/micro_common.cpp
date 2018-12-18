@@ -229,7 +229,8 @@ void micropp<tdim>::calc_ctan_lin()
 				       eps_1,
 				       nullptr,
 				       u_aux,
-				       nullptr);
+				       nullptr,
+				       false);
 
 		calc_ave_stress(u_aux, NULL, sig_1);
 
@@ -253,6 +254,8 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
+	INST_START;
+
 	constexpr int npedim = npe * dim;
 	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
 

@@ -157,7 +157,7 @@ class micropp {
 		void calc_fields(double *u, double *int_vars_old);
 
 		int newton_raphson_linear(const double strain[nvoi],
-					  double *u);
+					  double *u, bool print);
 
 		int newton_raphson_v(const bool non_linear,
 				     const int newton_max_its,
@@ -165,7 +165,8 @@ class micropp {
 				     const double strain[nvoi],
 				     const double *int_vars_old,
 				     double *u,
-				     newton_t *newton);
+				     newton_t *newton,
+				     bool print);
 
 		void get_elem_mat(const double *u,
 				  const double *int_vars_old,

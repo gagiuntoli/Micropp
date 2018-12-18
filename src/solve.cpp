@@ -24,10 +24,11 @@
 using namespace std;
 
 template <int tdim>
-int micropp<tdim>::newton_raphson_linear(const double strain[nvoi], double *u)
+int micropp<tdim>::newton_raphson_linear(const double strain[nvoi], double *u,
+					 bool print)
 {
 	return newton_raphson_v(false, 2, MAT_MODE_A0, strain, nullptr, u,
-			       	nullptr);
+				nullptr, print);
 }
 
 
@@ -38,7 +39,8 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 				    const double strain[nvoi],
 				    const double *int_vars_old,
 				    double *u,
-				    newton_t *newton)
+				    newton_t *newton,
+				    bool print)
 {
 	INST_START;
 
@@ -57,6 +59,8 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 	while (its < newton_max_its) {
 
 		norm = assembly_rhs(u, int_vars_old);
+		if (print)
+			cout << "|RES| = " << norm << endl;
 
 		if (its == 0)
 			norm_0 = norm;
