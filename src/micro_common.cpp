@@ -100,6 +100,14 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 	assembly_mat(&A0, u_aux, NULL);
 
+	nthreads = omp_get_num_threads();
+	matrices_A = (ell_matrix*)malloc(nthreads * sizeof(ell_matrix));
+	matrices_A0 = (ell_matrix*)malloc(nthreads * sizeof(ell_matrix));
+	for (int i = 0; i < nthreads; ++i) {
+		ell_init(&matrices_A[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&matrices_A0[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+	}
+
 	if (_ctan_lin == nullptr)
 		calc_ctan_lin();
 
@@ -107,7 +115,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		gp_list[gp].macro_ctan = ctan_lin;
 
 	f_trial_max = -1.0e50;
-	nthreads = omp_get_thread_num();
 
 }
 

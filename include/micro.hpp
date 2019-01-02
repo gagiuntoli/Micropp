@@ -103,6 +103,8 @@ class micropp {
 
 		ell_matrix A;  // Non - Linear Jacobian
 		ell_matrix A0; // Linear Jacobian (constant)
+		ell_matrix *matrices_A;  // Non - Linear Jacobian
+		ell_matrix *matrices_A0; // Linear Jacobian (constant)
 
 		double *b;
 		double *du;

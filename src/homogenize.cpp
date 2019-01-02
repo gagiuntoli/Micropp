@@ -60,11 +60,15 @@ void micropp<tdim>::homogenize()
 {
 	INST_START;
 
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		newton_t newton;
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
+
+		int thread_id = omp_get_thread_num();
+		ell_matrix *A_ptr = &matrices_A[thread_id];
+		ell_matrix *A0_ptr = &matrices_A0[thread_id];
 
 		gp_ptr->sigma_cost = 0;
 
