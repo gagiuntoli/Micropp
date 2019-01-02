@@ -23,6 +23,7 @@ set(testsources
 	test_print_vtu_1.cpp
 	test_newton_linear.cpp
 	test_newton_non_linear.cpp
+	test_omp.cpp
 	test_util_1.cpp)
 
 # Iterate over the list above

@@ -30,6 +30,7 @@
 #include <cmath>
 #include <cassert>
 #include <cstring>
+#include <omp.h>
 
 #include "util.hpp"
 #include "ell.hpp"
@@ -124,6 +125,8 @@ class micropp {
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
 		double f_trial_max;
+
+		int nthreads;
 
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;

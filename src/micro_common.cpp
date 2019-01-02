@@ -107,6 +107,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		gp_list[gp].macro_ctan = ctan_lin;
 
 	f_trial_max = -1.0e50;
+	nthreads = omp_get_thread_num();
 
 }
 
