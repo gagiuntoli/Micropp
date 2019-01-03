@@ -167,6 +167,8 @@ class micropp {
 		int newton_raphson_v(const bool non_linear,
 				     const int newton_max_its,
 				     const int mat_mode,
+				     ell_matrix *A,
+				     ell_matrix *A0,
 				     const double strain[nvoi],
 				     const double *int_vars_old,
 				     double *u,

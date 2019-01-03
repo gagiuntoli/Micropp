@@ -106,6 +106,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int i = 0; i < nthreads; ++i) {
 		ell_init(&matrices_A[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		ell_init(&matrices_A0[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		assembly_mat(&matrices_A0[i], u_aux, NULL);
 	}
 
 	if (_ctan_lin == nullptr)
@@ -233,7 +234,9 @@ void micropp<tdim>::calc_ctan_lin()
 
 		err = newton_raphson_v(false,
 				       NR_MAX_ITS,
-				       MAT_MODE_A,
+				       MAT_MODE_A0,
+				       nullptr,
+				       &A0,
 				       eps_1,
 				       nullptr,
 				       u_aux,

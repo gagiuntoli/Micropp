@@ -27,8 +27,16 @@ template <int tdim>
 int micropp<tdim>::newton_raphson_linear(const double strain[nvoi], double *u,
 					 bool print)
 {
-	return newton_raphson_v(false, 2, MAT_MODE_A0, strain, nullptr, u,
-				nullptr, print);
+	return newton_raphson_v(false,
+				2,
+				MAT_MODE_A0,
+				nullptr,
+				&A0,
+				strain,
+				nullptr,
+				u,
+				nullptr,
+				print);
 }
 
 
@@ -36,6 +44,8 @@ template <int tdim>
 int micropp<tdim>::newton_raphson_v(const bool non_linear,
 				    const int newton_max_its,
 				    const int mat_mode,
+				    ell_matrix *A,
+				    ell_matrix *A0,
 				    const double strain[nvoi],
 				    const double *int_vars_old,
 				    double *u,
@@ -77,7 +87,7 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 			case MAT_MODE_A0:
 
 				/* Always use A0 */
-				A_ptr = &A0;
+				A_ptr = A0;
 				break;
 
 			case MAT_MODE_A:
@@ -89,12 +99,12 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 
 				if (non_linear || its > 0) {
 
-					assembly_mat(&A, u, int_vars_old);
-					A_ptr = &A;
+					assembly_mat(A, u, int_vars_old);
+					A_ptr = A;
 
 				} else {
 
-					A_ptr = &A0;
+					A_ptr = A0;
 
 				}
 
