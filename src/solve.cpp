@@ -32,6 +32,7 @@ int micropp<tdim>::newton_raphson_linear(const double strain[nvoi], double *u,
 				MAT_MODE_A0,
 				nullptr,
 				&A0,
+				b,
 				strain,
 				nullptr,
 				u,
@@ -46,6 +47,7 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 				    const int mat_mode,
 				    ell_matrix *A,
 				    ell_matrix *A0,
+				    double *b,
 				    const double strain[nvoi],
 				    const double *int_vars_old,
 				    double *u,
@@ -68,7 +70,7 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 
 	while (its < newton_max_its) {
 
-		norm = assembly_rhs(u, int_vars_old);
+		norm = assembly_rhs(u, int_vars_old, b);
 		if (print)
 			cout << "|RES| = " << norm << endl;
 

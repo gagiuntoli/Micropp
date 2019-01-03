@@ -106,6 +106,8 @@ class micropp {
 		ell_matrix *matrices_A;  // Non - Linear Jacobian
 		ell_matrix *matrices_A0; // Linear Jacobian (constant)
 
+		double **vectors_b;
+
 		double *b;
 		double *du;
 		double *u;
@@ -169,6 +171,7 @@ class micropp {
 				     const int mat_mode,
 				     ell_matrix *A,
 				     ell_matrix *A0,
+				     double *b,
 				     const double strain[nvoi],
 				     const double *int_vars_old,
 				     double *u,
@@ -183,7 +186,8 @@ class micropp {
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(const double *u,
-				    const double *int_vars_old);
+				    const double *int_vars_old,
+				    double *b);
 
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *int_vars_old);

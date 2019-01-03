@@ -69,6 +69,7 @@ void micropp<tdim>::homogenize()
 		int thread_id = omp_get_thread_num();
 		ell_matrix *A_ptr = &matrices_A[thread_id];
 		ell_matrix *A0_ptr = &matrices_A0[thread_id];
+		double *b_ptr = vectors_b[thread_id];
 
 		gp_ptr->sigma_cost = 0;
 
@@ -87,6 +88,7 @@ void micropp<tdim>::homogenize()
 				 MAT_MODE_A,
 				 A_ptr,
 				 A0_ptr,
+				 b_ptr,
 				 gp_ptr->macro_strain,
 				 gp_ptr->int_vars_n,
 				 gp_ptr->u_k,
@@ -129,6 +131,7 @@ void micropp<tdim>::homogenize()
 						 MAT_MODE_A,
 						 A_ptr,
 						 A0_ptr,
+						 b_ptr,
 						 eps_1,
 						 gp_ptr->int_vars_n,
 						 u_aux,

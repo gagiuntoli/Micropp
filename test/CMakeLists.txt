@@ -18,7 +18,6 @@ set(testsources
 	test_ell_1.cpp
 	test_ell_2.cpp
 	test_ell_3.cpp
-	test_cg.cpp
 	conv3d_2lay.cpp
 	test_print_vtu_1.cpp
 	test_newton_linear.cpp
@@ -26,6 +25,7 @@ set(testsources
 	test_util_1.cpp)
 
 #test_newton_non_linear.cpp
+#test_cg.cpp
 # Iterate over the list above
 foreach (testfile ${testsources})
 	# Delete File extensions (test_i.cpp -> test_i)
