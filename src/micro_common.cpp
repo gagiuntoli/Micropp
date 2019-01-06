@@ -100,7 +100,9 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 	assembly_mat(&A0, u_aux, NULL);
 
-	nthreads = omp_get_num_threads();
+	nthreads = omp_get_max_threads();
+	cout << "nthreads " << nthreads << endl;
+
 	matrices_A = (ell_matrix *)malloc(nthreads * sizeof(ell_matrix));
 	matrices_A0 = (ell_matrix *)malloc(nthreads * sizeof(ell_matrix));
 	vectors_b = (double **)malloc(nthreads * sizeof(double *));
