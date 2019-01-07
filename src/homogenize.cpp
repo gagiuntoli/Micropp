@@ -67,9 +67,6 @@ void micropp<tdim>::homogenize()
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		int thread_id = omp_get_thread_num();
-		ell_matrix *A_ptr = &matrices_A[thread_id];
-		ell_matrix *A0_ptr = &matrices_A0[thread_id];
-		double *b_ptr = vectors_b[thread_id];
 
 		gp_ptr->sigma_cost = 0;
 
@@ -83,15 +80,16 @@ void micropp<tdim>::homogenize()
 		// SIGMA 1 Newton-Raphson
 		memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
 
-		newton_raphson_v(gp_ptr->allocated,
+		newton_raphson_v(&A[thread_id],
+				 &A0[thread_id],
+				 b[thread_id],
+				 u[thread_id],
+				 du[thread_id],
+				 gp_ptr->allocated,
 				 NR_MAX_ITS,
 				 MAT_MODE_A,
-				 A_ptr,
-				 A0_ptr,
-				 b_ptr,
 				 gp_ptr->macro_strain,
 				 gp_ptr->int_vars_n,
-				 gp_ptr->u_k,
 				 &newton,
 				 false);
 
@@ -118,7 +116,7 @@ void micropp<tdim>::homogenize()
 			// CTAN 3/6 Newton-Raphsons in 2D/3D
 			double eps_1[6], sig_0[6], sig_1[6];
 
-			memcpy(u_aux, gp_ptr->u_k, nndim * sizeof(double));
+			memcpy(u[thread_id], gp_ptr->u_k, nndim * sizeof(double));
 			memcpy(sig_0, gp_ptr->macro_stress, nvoi * sizeof(double));
 
 			for (int i = 0; i < nvoi; ++i) {
@@ -126,22 +124,23 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				newton_raphson_v(true,
+				newton_raphson_v(&A[thread_id],
+						 &A0[thread_id],
+						 b[thread_id],
+						 u[thread_id],
+						 du[thread_id],
+						 true,
 						 NR_MAX_ITS,
 						 MAT_MODE_A,
-						 A_ptr,
-						 A0_ptr,
-						 b_ptr,
 						 eps_1,
 						 gp_ptr->int_vars_n,
-						 u_aux,
 						 nullptr,
 						 false);
 
 				for (int i = 0; i < newton.its; ++i)
 					gp_ptr->sigma_cost += newton.solver_its[i];
 
-				calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);
+				calc_ave_stress(u[thread_id], gp_ptr->int_vars_n, sig_1);
 
 				for (int v = 0; v < nvoi; ++v)
 					gp_ptr->macro_ctan[v * nvoi + i] =

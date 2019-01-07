@@ -46,12 +46,21 @@ int main (int argc, char *argv[])
 
 			~test_t() {};
 
-			void newton_raphson(void)
+			void just_do_it(void)
 			{
 
-				double lerr, cg_err;
-				memset(u_aux, 0.0, nndim * sizeof(double));
-				newton_raphson_linear(strain, u_aux, true);
+#pragma omp parallel for
+				for (int i = 0; i < REPETITIONS; ++i) {
+					int thread_id = omp_get_thread_num();
+					memset(u[thread_id], 0.0, nndim * sizeof(double));
+					newton_raphson_linear(&A0[thread_id],
+							      b[thread_id],
+							      u[thread_id],
+							      du[thread_id],
+							      strain,
+							      true);
+					cout << endl;
+				}
 
 			};
 
@@ -79,8 +88,7 @@ int main (int argc, char *argv[])
 	mat_params[1].set(Em * a, 0.25, 1.0e8, 1.0e4, 0);
 
 	test_t test(size, micro_type, micro_params, mat_params);
-	for (int i = 0; i < REPETITIONS; ++i)
-		test.newton_raphson();
+	test.just_do_it();
 
 	return 0;
 }

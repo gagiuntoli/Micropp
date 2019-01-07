@@ -101,17 +101,11 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix A;  // Non - Linear Jacobian
-		ell_matrix A0; // Linear Jacobian (constant)
-		ell_matrix *matrices_A;  // Non - Linear Jacobian
-		ell_matrix *matrices_A0; // Linear Jacobian (constant)
-
-		double **vectors_b;
-
-		double *b;
-		double *du;
-		double *u;
-		double *u_aux;
+		ell_matrix *A;  // Non - Linear Jacobian
+		ell_matrix *A0; // Linear Jacobian (constant)
+		double **b;
+		double **du;
+		double **u;
 
 		int *elem_type;
 		double *elem_stress;
@@ -163,18 +157,23 @@ class micropp {
 
 		void calc_fields(double *u, double *int_vars_old);
 
-		int newton_raphson_linear(const double strain[nvoi],
-					  double *u, bool print);
+		int newton_raphson_linear(ell_matrix *A0,
+					  double *b,
+					  double *u,
+					  double *du,
+					  const double strain[nvoi],
+					  bool print);
 
-		int newton_raphson_v(const bool non_linear,
-				     const int newton_max_its,
-				     const int mat_mode,
-				     ell_matrix *A,
+		int newton_raphson_v(ell_matrix *A,
 				     ell_matrix *A0,
 				     double *b,
-				     const double strain[nvoi],
-				     const double *int_vars_old,
 				     double *u,
+				     double *du,
+				     const bool non_linear,
+				     const int newton_max_its,
+				     const int mat_mode,
+				     const double strain[nvoi],
+				     const double *vars_old,
 				     newton_t *newton,
 				     bool print);
 
