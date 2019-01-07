@@ -60,13 +60,13 @@ void micropp<tdim>::homogenize()
 {
 	INST_START;
 
-	int ierr;
-	bool nl_flag;
-
+#pragma omp parallel for
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		newton_t newton;
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
+
+		int thread_id = omp_get_thread_num();
 
 		gp_ptr->sigma_cost = 0;
 
@@ -78,17 +78,22 @@ void micropp<tdim>::homogenize()
 		}
 
 		// SIGMA 1 Newton-Raphson
-		memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
+		memcpy(u[thread_id], gp_ptr->u_n, nndim * sizeof(double));
 
-		ierr = newton_raphson_v(gp_ptr->allocated,
-					NR_MAX_ITS,
-					MAT_MODE_A,
-					gp_ptr->macro_strain,
-					gp_ptr->int_vars_n,
-					gp_ptr->u_k,
-					&newton,
-					false);
+		newton_raphson_v(&A[thread_id],
+				 &A0[thread_id],
+				 b[thread_id],
+				 u[thread_id],
+				 du[thread_id],
+				 gp_ptr->allocated,
+				 NR_MAX_ITS,
+				 MAT_MODE_A,
+				 gp_ptr->macro_strain,
+				 gp_ptr->int_vars_n,
+				 &newton,
+				 false);
 
+		memcpy(gp_ptr->u_k, u[thread_id], nndim * sizeof(double));
 		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
 
 		for (int i = 0; i < newton.its; ++i)
@@ -98,7 +103,7 @@ void micropp<tdim>::homogenize()
 		filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
 
 		/* Updates <vars_new> and <f_trial_max> */
-		nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new, &f_trial_max);
+		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new, &f_trial_max);
 
 		if (nl_flag == true) {
 			if (gp_ptr->allocated == false) {
@@ -112,7 +117,7 @@ void micropp<tdim>::homogenize()
 			// CTAN 3/6 Newton-Raphsons in 2D/3D
 			double eps_1[6], sig_0[6], sig_1[6];
 
-			memcpy(u_aux, gp_ptr->u_k, nndim * sizeof(double));
+			memcpy(u[thread_id], gp_ptr->u_k, nndim * sizeof(double));
 			memcpy(sig_0, gp_ptr->macro_stress, nvoi * sizeof(double));
 
 			for (int i = 0; i < nvoi; ++i) {
@@ -120,19 +125,23 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				ierr = newton_raphson_v(true,
-							NR_MAX_ITS,
-							MAT_MODE_A,
-							eps_1,
-							gp_ptr->int_vars_n,
-							u_aux,
-							nullptr,
-							false);
+				newton_raphson_v(&A[thread_id],
+						 &A0[thread_id],
+						 b[thread_id],
+						 u[thread_id],
+						 du[thread_id],
+						 true,
+						 NR_MAX_ITS,
+						 MAT_MODE_A,
+						 eps_1,
+						 gp_ptr->int_vars_n,
+						 nullptr,
+						 false);
 
 				for (int i = 0; i < newton.its; ++i)
 					gp_ptr->sigma_cost += newton.solver_its[i];
 
-				calc_ave_stress(u_aux, gp_ptr->int_vars_n, sig_1);
+				calc_ave_stress(u[thread_id], gp_ptr->int_vars_n, sig_1);
 
 				for (int v = 0; v < nvoi; ++v)
 					gp_ptr->macro_ctan[v * nvoi + i] =

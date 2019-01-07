@@ -30,6 +30,7 @@
 #include <cmath>
 #include <cassert>
 #include <cstring>
+#include <omp.h>
 
 #include "util.hpp"
 #include "ell.hpp"
@@ -100,13 +101,11 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix A;  // Non - Linear Jacobian
-		ell_matrix A0; // Linear Jacobian (constant)
-
-		double *b;
-		double *du;
-		double *u;
-		double *u_aux;
+		ell_matrix *A;  // Non - Linear Jacobian
+		ell_matrix *A0; // Linear Jacobian (constant)
+		double **b;
+		double **du;
+		double **u;
 
 		int *elem_type;
 		double *elem_stress;
@@ -124,6 +123,8 @@ class micropp {
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
 		double f_trial_max;
+
+		int nthreads;
 
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;
@@ -156,15 +157,23 @@ class micropp {
 
 		void calc_fields(double *u, double *int_vars_old);
 
-		int newton_raphson_linear(const double strain[nvoi],
-					  double *u, bool print);
+		int newton_raphson_linear(ell_matrix *A0,
+					  double *b,
+					  double *u,
+					  double *du,
+					  const double strain[nvoi],
+					  bool print);
 
-		int newton_raphson_v(const bool non_linear,
+		int newton_raphson_v(ell_matrix *A,
+				     ell_matrix *A0,
+				     double *b,
+				     double *u,
+				     double *du,
+				     const bool non_linear,
 				     const int newton_max_its,
 				     const int mat_mode,
 				     const double strain[nvoi],
-				     const double *int_vars_old,
-				     double *u,
+				     const double *vars_old,
 				     newton_t *newton,
 				     bool print);
 
@@ -176,7 +185,8 @@ class micropp {
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(const double *u,
-				    const double *int_vars_old);
+				    const double *int_vars_old,
+				    double *b);
 
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *int_vars_old);

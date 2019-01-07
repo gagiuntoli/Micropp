@@ -36,6 +36,7 @@ include_directories(include ${CMAKE_BINARY_DIR})
 file(GLOB SOURCESLIB src/*.cpp src/*.f95)
 
 add_library(micropp ${SOURCESLIB})
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fopenmp")
 
 enable_testing()
 add_subdirectory(test)

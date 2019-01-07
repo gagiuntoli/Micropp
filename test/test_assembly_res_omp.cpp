@@ -27,11 +27,10 @@
 
 #include "micro.hpp"
 
-#define REPETITIONS 5
+#define REPETITIONS 20
 
 using namespace std;
 
-const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 double s;
 
 int main (int argc, char *argv[])
@@ -48,33 +47,41 @@ int main (int argc, char *argv[])
 
 			void just_do_it(void)
 			{
+				int nthreads = omp_get_max_threads();
+				double **u = (double**)malloc(nthreads * sizeof(double*));
+				double **b = (double**)malloc(nthreads * sizeof(double*));
+				for (int i = 0; i < nthreads; ++i) {
+					u[i] = (double*)malloc(nndim * sizeof(double));
+					b[i] = (double*)malloc(nndim * sizeof(double));
+				}
 
 #pragma omp parallel for
 				for (int i = 0; i < REPETITIONS; ++i) {
+					const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 					int thread_id = omp_get_thread_num();
 					memset(u[thread_id], 0.0, nndim * sizeof(double));
-					newton_raphson_linear(&A0[thread_id],
-							      b[thread_id],
-							      u[thread_id],
-							      du[thread_id],
-							      strain,
-							      true);
-					cout << endl;
+					set_displ_bc(strain, u[thread_id]);
+					double norm = assembly_rhs(u[thread_id], nullptr, b[thread_id]);
+					printf("Thread id : %d norm = %lf\n", thread_id, norm);
 				}
 
+				for (int i = 0; i < nthreads; ++i) {
+					free(u[i]);
+					free(b[i]);
+				}
+				free(u);
+				free(b);
 			};
 
 	};
 
 	if (argc < 2) {
 		/* argv[1] (n) : Problem size
-		 * argv[2] (a) : Factor that says Ef = Em x a
 		 */
-		cerr << "Usage: " << argv[0] << " [n = 10] [a = 1]" << endl;
+		cerr << "Usage: " << argv[0] << " [n = 10]" << endl;
 	}
 
 	const int n = (argc > 1) ? atoi(argv[1]) : 10;
-	const double a = (argc > 2) ? atoi(argv[2]) : 1.0;
 
 	int size[3] = { n, n, n };
 
@@ -85,9 +92,12 @@ int main (int argc, char *argv[])
 
 	material_t mat_params[2];
 	mat_params[0].set(Em, 0.25, 1.0e8, 1.0e4, 0);
-	mat_params[1].set(Em * a, 0.25, 1.0e8, 1.0e4, 0);
+	mat_params[1].set(Em, 0.25, 1.0e8, 1.0e4, 0);
 
+	printf("Initializing\n");
 	test_t test(size, micro_type, micro_params, mat_params);
+
+	printf("Doing test\n");
 	double time = omp_get_wtime();
 	test.just_do_it();
 	time = omp_get_wtime() - time;

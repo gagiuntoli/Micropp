@@ -24,21 +24,47 @@
 using namespace std;
 
 template <int tdim>
-int micropp<tdim>::newton_raphson_linear(const double strain[nvoi], double *u,
+int micropp<tdim>::newton_raphson_linear(ell_matrix *A0,
+					 double *b,
+					 double *u,
+					 double *du,
+					 const double strain[nvoi],
 					 bool print)
+
+
+
+
+
+
 {
-	return newton_raphson_v(false, 2, MAT_MODE_A0, strain, nullptr, u,
-				nullptr, print);
+
+	int thread_id = omp_get_thread_num();
+	return newton_raphson_v(nullptr,
+				A0,
+				b,
+				u,
+				du,
+				false,
+				2,
+				MAT_MODE_A0,
+				strain,
+				nullptr,
+				nullptr,
+				print);
 }
 
 
 template <int tdim>
-int micropp<tdim>::newton_raphson_v(const bool non_linear,
+int micropp<tdim>::newton_raphson_v(ell_matrix *A,
+				    ell_matrix *A0,
+				    double *b,
+				    double *u,
+				    double *du,
+				    const bool non_linear,
 				    const int newton_max_its,
 				    const int mat_mode,
 				    const double strain[nvoi],
-				    const double *int_vars_old,
-				    double *u,
+				    const double *vars_old,
 				    newton_t *newton,
 				    bool print)
 {
@@ -56,11 +82,13 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 		memset(newton->norms, 0, NR_MAX_ITS * sizeof(double));
 	}
 
+	int thread_id = omp_get_thread_num();
+
 	while (its < newton_max_its) {
 
-		norm = assembly_rhs(u, int_vars_old);
+		norm = assembly_rhs(u, vars_old, b);
 		if (print)
-			cout << "|RES| = " << norm << endl;
+			printf("Thread : %d |b| = %e\n", thread_id, norm);
 
 		if (its == 0)
 			norm_0 = norm;
@@ -77,7 +105,7 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 			case MAT_MODE_A0:
 
 				/* Always use A0 */
-				A_ptr = &A0;
+				A_ptr = A0;
 				break;
 
 			case MAT_MODE_A:
@@ -89,12 +117,12 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 
 				if (non_linear || its > 0) {
 
-					assembly_mat(&A, u, int_vars_old);
-					A_ptr = &A;
+					assembly_mat(A, u, vars_old);
+					A_ptr = A;
 
 				} else {
 
-					A_ptr = &A0;
+					A_ptr = A0;
 
 				}
 
@@ -106,12 +134,12 @@ int micropp<tdim>::newton_raphson_v(const bool non_linear,
 		}
 
 		if (print)
-			cout << "SOLVER_START" << endl;
+			printf("Thread : %d SOLVER_START\n", thread_id);
 
 		cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 
 		if (print)
-			cout << "SOLVER_END ITS = " << cg_its << endl;
+			printf("Thread : %d SOLVER_END ITS : %d\n", thread_id, cg_its);
 
 		if (newton != nullptr) {
 			newton->solver_its[its] = cg_its;

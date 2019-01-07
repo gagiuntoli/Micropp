@@ -64,17 +64,10 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));
 	}
 
-	b = (double *) calloc(nndim, sizeof(double));
-	du = (double *) calloc(nndim, sizeof(double));
-	u_aux = (double *) calloc(nndim, sizeof(double));
-
 	elem_type = (int *) calloc(nelem, sizeof(int));
 	elem_stress = (double *) calloc(nelem * nvoi, sizeof(double));
 	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
 	vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
-
-	assert(b && du && u_aux && elem_stress
-	       && elem_strain && elem_type && vars_new_aux);
 
 	int nParams = 4;
 	numMaterials = 2;
@@ -94,11 +87,27 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		}
 	}
 
+
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = dim;
-	ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
-	ell_init(&A0, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
-	assembly_mat(&A0, u_aux, NULL);
+
+	nthreads = omp_get_max_threads();
+	cout << "nthreads " << nthreads << endl;
+
+	A = (ell_matrix *)malloc(nthreads * sizeof(ell_matrix));
+	A0 = (ell_matrix *)malloc(nthreads * sizeof(ell_matrix));
+	b = (double **) malloc(nthreads * sizeof(double *));
+	u = (double **) calloc(nndim, sizeof(double));
+	du = (double **) calloc(nndim, sizeof(double));
+
+	for (int i = 0; i < nthreads; ++i) {
+		ell_init(&A[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A0[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		b[i] = (double *) calloc(nndim, sizeof(double));
+		u[i] = (double *) calloc(nndim, sizeof(double));
+		du[i] = (double *) calloc(nndim, sizeof(double));
+		assembly_mat(&A0[i], u[i], NULL);
+	}
 
 	if (_ctan_lin == nullptr)
 		calc_ctan_lin();
@@ -116,12 +125,22 @@ micropp<tdim>::~micropp()
 {
 	INST_DESTRUCT;
 
-	ell_free(&A);
-	ell_free(&A0);
+	for (int i = 0; i < nthreads; ++i) {
+		ell_free(&A[i]);
+		ell_free(&A0[i]);
+	}
+	free(A);
+	free(A0);
 
+	for (int i = 0; i < nthreads; ++i) {
+		free(b[i]);
+		free(u[i]);
+		free(du[i]);
+	}
 	free(b);
+	free(u);
 	free(du);
-	free(u_aux);
+
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
@@ -223,16 +242,22 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		err = newton_raphson_v(false,
+		int thread_id = omp_get_thread_num();
+
+		err = newton_raphson_v(nullptr,
+				       &A0[thread_id],
+				       b[thread_id],
+				       u[thread_id],
+				       du[thread_id],
+				       false,
 				       NR_MAX_ITS,
-				       MAT_MODE_A,
+				       MAT_MODE_A0,
 				       eps_1,
 				       nullptr,
-				       u_aux,
 				       nullptr,
 				       false);
 
-		calc_ave_stress(u_aux, NULL, sig_1);
+		calc_ave_stress(u[thread_id], NULL, sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
