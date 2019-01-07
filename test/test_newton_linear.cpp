@@ -88,7 +88,10 @@ int main (int argc, char *argv[])
 	mat_params[1].set(Em * a, 0.25, 1.0e8, 1.0e4, 0);
 
 	test_t test(size, micro_type, micro_params, mat_params);
+	double time = omp_get_wtime();
 	test.just_do_it();
+	time = omp_get_wtime() - time;
+	printf("time = %lf\n", time);
 
 	return 0;
 }

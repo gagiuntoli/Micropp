@@ -78,7 +78,7 @@ void micropp<tdim>::homogenize()
 		}
 
 		// SIGMA 1 Newton-Raphson
-		memcpy(gp_ptr->u_k, gp_ptr->u_n, nndim * sizeof(double));
+		memcpy(u[thread_id], gp_ptr->u_n, nndim * sizeof(double));
 
 		newton_raphson_v(&A[thread_id],
 				 &A0[thread_id],
@@ -93,6 +93,7 @@ void micropp<tdim>::homogenize()
 				 &newton,
 				 false);
 
+		memcpy(gp_ptr->u_k, u[thread_id], nndim * sizeof(double));
 		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
 
 		for (int i = 0; i < newton.its; ++i)
