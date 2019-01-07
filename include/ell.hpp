@@ -70,6 +70,7 @@ void ell_free(ell_matrix *m);
 
 double get_norm(const double *vector, const int n);
 double get_dot(const double *v1, const double *v2, const int n);
+double ell_get_norm(const ell_matrix *m);
 
 void print_ell(const ell_matrix *A);
 

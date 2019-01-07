@@ -178,6 +178,17 @@ double get_dot(const double *v1, const double *v2, const int n)
 }
 
 
+double ell_get_norm(const ell_matrix *m)
+{
+	double norm = 0.0;
+	for (int i = 0; i < m->nn; i++)
+		for (int j = 0; j < m->nfield; j++)
+			for (int d = 0; d < m->nnz; d++)
+				norm += m->vals[i * m->nfield * m->nnz + j * m->nnz + d];
+	return sqrt(norm);
+}
+
+
 int ell_solve_cgpd(const ell_matrix *m, const double *b,
 		   double *x, double *err_)
 {

@@ -22,6 +22,8 @@ set(testsources
 	test_print_vtu_1.cpp
 	test_newton_linear.cpp
 	test_set_displ_bc_omp.cpp
+	test_assembly_res_omp.cpp
+	test_assembly_jac_omp.cpp
 	test_omp.cpp
 	test_util_1.cpp)
 
