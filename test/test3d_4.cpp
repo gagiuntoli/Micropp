@@ -73,6 +73,8 @@ int main(int argc, char **argv)
 
 	micropp<dim> micro(ngp, size, micro_type, micro_params, mat_params);
 
+	double time = omp_get_wtime();
+
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
 
@@ -136,10 +138,10 @@ int main(int argc, char **argv)
 
 		micro.update_vars();
 
-	    char filename[128];
-	    snprintf(filename, 128, "micropp_%d", t); 
-		micro.output (1, filename);
-		cout << endl;
 	}
+
+	time = omp_get_wtime() - time;
+	printf("time = %lf\n", time);
+
 	return 0;
 }
