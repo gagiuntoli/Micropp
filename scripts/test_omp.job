@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#!/bin/bash
+#SBATCH --job-name=omp
+#SBATCH --workdir=.
+#SBATCH --output=omp.out
+#SBATCH --error=omp.err
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH --exclusive
+#SBATCH --time=00:10:00
+#SBATCH --qos=debug
+
+procs=(1 2 4 8 16 32 48)
+
+for i in ${procs[@]}; do
+
+echo "Executing with $i Threads"
+export OMP_NUM_THREADS=${i}
+time ../build/test/test3d_4 10 80 > res_${i}.dat
+
+done

@@ -37,27 +37,23 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
-	if (argc < 4) {
-		cerr << "Usage: " << argv[0] << " nx ny nz [ngp] [steps]" << endl;
+	if (argc < 2) {
+		cerr << "Usage: " << argv[0] << " n [ngp] [steps]" << endl;
 		return(1);
 	}
 
 	const int nvoi = 6;
-	const int nx = atoi(argv[1]);
-	const int ny = atoi(argv[2]);
-	const int nz = atoi(argv[3]);
-	const int ngp = (argc > 4 ? atoi(argv[4]) : 2);
-	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
+	const int n = atoi(argv[1]);
+	const int ngp = (argc > 2 ? atoi(argv[2]) : 2);
+	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);  // Optional value
 
-	assert(nx > 1 && ny > 1 && nz > 1 && ngp > 1 && time_steps > 0);
+	assert(n > 1 && ngp > 1 && time_steps > 0);
 
-	int size[dim] = { nx, ny, nz };
+	int size[dim] = { n, n, n };
 
 	const int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
 
-	const double micro_params[5] = {1.0, 1.0, 1.0,
-	                                0.1,		// Layer width
-	                                1.0e-5 };   // INV_MAX
+	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
@@ -88,15 +84,14 @@ int main(int argc, char **argv)
 			eps[dir] += D_EPS;
 
 		cout << "setting strains ..." << endl;
+		cout << scientific;
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.set_macro_strain(gp, eps);
-			cout << "gp = " << gp << " eps = ";
-			cout << scientific;
-
-			for (int i = 0; i < 6; ++i)
-				cout << setw(14) << eps[i] << " ";
-			cout << endl;
 		}
+		cout << " eps = ";
+		for (int i = 0; i < 6; ++i)
+			cout << setw(14) << eps[i] << " ";
+		cout << endl;
 
 		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
@@ -104,21 +99,21 @@ int main(int argc, char **argv)
 		cout << "Getting stresses ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.get_macro_stress(gp, sig);
-			cout << "gp = " << gp << " sig  = ";
-			for (int i = 0; i < 6; ++i)
-				cout << setw(14) << sig[i] << "\t";
-			cout << endl;
 			memcpy(sig_test[gp], sig, 3 * sizeof(double));
 		}
+		cout << " sig  = ";
+		for (int i = 0; i < 6; ++i)
+			cout << setw(14) << sig[i] << "\t";
+		cout << endl;
 
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.get_macro_ctan(gp, ctan);
-			cout << "gp = " << gp << " ctan = ";
-			for (int i = 0; i < 6; ++i)
-				cout << setw(14) << ctan[i] << "\t";
-			cout << endl;
 			memcpy(ctan_test[gp], ctan, 3 * sizeof(double));
 		}
+		cout << " ctan = ";
+		for (int i = 0; i < 6; ++i)
+			cout << setw(14) << ctan[i] << "\t";
+		cout << endl;
 
 		double diff_sum_sig = 0.0, diff_sum_ctan = 0.0;
 		for (int gp = 1; gp < ngp; ++gp) {
@@ -135,6 +130,7 @@ int main(int argc, char **argv)
 		}
 		cout << "Diff sig:\t" << diff_sum_sig << endl;
 		cout << "Diff ctan:\t" << diff_sum_ctan << endl;
+		cout << endl;
 
 		micro.update_vars();
 
