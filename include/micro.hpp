@@ -270,4 +270,8 @@ class micropp {
 		void print_info() const;
 };
 
+micropp<3>* get_instance_3_simple(const int _ngp, const int nn, const int _micro_type,
+				      const double parameter);
+
+
 #endif
