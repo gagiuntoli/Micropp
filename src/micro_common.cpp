@@ -114,6 +114,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	u = (double **) calloc(nndim, sizeof(double));
 	du = (double **) calloc(nndim, sizeof(double));
 
+#pragma omp parallel for
 	for (int i = 0; i < nthreads; ++i) {
 		ell_init(&A[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		ell_init(&A0[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
