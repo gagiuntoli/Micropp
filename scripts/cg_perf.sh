@@ -2,8 +2,10 @@
 
 source vars.sh
 
+export OMP_NUM_THREADS=1
+
 PATH_OUT="./result"
-EXEC="../build/test/test_newton_linear"
+EXEC="../build/test/test_cg"
 
 mkdir -p ${PATH_OUT}
 

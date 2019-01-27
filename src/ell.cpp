@@ -228,8 +228,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	while (its < m->max_its) {
 
 #ifdef CGDEBUG
-		double err = get_norm(m->r, m->nrow);
-		printf("cgpd : its = %-4d |precon| = %e\t|real| = %e\t|rel| = %e\n", its, pnorm, err, pnorm / pnorm_0);
+		printf("cgpd : its = %-4d |precon| = %e\n", its, pnorm);
 #endif
 
 		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
