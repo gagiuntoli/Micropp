@@ -222,18 +222,17 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	double rz = get_dot(m->r, m->z, m->nrow);
 
 	int its = 0;
-	double rz_0;
+	double pnorm_0 = sqrt(get_dot(m->z, m->z, m->nrow));
+	double pnorm = pnorm_0;
+
 	while (its < m->max_its) {
 
 #ifdef CGDEBUG
 		double err = get_norm(m->r, m->nrow);
-		printf("cgpd : its = %-4d |real| = %e\t|precon| = %e\n", its, err, rz);
+		printf("cgpd : its = %-4d |precon| = %e\t|real| = %e\t|rel| = %e\n", its, pnorm, err, pnorm / pnorm_0);
 #endif
 
-		if (its == 0)
-			rz_0 = rz;
-
-		if (rz < m->min_err || rz < rz_0 * m->rel_err)
+		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
 			break;
 
 		ell_mvp(m, m->p, m->Ap);
@@ -249,6 +248,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 		for (int i = 0; i < m->nrow; ++i)
 			m->z[i] = m->k[i] * m->r[i];
 
+		pnorm = sqrt(get_dot(m->z, m->z, m->nrow));
 		double rz_n = get_dot(m->r, m->z, m->nrow);
 
 		const double beta = rz_n / rz;

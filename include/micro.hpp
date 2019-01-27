@@ -43,9 +43,9 @@
 #define MAX_MATS        10
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
-#define CG_MIN_ERR      1.0e-20
-#define CG_MAX_ITS      500
-#define CG_REL_ERR      1.0e-10
+#define CG_MIN_ERR      1.0e-50
+#define CG_MAX_ITS      10000
+#define CG_REL_ERR      1.0e-5
 
 #define FILTER_REL_TOL  1.0e-5
 
@@ -269,5 +269,9 @@ class micropp {
 		void update_vars();
 		void print_info() const;
 };
+
+micropp<3>* get_instance_3_simple(const int _ngp, const int nn, const int _micro_type,
+				  const double parameter, const double factor_a);
+
 
 #endif

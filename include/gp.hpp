@@ -25,8 +25,6 @@
 
 #include "newton.hpp"
 
-#define GP_NR_MAX_ITS 4
-
 template <int dim>
 class gp_t {
 

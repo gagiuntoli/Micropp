@@ -33,33 +33,23 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
-	const int dim = 3;
-	if (argc < 5) {
-		cerr << "Usage: " << argv[0] << " nx ny nz dir [steps]" << endl;
+	if (argc < 2) {
+		cerr << "Usage: " << argv[0] << " n [steps]" << endl;
 		return(1);
 	}
 
-	const int nx = atoi(argv[1]);
-	const int ny = atoi(argv[2]);
-	const int nz = atoi(argv[3]);
-	const int dir = atoi(argv[4]);
-	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
-	int size[3] = { nx, ny, nz };
+	const int dir = 1;
+	const int n = atoi(argv[1]);
+	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);  // Optional value
+	const int micro_type = MIC_LAYER_Y;
 
 	ofstream file;
 	file.open("result.dat");
 
-	int micro_type = 1; // 2 flat layers
-	double micro_params[4] = { 1., 1., 1., .5 };
+	micropp<3> *micropp3 = get_instance_3_simple (1, n, micro_type, 1.0, 1.0);
+	micropp3->print_info();
 
-	material_t mat_params[2];
-	mat_params[0].set(3.0e7, 0.25, 1.0e0, 2.0e5, 1);
-	mat_params[1].set(3.0e7, 0.25, 1.0e5, 2.0e5, 0);
-
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
-	micro.print_info();
-
-	double sig[6], ctan[36];
+	double sig[6];
 	double eps[6] = { 0. };
 
 	for (int t = 0; t < time_steps; ++t) {
@@ -73,18 +63,17 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += D_EPS;
 
-		micro.set_macro_strain(0, eps);
-		micro.homogenize();
-		micro.get_macro_stress(0, sig);
-		micro.get_macro_ctan(0, ctan);
-		int newton_its = micro.get_sigma_newton_its(0);
-		int non_linear = micro.is_non_linear(0);
+		micropp3->set_macro_strain(0, eps);
+		micropp3->homogenize();
+		micropp3->get_macro_stress(0, sig);
+		int newton_its = micropp3->get_sigma_newton_its(0);
+		int non_linear = micropp3->is_non_linear(0);
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", micro_type);
-		micro.output (0, filename);
+		micropp3->output (0, filename);
 
-		micro.update_vars();
+		micropp3->update_vars();
 
 		cout << "non_linear = \t" << non_linear << "\tnewton its =\t" << newton_its << endl;
 		cout << "eps =\t";
@@ -96,13 +85,6 @@ int main (int argc, char *argv[])
 		for (int i = 0; i < 6; ++i)
 			cout << setw(14) << sig[i] << "\t";
 		cout << endl;
-
-		cout << "ctan =\n";
-		for (int i = 0; i < 6; ++i) {
-			for (int j = 0; j < 6; ++j)
-				cout << setw(14) << ctan[i * 6 + j] << "\t";
-			cout << endl;
-		}
 
 		cout << endl;
 		file << setw(14) << eps[dir] << "\t" << sig[dir] << "\t" << endl;
