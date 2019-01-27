@@ -46,7 +46,7 @@ int main (int argc, char *argv[])
 	ofstream file;
 	file.open("result.dat");
 
-	micropp<3> *micropp3 = get_instance_3_simple (1, n, micro_type, 1.0);
+	micropp<3> *micropp3 = get_instance_3_simple (1, n, micro_type, 1.0, 1.0);
 	micropp3->print_info();
 
 	double sig[6];

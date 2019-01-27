@@ -48,13 +48,13 @@ int main (int argc, char *argv[])
 			{
 
 				double lerr, cg_err;
-				memset(u_aux, 0.0, nndim * sizeof(double));
+				memset(u[0], 0.0, nndim * sizeof(double));
 
-				set_displ_bc(strain, u_aux);
-				lerr = assembly_rhs(u_aux, vars_new_aux);
+				set_displ_bc(strain, u[0]);
+				lerr = assembly_rhs(u[0], nullptr, b[0]);
 
-				assembly_mat(&A, u_aux, vars_new_aux);
-				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+				assembly_mat(&A[0], u[0], nullptr);
+				int cg_its = ell_solve_cgpd(&A[0], b[0], du[0], &cg_err);
 				cout
 					<< "|RES| : " << lerr
 					<< " CG_ITS : " << cg_its
@@ -70,6 +70,8 @@ int main (int argc, char *argv[])
 		 */
 		cerr << "Usage: " << argv[0] << " [n = 10] [a = 1]" << endl;
 	}
+	omp_set_dynamic(0);     // Explicitly disable dynamic teams
+	omp_set_num_threads(1); // Use 4 threads for all consecutive parallel regions
 
 	const int n = (argc > 1) ? atoi(argv[1]) : 10;
 	const double a = (argc > 2) ? atoi(argv[2]) : 1.0;
