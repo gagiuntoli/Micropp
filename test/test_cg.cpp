@@ -55,6 +55,11 @@ int main (int argc, char *argv[])
 
 				assembly_mat(&A[0], u[0], nullptr);
 				int cg_its = ell_solve_cgpd(&A[0], b[0], du[0], &cg_err);
+
+				for (int i = 0; i < nndim; ++i)
+					u[0][i] += du[0][i];
+
+				lerr = assembly_rhs(u[0], nullptr, b[0]);
 				cout
 					<< "|RES| : " << lerr
 					<< " CG_ITS : " << cg_its
