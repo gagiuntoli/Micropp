@@ -19,39 +19,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "micro.hpp"
 
+
 using namespace std;
-
-template <int tdim>
-int micropp<tdim>::newton_raphson_linear(ell_matrix *A0,
-					 double *b,
-					 double *u,
-					 double *du,
-					 const double strain[nvoi],
-					 bool print)
-
-
-
-
-
-
-{
-
-	int thread_id = omp_get_thread_num();
-	return newton_raphson_v(nullptr,
-				A0,
-				b,
-				u,
-				du,
-				false,
-				2,
-				MAT_MODE_A0,
-				strain,
-				nullptr,
-				nullptr,
-				print);
-}
 
 
 template <int tdim>
