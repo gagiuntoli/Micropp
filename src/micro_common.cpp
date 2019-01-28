@@ -250,7 +250,11 @@ template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
 	double sig_1[6];
-	int err;
+
+	newton_t newton;
+	newton.max_its = NR_MAX_ITS;
+	newton.max_tol = NR_MAX_TOL;
+	newton.rel_tol = NR_REL_TOL;
 
 	for (int i = 0; i < nvoi; ++i) {
 
@@ -259,18 +263,9 @@ void micropp<tdim>::calc_ctan_lin()
 
 		int thread_id = omp_get_thread_num();
 
-		err = newton_raphson_v(nullptr,
-				       &A0[thread_id],
-				       b[thread_id],
-				       u[thread_id],
-				       du[thread_id],
-				       false,
-				       NR_MAX_ITS,
-				       MAT_MODE_A0,
-				       eps_1,
-				       nullptr,
-				       nullptr,
-				       false);
+		newton_raphson(&A[thread_id], &A0[thread_id],
+			       b[thread_id], u[thread_id], du[thread_id],
+			       false, eps_1, nullptr, &newton);
 
 		calc_ave_stress(u[thread_id], NULL, sig_1);
 

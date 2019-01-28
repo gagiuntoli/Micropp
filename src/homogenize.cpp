@@ -64,6 +64,10 @@ void micropp<tdim>::homogenize()
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		newton_t newton;
+		newton.max_its = NR_MAX_ITS;
+		newton.max_tol = NR_MAX_TOL;
+		newton.rel_tol = NR_REL_TOL;
+
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		int thread_id = omp_get_thread_num();
@@ -80,18 +84,10 @@ void micropp<tdim>::homogenize()
 		// SIGMA 1 Newton-Raphson
 		memcpy(u[thread_id], gp_ptr->u_n, nndim * sizeof(double));
 
-		newton_raphson_v(&A[thread_id],
-				 &A0[thread_id],
-				 b[thread_id],
-				 u[thread_id],
-				 du[thread_id],
-				 gp_ptr->allocated,
-				 NR_MAX_ITS,
-				 MAT_MODE_A,
-				 gp_ptr->macro_strain,
-				 gp_ptr->int_vars_n,
-				 &newton,
-				 false);
+		newton_raphson(&A[thread_id], &A0[thread_id],
+			       b[thread_id], u[thread_id], du[thread_id],
+			       gp_ptr->allocated, gp_ptr->macro_strain,
+			       gp_ptr->int_vars_n, &newton);
 
 		memcpy(gp_ptr->u_k, u[thread_id], nndim * sizeof(double));
 		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
@@ -125,18 +121,9 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				newton_raphson_v(&A[thread_id],
-						 &A0[thread_id],
-						 b[thread_id],
-						 u[thread_id],
-						 du[thread_id],
-						 true,
-						 NR_MAX_ITS,
-						 MAT_MODE_A,
-						 eps_1,
-						 gp_ptr->int_vars_n,
-						 nullptr,
-						 false);
+				newton_raphson(&A[thread_id], &A0[thread_id],
+					       b[thread_id], u[thread_id], du[thread_id],
+					       true, eps_1, gp_ptr->int_vars_n, &newton);
 
 				for (int i = 0; i < newton.its; ++i)
 					gp_ptr->sigma_cost += newton.solver_its[i];

@@ -30,6 +30,12 @@
 
 typedef struct {
 
+	/* For controlling newton-raphson loop */
+	int max_its;
+	double max_tol;
+	double rel_tol;
+
+	/* For getting performance results from newton-raphson loop */
 	int its;
 	double norms[NR_MAX_ITS];
 	int solver_its[NR_MAX_ITS];
