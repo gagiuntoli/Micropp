@@ -70,12 +70,6 @@ enum {
 };
 
 
-enum {
-      MAT_MODE_A,
-      MAT_MODE_A0
-};
-
-
 using namespace std;
 
 template <int tdim>
@@ -144,31 +138,17 @@ class micropp {
 				int ex, int ey, int ez = 0) const;
 
 		int get_elem_type(int ex, int ey, int ez = 0) const;
-
-		void get_elem_rhs(const double *u,
-				  const double *int_vars_old,
-				  double be[npe * dim],
-				  int ex, int ey, int ez = 0) const;
-		void calc_ave_stress(double *u,
-				     double *int_vars_old,
+		void get_elem_rhs(const double *u, const double *vars_old,
+				  double be[npe * dim], int ex, int ey, int ez = 0) const;
+		void calc_ave_stress(double *u, double *vars_old,
 				     double stress_ave[nvoi]) const;
-		void calc_ave_strain(const double *u,
-				     double strain_ave[nvoi]) const;
+		void calc_ave_strain(const double *u, double strain_ave[nvoi]) const;
+		void calc_fields(double *u, double *vars_old);
 
-		void calc_fields(double *u, double *int_vars_old);
-
-		int newton_raphson_v(ell_matrix *A,
-				     ell_matrix *A0,
-				     double *b,
-				     double *u,
-				     double *du,
-				     const bool non_linear,
-				     const int newton_max_its,
-				     const int mat_mode,
-				     const double strain[nvoi],
-				     const double *vars_old,
-				     newton_t *newton,
-				     bool print);
+		int newton_raphson(ell_matrix *A, ell_matrix *A0,
+				   double *b, double *u, double *du,
+				   const bool non_linear, const double strain[nvoi],
+				   const double *vars_old, newton_t *newton);
 
 		void get_elem_mat(const double *u,
 				  const double *int_vars_old,

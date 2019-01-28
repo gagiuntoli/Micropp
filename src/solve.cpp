@@ -27,102 +27,77 @@ using namespace std;
 
 
 template <int tdim>
-int micropp<tdim>::newton_raphson_v(ell_matrix *A,
-				    ell_matrix *A0,
-				    double *b,
-				    double *u,
-				    double *du,
-				    const bool non_linear,
-				    const int newton_max_its,
-				    const int mat_mode,
-				    const double strain[nvoi],
-				    const double *vars_old,
-				    newton_t *newton,
-				    bool print)
+int micropp<tdim>::newton_raphson(ell_matrix *A, ell_matrix *A0,
+				  double *b, double *u, double *du,
+				  const bool non_linear, const double strain[nvoi],
+				  const double *vars_old, newton_t *newton)
 {
 	INST_START;
+
+	if (newton == nullptr)
+		return -1;
 
 	set_displ_bc(strain, u);
 
 	int its = 0;
-	double norm, norm_0, cg_err;
-	ell_matrix *A_ptr;
 
-	if (newton != nullptr) {
-		memset(newton->solver_its, 0, NR_MAX_ITS * sizeof(int));
-		memset(newton->solver_norms, 0, NR_MAX_ITS * sizeof(double));
-		memset(newton->norms, 0, NR_MAX_ITS * sizeof(double));
-	}
+	memset(newton->solver_its, 0, NR_MAX_ITS * sizeof(int));
+	memset(newton->solver_norms, 0, NR_MAX_ITS * sizeof(double));
+	memset(newton->norms, 0, NR_MAX_ITS * sizeof(double));
 
 	int thread_id = omp_get_thread_num();
+	double norm = assembly_rhs(u, vars_old, b);
+	const double norm_0 = norm;
 
-	while (its < newton_max_its) {
+	while (its < newton->max_its) {
 
-		norm = assembly_rhs(u, vars_old, b);
-		if (print)
-			printf("Thread : %d |b| = %e\n", thread_id, norm);
+		newton->norms[its] = norm;
 
-		if (its == 0)
-			norm_0 = norm;
+#ifdef NRDEBUG
+		printf("Thread : %d |b| = %e\n", thread_id, norm);
+#endif
 
-		if (newton != nullptr)
-			newton->norms[its] = norm;
-
-		if (norm < NR_MAX_TOL || norm < norm_0 * NR_REL_TOL)
+		if (norm < newton->max_tol || norm < norm_0 * newton->rel_tol)
 			break;
 
-		int cg_its;
-		switch (mat_mode) {
+		/* Assemblies a new matrix if we are in a
+		 * non-linear situation or if we are in a
+		 * second newton-raphson iteration.
+		 */
 
-			case MAT_MODE_A0:
+		ell_matrix *A_ptr;
 
-				/* Always use A0 */
-				A_ptr = A0;
-				break;
+		if (non_linear || its > 0) {
 
-			case MAT_MODE_A:
+			assembly_mat(A, u, vars_old);
+			A_ptr = A;
 
-				/* Assemblies a new matrix if we are in a
-				 * non-linear situation or if we are in a
-				 * second newton-raphson iteration.
-				 */
+		} else {
 
-				if (non_linear || its > 0) {
+			A_ptr = A0;
 
-					assembly_mat(A, u, vars_old);
-					A_ptr = A;
-
-				} else {
-
-					A_ptr = A0;
-
-				}
-
-				break;
-
-			default:
-				return 1;
-				break;
 		}
 
-		if (print)
-			printf("Thread : %d SOLVER_START\n", thread_id);
+#ifdef NRDEBUG
+		printf("Thread : %d SOLVER_START\n", thread_id);
+#endif
 
-		cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
+		double cg_err;
+		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 
-		if (print)
-			printf("Thread : %d SOLVER_END ITS : %d\n", thread_id, cg_its);
+#ifdef NRDEBUG
+		printf("Thread : %d SOLVER_END ITS : %d\n", thread_id, cg_its);
+#endif
 
-		if (newton != nullptr) {
-			newton->solver_its[its] = cg_its;
-			newton->solver_norms[its] = cg_err;
-		}
+		newton->solver_its[its] = cg_its;
+		newton->solver_norms[its] = cg_err;
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
-		its++;
+		norm = assembly_rhs(u, vars_old, b);
 
+		its++;
 	}
 
 	if (newton != nullptr)
