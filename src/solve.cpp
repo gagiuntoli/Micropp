@@ -54,7 +54,8 @@ int micropp<tdim>::newton_raphson(ell_matrix *A, ell_matrix *A0,
 		newton->norms[its] = norm;
 
 #ifdef NRDEBUG
-		printf("Thread : %d |b| = %e\n", thread_id, norm);
+		if (thread_id == 0)
+			printf("nr it = %d |b| = %e\n", its, norm);
 #endif
 
 		if (norm < newton->max_tol || norm < norm_0 * newton->rel_tol)
@@ -79,14 +80,16 @@ int micropp<tdim>::newton_raphson(ell_matrix *A, ell_matrix *A0,
 		}
 
 #ifdef NRDEBUG
-		printf("Thread : %d SOLVER_START\n", thread_id);
+		if (thread_id == 0)
+			printf("SOLVER_START\n");
 #endif
 
 		double cg_err;
 		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 
 #ifdef NRDEBUG
-		printf("Thread : %d SOLVER_END ITS : %d\n", thread_id, cg_its);
+		if (thread_id == 0)
+			printf("SOLVER_END ITS : %d\n", cg_its);
 #endif
 
 		newton->solver_its[its] = cg_its;

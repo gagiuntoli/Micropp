@@ -8,8 +8,15 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --exclusive
-#SBATCH --time=00:10:00
-#SBATCH --qos=debug
+#SBATCH --time=04:00:00
+#SBATCH --qos=bsc_case
+##SBATCH --qos=debug
+
+N=60
+NGP=400
+
+folder="res_${N}_${NGP}"
+mkdir -p ${folder}
 
 procs=(1 2 4 8 16 32 48)
 
@@ -17,6 +24,6 @@ for i in ${procs[@]}; do
 
 echo "Executing with $i Threads"
 export OMP_NUM_THREADS=${i}
-time ../build/test/test3d_4 10 80 > res_${i}.dat
+time ../build/test/test_omp $N $NGP > ${folder}/res_${i}.dat
 
 done

@@ -15,6 +15,7 @@ endif ()
 
 option(TIMER "Enable time benchmarks instrumentation" OFF)
 option(CGDEBUG "Enable CG algorithm debug" OFF)
+option(NRDEBUG "Enable CG algorithm debug" OFF)
 option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
 
 if (TIMER)
@@ -23,6 +24,10 @@ endif()
 
 if (CGDEBUG)
 	add_definitions(-DCGDEBUG)
+endif()
+
+if (NRDEBUG)
+	add_definitions(-DNRDEBUG)
 endif()
 
 if (FILTER)
