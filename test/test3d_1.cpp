@@ -42,12 +42,18 @@ int main (int argc, char *argv[])
 	const int n = atoi(argv[1]);
 	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);  // Optional value
 	const int micro_type = MIC_LAYER_Y;
+	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.15 };
+	const int size[3] = { n, n, n };
 
 	ofstream file;
 	file.open("result.dat");
 
-	micropp<3> *micropp3 = get_instance_3_simple (1, n, micro_type, 1.0, 1.0);
-	micropp3->print_info();
+	material_t mat_params[2];
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
+	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
+
+	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
+	micro.print_info();
 
 	double sig[6];
 	double eps[6] = { 0. };
@@ -63,17 +69,17 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += D_EPS;
 
-		micropp3->set_macro_strain(0, eps);
-		micropp3->homogenize();
-		micropp3->get_macro_stress(0, sig);
-		int newton_its = micropp3->get_sigma_newton_its(0);
-		int non_linear = micropp3->is_non_linear(0);
+		micro.set_macro_strain(0, eps);
+		micro.homogenize();
+		micro.get_macro_stress(0, sig);
+		int newton_its = micro.get_sigma_newton_its(0);
+		int non_linear = micro.is_non_linear(0);
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", micro_type);
-		micropp3->output (0, filename);
+		micro.output (0, filename);
 
-		micropp3->update_vars();
+		micro.update_vars();
 
 		cout << "non_linear = \t" << non_linear << "\tnewton its =\t" << newton_its << endl;
 		cout << "eps =\t";
