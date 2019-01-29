@@ -22,20 +22,6 @@
 
 #include "micro.hpp"
 
-micropp<3>* get_instance_3_simple(const int _ngp, const int nn, const int _micro_type,
-				  const double parameter, const double factor_a)
-{
-	const int size[3] = { nn, nn, nn };
-	const double params[4] = { 1.0, 1.0, 1.0, parameter };
-	double s;
-
-	material_t materials[2];
-	materials[0].set(3.0e7, 0.25, 1.0e0, 2.0e5, 0);
-	materials[1].set(factor_a * 3.0e7, 0.25, 1.0e5, 2.0e5, 1);
-
-	return new micropp<3>(_ngp, size, _micro_type, params, materials, &s);
-}
-
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
