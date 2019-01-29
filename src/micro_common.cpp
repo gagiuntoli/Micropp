@@ -94,11 +94,11 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nthreads = omp_get_max_threads();
 	cout << "nthreads " << nthreads << endl;
 
-	A = (ell_matrix *)malloc(nthreads * sizeof(ell_matrix));
-	A0 = (ell_matrix *)malloc(nthreads * sizeof(ell_matrix));
+	A = (ell_matrix *) malloc(nthreads * sizeof(ell_matrix));
+	A0 = (ell_matrix *) malloc(nthreads * sizeof(ell_matrix));
 	b = (double **) malloc(nthreads * sizeof(double *));
-	u = (double **) calloc(nndim, sizeof(double));
-	du = (double **) calloc(nndim, sizeof(double));
+	u = (double **) malloc(nthreads * sizeof(double *));
+	du = (double **) malloc(nthreads * sizeof(double *));
 
 #pragma omp parallel for
 	for (int i = 0; i < nthreads; ++i) {
