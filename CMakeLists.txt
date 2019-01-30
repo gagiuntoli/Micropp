@@ -18,6 +18,9 @@ option(CGDEBUG "Enable CG algorithm debug" OFF)
 option(NRDEBUG "Enable CG algorithm debug" OFF)
 option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
 
+set(CMAKE_BUILD_TYPE "Debug")
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+
 if (TIMER)
 	add_definitions(-DTIMER)
 endif()
