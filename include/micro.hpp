@@ -70,6 +70,7 @@ enum {
 };
 
 enum {
+       	NO_COUPLING,
        	ONE_WAY,
        	FULL
 };
@@ -95,6 +96,8 @@ class micropp {
 
 		const int micro_type, num_int_vars;
 		gp_t<tdim> *gp_list;
+
+		int coupling;
 
 		double micro_params[5];
 		int numMaterials;
@@ -196,7 +199,7 @@ class micropp {
 
 		micropp(const int ngp, const int size[3], const int micro_type,
 			const double *micro_params, const material_t *materials,
-			int coupling = ONE_WAY, bool calc_ctan_lin = false);
+			int coupling = ONE_WAY);
 
 		~micropp();
 

@@ -39,7 +39,7 @@ int main (int argc, char *argv[])
 		public:
 			test_t(const int size[3], const int micro_type, const double micro_params[5],
 			       const material_t mat_params[2])
-				:micropp<3> (1, size, micro_type, micro_params, mat_params)
+				:micropp<3> (1, size, micro_type, micro_params, mat_params, NO_COUPLING)
 			{};
 
 			~test_t() {};
