@@ -95,8 +95,23 @@ void micropp<tdim>::homogenize()
 		for (int i = 0; i < newton.its; ++i)
 			gp_ptr->sigma_cost += newton.solver_its[i];
 
-		calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
-		filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
+		if (coupling == ONE_WAY) {
+
+			double *stress = gp_ptr->macro_stress;
+			double *strain = gp_ptr->macro_strain;
+			memset (stress, 0.0, nvoi * sizeof(double));
+			for (int i = 0; i < nvoi; ++i) {
+				for (int j = 0; j < nvoi; ++j) {
+					stress[i] += ctan_lin[i * nvoi + j] * strain[j];
+				}
+			}
+
+		} else if (coupling == FULL) {
+
+			calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
+			filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
+
+		}
 
 		/* Updates <vars_new> and <f_trial_max> */
 		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new, &f_trial_max);
@@ -108,7 +123,7 @@ void micropp<tdim>::homogenize()
 			}
 		}
 
-		if (gp_ptr->allocated) {
+		if (gp_ptr->allocated && coupling == FULL) {
 
 			// CTAN 3/6 Newton-Raphsons in 2D/3D
 			double eps_1[6], sig_0[6], sig_1[6];

@@ -69,8 +69,15 @@ enum {
        	MIC_QUAD_FIB_XZ_BROKEN_X
 };
 
+enum {
+       	NO_COUPLING,
+       	ONE_WAY,
+       	FULL
+};
+
 
 using namespace std;
+
 
 template <int tdim>
 class micropp {
@@ -89,6 +96,8 @@ class micropp {
 
 		const int micro_type, num_int_vars;
 		gp_t<tdim> *gp_list;
+
+		int coupling;
 
 		double micro_params[5];
 		int numMaterials;
@@ -190,7 +199,7 @@ class micropp {
 
 		micropp(const int ngp, const int size[3], const int micro_type,
 			const double *micro_params, const material_t *materials,
-			double *_ctan_lin = nullptr);
+			int coupling = ONE_WAY);
 
 		~micropp();
 

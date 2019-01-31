@@ -60,9 +60,8 @@ int main(int argc, char **argv)
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi];
 	double ctan[nvoi * nvoi];
-	double s;
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, &s);
+	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, ONE_WAY);
 
 	double time = omp_get_wtime();
 

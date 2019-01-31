@@ -26,7 +26,7 @@
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
-		       const material_t *_materials, double *_ctan_lin):
+		       const material_t *_materials, int _coupling):
 	/* 
 	 * The <_ctan_lin> option is intended for cases that we don't want to
 	 * calculate the ctan_lin because of it computational cost. For example,
@@ -43,6 +43,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	nex(nx - 1), ney(ny - 1),
 	nez((tdim == 3) ? (nz - 1) : 1),
+	coupling(_coupling),
 
 	nelem(nex * ney * nez),
 	lx(_micro_params[0]), ly(_micro_params[1]),
@@ -110,7 +111,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		assembly_mat(&A0[i], u[i], NULL);
 	}
 
-	if (_ctan_lin == nullptr)
+	if (coupling != NO_COUPLING)
 		calc_ctan_lin();
 
 	for (int gp = 0; gp < ngp; ++gp)
