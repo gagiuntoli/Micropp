@@ -60,7 +60,7 @@ void micropp<tdim>::homogenize()
 {
 	INST_START;
 
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		newton_t newton;
