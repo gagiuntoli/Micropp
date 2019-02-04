@@ -17,9 +17,14 @@ option(TIMER "Enable time benchmarks instrumentation" OFF)
 option(CGDEBUG "Enable CG algorithm debug" OFF)
 option(NRDEBUG "Enable CG algorithm debug" OFF)
 option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
+option(OPENMP "Enable time benchmarks instrumentation" OFF)
 
 set(CMAKE_BUILD_TYPE "Debug")
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+
+if(OPENMP)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+endif()
 
 if (TIMER)
 	add_definitions(-DTIMER)
@@ -44,7 +49,6 @@ include_directories(include ${CMAKE_BINARY_DIR})
 file(GLOB SOURCESLIB src/*.cpp src/*.f95)
 
 add_library(micropp ${SOURCESLIB})
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fopenmp")
 
 enable_testing()
 add_subdirectory(test)
