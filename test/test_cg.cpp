@@ -74,8 +74,6 @@ int main (int argc, char *argv[])
 		 */
 		cerr << "Usage: " << argv[0] << " [n = 10] [a = 1]" << endl;
 	}
-	omp_set_dynamic(0);     // Explicitly disable dynamic teams
-	omp_set_num_threads(1); // Use 4 threads for all consecutive parallel regions
 
 	const int n = (argc > 1) ? atoi(argv[1]) : 10;
 	const double a = (argc > 2) ? atoi(argv[2]) : 1.0;

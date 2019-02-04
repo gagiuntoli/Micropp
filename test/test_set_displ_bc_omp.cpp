@@ -25,6 +25,8 @@
 #include <ctime>
 #include <cassert>
 
+#include <bits/stdc++.h>
+
 #include "micro.hpp"
 
 #define REPETITIONS 20
@@ -89,9 +91,9 @@ int main (int argc, char *argv[])
 	test_t test(size, micro_type, micro_params, mat_params);
 
 	printf("Doing test\n");
-	double time = omp_get_wtime();
+	double time = clock();
 	test.just_do_it();
-	time = omp_get_wtime() - time;
+	time = clock() - time;
 	printf("time = %lf\n", time);
 
 	return 0;

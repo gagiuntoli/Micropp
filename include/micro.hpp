@@ -30,7 +30,6 @@
 #include <cmath>
 #include <cassert>
 #include <cstring>
-#include <omp.h>
 
 #include "util.hpp"
 #include "ell.hpp"
@@ -38,6 +37,23 @@
 #include "gp.hpp"
 #include "instrument.hpp"
 #include "newton.hpp"
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+
+inline int omp_get_thread_num(void)
+{
+	return 0;
+}
+
+
+inline int omp_get_max_threads(void)
+{
+	return 1;
+}
+
+#endif
 
 #define MAX_DIM         3
 #define MAX_MATS        10

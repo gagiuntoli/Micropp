@@ -21,12 +21,13 @@ set(testsources
 	test_cg.cpp
 	conv3d_2lay.cpp
 	test_print_vtu_1.cpp
-	test_set_displ_bc_omp.cpp
-	test_assembly_res_omp.cpp
-	test_assembly_jac_omp.cpp
-	test_solver_omp.cpp
 	test_omp.cpp
 	test_util_1.cpp)
+
+#test_set_displ_bc_omp.cpp
+#test_assembly_res_omp.cpp
+#test_assembly_jac_omp.cpp
+#test_solver_omp.cpp
 
 # Iterate over the list above
 foreach (testfile ${testsources})

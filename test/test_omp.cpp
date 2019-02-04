@@ -26,6 +26,8 @@
 #include <ctime>
 #include <cassert>
 
+#include <bits/stdc++.h>
+
 #include "micro.hpp"
 
 using namespace std;
@@ -63,7 +65,7 @@ int main(int argc, char **argv)
 
 	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, ONE_WAY);
 
-	double time = omp_get_wtime();
+	double time = clock();
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
@@ -112,7 +114,7 @@ int main(int argc, char **argv)
 
 	}
 
-	time = omp_get_wtime() - time;
+	time = clock() - time;
 	printf("time = %lf\n", time);
 
 	return 0;
