@@ -19,7 +19,9 @@ option(NRDEBUG "Enable CG algorithm debug" OFF)
 option(FILTER "Enable Filtering on Average Stress and Ctan" OFF)
 option(OPENMP "Enables OpenMP paralelization" OFF)
 
-set(CMAKE_BUILD_TYPE "Debug")
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+endif(NOT CMAKE_BUILD_TYPE)
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
 
 if(OPENMP)
