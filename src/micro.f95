@@ -83,14 +83,14 @@ contains
   subroutine get_macro_stress(this, gp_id, macro_stress)
     class(micropp3) :: this
     integer, intent(in) :: gp_id
-    real(8), intent(in), dimension(*) :: macro_stress
+    real(8), intent(out), dimension(*) :: macro_stress
     call get_macro_stress3(this%ptr, gp_id, macro_stress)
   end subroutine get_macro_stress
 
   subroutine get_macro_ctan(this, gp_id, macro_ctan)
     class(micropp3) :: this
     integer, intent(in) :: gp_id
-    real(8), intent(in), dimension(*) :: macro_ctan
+    real(8), intent(out), dimension(*) :: macro_ctan
     call get_macro_ctan3(this%ptr, gp_id, macro_ctan)
   end subroutine get_macro_ctan
 
