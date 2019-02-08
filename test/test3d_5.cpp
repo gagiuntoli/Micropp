@@ -54,10 +54,10 @@ int main(int argc, char **argv)
 	int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
 
 	double micro_params[5] = {1.0,		// lx
-	                          1.0,		// ly
-	                          1.0,		// lz
-	                          0.1,		// layer width
-	                          1.0e-5};	// inv_max
+		1.0,		// ly
+		1.0,		// lz
+		0.1,		// layer width
+		1.0e-5};	// inv_max
 
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
@@ -68,9 +68,9 @@ int main(int argc, char **argv)
 	double eps_1[6] = {0.0}, eps_2[6] = {0.0};
 	double sig[6], (*sig_test)[3];
 
-    sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
+	sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
 
-    micropp<dim> micro(ngp, size, micro_type, micro_params, mat_params);
+	micropp<dim> micro(ngp, size, micro_type, micro_params, mat_params);
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 				cout << setw(14) << sig[i] << " ";
 			cout << endl;
 
-            memcpy(sig_test[gp], sig, 3 * sizeof(double));
+			memcpy(sig_test[gp], sig, 3 * sizeof(double));
 		}
 
 		for (int gp = 2; gp < ngp; ++gp) {
@@ -125,8 +125,8 @@ int main(int argc, char **argv)
 
 		micro.update_vars();
 
-	    char filename[128];
-	    snprintf(filename, 128, "micropp_%d", t); 
+		char filename[128];
+		snprintf(filename, 128, "micropp_%d", t); 
 		micro.output (1, filename);
 		cout << endl;
 	}

@@ -34,25 +34,32 @@ using namespace std;
 int main (int argc, char *argv[])
 {
 	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [steps]" << endl;
+		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
 		return(1);
 	}
 
 	const int dir = 1;
 	const int n = atoi(argv[1]);
-	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);  // Optional value
-	const int micro_type = MIC_LAYER_Y;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.15 };
+
+	const int print = (argc > 2) ? atoi(argv[2]) : 0;
+	if (print < 0 || print > 1) {
+		cerr << "Error in [print] argument, it only can be 0 or 1" << endl;
+		return(1);
+	}
+
+	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
+	const int micro_type = MIC_SPHERES;
+	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.4 };
 	const int size[3] = { n, n, n };
 
 	ofstream file;
 	file.open("result.dat");
 
 	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
-	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 1);
+	mat_params[1].set(1.0e3, 0.3, 1.0e4, 5.0e4, 0);
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
+	micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING);
 	micro.print_info();
 
 	double sig[6];
@@ -94,6 +101,12 @@ int main (int argc, char *argv[])
 
 		cout << endl;
 		file << setw(14) << eps[dir] << "\t" << sig[dir] << "\t" << endl;
+
+		if (print) {
+			char filename[128];
+			snprintf(filename, 128, "micropp_%d", t);
+			micro.output (0, filename);
+		}
 	}
 
 	file.close();

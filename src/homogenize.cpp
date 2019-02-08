@@ -106,7 +106,7 @@ void micropp<tdim>::homogenize()
 				}
 			}
 
-		} else if (coupling == FULL) {
+		} else if (coupling == FULL || coupling == NO_COUPLING) {
 
 			calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
 			filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);

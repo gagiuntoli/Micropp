@@ -5,7 +5,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(testsources
 	test2d_1.cpp
 	test3d_1.cpp
-	test3d_2.cpp
 	test3d_3.f90
 	test3d_4.cpp
 	test3d_5.cpp
