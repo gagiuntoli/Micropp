@@ -12,14 +12,11 @@ set(testsources
 	test3d_6.c
 	test3d_perf_1.cpp
 	test_mictype_3.cpp
-	test_MIC_QUAD_FIB_XZ.cpp
-	test_MIC_QUAD_FIB_XZ_BROKEN_X.cpp
 	test_get_elem_nodes.cpp
 	test_ell_1.cpp
 	test_ell_2.cpp
 	test_ell_3.cpp
 	test_cg.cpp
-	conv3d_2lay.cpp
 	test_print_vtu_1.cpp
 	test_omp.cpp
 	test_util_1.cpp)

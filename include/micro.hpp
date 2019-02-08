@@ -82,7 +82,8 @@ enum {
        	MIC_CILI_FIB_XZ,
        	MIC_QUAD_FIB_XYZ,
        	MIC_QUAD_FIB_XZ,
-       	MIC_QUAD_FIB_XZ_BROKEN_X
+	MIC_QUAD_FIB_XZ_BROKEN_X,
+	MIC_SPHERES
 };
 
 enum {

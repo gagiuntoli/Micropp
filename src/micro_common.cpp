@@ -474,6 +474,39 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 			return 1;
 
 		return 0;
+
+	} else if (micro_type == MIC_SPHERES) {
+
+	       	/* Distribution of Several Spheres of diferent sizes */
+
+		const double factor = special_param;
+
+		const int num = 9;
+		const double centers[num][3] = {
+			{ 0.50 * lx, 0.50 * ly, 0.50 * lz },
+			{ 0.22 * lx, 0.65 * ly, 0.10 * lz },
+			{ 0.21 * lx, 0.80 * ly, 0.90 * lz },
+			{ 0.10 * lx, 0.19 * ly, 0.35 * lz },
+			{ 0.20 * lx, 0.17 * ly, 0.85 * lz },
+			{ 0.65 * lx, 0.81 * ly, 0.15 * lz },
+			{ 0.81 * lx, 0.78 * ly, 0.60 * lz },
+			{ 0.77 * lx, 0.35 * ly, 0.25 * lz },
+			{ 0.70 * lx, 0.15 * ly, 0.80 * lz }
+		};
+
+		double rads[num] = { 0.3, 0.22, 0.13, 0.08, 0.20, 0.17, 0.19, 0.21, 0.15 };
+		for (int i = 0; i < num; ++i)
+			rads[i] *= factor;
+
+		for (int i = 0; i < num; ++i) {
+			double tmp = 0.;
+			for (int d = 0; d < dim; ++d)
+				tmp += (centers[i][d] - coor[d]) * (centers[i][d] - coor[d]);
+			if (tmp < rads[i] * rads[i])
+				return 1;
+		}
+
+		return 0;
 	}
 
 	cerr << "Invalid micro_type = " << micro_type << endl;

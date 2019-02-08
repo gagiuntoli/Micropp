@@ -32,30 +32,53 @@ using namespace std;
 int main (int argc, char *argv[])
 {
 	const int dim = 3;
-	if (argc < 4) {
-		cerr << "Usage: " << argv[0] << " nx ny nz" << endl;
+	if (argc < 2) {
+		cerr << "Usage: " << argv[0] << " n [mic_type = [0 ... 7]]" << endl;
 		return(1);
 	}
-	const int size[3] = { atoi(argv[1]), atoi(argv[2]), atoi(argv[3]) };
 
-	const double special_param[5] = { .11, .11, .11, .11, .15 };
-	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
-	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
+	const int n = atoi(argv[1]);
+	const int size[3] = { n, n, n };
 
-	for(int micro_type = 0; micro_type < 6; ++micro_type) {
+	const int mic_selected = (argc == 3) ? atoi(argv[2]) : -1;
+	if (mic_selected > MIC_SPHERES) {
+		cerr << "mic_type > " << MIC_SPHERES << endl;
+		return(1);
+	}
 
-		cout << "Plotting Micro Type : " << micro_type << endl;
-		double micro_params[4] = { 1.0, 1.0, 1.0, special_param[micro_type] };
-		micropp<3> *micro = new micropp<3>(1, size, micro_type,
-						   micro_params, mat_params);
 
+	material_t materials[2];
+	materials[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 0);
+	materials[1].set(1.0e6, 0.3, 1.0e4, 5.0e4, 0);
+
+	if (mic_selected < 0) {
+
+		for(int micro_type = 0; micro_type < MIC_SPHERES + 1; ++micro_type) {
+
+			cout << "Plotting Micro Type : " << micro_type << endl;
+			double params[4] = { 1.0, 1.0, 1.0, 0.6 };
+			micropp<3> *micro = new micropp<3>(1, size, micro_type,
+							   params, materials, NO_COUPLING);
+
+			char filename[128];
+			snprintf(filename, 128, "micro_type_%d", micro_type);
+			micro->output (0, filename);
+			delete micro;
+		}
+
+	} else {
+
+		cout << "Plotting Micro Type : " << mic_selected << endl;
+		double params[4] = { 1.0, 1.0, 1.0, 0.6 };
+		micropp<3> *micro = new micropp<3>(1, size, mic_selected, params,
+						   materials, NO_COUPLING);
 
 		char filename[128];
-		snprintf(filename, 128, "micro_type_%d", micro_type);
+		snprintf(filename, 128, "micro_type_%d", mic_selected);
 		micro->output (0, filename);
 		delete micro;
 	}
+
 
 	return 0;
 }
