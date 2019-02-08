@@ -1,8 +1,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(MicroPP VERSION 0.1
-  LANGUAGES C CXX Fortran)
+project(MicroPP VERSION 0.1 LANGUAGES C CXX Fortran)
 
 # Use C++11
 if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -48,9 +47,9 @@ endif()
 include_directories(include ${CMAKE_BINARY_DIR})
 
 # wildcard all the sources in src
-file(GLOB SOURCESLIB src/*.cpp src/*.f95)
+file(GLOB SOURCES src/*.cpp src/*.f95)
 
-add_library(micropp ${SOURCESLIB})
+add_library(micropp ${SOURCES})
 
 enable_testing()
 add_subdirectory(test)
