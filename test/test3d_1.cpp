@@ -81,6 +81,7 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 		int newton_its = micro.get_sigma_newton_its(0);
 		int non_linear = micro.is_non_linear(0);
+		int cost = micro.get_sigma_cost(0);
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", micro_type);
@@ -88,7 +89,10 @@ int main (int argc, char *argv[])
 
 		micro.update_vars();
 
-		cout << "non_linear = \t" << non_linear << "\tnewton its =\t" << newton_its << endl;
+		cout 	<< "NL     = " << non_linear << endl
+			<< "NR its = " << newton_its << endl
+			<< "Cost   = " << cost << endl;
+
 		cout << "eps =\t";
 		for (int i = 0; i < 6; ++i)
 			cout << setw(14) << eps[i] << "\t";
@@ -100,7 +104,9 @@ int main (int argc, char *argv[])
 		cout << endl;
 
 		cout << endl;
-		file << setw(14) << eps[dir] << "\t" << sig[dir] << "\t" << endl;
+		file    << setw(14)
+			<< eps[dir] << "\t"
+			<< sig[dir] << "\t" << endl;
 
 		if (print) {
 			char filename[128];
