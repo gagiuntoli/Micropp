@@ -225,11 +225,11 @@ int micropp<tdim>::get_sigma_newton_its(int gp_id) const
 
 
 template <int tdim>
-int micropp<tdim>::get_sigma_cost(int gp_id) const
+int micropp<tdim>::get_cost(int gp_id) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
-	return gp_list[gp_id].sigma_cost;
+	return gp_list[gp_id].cost;
 }
 
 

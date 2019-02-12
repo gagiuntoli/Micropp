@@ -234,7 +234,7 @@ class micropp {
 		void get_sigma_solver_err(int gp_id, double sigma_solver_err[NR_MAX_ITS]) const;
 		void get_sigma_newton_err(int gp_id, double sigma_nr_err[NR_MAX_ITS]) const;
 		int get_sigma_newton_its(int gp_id) const;
-		int get_sigma_cost(int gp_id) const;
+		int get_cost(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();
 		void print_info() const;

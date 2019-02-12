@@ -44,7 +44,7 @@ class gp_t {
 	double *u_k;
 
 	newton_t newton;
-	long int sigma_cost;
+	long int cost;
 
 	gp_t():
 		u_n(nullptr),

@@ -32,7 +32,6 @@
 using namespace std;
 
 #define dim 3
-#define nmaterials 2
 #define D_EPS 0.01
 
 int main(int argc, char **argv)
@@ -50,10 +49,8 @@ int main(int argc, char **argv)
 
 	assert(n > 1 && ngp > 1 && time_steps > 0);
 
-	int size[dim] = { n, n, n };
-
+	const int size[dim] = { n, n, n };
 	const int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
-
 	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
 	material_t mat_params[2];

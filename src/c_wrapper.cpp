@@ -105,7 +105,7 @@ extern "C" {
 
 	int micropp_C_get_sigma_cost3(int gp)
 	{
-		return micro3->get_sigma_cost(gp);
+		return micro3->get_cost(gp);
 	}
 
 }

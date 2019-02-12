@@ -63,6 +63,8 @@ void micropp<tdim>::homogenize()
 #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
 
+		int thread_id = omp_get_thread_num();
+
 		newton_t newton;
 		newton.max_its = NR_MAX_ITS;
 		newton.max_tol = NR_MAX_TOL;
@@ -70,16 +72,8 @@ void micropp<tdim>::homogenize()
 
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
-		int thread_id = omp_get_thread_num();
-
-		gp_ptr->sigma_cost = 0;
-
-		double *vars_new;
-		if (gp_ptr->allocated) {
-			vars_new = gp_ptr->int_vars_k;
-		} else {
-			vars_new = vars_new_aux;
-		}
+		double *vars_new = (gp_ptr->allocated) ? gp_ptr->int_vars_k : vars_new_aux;
+		gp_ptr->cost = 0;
 
 		// SIGMA 1 Newton-Raphson
 		memcpy(u[thread_id], gp_ptr->u_n, nndim * sizeof(double));
@@ -93,7 +87,7 @@ void micropp<tdim>::homogenize()
 		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
 
 		for (int i = 0; i < newton.its; ++i)
-			gp_ptr->sigma_cost += newton.solver_its[i];
+			gp_ptr->cost += newton.solver_its[i];
 
 		if (coupling == ONE_WAY) {
 
@@ -101,9 +95,8 @@ void micropp<tdim>::homogenize()
 			double *strain = gp_ptr->macro_strain;
 			memset (stress, 0.0, nvoi * sizeof(double));
 			for (int i = 0; i < nvoi; ++i) {
-				for (int j = 0; j < nvoi; ++j) {
+				for (int j = 0; j < nvoi; ++j)
 					stress[i] += ctan_lin[i * nvoi + j] * strain[j];
-				}
 			}
 
 		} else if (coupling == FULL || coupling == NO_COUPLING) {
@@ -141,7 +134,7 @@ void micropp<tdim>::homogenize()
 					       true, eps_1, gp_ptr->int_vars_n, &newton);
 
 				for (int i = 0; i < newton.its; ++i)
-					gp_ptr->sigma_cost += newton.solver_its[i];
+					gp_ptr->cost += newton.solver_its[i];
 
 				calc_ave_stress(u[thread_id], gp_ptr->int_vars_n, sig_1);
 

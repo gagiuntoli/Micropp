@@ -33,6 +33,7 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
+	// Execution ./test3d_1 n [print] [steps]
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
 		return(1);
@@ -81,7 +82,7 @@ int main (int argc, char *argv[])
 		micro.get_macro_stress(0, sig);
 		int newton_its = micro.get_sigma_newton_its(0);
 		int non_linear = micro.is_non_linear(0);
-		int cost = micro.get_sigma_cost(0);
+		int cost = micro.get_cost(0);
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", micro_type);
