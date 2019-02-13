@@ -37,6 +37,8 @@ program test3d_3
         integer, parameter :: micro_type = 1
         real(8), parameter :: d_eps = 0.01
         integer, parameter :: dir = 3;
+        integer :: cost
+        integer :: nn
         Character(len = 128) :: filename
         Character(len = 16) :: time_char
 
@@ -47,21 +49,19 @@ program test3d_3
 
         argc = command_argument_count()
 
-        if (argc < 3) then
+        if (argc < 1) then
                 call get_command_argument(0, arg)
-                write (ERROR_UNIT,*) "Usage: ./executable nx ny nz [steps]"
+                write (ERROR_UNIT,*) "Usage: ./executable n [steps(10)]"
                 stop 1
         end if
 
         call get_command_argument(1, arg)
-        read(arg, *) sizes(1)
-        call get_command_argument(2, arg)
-        read(arg, *) sizes(2)
-        call get_command_argument(3, arg)
-        read(arg, *) sizes(3)
+        read(arg, *) nn
 
-        if (argc >= 4) then
-                call get_command_argument(4, arg)
+        sizes = (/ nn, nn, nn /)
+
+        if (argc >= 2) then
+                call get_command_argument(2, arg)
                 read(arg, *) time_steps
         else
                 time_steps = 10
@@ -91,15 +91,17 @@ program test3d_3
                 eps(dir) = eps(dir) + d_eps;
         end if
 
-        call micro%set_macro_strain(0, eps)
+        call micro%set_macro_strain(gp_id, eps)
         call micro%homogenize()
 
-        call micro%get_macro_stress(0, sig)
+        call micro%get_macro_stress(gp_id, sig)
 
         call micro%update_vars()
         call micro%get_nl_flag(gp_id, nl_flag)
+        call micro%get_cost(gp_id, cost)
 
         write(*,'(A,2I5)') "nl = ", nl_flag
+        write(*,'(A,2I5)') "cost = ", cost
         write(*,'(A,F12.2)') "eps = ", eps(dir)
         write(*,'(A)', advance="no") 'sig = '
         write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)
