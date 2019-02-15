@@ -30,6 +30,7 @@
 #include <cmath>
 #include <cassert>
 #include <cstring>
+#include <ctime>
 
 #include "util.hpp"
 #include "ell.hpp"
@@ -51,6 +52,11 @@ inline int omp_get_thread_num(void)
 inline int omp_get_max_threads(void)
 {
 	return 1;
+}
+
+inline double omp_get_wtime(void)
+{
+	return (double) clock();
 }
 
 #endif

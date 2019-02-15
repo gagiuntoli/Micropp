@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
 	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
 
-	double time = clock();
+	double time = omp_get_wtime();
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
@@ -102,19 +102,11 @@ int main(int argc, char **argv)
 			cout << endl;
 		}
 
-		for (int gp = 0; gp < ngp; ++gp) {
-			micro.get_macro_ctan(gp, ctan);
-			cout << "gp = " << gp << " ctan = ";
-			for (int i = 0; i < 6; ++i)
-				cout << setw(14) << ctan[i] << "\t";
-			cout << endl;
-		}
-
 		micro.update_vars();
 
 	}
 
-	time = clock() - time;
+	time = omp_get_wtime() - time;
 	printf("time = %lf\n", time);
 
 	return 0;
