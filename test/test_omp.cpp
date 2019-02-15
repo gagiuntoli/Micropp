@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	double sig[nvoi];
 	double ctan[nvoi * nvoi];
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, ONE_WAY);
+	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
 
 	double time = clock();
 
