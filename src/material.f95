@@ -22,7 +22,7 @@ module libmaterial
   public :: material_t
 
   type, bind(C) :: material_t
-     real(c_double) :: E, nu, Sy, Ka
+     real(c_double) :: E, nu, Ka, Sy
      real(c_double) :: k, mu, lambda
      integer(c_int) type
      logical(c_bool) plasticity, damage
@@ -30,14 +30,14 @@ module libmaterial
 
 contains
 
-  subroutine set(this, E, nu, Sy, Ka, type)
+  subroutine set(this, E, nu, Ka, Sy, type)
     implicit none
     type(material_t) :: this
     real(4), intent(in) :: E, nu, Ka, Sy
     integer(4), intent(in) :: type
 
     call material_set(this, dble(E), dble(nu), & 
-         dble(Sy), dble(Ka), type)
+         dble(Ka), dble(Sy), type)
 
   end subroutine set
 

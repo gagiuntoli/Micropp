@@ -33,7 +33,7 @@ struct material_t {
 	bool plasticity, damage;
 
 	material_t() :
-		E(NAN), nu(NAN), Sy(NAN), Ka(NAN),
+		E(NAN), nu(NAN), Ka(NAN), Sy(NAN),
 		k(NAN), mu(NAN), lambda(NAN),
 		type(-1),
 		plasticity(false), damage(false){}

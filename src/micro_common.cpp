@@ -153,7 +153,7 @@ micropp<tdim>::~micropp()
 
 
 template <int tdim>
-int micropp<tdim>::is_non_linear(int gp_id) const
+int micropp<tdim>::is_non_linear(const int gp_id) const
 {
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
