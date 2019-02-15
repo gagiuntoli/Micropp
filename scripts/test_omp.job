@@ -1,19 +1,19 @@
 #!/bin/bash
 
 #!/bin/bash
-#SBATCH --job-name=omp
+#SBATCH --job-name=MICROMP
 #SBATCH --workdir=.
 #SBATCH --output=omp.out
 #SBATCH --error=omp.err
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --exclusive
-#SBATCH --time=04:00:00
-#SBATCH --qos=bsc_case
-##SBATCH --qos=debug
+#SBATCH --time=01:00:00
+##SBATCH --qos=bsc_case
+#SBATCH --qos=debug
 
-N=60
-NGP=400
+N=30
+NGP=100
 
 folder="res_${N}_${NGP}"
 mkdir -p ${folder}
