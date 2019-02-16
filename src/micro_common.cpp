@@ -548,40 +548,59 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 template <int tdim>
 void micropp<tdim>::print_info() const
 {
-	printf("\nmicropp%d\n", dim);
+	cout << "micropp" << dim << endl;
 
-	printf("Micro-structure = ");
+	cout << "Micro-structure : ";
 	switch(micro_type) {
 		case(MIC_SPHERE):
-			printf("MIC_SPHERE");
+			cout << "MIC_SPHERE" << endl;
 			break;
 		case(MIC_LAYER_Y):
-			printf("MIC_LAYER_Y");
+			cout << "MIC_LAYER_Y" << endl;
 			break;
 		case(MIC_CILI_FIB_Z):
-			printf("MIC_CILI_FIB_Z");
+			cout << "MIC_CILI_FIB_Z" << endl;
 			break;
 		case(MIC_CILI_FIB_XZ):
-			printf("MIC_CILI_FIB_XZ");
+			cout << "MIC_CILI_FIB_XZ" << endl;
 			break;
 		case(MIC_QUAD_FIB_XYZ):
-			printf("MIC_QUAD_FIB_XYZ");
+			cout << "MIC_QUAD_FIB_XYZ" << endl;
 			break;
 		case(MIC_QUAD_FIB_XZ):
-			printf("MIC_QUAD_FIB_XZ");
+			cout << "MIC_QUAD_FIB_XZ" << endl;
 			break;
 		case(MIC_QUAD_FIB_XZ_BROKEN_X):
-			printf("MIC_QUAD_FIB_XZ_BROKEN_X");
+			cout << "MIC_QUAD_FIB_XZ_BROKEN_X" << endl;
+			break;
+		case(MIC_SPHERES):
+			cout << "MIC_SPHERES" << endl;
+			break;
+		default:
+			cout << "NO TYPE" << endl;
+			break;
+	}
+
+	cout << "Coupling : ";
+	switch(coupling) {
+		case(NO_COUPLING):
+			cout << "NO_COUPLING" << endl;
+			break;
+		case(ONE_WAY):
+			cout << "ONE_WAY" << endl;
+			break;
+		case(FULL):
+			cout << "FULL" << endl;
 			break;
 		default:
 			break;
 	}
        	
-	printf("\nngp %d\n nx = %d\tny = %d\tnz = %d\tnn = %d\n", ngp, nx, ny, nz, nn);
-	printf("lx = %e\tly = %e\tlz = %e\t\nparam = %e\n", lx, ly, lz, special_param);
+	cout << "ngp :" << ngp << "nx :" << nx << "ny :" << ny << "nz :" << nz << "nn :" << nn << endl;
+	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
 	for (int i = 0; i < numMaterials; ++i)
 		material_list[i].print();
-	printf("\n");
+	cout << endl;
 }
 
 
