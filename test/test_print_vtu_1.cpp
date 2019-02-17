@@ -51,14 +51,26 @@ int main (int argc, char *argv[])
 	materials[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 0);
 	materials[1].set(1.0e6, 0.3, 1.0e4, 5.0e4, 0);
 
+	double params[8][4] = {
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.1 },
+		{ 1.0, 1.0, 1.0, 0.6 }
+	};
+
 	if (mic_selected < 0) {
 
 		for(int micro_type = 0; micro_type < MIC_SPHERES + 1; ++micro_type) {
 
 			cout << "Plotting Micro Type : " << micro_type << endl;
-			double params[4] = { 1.0, 1.0, 1.0, 0.6 };
 			micropp<3> *micro = new micropp<3>(1, size, micro_type,
-							   params, materials, NO_COUPLING);
+							   params[micro_type],
+							   materials, NO_COUPLING);
+			micro->print_info();
 
 			char filename[128];
 			snprintf(filename, 128, "micro_type_%d", micro_type);
@@ -69,9 +81,10 @@ int main (int argc, char *argv[])
 	} else {
 
 		cout << "Plotting Micro Type : " << mic_selected << endl;
-		double params[4] = { 1.0, 1.0, 1.0, 0.6 };
-		micropp<3> *micro = new micropp<3>(1, size, mic_selected, params,
+		micropp<3> *micro = new micropp<3>(1, size, mic_selected,
+						   params[mic_selected],
 						   materials, NO_COUPLING);
+		micro->print_info();
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", mic_selected);
