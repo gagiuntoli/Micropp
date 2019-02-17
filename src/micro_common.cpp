@@ -111,11 +111,12 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		assembly_mat(&A0[i], u[i], NULL);
 	}
 
+	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
 	if (coupling != NO_COUPLING)
 		calc_ctan_lin();
 
 	for (int gp = 0; gp < ngp; ++gp)
-		gp_list[gp].macro_ctan = ctan_lin;
+		memcpy(gp_list[gp].macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 
 	f_trial_max = -1.0e50;
 
@@ -596,7 +597,7 @@ void micropp<tdim>::print_info() const
 			break;
 	}
        	
-	cout << "ngp :" << ngp << "nx :" << nx << "ny :" << ny << "nz :" << nz << "nn :" << nn << endl;
+	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :" << nz << " nn :" << nn << endl;
 	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
 	for (int i = 0; i < numMaterials; ++i)
 		material_list[i].print();

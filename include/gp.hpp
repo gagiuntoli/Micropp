@@ -34,7 +34,7 @@ class gp_t {
 
 	double macro_strain[nvoi];
 	double macro_stress[nvoi];
-	double *macro_ctan;
+	double macro_ctan[nvoi * nvoi];
 
 	bool allocated; // flag for memory optimization
 
@@ -59,7 +59,6 @@ class gp_t {
 		free(u_n);
 		free(u_k);
 		if (allocated) {
-			free(macro_ctan);
 			free(int_vars_n);
 			free(int_vars_k);
 		}
@@ -69,7 +68,6 @@ class gp_t {
 	{
 		assert(!allocated);
 
-		macro_ctan = (double *) calloc(nvoi * nvoi, sizeof(double));
 		int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
 		int_vars_k = (double *) calloc(num_int_vars, sizeof(double));
 

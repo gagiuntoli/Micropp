@@ -50,21 +50,25 @@ int main (int argc, char *argv[])
 
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
 	const int micro_type = MIC_SPHERES;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.4 };
+	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.2 };
 	const int size[3] = { n, n, n };
 
 	ofstream file;
 	file.open("result.dat");
 
 	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 1);
-	mat_params[1].set(1.0e3, 0.3, 1.0e4, 5.0e4, 0);
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 0);
+	mat_params[1].set(1.0e3, 0.3, 1.0e4, 5.0e4, 1);
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING);
+	//micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING);
+	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();
 
 	double sig[6];
+	double ctan[36];
 	double eps[6] = { 0. };
+
+	cout << scientific;
 
 	for (int t = 0; t < time_steps; ++t) {
 
@@ -80,6 +84,7 @@ int main (int argc, char *argv[])
 		micro.set_macro_strain(0, eps);
 		micro.homogenize();
 		micro.get_macro_stress(0, sig);
+		micro.get_macro_ctan(0, ctan);
 		int newton_its = micro.get_sigma_newton_its(0);
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
@@ -96,15 +101,23 @@ int main (int argc, char *argv[])
 
 		cout << "eps =\t";
 		for (int i = 0; i < 6; ++i)
-			cout << setw(14) << eps[i] << "\t";
+			cout << eps[i] << "\t";
 		cout << endl;
 
 		cout << "sig =\t";
 		for (int i = 0; i < 6; ++i)
-			cout << setw(14) << sig[i] << "\t";
+			cout << sig[i] << "\t";
 		cout << endl;
 
+		cout << "ctan = " << endl;
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				cout << ctan[i * 6 + j] << "\t";
+			}
+			cout << endl;
+		}
 		cout << endl;
+
 		file    << setw(14)
 			<< eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
