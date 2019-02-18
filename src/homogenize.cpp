@@ -78,8 +78,7 @@ void micropp<tdim>::homogenize()
 		// SIGMA 1 Newton-Raphson
 		memcpy(u[thread_id], gp_ptr->u_n, nndim * sizeof(double));
 
-		newton_raphson(&A[thread_id], &A0[thread_id],
-			       b[thread_id], u[thread_id], du[thread_id],
+		newton_raphson(&A[thread_id], b[thread_id], u[thread_id], du[thread_id],
 			       gp_ptr->allocated, gp_ptr->macro_strain,
 			       gp_ptr->int_vars_n, &newton);
 
@@ -129,8 +128,7 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				newton_raphson(&A[thread_id], &A0[thread_id],
-					       b[thread_id], u[thread_id], du[thread_id],
+				newton_raphson(&A[thread_id], b[thread_id], u[thread_id], du[thread_id],
 					       true, eps_1, gp_ptr->int_vars_n, &newton);
 
 				for (int i = 0; i < newton.its; ++i)

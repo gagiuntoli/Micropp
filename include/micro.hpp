@@ -66,7 +66,7 @@ inline double omp_get_wtime(void)
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
 #define CG_MIN_ERR      1.0e-50
-#define CG_MAX_ITS      10000
+#define CG_MAX_ITS      1000
 #define CG_REL_ERR      1.0e-5
 
 #define FILTER_REL_TOL  1.0e-5
@@ -127,8 +127,7 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix *A;  // Non - Linear Jacobian
-		ell_matrix *A0; // Linear Jacobian (constant)
+		ell_matrix *A;  // Jacobian
 		double **b;
 		double **du;
 		double **u;
@@ -177,8 +176,7 @@ class micropp {
 		bool calc_vars_new(const double *u, double *vars_old, double *vars_new,
 				   double *f_trial_max);
 
-		int newton_raphson(ell_matrix *A, ell_matrix *A0,
-				   double *b, double *u, double *du,
+		int newton_raphson(ell_matrix *A, double *b, double *u, double *du,
 				   const bool non_linear, const double strain[nvoi],
 				   const double *vars_old, newton_t *newton);
 

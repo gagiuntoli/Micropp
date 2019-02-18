@@ -96,7 +96,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	cout << "nthreads " << nthreads << endl;
 
 	A = (ell_matrix *) malloc(nthreads * sizeof(ell_matrix));
-	A0 = (ell_matrix *) malloc(nthreads * sizeof(ell_matrix));
 	b = (double **) malloc(nthreads * sizeof(double *));
 	u = (double **) malloc(nthreads * sizeof(double *));
 	du = (double **) malloc(nthreads * sizeof(double *));
@@ -104,11 +103,9 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 #pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i < nthreads; ++i) {
 		ell_init(&A[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
-		ell_init(&A0[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		b[i] = (double *) calloc(nndim, sizeof(double));
 		u[i] = (double *) calloc(nndim, sizeof(double));
 		du[i] = (double *) calloc(nndim, sizeof(double));
-		assembly_mat(&A0[i], u[i], NULL);
 	}
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
@@ -128,12 +125,9 @@ micropp<tdim>::~micropp()
 {
 	INST_DESTRUCT;
 
-	for (int i = 0; i < nthreads; ++i) {
+	for (int i = 0; i < nthreads; ++i)
 		ell_free(&A[i]);
-		ell_free(&A0[i]);
-	}
 	free(A);
-	free(A0);
 
 	for (int i = 0; i < nthreads; ++i) {
 		free(b[i]);
@@ -251,8 +245,7 @@ void micropp<tdim>::calc_ctan_lin()
 
 		int thread_id = omp_get_thread_num();
 
-		newton_raphson(&A[thread_id], &A0[thread_id],
-			       b[thread_id], u[thread_id], du[thread_id],
+		newton_raphson(&A[thread_id], b[thread_id], u[thread_id], du[thread_id],
 			       false, eps_1, nullptr, &newton);
 
 		calc_ave_stress(u[thread_id], NULL, sig_1);
