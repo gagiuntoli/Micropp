@@ -127,11 +127,6 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix *A;  // Jacobian
-		double **b;
-		double **du;
-		double **u;
-
 		int *elem_type;
 		double *elem_stress;
 		double *elem_strain;

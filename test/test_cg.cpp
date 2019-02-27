@@ -46,24 +46,37 @@ int main (int argc, char *argv[])
 			void assembly_and_solve(void)
 			{
 
+				const int ns[3] = { nx, ny, nz };
+				const int nfield = dim;
+
+				ell_matrix A;  // Jacobian
+				ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+				double *b = (double *) calloc(nndim, sizeof(double));
+				double *du = (double *) calloc(nndim, sizeof(double));
+				double *u = (double *) calloc(nndim, sizeof(double));
+
 				double lerr, cg_err;
-				memset(u[0], 0.0, nndim * sizeof(double));
+				memset(u, 0.0, nndim * sizeof(double));
 
-				set_displ_bc(strain, u[0]);
-				lerr = assembly_rhs(u[0], nullptr, b[0]);
+				set_displ_bc(strain, u);
+				lerr = assembly_rhs(u, nullptr, b);
 
-				assembly_mat(&A[0], u[0], nullptr);
-				int cg_its = ell_solve_cgpd(&A[0], b[0], du[0], &cg_err);
+				assembly_mat(&A, u, nullptr);
+				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
 
 				for (int i = 0; i < nndim; ++i)
-					u[0][i] += du[0][i];
+					u[i] += du[i];
 
-				lerr = assembly_rhs(u[0], nullptr, b[0]);
+				lerr = assembly_rhs(u, nullptr, b);
 				cout
 					<< "|RES| : " << lerr
 					<< " CG_ITS : " << cg_its
 					<< " CG_TOL : " << cg_err << endl;
 
+				ell_free(&A);
+				free(b);
+				free(u);
+				free(du);
 			};
 
 	};

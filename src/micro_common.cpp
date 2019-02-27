@@ -89,24 +89,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	}
 
 
-	const int ns[3] = { nx, ny, nz };
-	const int nfield = dim;
-
 	nthreads = omp_get_max_threads();
 	cout << "nthreads " << nthreads << endl;
-
-	A = (ell_matrix *) malloc(nthreads * sizeof(ell_matrix));
-	b = (double **) malloc(nthreads * sizeof(double *));
-	u = (double **) malloc(nthreads * sizeof(double *));
-	du = (double **) malloc(nthreads * sizeof(double *));
-
-#pragma omp parallel for schedule(dynamic,1)
-	for (int i = 0; i < nthreads; ++i) {
-		ell_init(&A[i], nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
-		b[i] = (double *) calloc(nndim, sizeof(double));
-		u[i] = (double *) calloc(nndim, sizeof(double));
-		du[i] = (double *) calloc(nndim, sizeof(double));
-	}
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
 	if (coupling != NO_COUPLING)
@@ -124,19 +108,6 @@ template <int tdim>
 micropp<tdim>::~micropp()
 {
 	INST_DESTRUCT;
-
-	for (int i = 0; i < nthreads; ++i)
-		ell_free(&A[i]);
-	free(A);
-
-	for (int i = 0; i < nthreads; ++i) {
-		free(b[i]);
-		free(u[i]);
-		free(du[i]);
-	}
-	free(b);
-	free(u);
-	free(du);
 
 	free(elem_stress);
 	free(elem_strain);
@@ -240,18 +211,30 @@ void micropp<tdim>::calc_ctan_lin()
 
 	for (int i = 0; i < nvoi; ++i) {
 
+		const int ns[3] = { nx, ny, nz };
+		const int nfield = dim;
+
+		ell_matrix A;  // Jacobian
+		ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		double *b = (double *) calloc(nndim, sizeof(double));
+		double *du = (double *) calloc(nndim, sizeof(double));
+		double *u = (double *) calloc(nndim, sizeof(double));
+
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		int thread_id = omp_get_thread_num();
-
-		newton_raphson(&A[thread_id], b[thread_id], u[thread_id], du[thread_id],
+		newton_raphson(&A, b, u, du,
 			       false, eps_1, nullptr, &newton);
 
-		calc_ave_stress(u[thread_id], NULL, sig_1);
+		calc_ave_stress(u, NULL, sig_1);
 
 		for (int v = 0; v < nvoi; ++v)
 			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
+
+		ell_free(&A);
+		free(b);
+		free(u);
+		free(du);
 	}
 	filter(ctan_lin, nvoi * nvoi, FILTER_REL_TOL);
 }
