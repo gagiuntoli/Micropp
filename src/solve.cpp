@@ -44,7 +44,6 @@ int micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, double *d
 	memset(newton->solver_norms, 0, NR_MAX_ITS * sizeof(double));
 	memset(newton->norms, 0, NR_MAX_ITS * sizeof(double));
 
-	int thread_id = omp_get_thread_num();
 	double norm = assembly_rhs(u, vars_old, b);
 	const double norm_0 = norm;
 

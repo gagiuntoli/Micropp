@@ -65,7 +65,12 @@ int main(int argc, char **argv)
 
 	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
 
-	double time = omp_get_wtime();
+	double time;
+#ifdef _OPENMP
+	time = omp_get_wtime() - time;
+#else
+	time = clock() - time;
+#endif
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
@@ -106,7 +111,11 @@ int main(int argc, char **argv)
 
 	}
 
+#ifdef _OPENMP
 	time = omp_get_wtime() - time;
+#else
+	time = clock() - time;
+#endif
 	printf("time = %lf\n", time);
 
 	return 0;

@@ -71,6 +71,7 @@ void micropp<tdim>::homogenize()
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
+		double *vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
 
 		newton_t newton;
 		newton.max_its = NR_MAX_ITS;
@@ -155,6 +156,7 @@ void micropp<tdim>::homogenize()
 		free(b);
 		free(u);
 		free(du);
+		free(vars_new_aux);
 	}
 }
 

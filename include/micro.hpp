@@ -41,24 +41,6 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#else
-
-inline int omp_get_thread_num(void)
-{
-	return 0;
-}
-
-
-inline int omp_get_max_threads(void)
-{
-	return 1;
-}
-
-inline double omp_get_wtime(void)
-{
-	return (double) clock();
-}
-
 #endif
 
 #define MAX_DIM         3
@@ -130,7 +112,6 @@ class micropp {
 		int *elem_type;
 		double *elem_stress;
 		double *elem_strain;
-		double *vars_new_aux;
 
 		const double xg[8][3] = {
 			{ -CONSTXG, -CONSTXG, -CONSTXG },
@@ -143,8 +124,6 @@ class micropp {
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
 		double f_trial_max;
-
-		int nthreads;
 
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;

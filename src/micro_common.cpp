@@ -68,7 +68,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	elem_type = (int *) calloc(nelem, sizeof(int));
 	elem_stress = (double *) calloc(nelem * nvoi, sizeof(double));
 	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
-	vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
 
 	int nParams = 4;
 	numMaterials = 2;
@@ -87,10 +86,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 			}
 		}
 	}
-
-
-	nthreads = omp_get_max_threads();
-	cout << "nthreads " << nthreads << endl;
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
 	if (coupling != NO_COUPLING)
@@ -112,7 +107,6 @@ micropp<tdim>::~micropp()
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
-	free(vars_new_aux);
 
 	delete [] gp_list;
 }
