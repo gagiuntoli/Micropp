@@ -48,19 +48,9 @@ int micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, double *d
 	double norm = assembly_rhs(u, vars_old, b);
 	const double norm_0 = norm;
 
-#ifdef NRDEBUG
-	if (thread_id == 0)
-		cout << endl;
-#endif
-
 	while (its < newton->max_its) {
 
 		newton->norms[its] = norm;
-
-#ifdef NRDEBUG
-		if (thread_id == 0)
-			cout << "nr it = " << its << " |b| = " << norm << endl;
-#endif
 
 		if (norm < newton->max_tol || norm < norm_0 * newton->rel_tol)
 			break;
@@ -69,11 +59,6 @@ int micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, double *d
 
 		double cg_err;
 		int cg_its = ell_solve_cgpd(A, b, du, &cg_err);
-
-#ifdef NRDEBUG
-		if (thread_id == 0)
-			cout << "SOLVER ITS : " << cg_its << endl;
-#endif
 
 		newton->solver_its[its] = cg_its;
 		newton->solver_norms[its] = cg_err;
