@@ -1,10 +1,9 @@
 #!/bin/bash
 
-#!/bin/bash
 #SBATCH --job-name=MICROMP
 #SBATCH --workdir=.
-#SBATCH --output=omp.out
-#SBATCH --error=omp.err
+#SBATCH --output=omp_%j.out
+#SBATCH --error=omp_%j.err
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --exclusive
@@ -12,18 +11,19 @@
 ##SBATCH --qos=bsc_case
 #SBATCH --qos=debug
 
-N=30
-NGP=100
-
-folder="res_${N}_${NGP}"
-mkdir -p ${folder}
+. vars.sh
 
 procs=(1 2 4 8 16 32 48)
 
 for i in ${procs[@]}; do
+	for N in ${sizes[@]}; do
 
-echo "Executing with $i Threads"
-export OMP_NUM_THREADS=${i}
-time ../build/test/test_omp $N $NGP > ${folder}/res_${i}.dat
+		folder="res_${N}_${NGP}"
+		mkdir -p ${folder}
 
+		echo "Executing with $i Threads"
+		export OMP_NUM_THREADS=${i}
+		time ../build/test/test_omp $N $NGP > ${folder}/res_${i}.dat
+
+	done
 done
