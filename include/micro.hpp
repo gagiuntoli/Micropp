@@ -41,24 +41,6 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#else
-
-inline int omp_get_thread_num(void)
-{
-	return 0;
-}
-
-
-inline int omp_get_max_threads(void)
-{
-	return 1;
-}
-
-inline double omp_get_wtime(void)
-{
-	return (double) clock();
-}
-
 #endif
 
 #define MAX_DIM         3
@@ -66,7 +48,7 @@ inline double omp_get_wtime(void)
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
 #define CG_MIN_ERR      1.0e-50
-#define CG_MAX_ITS      10000
+#define CG_MAX_ITS      1000
 #define CG_REL_ERR      1.0e-5
 
 #define FILTER_REL_TOL  1.0e-5
@@ -127,16 +109,9 @@ class micropp {
 		material_t material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
-		ell_matrix *A;  // Non - Linear Jacobian
-		ell_matrix *A0; // Linear Jacobian (constant)
-		double **b;
-		double **du;
-		double **u;
-
 		int *elem_type;
 		double *elem_stress;
 		double *elem_strain;
-		double *vars_new_aux;
 
 		const double xg[8][3] = {
 			{ -CONSTXG, -CONSTXG, -CONSTXG },
@@ -149,8 +124,6 @@ class micropp {
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
 		double f_trial_max;
-
-		int nthreads;
 
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;
@@ -177,8 +150,7 @@ class micropp {
 		bool calc_vars_new(const double *u, double *vars_old, double *vars_new,
 				   double *f_trial_max);
 
-		int newton_raphson(ell_matrix *A, ell_matrix *A0,
-				   double *b, double *u, double *du,
+		int newton_raphson(ell_matrix *A, double *b, double *u, double *du,
 				   const bool non_linear, const double strain[nvoi],
 				   const double *vars_old, newton_t *newton);
 
