@@ -32,7 +32,7 @@ module libmicropp
    contains
      procedure :: set_macro_strain, homogenize, &
           get_macro_stress, get_macro_ctan, update_vars, &
-          get_nl_flag, get_cost, output, print_info
+          get_nl_flag, get_cost, has_converged, output, print_info
   end type micropp3
 
   interface micropp3
@@ -116,6 +116,14 @@ contains
     integer, intent(in) :: gp_id
     integer, intent(out) :: cost
     call get_cost3(this%ptr, gp_id, cost)
+  end subroutine
+
+  subroutine has_converged(this, gp_id, converged)
+    implicit none
+    class(micropp3), intent(in) :: this
+    integer, intent(in) :: gp_id
+    logical, intent(out) :: converged
+    call has_converged3(this%ptr, gp_id, converged)
   end subroutine
 
   subroutine print_info(this)

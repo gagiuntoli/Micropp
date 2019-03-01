@@ -51,6 +51,11 @@ extern "C" {
 		(*cost) = (*self)->get_cost(*gp_id);
 	}
 
+	void has_converged3_(const micropp<3> **self, int *gp_id, bool *converged)
+	{
+		(*converged) = (*self)->has_converged(*gp_id);
+	}
+
 	void set_macro_strain3_(micropp<3> **self, const int *gp_id,
 				const double *macro_strain)
 	{

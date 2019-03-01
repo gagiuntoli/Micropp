@@ -35,9 +35,10 @@ program test3d_3
 
         integer, parameter :: gp_id = 0
         integer, parameter :: micro_type = 1
-        real(8), parameter :: d_eps = 0.01
+        real(8), parameter :: d_eps = 0.0001
         integer, parameter :: dir = 3;
         integer :: cost
+        logical :: converged
         integer :: nn
         Character(len = 128) :: filename
         Character(len = 16) :: time_char
@@ -99,9 +100,11 @@ program test3d_3
         call micro%update_vars()
         call micro%get_nl_flag(gp_id, nl_flag)
         call micro%get_cost(gp_id, cost)
+        call micro%has_converged(gp_id, converged)
 
         write(*,'(A,2I5)') "nl = ", nl_flag
         write(*,'(A,2I5)') "cost = ", cost
+        write(*,'(A,L1)') "converged = ", converged
         write(*,'(A,F12.2)') "eps = ", eps(dir)
         write(*,'(A)', advance="no") 'sig = '
         write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)

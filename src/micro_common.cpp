@@ -148,6 +148,15 @@ int micropp<tdim>::get_cost(int gp_id) const
 
 
 template <int tdim>
+bool micropp<tdim>::has_converged(int gp_id) const
+{
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+	return gp_list[gp_id].converged;
+}
+
+
+template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
 	double sig_1[6];

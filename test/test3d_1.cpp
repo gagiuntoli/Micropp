@@ -57,8 +57,8 @@ int main (int argc, char *argv[])
 	file.open("result.dat");
 
 	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 0);
-	mat_params[1].set(1.0e3, 0.3, 1.0e4, 5.0e4, 1);
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 1);
+	mat_params[1].set(1.0e3, 0.3, 5.0e4, 1.0e3, 1);
 
 	//micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING);
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
@@ -87,6 +87,7 @@ int main (int argc, char *argv[])
 		micro.get_macro_ctan(0, ctan);
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
+		bool has_converged = micro.has_converged(0);
 
 		char filename[128];
 		snprintf(filename, 128, "micro_type_%d", micro_type);
@@ -94,8 +95,9 @@ int main (int argc, char *argv[])
 
 		micro.update_vars();
 
-		cout 	<< "NL     = " << non_linear << endl
-			<< "Cost   = " << cost << endl;
+		cout 	<< "NL        = " << non_linear << endl
+			<< "Cost      = " << cost << endl
+			<< "Converged = " << has_converged << endl;
 
 		cout << "eps =\t";
 		for (int i = 0; i < 6; ++i)

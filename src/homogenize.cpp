@@ -75,7 +75,7 @@ void micropp<tdim>::homogenize()
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		double *vars_new = (gp_ptr->allocated) ? gp_ptr->int_vars_k : vars_new_aux;
-		gp_ptr->converged = false;
+		gp_ptr->converged = true;
 
 		// SIGMA 1 Newton-Raphson
 		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));

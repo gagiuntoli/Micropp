@@ -139,8 +139,8 @@ class micropp {
 		double f_trial_max;
 
 		const int nr_max_its;
-		const int nr_max_tol;
-		const int nr_rel_tol;
+		const double nr_max_tol;
+		const double nr_rel_tol;
 
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;
@@ -224,6 +224,7 @@ class micropp {
 		int get_non_linear_gps(void) const;
 		double get_f_trial_max(void) const;
 		int get_cost(int gp_id) const;
+		bool has_converged(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();
 		void print_info() const;
