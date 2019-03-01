@@ -37,7 +37,6 @@
 #include "material.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
-#include "newton.hpp"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -61,6 +60,21 @@
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
+
+#define NR_MAX_TOL      1.0e-10
+#define NR_MAX_ITS      4
+#define NR_REL_TOL      1.0e-3 // factor against first residual
+
+
+typedef struct {
+
+	/* For getting performance results from newton-raphson loop */
+	int its;
+	double norms[NR_MAX_ITS] = { 0.0 };
+	int solver_its[NR_MAX_ITS] = { 0 };
+	double solver_norms[NR_MAX_ITS] = { 0.0 };
+
+} newton_t;
 
 
 enum {
@@ -150,9 +164,10 @@ class micropp {
 		bool calc_vars_new(const double *u, double *vars_old, double *vars_new,
 				   double *f_trial_max);
 
-		int newton_raphson(ell_matrix *A, double *b, double *u, double *du,
-				   const bool non_linear, const double strain[nvoi],
-				   const double *vars_old, newton_t *newton);
+		newton_t newton_raphson(ell_matrix *A, double *b, double *u, double *du,
+					const double strain[nvoi], const double *vars_old = nullptr,
+					const int max_its = NR_MAX_ITS, const double max_tol = NR_MAX_TOL,
+					const double rel_tol = NR_REL_TOL);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
@@ -208,10 +223,6 @@ class micropp {
 		int is_non_linear(const int gp_id) const;
 		int get_non_linear_gps(void) const;
 		double get_f_trial_max(void) const;
-		void get_sigma_solver_its(int gp_id, int sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_solver_err(int gp_id, double sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_newton_err(int gp_id, double sigma_nr_err[NR_MAX_ITS]) const;
-		int get_sigma_newton_its(int gp_id) const;
 		int get_cost(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();

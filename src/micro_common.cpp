@@ -27,12 +27,6 @@ template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
 		       const material_t *_materials, int _coupling):
-	/* 
-	 * The <_ctan_lin> option is intended for cases that we don't want to
-	 * calculate the ctan_lin because of it computational cost. For example,
-	 * for doing profile of the solver.
-	 *
-	 */
 
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
@@ -140,51 +134,6 @@ double micropp<tdim>::get_f_trial_max(void) const
 
 
 template <int tdim>
-void micropp<tdim>::get_sigma_solver_its(int gp_id,
-					 int sigma_solver_its[NR_MAX_ITS])
-	const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	memcpy(sigma_solver_its, gp_list[gp_id].newton.solver_its,
-	       NR_MAX_ITS * sizeof(int));
-}
-
-
-template <int tdim>
-void micropp<tdim>::get_sigma_solver_err(int gp_id,
-					 double sigma_solver_err[NR_MAX_ITS])
-	const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	memcpy(sigma_solver_err, gp_list[gp_id].newton.solver_norms,
-	       NR_MAX_ITS * sizeof(double));
-}
-
-
-template <int tdim>
-void micropp<tdim>::get_sigma_newton_err(int gp_id,
-					 double sigma_newton_err[NR_MAX_ITS])
-	const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	memcpy(sigma_newton_err, gp_list[gp_id].newton.norms,
-	       NR_MAX_ITS * sizeof(double));
-}
-
-
-template <int tdim>
-int micropp<tdim>::get_sigma_newton_its(int gp_id) const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	return gp_list[gp_id].newton.its;
-}
-
-
-template <int tdim>
 int micropp<tdim>::get_cost(int gp_id) const
 {
 	assert(gp_id < ngp);
@@ -198,18 +147,12 @@ void micropp<tdim>::calc_ctan_lin()
 {
 	double sig_1[6];
 
-	newton_t newton;
-	newton.max_its = NR_MAX_ITS;
-	newton.max_tol = NR_MAX_TOL;
-	newton.rel_tol = NR_REL_TOL;
-
 	for (int i = 0; i < nvoi; ++i) {
 
 		const int ns[3] = { nx, ny, nz };
-		const int nfield = dim;
 
 		ell_matrix A;  // Jacobian
-		ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
@@ -217,8 +160,7 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
-		newton_raphson(&A, b, u, du,
-			       false, eps_1, nullptr, &newton);
+		newton_raphson(&A, b, u, du, eps_1);
 
 		calc_ave_stress(u, NULL, sig_1);
 

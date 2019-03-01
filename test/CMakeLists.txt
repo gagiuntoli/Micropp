@@ -9,8 +9,6 @@ set(testsources
 	test3d_4.cpp
 	test3d_5.cpp
 	test3d_6.c
-	test3d_perf_1.cpp
-	test_mictype_3.cpp
 	test_get_elem_nodes.cpp
 	test_ell_1.cpp
 	test_ell_2.cpp
@@ -19,11 +17,6 @@ set(testsources
 	test_print_vtu_1.cpp
 	test_omp.cpp
 	test_util_1.cpp)
-
-#test_set_displ_bc_omp.cpp
-#test_assembly_res_omp.cpp
-#test_assembly_jac_omp.cpp
-#test_solver_omp.cpp
 
 # Iterate over the list above
 foreach (testfile ${testsources})
@@ -38,7 +31,6 @@ endforeach ()
 # As some tests will require commands and could be executed in loops we add the
 # tests individually here.
 
-# Add a test that requires arguments
 add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
 add_test(NAME test3d_1 COMMAND test3d_1 5 0 10)
 add_test(NAME test3d_3 COMMAND test3d_3 5 5 5 10)

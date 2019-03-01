@@ -85,7 +85,6 @@ int main (int argc, char *argv[])
 		micro.homogenize();
 		micro.get_macro_stress(0, sig);
 		micro.get_macro_ctan(0, ctan);
-		int newton_its = micro.get_sigma_newton_its(0);
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
 
@@ -96,7 +95,6 @@ int main (int argc, char *argv[])
 		micro.update_vars();
 
 		cout 	<< "NL     = " << non_linear << endl
-			<< "NR its = " << newton_its << endl
 			<< "Cost   = " << cost << endl;
 
 		cout << "eps =\t";

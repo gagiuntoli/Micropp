@@ -23,7 +23,6 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "newton.hpp"
 
 template <int dim>
 class gp_t {
@@ -43,7 +42,6 @@ class gp_t {
 	double *u_n;
 	double *u_k;
 
-	newton_t newton;
 	long int cost;
 
 	gp_t():
