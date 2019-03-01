@@ -25,8 +25,9 @@
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
-		       const double _micro_params[4],
-		       const material_t *_materials, int _coupling):
+		       const double _micro_params[4], const material_t *_materials,
+		       const int _coupling, const int _nr_max_its,
+		       const double _nr_max_tol, const double _nr_rel_tol):
 
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
@@ -49,7 +50,11 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
 	ivol(1.0 / (wg * npe)),
-	micro_type(_micro_type), num_int_vars(nelem * npe * NUM_VAR_GP)
+	micro_type(_micro_type), num_int_vars(nelem * npe * NUM_VAR_GP),
+
+	nr_max_its(_nr_max_its),
+	nr_max_tol(_nr_max_tol),
+	nr_rel_tol(_nr_rel_tol)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 

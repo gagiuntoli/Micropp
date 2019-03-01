@@ -28,8 +28,7 @@ using namespace std;
 
 template <int tdim>
 newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, double *du,
-				       const double strain[nvoi], const double *vars_old,
-				       const int max_its, const double max_tol, const double rel_tol)
+				       const double strain[nvoi], const double *vars_old)
 {
 
 	INST_START;
@@ -43,11 +42,11 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, doub
 	double norm = assembly_rhs(u, vars_old, b);
 	const double norm_0 = norm;
 
-	while (its < max_its) {
+	while (its < nr_max_its) {
 
 		newton.norms[its] = norm;
 
-		if (norm < max_tol || norm < norm_0 * rel_tol)
+		if (norm < nr_max_tol || norm < norm_0 * nr_rel_tol)
 			break;
 
 		assembly_mat(A, u, vars_old);
