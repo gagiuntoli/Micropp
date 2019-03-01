@@ -37,7 +37,6 @@
 #include "material.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
-#include "newton.hpp"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -61,6 +60,21 @@
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
+
+#define NR_MAX_TOL      1.0e-10
+#define NR_MAX_ITS      4
+#define NR_REL_TOL      1.0e-3 // factor against first residual
+
+
+typedef struct {
+
+	/* For getting performance results from newton-raphson loop */
+	int its;
+	double norms[NR_MAX_ITS] = { 0.0 };
+	int solver_its[NR_MAX_ITS] = { 0 };
+	double solver_norms[NR_MAX_ITS] = { 0.0 };
+
+} newton_t;
 
 
 enum {

@@ -83,7 +83,6 @@ void micropp<tdim>::homogenize()
 		newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->macro_strain, gp_ptr->int_vars_n);
 
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
-		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
 
 		for (int i = 0; i < newton.its; ++i)
 			gp_ptr->cost += newton.solver_its[i];

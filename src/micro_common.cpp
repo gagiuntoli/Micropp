@@ -134,51 +134,6 @@ double micropp<tdim>::get_f_trial_max(void) const
 
 
 template <int tdim>
-void micropp<tdim>::get_sigma_solver_its(int gp_id,
-					 int sigma_solver_its[NR_MAX_ITS])
-	const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	memcpy(sigma_solver_its, gp_list[gp_id].newton.solver_its,
-	       NR_MAX_ITS * sizeof(int));
-}
-
-
-template <int tdim>
-void micropp<tdim>::get_sigma_solver_err(int gp_id,
-					 double sigma_solver_err[NR_MAX_ITS])
-	const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	memcpy(sigma_solver_err, gp_list[gp_id].newton.solver_norms,
-	       NR_MAX_ITS * sizeof(double));
-}
-
-
-template <int tdim>
-void micropp<tdim>::get_sigma_newton_err(int gp_id,
-					 double sigma_newton_err[NR_MAX_ITS])
-	const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	memcpy(sigma_newton_err, gp_list[gp_id].newton.norms,
-	       NR_MAX_ITS * sizeof(double));
-}
-
-
-template <int tdim>
-int micropp<tdim>::get_sigma_newton_its(int gp_id) const
-{
-	assert(gp_id < ngp);
-	assert(gp_id >= 0);
-	return gp_list[gp_id].newton.its;
-}
-
-
-template <int tdim>
 int micropp<tdim>::get_cost(int gp_id) const
 {
 	assert(gp_id < ngp);
