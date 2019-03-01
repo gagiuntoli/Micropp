@@ -75,7 +75,7 @@ void micropp<tdim>::homogenize()
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		double *vars_new = (gp_ptr->allocated) ? gp_ptr->int_vars_k : vars_new_aux;
-		gp_ptr->cost = 0;
+		gp_ptr->converged = false;
 
 		// SIGMA 1 Newton-Raphson
 		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
@@ -83,19 +83,15 @@ void micropp<tdim>::homogenize()
 		newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->macro_strain, gp_ptr->int_vars_n);
 
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
-
-		for (int i = 0; i < newton.its; ++i)
-			gp_ptr->cost += newton.solver_its[i];
+		gp_ptr->cost = newton.solver_its;
+		gp_ptr->converged &= newton.converged;
 
 		if (coupling == ONE_WAY) {
 
-			double *stress = gp_ptr->macro_stress;
-			double *strain = gp_ptr->macro_strain;
-			memset (stress, 0.0, nvoi * sizeof(double));
-			for (int i = 0; i < nvoi; ++i) {
+			memset (gp_ptr->macro_stress, 0.0, nvoi * sizeof(double));
+			for (int i = 0; i < nvoi; ++i)
 				for (int j = 0; j < nvoi; ++j)
-					stress[i] += ctan_lin[i * nvoi + j] * strain[j];
-			}
+					gp_ptr->macro_stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->macro_strain[j];
 
 		} else if (coupling == FULL || coupling == NO_COUPLING) {
 
@@ -129,8 +125,7 @@ void micropp<tdim>::homogenize()
 
 				newton_raphson(&A, b, u, du, eps_1, gp_ptr->int_vars_n);
 
-				for (int i = 0; i < newton.its; ++i)
-					gp_ptr->cost += newton.solver_its[i];
+				gp_ptr->cost += newton.solver_its;
 
 				calc_ave_stress(u, gp_ptr->int_vars_n, sig_1);
 

@@ -68,11 +68,10 @@
 
 typedef struct {
 
-	/* For getting performance results from newton-raphson loop */
-	int its;
-	double norms[NR_MAX_ITS] = { 0.0 };
-	int solver_its[NR_MAX_ITS] = { 0 };
-	double solver_norms[NR_MAX_ITS] = { 0.0 };
+	/* Results from newton-raphson loop */
+	int its = 0;
+	int solver_its = 0;
+	bool converged = false;
 
 } newton_t;
 

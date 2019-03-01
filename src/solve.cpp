@@ -38,24 +38,22 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, doub
 	set_displ_bc(strain, u);
 
 	int its = 0;
-
 	double norm = assembly_rhs(u, vars_old, b);
 	const double norm_0 = norm;
 
 	while (its < nr_max_its) {
 
-		newton.norms[its] = norm;
-
-		if (norm < nr_max_tol || norm < norm_0 * nr_rel_tol)
+		if (norm < nr_max_tol || norm < norm_0 * nr_rel_tol) {
+			newton.converged = true;
 			break;
+		}
 
 		assembly_mat(A, u, vars_old);
 
 		double cg_err;
 		int cg_its = ell_solve_cgpd(A, b, du, &cg_err);
 
-		newton.solver_its[its] = cg_its;
-		newton.solver_norms[its] = cg_err;
+		newton.solver_its += cg_its;
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
@@ -66,7 +64,6 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, doub
 	}
 
 	newton.its = its;
-
 	return newton;
 }
 
