@@ -64,19 +64,13 @@ void micropp<tdim>::homogenize()
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		const int ns[3] = { nx, ny, nz };
-		const int nfield = dim;
 
 		ell_matrix A;  // Jacobian
-		ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
 		double *vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
-
-		newton_t newton;
-		newton.max_its = NR_MAX_ITS;
-		newton.max_tol = NR_MAX_TOL;
-		newton.rel_tol = NR_REL_TOL;
 
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
@@ -86,9 +80,7 @@ void micropp<tdim>::homogenize()
 		// SIGMA 1 Newton-Raphson
 		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
-		newton_raphson(&A, b, u, du,
-			       gp_ptr->allocated, gp_ptr->macro_strain,
-			       gp_ptr->int_vars_n, &newton);
+		newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->macro_strain, gp_ptr->int_vars_n);
 
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 		memcpy(&(gp_ptr->newton), &newton, sizeof(newton_t));
@@ -136,8 +128,7 @@ void micropp<tdim>::homogenize()
 				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				newton_raphson(&A, b, u, du,
-					       true, eps_1, gp_ptr->int_vars_n, &newton);
+				newton_raphson(&A, b, u, du, eps_1, gp_ptr->int_vars_n);
 
 				for (int i = 0; i < newton.its; ++i)
 					gp_ptr->cost += newton.solver_its[i];

@@ -150,9 +150,10 @@ class micropp {
 		bool calc_vars_new(const double *u, double *vars_old, double *vars_new,
 				   double *f_trial_max);
 
-		int newton_raphson(ell_matrix *A, double *b, double *u, double *du,
-				   const bool non_linear, const double strain[nvoi],
-				   const double *vars_old, newton_t *newton);
+		newton_t newton_raphson(ell_matrix *A, double *b, double *u, double *du,
+					const double strain[nvoi], const double *vars_old = nullptr,
+					const int max_its = NR_MAX_ITS, const double max_tol = NR_MAX_TOL,
+					const double rel_tol = NR_REL_TOL);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
