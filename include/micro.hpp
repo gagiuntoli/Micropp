@@ -223,10 +223,6 @@ class micropp {
 		int is_non_linear(const int gp_id) const;
 		int get_non_linear_gps(void) const;
 		double get_f_trial_max(void) const;
-		void get_sigma_solver_its(int gp_id, int sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_solver_err(int gp_id, double sigma_solver_err[NR_MAX_ITS]) const;
-		void get_sigma_newton_err(int gp_id, double sigma_nr_err[NR_MAX_ITS]) const;
-		int get_sigma_newton_its(int gp_id) const;
 		int get_cost(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();
