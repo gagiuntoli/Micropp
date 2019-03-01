@@ -43,6 +43,7 @@ class gp_t {
 	double *u_k;
 
 	long int cost;
+	bool converged;
 
 	gp_t():
 		u_n(nullptr),

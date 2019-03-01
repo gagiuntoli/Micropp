@@ -68,11 +68,10 @@
 
 typedef struct {
 
-	/* For getting performance results from newton-raphson loop */
-	int its;
-	double norms[NR_MAX_ITS] = { 0.0 };
-	int solver_its[NR_MAX_ITS] = { 0 };
-	double solver_norms[NR_MAX_ITS] = { 0.0 };
+	/* Results from newton-raphson loop */
+	int its = 0;
+	int solver_its = 0;
+	bool converged = false;
 
 } newton_t;
 
@@ -139,6 +138,10 @@ class micropp {
 
 		double f_trial_max;
 
+		const int nr_max_its;
+		const double nr_max_tol;
+		const double nr_rel_tol;
+
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;
 
@@ -165,9 +168,7 @@ class micropp {
 				   double *f_trial_max);
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u, double *du,
-					const double strain[nvoi], const double *vars_old = nullptr,
-					const int max_its = NR_MAX_ITS, const double max_tol = NR_MAX_TOL,
-					const double rel_tol = NR_REL_TOL);
+					const double strain[nvoi], const double *vars_old = nullptr);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
@@ -177,8 +178,6 @@ class micropp {
 
 		double assembly_rhs(const double *u, const double *vars_old, double *b);
 		void assembly_mat(ell_matrix *A, const double *u, const double *vars_old);
-
-
 
 		void write_vtu(double *u, double *vars_old, const char *filename);
 
@@ -209,7 +208,8 @@ class micropp {
 
 		micropp(const int ngp, const int size[3], const int micro_type,
 			const double *micro_params, const material_t *materials,
-			int coupling = ONE_WAY);
+			const int coupling = ONE_WAY, const int max_its = NR_MAX_ITS,
+			const double max_tol = NR_MAX_TOL, const double rel_tol = NR_REL_TOL);
 
 		~micropp();
 
@@ -224,6 +224,7 @@ class micropp {
 		int get_non_linear_gps(void) const;
 		double get_f_trial_max(void) const;
 		int get_cost(int gp_id) const;
+		bool has_converged(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();
 		void print_info() const;
