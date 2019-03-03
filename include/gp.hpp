@@ -50,7 +50,9 @@ class gp_t {
 		u_k(nullptr),
 		int_vars_n(nullptr),
 		int_vars_k(nullptr),
-		allocated(false)
+		allocated(false),
+		cost(0),
+		converged(true)
 	{}
 
 	~gp_t()
