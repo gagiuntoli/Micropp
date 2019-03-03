@@ -159,13 +159,13 @@ class micropp {
 		void get_elem_rhs(const double *u, const double *vars_old,
 				  double be[npe * dim], int ex, int ey, int ez = 0) const;
 
-		void calc_ave_stress(double *u, double *vars_old,
-				     double stress_ave[nvoi]) const;
+		void calc_ave_stress(const double *u, double stress_ave[nvoi],
+				     const double *vars_old = nullptr) const;
 		void calc_ave_strain(const double *u, double strain_ave[nvoi]) const;
 		void calc_fields(double *u, double *vars_old);
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
-		bool calc_vars_new(const double *u, double *vars_old, double *vars_new,
-				   double *f_trial_max);
+		bool calc_vars_new(const double *u, const double *vars_old,
+				   double *vars_new, double *f_trial_max) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u, double *du,
 					const double strain[nvoi], const double *vars_old = nullptr);
@@ -214,9 +214,9 @@ class micropp {
 		~micropp();
 
 		/* The most important functions */
-		void set_macro_strain(const int gp_id, const double *macro_strain);
-		void get_macro_stress(const int gp_id, double *macro_stress) const;
-		void get_macro_ctan(const int gp_id, double *macro_ctan) const;
+		void set_macro_strain(const int gp_id, const double *strain);
+		void get_macro_stress(const int gp_id, double *stress) const;
+		void get_macro_ctan(const int gp_id, double *ctan) const;
 		void homogenize();
 
 		/* Extras */

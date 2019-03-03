@@ -27,31 +27,29 @@
 
 
 template <int tdim>
-void micropp<tdim>::set_macro_strain(const int gp_id,
-				     const double *macro_strain)
+void micropp<tdim>::set_macro_strain(const int gp_id, const double *strain)
 {
 	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	memcpy(gp_list[gp_id].macro_strain, macro_strain, nvoi * sizeof(double));
+	memcpy(gp_list[gp_id].macro_strain, strain, nvoi * sizeof(double));
 }
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_stress(const int gp_id,
-				     double *macro_stress) const
+void micropp<tdim>::get_macro_stress(const int gp_id, double *stress) const
 {
 	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	memcpy(macro_stress, gp_list[gp_id].macro_stress, nvoi * sizeof(double));
+	memcpy(stress, gp_list[gp_id].macro_stress, nvoi * sizeof(double));
 }
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_ctan(const int gp_id, double *macro_ctan) const
+void micropp<tdim>::get_macro_ctan(const int gp_id, double *ctan) const
 {
 	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	memcpy(macro_ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
+	memcpy(ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
 }
 
 
@@ -95,7 +93,7 @@ void micropp<tdim>::homogenize()
 
 		} else if (coupling == FULL || coupling == NO_COUPLING) {
 
-			calc_ave_stress(gp_ptr->u_k, gp_ptr->int_vars_n, gp_ptr->macro_stress);
+			calc_ave_stress(gp_ptr->u_k, gp_ptr->macro_stress, gp_ptr->int_vars_n);
 			filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
 
 		}
@@ -127,7 +125,7 @@ void micropp<tdim>::homogenize()
 
 				gp_ptr->cost += newton.solver_its;
 
-				calc_ave_stress(u, gp_ptr->int_vars_n, sig_1);
+				calc_ave_stress(u, sig_1, gp_ptr->int_vars_n);
 
 				for (int v = 0; v < nvoi; ++v)
 					gp_ptr->macro_ctan[v * nvoi + i] =
