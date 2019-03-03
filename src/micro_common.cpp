@@ -159,7 +159,6 @@ bool micropp<tdim>::has_converged(int gp_id) const
 template <int tdim>
 void micropp<tdim>::calc_ctan_lin()
 {
-	double sig_1[6];
 
 #pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i < nvoi; ++i) {
@@ -172,6 +171,7 @@ void micropp<tdim>::calc_ctan_lin()
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
 
+		double sig_1[6];
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
