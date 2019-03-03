@@ -161,6 +161,7 @@ void micropp<tdim>::calc_ctan_lin()
 {
 	double sig_1[6];
 
+#pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i < nvoi; ++i) {
 
 		const int ns[3] = { nx, ny, nz };
