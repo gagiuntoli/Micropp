@@ -17,125 +17,107 @@
 
 module libmicropp
   use libmaterial
+  use iso_c_binding
 
   implicit none
 
-  private :: new_micropp3, set_macro_strain, homogenize, &
-       get_macro_stress, get_macro_ctan, update_vars, &
-       get_nl_flag, output
-
-  public :: micropp3, free
-
-  type :: micropp3
-     private
-     integer(8) :: ptr ! pointer
-   contains
-     procedure :: set_macro_strain, homogenize, &
-          get_macro_stress, get_macro_ctan, update_vars, &
-          get_nl_flag, get_cost, has_converged, output, print_info
+  ! Important: if you change this remember to change also the equivalent
+  ! one in the C_wrapper
+  type, bind(C) :: micropp3
+     type(c_ptr) :: ptr ! pointer
   end type micropp3
 
-  interface micropp3
-     procedure new_micropp3
-  end interface micropp3
+  interface
+     subroutine micropp3_new(self, ngp, size, micro_type, micro_params, params) &
+          bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       use libmaterial
+       import micropp3
+       implicit none
+       type(micropp3), intent(out) :: self
+       integer(c_int), value :: ngp
+       integer(c_int), intent(in) :: size(3)
+       integer(c_int), value :: micro_type
+       real(c_double), intent(in), dimension (*) :: micro_params
+       type(material_base), intent(in), dimension (*) :: params
+     end subroutine micropp3_new
 
-  integer(8) :: init3
-  external init3
+     subroutine micropp3_free(this) bind(C)
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+     end subroutine micropp3_free
 
-contains
+     subroutine micropp3_set_macro_strain(this, gp_id, macro_strain) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       real(c_double), intent(in), dimension(*) :: macro_strain
+     end subroutine micropp3_set_macro_strain
 
-  !------------------------------------------------------------
-  ! Constructors
+     subroutine micropp3_homogenize(this) bind(C)
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+     end subroutine micropp3_homogenize
 
-  function new_micropp3(ngp, size, micro_type, micro_params, params)
-    implicit none
-    type(micropp3) :: new_micropp3
-    integer, intent(in) :: ngp
-    integer, intent(in) :: size(3)
-    integer, intent(in) :: micro_type
-    real(8), intent(in), dimension (*) :: micro_params
-    type(material_t), intent(in), dimension (*) :: params
+     logical(c_bool) function micropp3_get_nl_flag(this, gp_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_bool, c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+       integer(c_int), intent(in), value :: gp_id
+     end function micropp3_get_nl_flag
 
-    new_micropp3%ptr = init3(ngp, size, micro_type, micro_params, params)
+     integer(c_int) function micropp3_get_cost(this, gp_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+       integer(c_int), intent(in), value :: gp_id
+     end function micropp3_get_cost
 
-  end function new_micropp3
+     subroutine micropp3_get_macro_stress(this, gp_id, macro_stress) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       real(c_double), intent(in), dimension(*) :: macro_stress
+     end subroutine micropp3_get_macro_stress
 
-  subroutine free(this)
-    class(micropp3) :: this
-    call free3(this%ptr)
-  end subroutine free
+     subroutine micropp3_get_macro_ctan(this, gp_id, macro_stress) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       real(c_double), intent(in), dimension(*) :: macro_stress
+     end subroutine micropp3_get_macro_ctan
 
-  !------------------------------------------------------------
-  ! Main Calculation
+     subroutine micropp3_update_vars(this) bind(C)
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+     end subroutine micropp3_update_vars
 
-  subroutine set_macro_strain(this, gp_id, macro_strain)
-    class(micropp3), intent(inout) :: this
-    integer, intent(in) :: gp_id
-    real(8), intent(in), dimension(*) :: macro_strain
-    call set_macro_strain3(this%ptr, gp_id, macro_strain)
-  end subroutine set_macro_strain
+     subroutine micropp3_output(this, gp_id, filename) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_char
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       character(kind=c_char), intent(in) :: filename(128)
+     end subroutine micropp3_output
 
-  subroutine homogenize(this)
-    class(micropp3) :: this
-    call homogenize3(this%ptr)
-  end subroutine homogenize
+     subroutine micropp3_print_info(this) bind(C)
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+     end subroutine micropp3_print_info
 
-  subroutine get_macro_stress(this, gp_id, macro_stress)
-    class(micropp3) :: this
-    integer, intent(in) :: gp_id
-    real(8), intent(out), dimension(*) :: macro_stress
-    call get_macro_stress3(this%ptr, gp_id, macro_stress)
-  end subroutine get_macro_stress
-
-  subroutine get_macro_ctan(this, gp_id, macro_ctan)
-    class(micropp3) :: this
-    integer, intent(in) :: gp_id
-    real(8), intent(out), dimension(*) :: macro_ctan
-    call get_macro_ctan3(this%ptr, gp_id, macro_ctan)
-  end subroutine get_macro_ctan
-
-  subroutine update_vars(this)
-    class(micropp3) :: this
-    call update_vars3(this%ptr)
-  end subroutine update_vars
-
-  !------------------------------------------------------------
-  ! Output
-
-  subroutine get_nl_flag(this, gp_id, nl_flag)
-    implicit none
-    class(micropp3), intent(inout) :: this
-    integer, intent(in) :: gp_id
-    integer, intent(out) :: nl_flag
-    call get_nl_flag3(this%ptr, gp_id, nl_flag)
-  end subroutine
-
-  subroutine get_cost(this, gp_id, cost)
-    implicit none
-    class(micropp3), intent(in) :: this
-    integer, intent(in) :: gp_id
-    integer, intent(out) :: cost
-    call get_cost3(this%ptr, gp_id, cost)
-  end subroutine
-
-  subroutine has_converged(this, gp_id, converged)
-    implicit none
-    class(micropp3), intent(in) :: this
-    integer, intent(in) :: gp_id
-    logical, intent(out) :: converged
-    call has_converged3(this%ptr, gp_id, converged)
-  end subroutine
-
-  subroutine print_info(this)
-    class(micropp3) :: this
-    call print_info3(this%ptr)
-  end subroutine print_info
-
-  subroutine output(this, gp_id, filename)
-    class(micropp3) :: this
-    integer, intent(in) :: gp_id
-    Character(128), intent(in) :: filename
-    call output3(this%ptr, gp_id, filename)
-  end subroutine output
+  end interface
 
 end module libmicropp

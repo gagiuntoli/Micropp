@@ -19,39 +19,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MATERIAL_HPP
-#define MATERIAL_HPP
+#ifndef MATERIAL_BASE_H
+#define MATERIAL_BASE_H
 
-#include "material_base.h"
+#ifdef __cplusplus
+extern "C" {
+	#include <cstdio>
+#else
+	#include <stdbool.h>
+	#include <stdio.h>
+#endif
 
-#include <cmath>
-#include <cstdio>
+	struct material_base {
 
-struct material_t : public material_base {
+		double E, nu, Ka, Sy;
+		double k, mu, lambda;
+		int type;
+		bool plasticity, damage;
+	};
 
-	material_t() {
-		E = NAN;
-		nu = NAN;
-		Ka = NAN;
-		Sy = NAN;
-		k = NAN;
-		mu = NAN;
-		lambda = NAN;
-		type = -1;
-		plasticity = false;
-		damage = false;
-	}
+	void material_set(struct material_base *self, double _E, double _nu,
+	                         double _Ka, double _Sy, int _type);
 
-	void set(double _E, double _nu, double _Ka, double _Sy, int _type)
-	{
-		material_set(this, _E, _nu, _Ka, _Sy, _type);
-	}
-
-	void print() const
-	{
-		material_print(this);
-	}
-};
+	void material_print(const struct material_base *self);
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif

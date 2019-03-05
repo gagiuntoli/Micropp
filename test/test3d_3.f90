@@ -31,14 +31,13 @@ program test3d_3
         integer :: argc, t
         character(len=32) :: arg
         integer :: sizes(3), time_steps
-        integer :: nl_flag
+        logical :: nl_flag
 
         integer, parameter :: gp_id = 0
         integer, parameter :: micro_type = 1
-        real(8), parameter :: d_eps = 0.0001
+        real(8), parameter :: d_eps = 0.01
         integer, parameter :: dir = 3;
         integer :: cost
-        logical :: converged
         integer :: nn
         Character(len = 128) :: filename
         Character(len = 16) :: time_char
@@ -46,7 +45,7 @@ program test3d_3
         real(8), dimension(*) :: eps(6), sig(6)
 
         real(8) :: micro_params(5)
-        type(material_t) :: mat_params(2)
+        type(material_base) :: mat_params(2)
 
         argc = command_argument_count()
 
@@ -70,11 +69,11 @@ program test3d_3
 
         micro_params = (/ 1.0, 1.0, 1.0, 0.1, 0.0 /)
 
-        call set(mat_params(1), 1.0e6, 0.3, 5.0e4, 5.0e4, 1)
-        call set(mat_params(2), 1.0e6, 0.3, 1.0e4, 0.0e-1, 0)
+        call material_set(mat_params(1), 1.0e6, 0.3, 5.0e4, 5.0e4, 1)
+        call material_set(mat_params(2), 1.0e6, 0.3, 1.0e4, 0.0e-1, 0)
 
-        micro = micropp3(1, sizes, micro_type, micro_params, mat_params)
-        call micro%print_info()
+        call micropp3_new(micro, 1, sizes, micro_type, micro_params, mat_params)
+        call micropp3_print_info(micro)
 
         eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
         sig = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
@@ -92,19 +91,17 @@ program test3d_3
                 eps(dir) = eps(dir) + d_eps;
         end if
 
-        call micro%set_macro_strain(gp_id, eps)
-        call micro%homogenize()
+        call micropp3_set_macro_strain(micro, gp_id, eps)
+        call micropp3_homogenize(micro)
 
-        call micro%get_macro_stress(gp_id, sig)
+        call micropp3_get_macro_stress(micro, gp_id, sig)
 
-        call micro%update_vars()
-        call micro%get_nl_flag(gp_id, nl_flag)
-        call micro%get_cost(gp_id, cost)
-        call micro%has_converged(gp_id, converged)
+        call micropp3_update_vars(micro)
+        nl_flag = micropp3_get_nl_flag(micro, gp_id)
+        cost = micropp3_get_cost(micro, gp_id)
 
         write(*,'(A,2I5)') "nl = ", nl_flag
         write(*,'(A,2I5)') "cost = ", cost
-        write(*,'(A,L1)') "converged = ", converged
         write(*,'(A,F12.2)') "eps = ", eps(dir)
         write(*,'(A)', advance="no") 'sig = '
         write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)
@@ -122,6 +119,6 @@ program test3d_3
 
         end do
 
-        call free(micro)
+        call micropp3_free(micro)
 
 end program test3d_3

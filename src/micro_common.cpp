@@ -21,6 +21,7 @@
 
 
 #include "micro.hpp"
+#include "material.hpp"
 
 
 template<int tdim>
