@@ -29,14 +29,14 @@ module libmaterial
   end type material_base
 
   interface
-     subroutine material_set(this, E, nu, Ka, Sy, type) &
-          bind (C, name='material_set')
-       use, intrinsic :: iso_c_binding, only: c_int, c_float
+     !subroutine material_set(this, E, nu, Ka, Sy, mtype) bind (C, name='material_set')
+     subroutine material_set(this, E, nu, Ka, Sy, mtype) bind (C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
        import material_base
        implicit none
        type(material_base) :: this
-       real(c_float), intent(in), value :: E, nu, Ka, Sy
-       integer(c_int), intent(in), value :: type
+       real(c_double), intent(in), value :: E, nu, Ka, Sy
+       integer(c_int), intent(in), value :: mtype
      end subroutine material_set
   end interface
 

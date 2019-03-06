@@ -29,6 +29,7 @@ program test3d_3
 
         type(micropp3) :: micro
         integer :: argc, t
+        integer :: i, j
         character(len=32) :: arg
         integer :: sizes(3), time_steps
         logical :: nl_flag
@@ -42,9 +43,9 @@ program test3d_3
         Character(len = 128) :: filename
         Character(len = 16) :: time_char
 
-        real(8), dimension(*) :: eps(6), sig(6)
+        real(8), dimension(*) :: eps(6), sig(6), ctan(36)
 
-        real(8) :: micro_params(5)
+        real(8) :: micro_params(4)
         type(material_base) :: mat_params(2)
 
         argc = command_argument_count()
@@ -67,10 +68,10 @@ program test3d_3
                 time_steps = 10
         end if
 
-        micro_params = (/ 1.0, 1.0, 1.0, 0.1, 0.0 /)
+        micro_params = (/ 1.0, 1.0, 1.0, 0.1 /)
 
-        call material_set(mat_params(1), 1.0e6, 0.3, 5.0e4, 5.0e4, 1)
-        call material_set(mat_params(2), 1.0e6, 0.3, 1.0e4, 0.0e-1, 0)
+        call material_set(mat_params(1), 1.0D6, 0.3D0, 5.0D4, 5.0D4, 1)
+        call material_set(mat_params(2), 1.0D6, 0.3D0, 1.0D4, 0.0D-1, 0)
 
         call micropp3_new(micro, 1, sizes, micro_type, micro_params, mat_params)
         call micropp3_print_info(micro)
@@ -95,17 +96,30 @@ program test3d_3
         call micropp3_homogenize(micro)
 
         call micropp3_get_macro_stress(micro, gp_id, sig)
+        call micropp3_get_macro_ctan(micro, gp_id, ctan)
 
         call micropp3_update_vars(micro)
         nl_flag = micropp3_get_nl_flag(micro, gp_id)
         cost = micropp3_get_cost(micro, gp_id)
 
-        write(*,'(A,2I5)') "nl = ", nl_flag
+        write(*,'(A,L)') "nl = ", nl_flag
         write(*,'(A,2I5)') "cost = ", cost
         write(*,'(A,F12.2)') "eps = ", eps(dir)
+
         write(*,'(A)', advance="no") 'sig = '
-        write(*,'(F12.2,F12.2,F12.2,A)', advance="no") sig(1), sig(2), sig(3)
-        write(*,'(F12.2,F12.2,F12.2,A)') sig(4), sig(5), sig(6)
+        do i = 1, 6
+                write(*,'(F12.2)', advance="no") sig(i)
+        enddo
+        write(*,*)
+
+        write(*,'(A)', advance="no") 'ctan = '
+        write(*,*)
+        do i = 0, 5
+                do j = 1, 6
+                        write(*,'(F12.2)', advance="no") ctan(i * 6 + j)
+                enddo
+                write(*,*)
+        enddo
 
         write(*,*) ""
 

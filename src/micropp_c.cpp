@@ -32,8 +32,7 @@ extern "C" {
 	                  const material_base *materials)
 	{
 		material_t *tmp = (material_t *) materials;
-		self->ptr = new micropp<3>(ngp, size, micro_type,
-		                           micro_params, tmp);
+		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params, tmp);
 	}
 
 	void micropp3_free(micropp3 *self)
