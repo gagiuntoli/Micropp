@@ -19,34 +19,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MICROPP_C_WRAPPER_H
-#define MICROPP_C_WRAPPER_H
+#include "material_base.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void material_set(struct material_base *self, double _E, double _nu,
+                  double _Ka, double _Sy, int _type)
+{
+	self->E = _E;
+	self->nu = _nu;
+	self->Ka = _Ka;
+	self->Sy = _Sy;
+	self->type = _type;
 
-	void micropp_C_material_set(int num_mat, const double E, double nu,
-				    double Ka, double Sy, int type);
-	void micropp_C_material_print(int num_mat);
+	self->k = _E / (3. * (1. - 2. * _nu));
+	self->mu = _E / (2. * (1. + _nu));
+	self->lambda = _nu * _E / ((1. + _nu) * (1. - 2. * _nu));
 
-	void micropp_C_create3(int ngp, int size[3], int type, double *params);
-	void micropp_C_destroy3();
-
-	void micropp_C_homogenize();
-	void micropp_C_set_strain3(int gp, double strain[6]);
-	void micropp_C_get_stress3(int gp, double stress[6]);
-	void micropp_C_get_ctan3(int gp, double ctan[36]);
-
-	int micropp_C_get_non_linear_gps(void);
-	int micropp_C_is_non_linear(int gp);
-	double micropp_C_get_f_trial_max(void);
-	void micropp_C_update_vars();
-	void micropp_C_print_info();
-	int micropp_C_get_sigma_cost3(int gp);
-	void micropp_C_output(int gp_id, const char *filename);
-
-#ifdef __cplusplus
+	if (_type == 0) {        // lineal
+		self->plasticity = false;
+		self->damage = false;
+	} else if (_type == 1) { // con plasticidad
+		self->plasticity = true;
+		self->damage = false;
+	} else if (_type == 2) { // con daño
+		self->plasticity = false;
+		self->damage = true;
+	}
 }
-#endif
-#endif
+
+void material_print(const struct material_base *self)
+{
+	printf("E = %e, nu = %e, Ka = %e, Sy = %e, type = %1d\n",
+	       self->E, self->nu , self->Ka, self->Sy, self->type);
+}

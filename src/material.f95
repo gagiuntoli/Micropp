@@ -17,28 +17,27 @@
 
 module libmaterial
   use iso_c_binding
+
   implicit none
 
-  public :: material_t
-
-  type, bind(C) :: material_t
+  ! If you change this remember to change also the material_base C struct
+  type, bind(C) :: material_base
      real(c_double) :: E, nu, Ka, Sy
      real(c_double) :: k, mu, lambda
      integer(c_int) type
      logical(c_bool) plasticity, damage
-  end type material_t
+  end type material_base
 
-contains
-
-  subroutine set(this, E, nu, Ka, Sy, type)
-    implicit none
-    type(material_t) :: this
-    real(4), intent(in) :: E, nu, Ka, Sy
-    integer(4), intent(in) :: type
-
-    call material_set(this, dble(E), dble(nu), & 
-         dble(Ka), dble(Sy), type)
-
-  end subroutine set
+  interface
+     !subroutine material_set(this, E, nu, Ka, Sy, mtype) bind (C, name='material_set')
+     subroutine material_set(this, E, nu, Ka, Sy, mtype) bind (C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       import material_base
+       implicit none
+       type(material_base) :: this
+       real(c_double), intent(in), value :: E, nu, Ka, Sy
+       integer(c_int), intent(in), value :: mtype
+     end subroutine material_set
+  end interface
 
 end module libmaterial

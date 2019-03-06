@@ -21,6 +21,7 @@
 
 
 #include "micro.hpp"
+#include "material.hpp"
 
 
 template<int tdim>
@@ -121,24 +122,6 @@ int micropp<tdim>::is_non_linear(const int gp_id) const
 
 
 template <int tdim>
-int micropp<tdim>::get_non_linear_gps(void) const
-{
-	int count = 0;
-	for (int gp = 0; gp < ngp; ++gp)
-		if (gp_list[gp].allocated)
-			count ++;
-	return count;
-}
-
-
-template <int tdim>
-double micropp<tdim>::get_f_trial_max(void) const
-{
-	return f_trial_max;
-}
-
-
-template <int tdim>
 int micropp<tdim>::get_cost(int gp_id) const
 {
 	assert(gp_id < ngp);
@@ -153,6 +136,24 @@ bool micropp<tdim>::has_converged(int gp_id) const
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
 	return gp_list[gp_id].converged;
+}
+
+
+template <int tdim>
+int micropp<tdim>::get_non_linear_gps(void) const
+{
+	int count = 0;
+	for (int gp = 0; gp < ngp; ++gp)
+		if (gp_list[gp].allocated)
+			count ++;
+	return count;
+}
+
+
+template <int tdim>
+double micropp<tdim>::get_f_trial_max(void) const
+{
+	return f_trial_max;
 }
 
 

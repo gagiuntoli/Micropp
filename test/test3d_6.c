@@ -24,8 +24,7 @@
 #include <stdlib.h>
 
 
-#include "micropp_c_wrapper.h"
-
+#include "micropp_c.h"
 
 #define D_EPS 2.0e-4
 
@@ -44,18 +43,19 @@ int main (int argc, char *argv[])
 	const int dir = atoi(argv[4]);
 	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
 	int size[3] = { nx, ny, nz };
-	FILE *file_out = fopen("info.dat", "w");
 
-	micropp_C_material_set(0, 1.0e7, 0.25, 1.0e4, 1.0e4, 1);
-	micropp_C_material_set(1, 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
-	micropp_C_material_print(0);
-	micropp_C_material_print(1);
+	struct material_base matlist[2];
+	material_set(&matlist[0], 1.0e7, 0.25, 1.0e4, 1.0e4, 1);
+	material_set(&matlist[1], 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
+	material_print(&matlist[0]);
+	material_print(&matlist[1]);
 
+	struct micropp3 micro;
 	int ngpl = 1;
 	int micro_type = 5;
 	double params[4] = { 1., 1., 1., .15 };
-	micropp_C_create3(ngpl, size, micro_type, params);
-	micropp_C_print_info();
+	micropp3_new(&micro, ngpl, size, micro_type, params, matlist);
+	micropp3_print_info(&micro);
 
 
 	double sig[6], ctan[36];
@@ -73,26 +73,25 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += D_EPS;
 
-		micropp_C_set_strain3(0, eps);
-		micropp_C_homogenize();
-		micropp_C_get_stress3(0, sig);
-		micropp_C_get_ctan3(0, ctan);
-		int sigma_cost = micropp_C_get_sigma_cost3(0);
-		int non_linear = micropp_C_is_non_linear(0);
-		int num_non_linear = micropp_C_get_non_linear_gps();
-		double f_trial_max = micropp_C_get_f_trial_max();
+		micropp3_set_macro_strain(&micro, 0, eps);
+		micropp3_homogenize(&micro);
+		micropp3_get_macro_stress(&micro, 0, sig);
+		micropp3_get_macro_ctan(&micro, 0, ctan);
+		int sigma_cost = micropp3_get_cost(&micro, 0);
+		bool non_linear = micropp3_is_non_linear(&micro, 0);
+		int num_non_linear = micropp3_get_non_linear_gps(&micro);
+		double f_trial_max = micropp3_get_f_trial_max(&micro);
 
-		micropp_C_update_vars();
+		micropp3_update_vars(&micro);
 
 		char filename[128];
 		sprintf(filename, "test3d_6_%d", t);
-		micropp_C_output(0, filename);
+		micropp3_output(&micro, 0, filename);
 
 		printf("sigma_cost       = %d\n", sigma_cost);
 		printf("Non-Linear       = %d\n", non_linear);
 		printf("Non-Linear Total = %d\n", num_non_linear);
 		printf("F trial max      = %e\n", f_trial_max);
-		fprintf(file_out, "%d\t%e\t%e\t%d\t%e\n", t, eps[dir], sig[dir], non_linear, f_trial_max);
 
 		printf("eps =\n");
 		for (i = 0; i < 6; ++i)
@@ -112,7 +111,5 @@ int main (int argc, char *argv[])
 		printf("\n");
 
 	}
-
-	fclose(file_out);
 	return 0;
 }
