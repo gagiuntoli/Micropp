@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
 		micropp3_get_macro_stress(&micro, 0, sig);
 		micropp3_get_macro_ctan(&micro, 0, ctan);
 		int sigma_cost = micropp3_get_cost(&micro, 0);
-		bool non_linear = micropp3_get_nl_flag(&micro, 0);
+		bool non_linear = micropp3_is_non_linear(&micro, 0);
 		int num_non_linear = micropp3_get_non_linear_gps(&micro);
 		double f_trial_max = micropp3_get_f_trial_max(&micro);
 

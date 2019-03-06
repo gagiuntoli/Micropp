@@ -63,13 +63,13 @@ module libmicropp
        type(micropp3), intent(inout) :: this
      end subroutine micropp3_homogenize
 
-     logical(c_bool) function micropp3_get_nl_flag(this, gp_id) bind(C)
+     logical(c_bool) function micropp3_is_non_linear(this, gp_id) bind(C)
        use, intrinsic :: iso_c_binding, only: c_bool, c_int
        import micropp3
        implicit none
        type(micropp3), intent(in) :: this
        integer(c_int), intent(in), value :: gp_id
-     end function micropp3_get_nl_flag
+     end function micropp3_is_non_linear
 
      integer(c_int) function micropp3_get_cost(this, gp_id) bind(C)
        use, intrinsic :: iso_c_binding, only: c_int
@@ -78,6 +78,14 @@ module libmicropp
        type(micropp3), intent(in) :: this
        integer(c_int), intent(in), value :: gp_id
      end function micropp3_get_cost
+
+     logical(c_bool) function micropp3_has_converged(this, gp_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_bool, c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+       integer(c_int), intent(in), value :: gp_id
+     end function micropp3_has_converged
 
      subroutine micropp3_get_macro_stress(this, gp_id, stress) bind(C)
        use, intrinsic :: iso_c_binding, only: c_int, c_double

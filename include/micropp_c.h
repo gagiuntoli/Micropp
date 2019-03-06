@@ -26,33 +26,37 @@
 
 #ifdef __cplusplus
 extern "C" {
-	#endif
+#endif
 
 	struct micropp3 {
 		void *ptr;
 	};
 
 	void micropp3_new(struct micropp3 *,int ngp, const int size[3],
-	                  const int micro_type, const double *micro_params,
-	                  const struct material_base *materials);
+			  const int micro_type, const double *micro_params,
+			  const struct material_base *materials);
 
 	void micropp3_free(struct micropp3 *in);
+
 	void micropp3_set_macro_strain(struct micropp3 *self, const int gp_id,
-	                               const double *macro_strain);
+				       const double *macro_strain);
 
 	void micropp3_homogenize(struct micropp3 *self);
-	bool micropp3_get_nl_flag(const struct micropp3 *self, const int gp_id);
+
+	bool micropp3_is_non_linear(const struct micropp3 *self, const int gp_id);
+
 	int micropp3_get_cost(const struct micropp3 *self, int gp_id);
+
 	void micropp3_get_macro_stress(const struct micropp3 *self, const int gp_id,
-	                               double *macro_stress);
+				       double *stress);
 
 	void micropp3_get_macro_ctan(const struct micropp3 *self, const int gp_id,
-	                             double *macro_ctan);
+				     double *ctan);
 
 	void micropp3_update_vars(struct micropp3 *self);
 
 	void micropp3_output(struct micropp3 *self, const int gp_id,
-	                     const char *filename);
+			     const char *filename);
 
 	void micropp3_print_info(struct micropp3 *self);
 
@@ -60,7 +64,7 @@ extern "C" {
 
 	double micropp3_get_f_trial_max(const struct micropp3 *self);
 
-	#ifdef __cplusplus
+#ifdef __cplusplus
 }
 #endif
 #endif

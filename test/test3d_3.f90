@@ -32,7 +32,7 @@ program test3d_3
         integer :: i, j
         character(len=32) :: arg
         integer :: sizes(3), time_steps
-        logical :: nl_flag
+        logical :: non_linear, converged
 
         integer, parameter :: gp_id = 0
         integer, parameter :: micro_type = 1
@@ -99,11 +99,13 @@ program test3d_3
         call micropp3_get_macro_ctan(micro, gp_id, ctan)
 
         call micropp3_update_vars(micro)
-        nl_flag = micropp3_get_nl_flag(micro, gp_id)
+        non_linear = micropp3_is_non_linear(micro, gp_id)
+        converged = micropp3_has_converged(micro, gp_id)
         cost = micropp3_get_cost(micro, gp_id)
 
-        write(*,'(A,L)') "nl = ", nl_flag
-        write(*,'(A,2I5)') "cost = ", cost
+        write(*,'(A,L)') "Non-linear = ", non_linear
+        write(*,'(A,2I5)') "Cost       = ", cost
+        write(*,'(A,L)') "Converged  = ", converged
         write(*,'(A,F12.2)') "eps = ", eps(dir)
 
         write(*,'(A)', advance="no") 'sig = '

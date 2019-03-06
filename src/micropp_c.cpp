@@ -86,7 +86,7 @@ extern "C" {
 		ptr->print_info();
 	}
 
-	bool micropp3_get_nl_flag(const micropp3 *self, const int gp_id)
+	bool micropp3_is_non_linear(const micropp3 *self, const int gp_id)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		return ptr->is_non_linear(gp_id);
@@ -102,6 +102,12 @@ extern "C" {
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		return ptr->get_f_trial_max();
+	}
+
+	bool micropp3_has_converged(const micropp3 *self, const int gp_id)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		return ptr->has_converged(gp_id);
 	}
 
 	void micropp3_get_macro_ctan(const micropp3 *self, int gp, double ctan[36])
