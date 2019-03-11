@@ -57,7 +57,6 @@ int main (int argc, char *argv[])
 	micropp3_new(&micro, ngpl, size, micro_type, params, matlist);
 	micropp3_print_info(&micro);
 
-
 	double sig[6], ctan[36];
 	double eps[6] = { 0. };
 	int i, j, t;
@@ -73,10 +72,10 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += D_EPS;
 
-		micropp3_set_macro_strain(&micro, 0, eps);
+		micropp3_set_strain(&micro, 0, eps);
 		micropp3_homogenize(&micro);
-		micropp3_get_macro_stress(&micro, 0, sig);
-		micropp3_get_macro_ctan(&micro, 0, ctan);
+		micropp3_get_stress(&micro, 0, sig);
+		micropp3_get_ctan(&micro, 0, ctan);
 		int sigma_cost = micropp3_get_cost(&micro, 0);
 		bool non_linear = micropp3_is_non_linear(&micro, 0);
 		int num_non_linear = micropp3_get_non_linear_gps(&micro);

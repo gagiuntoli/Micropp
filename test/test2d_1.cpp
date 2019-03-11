@@ -79,10 +79,10 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += d_eps;
 
-		micro.set_macro_strain(0, eps);
+		micro.set_strain(0, eps);
 		micro.homogenize();
-		micro.get_macro_stress(0, sig);
-		micro.get_macro_ctan(0, ctan);
+		micro.get_stress(0, sig);
+		micro.get_ctan(0, ctan);
 
 		micro.update_vars();
 

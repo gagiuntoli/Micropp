@@ -92,11 +92,11 @@ program test3d_3
                 eps(dir) = eps(dir) + d_eps;
         end if
 
-        call micropp3_set_macro_strain(micro, gp_id, eps)
+        call micropp3_set_strain(micro, gp_id, eps)
         call micropp3_homogenize(micro)
 
-        call micropp3_get_macro_stress(micro, gp_id, sig)
-        call micropp3_get_macro_ctan(micro, gp_id, ctan)
+        call micropp3_get_stress(micro, gp_id, sig)
+        call micropp3_get_ctan(micro, gp_id, ctan)
 
         call micropp3_update_vars(micro)
         non_linear = micropp3_is_non_linear(micro, gp_id)

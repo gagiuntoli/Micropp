@@ -41,11 +41,22 @@ extern "C" {
 		delete ptr;
 	}
 
-	void micropp3_set_macro_strain(micropp3 *self, const int gp_id,
-				const double *macro_strain)
+	void micropp3_set_strain(micropp3 *self, const int gp_id, const double *strain)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->set_macro_strain(gp_id, macro_strain);
+		ptr->set_strain(gp_id, strain);
+	}
+
+	void micropp3_get_stress(const micropp3 *self, const int gp_id, double *stress)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->get_stress(gp_id, stress);
+	}
+
+	void micropp3_get_ctan(const micropp3 *self, int gp, double ctan[36])
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->get_ctan(gp, ctan);
 	}
 
 	void micropp3_homogenize(micropp3 *self)
@@ -58,13 +69,6 @@ extern "C" {
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		return ptr->get_cost(gp_id);
-	}
-
-	void micropp3_get_macro_stress(const micropp3 *self, const int gp_id,
-	                                 double *macro_stress)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->get_macro_stress(gp_id, macro_stress);
 	}
 
 	void micropp3_update_vars(micropp3 *self)
@@ -109,13 +113,5 @@ extern "C" {
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		return ptr->has_converged(gp_id);
 	}
-
-	void micropp3_get_macro_ctan(const micropp3 *self, int gp, double ctan[36])
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->get_macro_ctan(gp, ctan);
-	}
-
-
 
 }

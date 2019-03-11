@@ -81,10 +81,10 @@ int main (int argc, char *argv[])
 		else
 			eps[dir] += D_EPS;
 
-		micro.set_macro_strain(0, eps);
+		micro.set_strain(0, eps);
 		micro.homogenize();
-		micro.get_macro_stress(0, sig);
-		micro.get_macro_ctan(0, ctan);
+		micro.get_stress(0, sig);
+		micro.get_ctan(0, ctan);
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
 		bool has_converged = micro.has_converged(0);

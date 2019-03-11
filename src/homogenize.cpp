@@ -27,29 +27,29 @@
 
 
 template <int tdim>
-void micropp<tdim>::set_macro_strain(const int gp_id, const double *strain)
+void micropp<tdim>::set_strain(const int gp_id, const double *strain)
 {
 	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	memcpy(gp_list[gp_id].macro_strain, strain, nvoi * sizeof(double));
+	memcpy(gp_list[gp_id].strain, strain, nvoi * sizeof(double));
 }
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_stress(const int gp_id, double *stress) const
+void micropp<tdim>::get_stress(const int gp_id, double *stress) const
 {
 	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	memcpy(stress, gp_list[gp_id].macro_stress, nvoi * sizeof(double));
+	memcpy(stress, gp_list[gp_id].stress, nvoi * sizeof(double));
 }
 
 
 template <int tdim>
-void micropp<tdim>::get_macro_ctan(const int gp_id, double *ctan) const
+void micropp<tdim>::get_ctan(const int gp_id, double *ctan) const
 {
 	assert(gp_id >= 0);
 	assert(gp_id < ngp);
-	memcpy(ctan, gp_list[gp_id].macro_ctan, nvoi * nvoi * sizeof(double));
+	memcpy(ctan, gp_list[gp_id].ctan, nvoi * nvoi * sizeof(double));
 }
 
 
@@ -72,39 +72,60 @@ void micropp<tdim>::homogenize()
 
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
-		double *vars_new = (gp_ptr->allocated) ? gp_ptr->int_vars_k : vars_new_aux;
+		double *vars_new = (gp_ptr->allocated) ? gp_ptr->vars_k : vars_new_aux;
 		gp_ptr->converged = true;
 
 		// SIGMA 1 Newton-Raphson
 		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
-		newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->macro_strain, gp_ptr->int_vars_n);
+		newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
 
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 		gp_ptr->cost = newton.solver_its;
 		gp_ptr->converged &= newton.converged;
 
+		/*
+		// In case it has not converged do the sub-iterations
+		if (gp_ptr->converged == false && subiterations == true) {
+
+			memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
+
+			double eps_sub[nvoi], deps_sub[nvoi];
+			memcpy(eps_sub, gp_ptr->macro_strain, nvoi * sizeof(double));
+			for (int i = 0; i < nvoi; ++i)
+				deps_sub[i] = eps_sub[i] / nsubiterations;
+
+			for (int i = 0; i < nsubiterations; ++i) {
+				newton_t newton = newton_raphson(&A, b, u, du, eps_sub, gp_ptr->vars_n);
+
+				gp_ptr->cost = newton.solver_its;
+				gp_ptr->converged &= newton.converged;
+			}
+			memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
+		}
+		*/
+
 		if (coupling == ONE_WAY) {
 
-			memset (gp_ptr->macro_stress, 0.0, nvoi * sizeof(double));
+			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 			for (int i = 0; i < nvoi; ++i)
 				for (int j = 0; j < nvoi; ++j)
-					gp_ptr->macro_stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->macro_strain[j];
+					gp_ptr->stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
 
 		} else if (coupling == FULL || coupling == NO_COUPLING) {
 
-			calc_ave_stress(gp_ptr->u_k, gp_ptr->macro_stress, gp_ptr->int_vars_n);
-			filter(gp_ptr->macro_stress, nvoi, FILTER_REL_TOL);
+			calc_ave_stress(gp_ptr->u_k, gp_ptr->stress, gp_ptr->vars_n);
+			filter(gp_ptr->stress, nvoi, FILTER_REL_TOL);
 
 		}
 
 		/* Updates <vars_new> and <f_trial_max> */
-		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->int_vars_n, vars_new, &f_trial_max);
+		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new, &f_trial_max);
 
 		if (nl_flag == true) {
 			if (gp_ptr->allocated == false) {
 				gp_ptr->allocate(num_int_vars);
-				memcpy(gp_ptr->int_vars_k, vars_new, num_int_vars * sizeof(double));
+				memcpy(gp_ptr->vars_k, vars_new, num_int_vars * sizeof(double));
 			}
 		}
 
@@ -114,25 +135,25 @@ void micropp<tdim>::homogenize()
 			double eps_1[6], sig_0[6], sig_1[6];
 
 			memcpy(u, gp_ptr->u_k, nndim * sizeof(double));
-			memcpy(sig_0, gp_ptr->macro_stress, nvoi * sizeof(double));
+			memcpy(sig_0, gp_ptr->stress, nvoi * sizeof(double));
 
 			for (int i = 0; i < nvoi; ++i) {
 
-				memcpy(eps_1, gp_ptr->macro_strain, nvoi * sizeof(double));
+				memcpy(eps_1, gp_ptr->strain, nvoi * sizeof(double));
 				eps_1[i] += D_EPS_CTAN_AVE;
 
-				newton_raphson(&A, b, u, du, eps_1, gp_ptr->int_vars_n);
+				newton_raphson(&A, b, u, du, eps_1, gp_ptr->vars_n);
 
 				gp_ptr->cost += newton.solver_its;
 
-				calc_ave_stress(u, sig_1, gp_ptr->int_vars_n);
+				calc_ave_stress(u, sig_1, gp_ptr->vars_n);
 
 				for (int v = 0; v < nvoi; ++v)
-					gp_ptr->macro_ctan[v * nvoi + i] =
+					gp_ptr->ctan[v * nvoi + i] =
 						(sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
 
 			}
-			filter(gp_ptr->macro_ctan, nvoi * nvoi, FILTER_REL_TOL);
+			filter(gp_ptr->ctan, nvoi * nvoi, FILTER_REL_TOL);
 		}
 
 		ell_free(&A);

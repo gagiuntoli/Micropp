@@ -214,9 +214,9 @@ class micropp {
 		~micropp();
 
 		/* The most important functions */
-		void set_macro_strain(const int gp_id, const double *strain);
-		void get_macro_stress(const int gp_id, double *stress) const;
-		void get_macro_ctan(const int gp_id, double *ctan) const;
+		void set_strain(const int gp_id, const double *strain);
+		void get_stress(const int gp_id, double *stress) const;
+		void get_ctan(const int gp_id, double *ctan) const;
 		void homogenize();
 
 		/* Extras */

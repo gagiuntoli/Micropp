@@ -31,14 +31,15 @@ class gp_t {
 
 	public:
 
-	double macro_strain[nvoi];
-	double macro_stress[nvoi];
-	double macro_ctan[nvoi * nvoi];
+	double strain_old[nvoi];
+	double strain[nvoi];
+	double stress[nvoi];
+	double ctan[nvoi * nvoi];
 
 	bool allocated; // flag for memory optimization
 
-	double *int_vars_n; // vectors for calculations
-	double *int_vars_k;
+	double *vars_n; // vectors for calculations
+	double *vars_k;
 	double *u_n;
 	double *u_k;
 
@@ -48,8 +49,8 @@ class gp_t {
 	gp_t():
 		u_n(nullptr),
 		u_k(nullptr),
-		int_vars_n(nullptr),
-		int_vars_k(nullptr),
+		vars_n(nullptr),
+		vars_k(nullptr),
 		allocated(false),
 		cost(0),
 		converged(true)
@@ -60,8 +61,8 @@ class gp_t {
 		free(u_n);
 		free(u_k);
 		if (allocated) {
-			free(int_vars_n);
-			free(int_vars_k);
+			free(vars_n);
+			free(vars_k);
 		}
 	}
 
@@ -69,19 +70,19 @@ class gp_t {
 	{
 		assert(!allocated);
 
-		int_vars_n = (double *) calloc(num_int_vars, sizeof(double));
-		int_vars_k = (double *) calloc(num_int_vars, sizeof(double));
+		vars_n = (double *) calloc(num_int_vars, sizeof(double));
+		vars_k = (double *) calloc(num_int_vars, sizeof(double));
 
-		allocated = (int_vars_n && int_vars_k);
+		allocated = (vars_n && vars_k);
 		assert(allocated);
 	}
 
 
 	void update_vars()
 	{
-		double *tmp = int_vars_n;
-		int_vars_n = int_vars_k;
-		int_vars_k = tmp;
+		double *tmp = vars_n;
+		vars_n = vars_k;
+		vars_k = tmp;
 
 		tmp = u_n;
 		u_n = u_k;
