@@ -27,8 +27,8 @@
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4], const material_t *_materials,
-		       const int _coupling, const int _nr_max_its,
-		       const double _nr_max_tol, const double _nr_rel_tol):
+		       const int _coupling, const bool _subiterations, const int _nsubiterations,
+		       const int _nr_max_its, const double _nr_max_tol, const double _nr_rel_tol):
 
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
@@ -47,6 +47,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	dx(lx / nex), dy(ly / ney), dz((tdim == 3) ? lz / nez : 0.0),
 
 	special_param(_micro_params[3]),
+	subiterations(_subiterations),
+	nsubiterations(_nsubiterations),
 
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
@@ -92,7 +94,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		calc_ctan_lin();
 
 	for (int gp = 0; gp < ngp; ++gp)
-		memcpy(gp_list[gp].macro_ctan, ctan_lin, nvoi * nvoi * sizeof(double));
+		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 
 	f_trial_max = -1.0e50;
 
@@ -136,6 +138,15 @@ bool micropp<tdim>::has_converged(int gp_id) const
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
 	return gp_list[gp_id].converged;
+}
+
+
+template <int tdim>
+bool micropp<tdim>::has_subiterated(int gp_id) const
+{
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+	return gp_list[gp_id].subiterated;
 }
 
 

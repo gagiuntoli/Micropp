@@ -53,11 +53,7 @@ int main(int argc, char **argv)
 
 	int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
 
-	double micro_params[5] = {1.0,		// lx
-		1.0,		// ly
-		1.0,		// lz
-		0.1,		// layer width
-		1.0e-5};	// inv_max
+	double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
 	material_t mat_params[2];
 	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
@@ -87,7 +83,7 @@ int main(int argc, char **argv)
 
 		cout << "setting strains ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.set_macro_strain(gp, (gp%2) ? eps_1 : eps_2);
+			micro.set_strain(gp, (gp%2) ? eps_1 : eps_2);
 			cout << "gp = " << gp << " eps = ";
 			cout << scientific;
 
@@ -102,7 +98,7 @@ int main(int argc, char **argv)
 
 		cout << "Getting stresses ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.get_macro_stress(gp, sig);
+			micro.get_stress(gp, sig);
 			cout << "gp = " << gp << " sig = ";
 
 			cout << scientific;

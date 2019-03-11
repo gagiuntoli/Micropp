@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
 		cout << "setting strains ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.set_macro_strain(gp, eps);
+			micro.set_strain(gp, eps);
 			cout << "gp = " << gp << " eps = ";
 			cout << scientific;
 
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 
 		cout << "Getting stresses ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.get_macro_stress(gp, sig);
+			micro.get_stress(gp, sig);
 			cout << "gp = " << gp << " sig  = ";
 			for (int i = 0; i < 6; ++i)
 				cout << setw(14) << sig[i] << "\t";

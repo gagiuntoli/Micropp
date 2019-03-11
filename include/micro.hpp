@@ -113,6 +113,9 @@ class micropp {
 		const double special_param, wg, ivol;
 
 		const int micro_type, num_int_vars;
+		const int nsubiterations;
+		const bool subiterations;
+
 		gp_t<tdim> *gp_list;
 
 		int coupling;
@@ -208,15 +211,15 @@ class micropp {
 
 		micropp(const int ngp, const int size[3], const int micro_type,
 			const double *micro_params, const material_t *materials,
-			const int coupling = ONE_WAY, const int max_its = NR_MAX_ITS,
-			const double max_tol = NR_MAX_TOL, const double rel_tol = NR_REL_TOL);
+			const int _coupling = ONE_WAY, const bool _subiterations = false, const int _nsubiterations = 10,
+			const int max_its = NR_MAX_ITS, const double max_tol = NR_MAX_TOL, const double rel_tol = NR_REL_TOL);
 
 		~micropp();
 
 		/* The most important functions */
-		void set_macro_strain(const int gp_id, const double *strain);
-		void get_macro_stress(const int gp_id, double *stress) const;
-		void get_macro_ctan(const int gp_id, double *ctan) const;
+		void set_strain(const int gp_id, const double *strain);
+		void get_stress(const int gp_id, double *stress) const;
+		void get_ctan(const int gp_id, double *ctan) const;
 		void homogenize();
 
 		/* Extras */
@@ -225,6 +228,7 @@ class micropp {
 		double get_f_trial_max(void) const;
 		int get_cost(int gp_id) const;
 		bool has_converged(int gp_id) const;
+		bool has_subiterated(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();
 		void print_info() const;

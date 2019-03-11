@@ -35,14 +35,13 @@ void micropp<tdim>::output(int gp_id, const char *filename)
 	assert(gp_id < ngp);
 	assert(gp_id >= 0);
 
-	calc_fields(gp_list[gp_id].u_k, gp_list[gp_id].int_vars_n);
-	write_vtu(gp_list[gp_id].u_k, gp_list[gp_id].int_vars_n, filename);
+	calc_fields(gp_list[gp_id].u_k, gp_list[gp_id].vars_n);
+	write_vtu(gp_list[gp_id].u_k, gp_list[gp_id].vars_n, filename);
 }
 
 
 template <int tdim>
-void micropp<tdim>::write_vtu(double *u, double *int_vars_old,
-			      const char *filename)
+void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 {
 	std::stringstream fname_vtu_s;
 	fname_vtu_s << filename << ".vtu";
@@ -162,9 +161,9 @@ void micropp<tdim>::write_vtu(double *u, double *int_vars_old,
 		for (int gp = 0; gp < npe; ++gp) {
 			double tmp = 0.0;
 			for (int v = 0; v < nvoi; ++v) {
-				if (int_vars_old != NULL) {
-					tmp += int_vars_old[intvar_ix(e, gp, v)] *\
-					       int_vars_old[intvar_ix(e, gp, v)];
+				if (vars_old != NULL) {
+					tmp += vars_old[intvar_ix(e, gp, v)] *\
+					       vars_old[intvar_ix(e, gp, v)];
 				} else {
 					tmp += 0.0;
 				}
@@ -181,8 +180,8 @@ void micropp<tdim>::write_vtu(double *u, double *int_vars_old,
 	for (int e = 0; e < nelem; ++e) {
 		double hardening = 0.;
 		for (int gp = 0; gp < npe; ++gp) {
-			if (int_vars_old != NULL) {
-				hardening += int_vars_old[intvar_ix(e, gp, 6)];
+			if (vars_old != NULL) {
+				hardening += vars_old[intvar_ix(e, gp, 6)];
 			} else {
 				hardening += 0.0;
 			}

@@ -48,14 +48,32 @@ module libmicropp
        type(micropp3), intent(inout) :: this
      end subroutine micropp3_free
 
-     subroutine micropp3_set_macro_strain(this, gp_id, strain) bind(C)
+     subroutine micropp3_set_strain(this, gp_id, strain) bind(C)
        use, intrinsic :: iso_c_binding, only: c_int, c_double
        import micropp3
        implicit none
        type(micropp3), intent(inout) :: this
        integer(c_int), intent(in), value :: gp_id
        real(c_double), intent(in), dimension(*) :: strain
-     end subroutine micropp3_set_macro_strain
+     end subroutine micropp3_set_strain
+
+     subroutine micropp3_get_stress(this, gp_id, stress) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       real(c_double), intent(out), dimension(*) :: stress
+     end subroutine micropp3_get_stress
+
+     subroutine micropp3_get_ctan(this, gp_id, ctan) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_double
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       real(c_double), intent(out), dimension(*) :: ctan
+     end subroutine micropp3_get_ctan
 
      subroutine micropp3_homogenize(this) bind(C)
        import micropp3
@@ -87,23 +105,13 @@ module libmicropp
        integer(c_int), intent(in), value :: gp_id
      end function micropp3_has_converged
 
-     subroutine micropp3_get_macro_stress(this, gp_id, stress) bind(C)
-       use, intrinsic :: iso_c_binding, only: c_int, c_double
+     logical(c_bool) function micropp3_has_subiterated(this, gp_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_bool, c_int
        import micropp3
        implicit none
-       type(micropp3), intent(inout) :: this
+       type(micropp3), intent(in) :: this
        integer(c_int), intent(in), value :: gp_id
-       real(c_double), intent(out), dimension(*) :: stress
-     end subroutine micropp3_get_macro_stress
-
-     subroutine micropp3_get_macro_ctan(this, gp_id, ctan) bind(C)
-       use, intrinsic :: iso_c_binding, only: c_int, c_double
-       import micropp3
-       implicit none
-       type(micropp3), intent(inout) :: this
-       integer(c_int), intent(in), value :: gp_id
-       real(c_double), intent(out), dimension(*) :: ctan
-     end subroutine micropp3_get_macro_ctan
+     end function micropp3_has_subiterated
 
      subroutine micropp3_update_vars(this) bind(C)
        import micropp3

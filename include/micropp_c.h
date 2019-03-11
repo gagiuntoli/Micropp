@@ -38,30 +38,22 @@ extern "C" {
 
 	void micropp3_free(struct micropp3 *in);
 
-	void micropp3_set_macro_strain(struct micropp3 *self, const int gp_id,
-				       const double *macro_strain);
-
+	void micropp3_set_strain(struct micropp3 *self, const int gp_id, const double *strain);
+	void micropp3_get_stress(const struct micropp3 *self, const int gp_id, double *stress);
+	void micropp3_get_ctan(const struct micropp3 *self, const int gp_id, double *ctan);
 	void micropp3_homogenize(struct micropp3 *self);
-
-	bool micropp3_is_non_linear(const struct micropp3 *self, const int gp_id);
-
-	int micropp3_get_cost(const struct micropp3 *self, int gp_id);
-
-	void micropp3_get_macro_stress(const struct micropp3 *self, const int gp_id,
-				       double *stress);
-
-	void micropp3_get_macro_ctan(const struct micropp3 *self, const int gp_id,
-				     double *ctan);
-
 	void micropp3_update_vars(struct micropp3 *self);
 
-	void micropp3_output(struct micropp3 *self, const int gp_id,
-			     const char *filename);
+	bool micropp3_is_non_linear(const struct micropp3 *self, const int gp_id);
+	int micropp3_get_cost(const struct micropp3 *self, int gp_id);
+	bool micropp3_has_converged(const struct micropp3 *self, int gp_id);
+	bool micropp3_has_subiterated(const struct micropp3 *self, int gp_id);
+
+	void micropp3_output(struct micropp3 *self, const int gp_id, const char *filename);
 
 	void micropp3_print_info(struct micropp3 *self);
 
 	int micropp3_get_non_linear_gps(const struct micropp3 *self);
-
 	double micropp3_get_f_trial_max(const struct micropp3 *self);
 
 #ifdef __cplusplus

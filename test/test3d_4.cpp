@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 		cout << "setting strains ..." << endl;
 		cout << scientific;
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.set_macro_strain(gp, eps);
+			micro.set_strain(gp, eps);
 		}
 		cout << " eps = ";
 		for (int i = 0; i < 6; ++i)
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 
 		cout << "Getting stresses ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.get_macro_stress(gp, sig);
+			micro.get_stress(gp, sig);
 			memcpy(sig_test[gp], sig, 3 * sizeof(double));
 		}
 		cout << " sig  = ";
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 		cout << endl;
 
 		for (int gp = 0; gp < ngp; ++gp) {
-			micro.get_macro_ctan(gp, ctan);
+			micro.get_ctan(gp, ctan);
 			memcpy(ctan_test[gp], ctan, 3 * sizeof(double));
 		}
 		cout << " ctan = ";
