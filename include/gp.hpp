@@ -45,6 +45,7 @@ class gp_t {
 
 	long int cost;
 	bool converged;
+	bool subiterated;
 
 	gp_t():
 		u_n(nullptr),
@@ -53,7 +54,8 @@ class gp_t {
 		vars_k(nullptr),
 		allocated(false),
 		cost(0),
-		converged(true)
+		converged(true),
+		subiterated(false)
 	{}
 
 	~gp_t()

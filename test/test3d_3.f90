@@ -32,10 +32,10 @@ program test3d_3
         integer :: i, j
         character(len=32) :: arg
         integer :: sizes(3), time_steps
-        logical :: non_linear, converged
+        logical :: non_linear, converged, subiterated
 
         integer, parameter :: gp_id = 0
-        integer, parameter :: micro_type = 1
+        integer, parameter :: micro_type = 2
         real(8), parameter :: d_eps = 0.01
         integer, parameter :: dir = 3;
         integer :: cost
@@ -71,7 +71,7 @@ program test3d_3
         micro_params = (/ 1.0, 1.0, 1.0, 0.1 /)
 
         call material_set(mat_params(1), 1.0D6, 0.3D0, 5.0D4, 5.0D4, 1)
-        call material_set(mat_params(2), 1.0D6, 0.3D0, 1.0D4, 0.0D-1, 0)
+        call material_set(mat_params(2), 1.0D6, 0.3D0, 1.0D4, 0.0D-1, 1)
 
         call micropp3_new(micro, 1, sizes, micro_type, micro_params, mat_params)
         call micropp3_print_info(micro)
@@ -101,11 +101,13 @@ program test3d_3
         call micropp3_update_vars(micro)
         non_linear = micropp3_is_non_linear(micro, gp_id)
         converged = micropp3_has_converged(micro, gp_id)
+        subiterated = micropp3_has_subiterated(micro, gp_id)
         cost = micropp3_get_cost(micro, gp_id)
 
         write(*,'(A,L)') "Non-linear = ", non_linear
         write(*,'(A,2I5)') "Cost       = ", cost
         write(*,'(A,L)') "Converged  = ", converged
+        write(*,'(A,L)') "Subiterated  = ", subiterated
         write(*,'(A,F12.2)') "eps = ", eps(dir)
 
         write(*,'(A)', advance="no") 'sig = '

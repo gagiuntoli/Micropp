@@ -32,7 +32,7 @@ extern "C" {
 	                  const material_base *materials)
 	{
 		material_t *tmp = (material_t *) materials;
-		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params, tmp);
+		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params, tmp, ONE_WAY, true, 10);
 	}
 
 	void micropp3_free(micropp3 *self)
@@ -71,6 +71,18 @@ extern "C" {
 		return ptr->get_cost(gp_id);
 	}
 
+	bool micropp3_has_converged(const micropp3 *self, const int gp_id)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		return ptr->has_converged(gp_id);
+	}
+
+	bool micropp3_has_subiterated(const micropp3 *self, const int gp_id)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		return ptr->has_subiterated(gp_id);
+	}
+
 	void micropp3_update_vars(micropp3 *self)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
@@ -106,12 +118,6 @@ extern "C" {
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		return ptr->get_f_trial_max();
-	}
-
-	bool micropp3_has_converged(const micropp3 *self, const int gp_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->has_converged(gp_id);
 	}
 
 }

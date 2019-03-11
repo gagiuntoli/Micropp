@@ -228,6 +228,7 @@ class micropp {
 		double get_f_trial_max(void) const;
 		int get_cost(int gp_id) const;
 		bool has_converged(int gp_id) const;
+		bool has_subiterated(int gp_id) const;
 		void output(int gp_id, const char *filename);
 		void update_vars();
 		void print_info() const;

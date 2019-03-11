@@ -142,6 +142,15 @@ bool micropp<tdim>::has_converged(int gp_id) const
 
 
 template <int tdim>
+bool micropp<tdim>::has_subiterated(int gp_id) const
+{
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+	return gp_list[gp_id].subiterated;
+}
+
+
+template <int tdim>
 int micropp<tdim>::get_non_linear_gps(void) const
 {
 	int count = 0;

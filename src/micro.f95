@@ -105,6 +105,14 @@ module libmicropp
        integer(c_int), intent(in), value :: gp_id
      end function micropp3_has_converged
 
+     logical(c_bool) function micropp3_has_subiterated(this, gp_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_bool, c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+       integer(c_int), intent(in), value :: gp_id
+     end function micropp3_has_subiterated
+
      subroutine micropp3_update_vars(this) bind(C)
        import micropp3
        implicit none

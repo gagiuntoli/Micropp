@@ -74,6 +74,7 @@ void micropp<tdim>::homogenize()
 
 		double *vars_new = (gp_ptr->allocated) ? gp_ptr->vars_k : vars_new_aux;
 		gp_ptr->converged = true;
+		gp_ptr->subiterated = false;
 
 		// SIGMA 1 Newton-Raphson
 		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
@@ -92,6 +93,7 @@ void micropp<tdim>::homogenize()
 			double eps_sub[nvoi], deps_sub[nvoi];
 			memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 			memcpy(eps_sub, gp_ptr->strain_old, nvoi * sizeof(double));
+			gp_ptr->subiterated = true;
 
 			for (int i = 0; i < nvoi; ++i)
 				deps_sub[i] = (gp_ptr->strain[i] - gp_ptr->strain_old[i]) / nsubiterations;

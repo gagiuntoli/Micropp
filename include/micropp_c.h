@@ -47,6 +47,7 @@ extern "C" {
 	bool micropp3_is_non_linear(const struct micropp3 *self, const int gp_id);
 	int micropp3_get_cost(const struct micropp3 *self, int gp_id);
 	bool micropp3_has_converged(const struct micropp3 *self, int gp_id);
+	bool micropp3_has_subiterated(const struct micropp3 *self, int gp_id);
 
 	void micropp3_output(struct micropp3 *self, const int gp_id, const char *filename);
 
