@@ -82,28 +82,32 @@ void micropp<tdim>::homogenize()
 
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 		gp_ptr->cost = newton.solver_its;
-		gp_ptr->converged &= newton.converged;
+		gp_ptr->converged = newton.converged;
 
 		/*
-		// In case it has not converged do the sub-iterations
+		 * In case it has not converged do the sub-iterations
+		 */
 		if (gp_ptr->converged == false && subiterations == true) {
 
-			memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
-
 			double eps_sub[nvoi], deps_sub[nvoi];
-			memcpy(eps_sub, gp_ptr->macro_strain, nvoi * sizeof(double));
+			memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
+			memcpy(eps_sub, gp_ptr->strain_old, nvoi * sizeof(double));
+
 			for (int i = 0; i < nvoi; ++i)
-				deps_sub[i] = eps_sub[i] / nsubiterations;
+				deps_sub[i] = (gp_ptr->strain[i] - gp_ptr->strain_old[i]) / nsubiterations;
 
-			for (int i = 0; i < nsubiterations; ++i) {
-				newton_t newton = newton_raphson(&A, b, u, du, eps_sub, gp_ptr->vars_n);
+			for (int its = 0; its < nsubiterations; ++its) {
 
-				gp_ptr->cost = newton.solver_its;
-				gp_ptr->converged &= newton.converged;
+				for (int j = 0; j < nvoi; ++j)
+					eps_sub[j] += deps_sub[j];
+
+				newton = newton_raphson(&A, b, u, du, eps_sub, gp_ptr->vars_n);
+				gp_ptr->cost += newton.solver_its;
 			}
+
+			gp_ptr->converged = newton.converged;
 			memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 		}
-		*/
 
 		if (coupling == ONE_WAY) {
 

@@ -31,7 +31,7 @@ class gp_t {
 
 	public:
 
-	double strain_old[nvoi];
+	double strain_old[nvoi] = { 0.0 };
 	double strain[nvoi];
 	double stress[nvoi];
 	double ctan[nvoi * nvoi];
@@ -87,5 +87,7 @@ class gp_t {
 		tmp = u_n;
 		u_n = u_k;
 		u_k = tmp;
+
+		memcpy(strain_old, strain, nvoi * sizeof(double));
 	}
 };
