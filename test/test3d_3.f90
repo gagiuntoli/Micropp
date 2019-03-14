@@ -73,7 +73,8 @@ program test3d_3
         call material_set(mat_params(1), 1.0D6, 0.3D0, 5.0D4, 5.0D4, 1)
         call material_set(mat_params(2), 1.0D6, 0.3D0, 1.0D4, 0.0D-1, 1)
 
-        call micropp3_new(micro, 1, sizes, micro_type, micro_params, mat_params)
+        call micropp3_new(micro, 1, sizes, micro_type, micro_params, &
+                mat_params, 10)
         call micropp3_print_info(micro)
 
         eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)
