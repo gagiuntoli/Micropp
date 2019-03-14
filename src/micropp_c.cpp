@@ -28,11 +28,13 @@ extern "C" {
 	// IMPORTANT!! This struct should match with the one in FORTRAN
 
 	void micropp3_new(struct micropp3 *self, int ngp, const int size[3],
-	                  const int micro_type, const double *micro_params,
-	                  const material_base *materials)
+			  const int micro_type, const double *micro_params,
+	                  const material_base *materials,
+			  const int nsubiteration)
 	{
 		material_t *tmp = (material_t *) materials;
-		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params, tmp, ONE_WAY, true, 10);
+		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params,
+					   tmp, ONE_WAY, true, nsubiteration);
 	}
 
 	void micropp3_free(micropp3 *self)
@@ -41,19 +43,22 @@ extern "C" {
 		delete ptr;
 	}
 
-	void micropp3_set_strain(micropp3 *self, const int gp_id, const double *strain)
+	void micropp3_set_strain(micropp3 *self, const int gp_id,
+				 const double *strain)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->set_strain(gp_id, strain);
 	}
 
-	void micropp3_get_stress(const micropp3 *self, const int gp_id, double *stress)
+	void micropp3_get_stress(const micropp3 *self, const int gp_id,
+				 double *stress)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->get_stress(gp_id, stress);
 	}
 
-	void micropp3_get_ctan(const micropp3 *self, int gp, double ctan[36])
+	void micropp3_get_ctan(const micropp3 *self, int gp,
+			       double ctan[36])
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->get_ctan(gp, ctan);

@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 	const int ny = atoi(argv[2]);
 	const int nz = atoi(argv[3]);
 	const int dir = atoi(argv[4]);
-	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10);  // Optional value
+	const int time_steps = (argc > 5 ? atoi(argv[5]) : 10); // Optional
 	int size[3] = { nx, ny, nz };
 
 	struct material_base matlist[2];
@@ -54,7 +54,7 @@ int main (int argc, char *argv[])
 	int ngpl = 1;
 	int micro_type = 5;
 	double params[4] = { 1., 1., 1., .15 };
-	micropp3_new(&micro, ngpl, size, micro_type, params, matlist);
+	micropp3_new(&micro, ngpl, size, micro_type, params, matlist, 10);
 	micropp3_print_info(&micro);
 
 	double sig[6], ctan[36];
@@ -99,7 +99,6 @@ int main (int argc, char *argv[])
 		printf("\nsig =\n");
 		for (i = 0; i < 6; ++i)
 			printf("%e\t", sig[i]);
-
 
 		printf("\nctan =\n");
 		for (i = 0; i < 6; ++i) {
