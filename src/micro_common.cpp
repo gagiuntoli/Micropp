@@ -538,8 +538,11 @@ void micropp<tdim>::print_info() const
        	
 	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :" << nz << " nn :" << nn << endl;
 	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
+
 	for (int i = 0; i < numMaterials; ++i)
 		material_list[i].print();
+
+	cout << "Number of Subiterations :" << nsubiterations << endl;
 	cout << endl;
 }
 

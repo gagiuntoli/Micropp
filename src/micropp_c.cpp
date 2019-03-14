@@ -30,11 +30,11 @@ extern "C" {
 	void micropp3_new(struct micropp3 *self, int ngp, const int size[3],
 			  const int micro_type, const double *micro_params,
 	                  const material_base *materials,
-			  const int nsubiteration)
+			  const int nsubiterations)
 	{
 		material_t *tmp = (material_t *) materials;
 		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params,
-					   tmp, ONE_WAY, true, nsubiteration);
+					   tmp, ONE_WAY, true, nsubiterations);
 	}
 
 	void micropp3_free(micropp3 *self)
