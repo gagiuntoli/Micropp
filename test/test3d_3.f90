@@ -99,11 +99,12 @@ program test3d_3
         call micropp3_get_stress(micro, gp_id, sig)
         call micropp3_get_ctan(micro, gp_id, ctan)
 
-        call micropp3_update_vars(micro)
         non_linear = micropp3_is_non_linear(micro, gp_id)
         converged = micropp3_has_converged(micro, gp_id)
         subiterated = micropp3_has_subiterated(micro, gp_id)
         cost = micropp3_get_cost(micro, gp_id)
+
+        call micropp3_update_vars(micro)
 
         write(*,'(A,L)') "Non-linear = ", non_linear
         write(*,'(A,2I5)') "Cost       = ", cost

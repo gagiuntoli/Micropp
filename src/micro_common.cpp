@@ -53,7 +53,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
 	ivol(1.0 / (wg * npe)),
-	micro_type(_micro_type), num_int_vars(nelem * npe * NUM_VAR_GP),
+	micro_type(_micro_type), nvars(nelem * npe * NUM_VAR_GP),
 
 	nr_max_its(_nr_max_its),
 	nr_max_tol(_nr_max_tol),

@@ -68,12 +68,12 @@ class gp_t {
 		}
 	}
 
-	void allocate(const int num_int_vars)
+	void allocate(const int nvars)
 	{
 		assert(!allocated);
 
-		vars_n = (double *) calloc(num_int_vars, sizeof(double));
-		vars_k = (double *) calloc(num_int_vars, sizeof(double));
+		vars_n = (double *) calloc(nvars, sizeof(double));
+		vars_k = (double *) calloc(nvars, sizeof(double));
 
 		allocated = (vars_n && vars_k);
 		assert(allocated);
@@ -91,5 +91,8 @@ class gp_t {
 		u_k = tmp;
 
 		memcpy(strain_old, strain, nvoi * sizeof(double));
+
+		cost = 0;
+		subiterated = false;
 	}
 };

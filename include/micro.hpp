@@ -112,7 +112,7 @@ class micropp {
 		const double vol_tot;
 		const double special_param, wg, ivol;
 
-		const int micro_type, num_int_vars;
+		const int micro_type, nvars;
 		const int nsubiterations;
 		const bool subiterations;
 
@@ -148,30 +148,43 @@ class micropp {
 		void calc_ctan_lin();
 		material_t get_material(const int e) const;
 
-		void get_elem_nodes(int n[npe], int ex, int ey, int ez = 0) const;
+		void get_elem_nodes(int n[npe],
+				    int ex, int ey, int ez = 0) const;
 
-		void get_elem_displ(const double *u, double elem_disp[npe * dim],
+		void get_elem_displ(const double *u,
+				    double elem_disp[npe * dim],
 				    int ex, int ey, int ez = 0) const;
 
 		void get_strain(const double *u, int gp, double strain_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
-		void get_stress(int gp, const double eps[nvoi], const double *vars_old,
-				double stress_gp[nvoi], int ex, int ey, int ez = 0) const;
+
+		void get_stress(int gp, const double eps[nvoi],
+				const double *vars_old,
+				double stress_gp[nvoi],
+				int ex, int ey, int ez = 0) const;
 
 		int get_elem_type(int ex, int ey, int ez = 0) const;
+
 		void get_elem_rhs(const double *u, const double *vars_old,
-				  double be[npe * dim], int ex, int ey, int ez = 0) const;
+				  double be[npe * dim], int ex, int ey,
+				  int ez = 0) const;
 
 		void calc_ave_stress(const double *u, double stress_ave[nvoi],
 				     const double *vars_old = nullptr) const;
-		void calc_ave_strain(const double *u, double strain_ave[nvoi]) const;
+
+		void calc_ave_strain(const double *u,
+				     double strain_ave[nvoi]) const;
+
 		void calc_fields(double *u, double *vars_old);
+
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
+
 		bool calc_vars_new(const double *u, const double *vars_old,
 				   double *vars_new, double *f_trial_max) const;
 
-		newton_t newton_raphson(ell_matrix *A, double *b, double *u, double *du,
-					const double strain[nvoi], const double *vars_old = nullptr);
+		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
+					double *du, const double strain[nvoi],
+					const double *vars_old = nullptr);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
@@ -179,30 +192,50 @@ class micropp {
 
 		void set_displ_bc(const double strain[nvoi], double *u);
 
-		double assembly_rhs(const double *u, const double *vars_old, double *b);
-		void assembly_mat(ell_matrix *A, const double *u, const double *vars_old);
+		double assembly_rhs(const double *u, const double *vars_old,
+				    double *b);
 
-		void write_vtu(double *u, double *vars_old, const char *filename);
+		void assembly_mat(ell_matrix *A, const double *u,
+				  const double *vars_old);
 
-		void get_dev_tensor(const double tensor[6], double tensor_dev[6]) const;
+		void write_vtu(double *u, double *vars_old,
+			       const char *filename);
 
-		void plastic_get_stress(const material_t *material, const double eps[6],
-					const double *eps_p_old, const double *alpha_old,
+		void get_dev_tensor(const double tensor[6],
+				    double tensor_dev[6]) const;
+
+		void plastic_get_stress(const material_t *material,
+					const double eps[6],
+					const double *eps_p_old,
+					const double *alpha_old,
 					double stress[6]) const;
 
-		bool plastic_law(const material_t *material, const double eps[6],
-				 const double *eps_p_old, const double *alpha_old,
-				 double *_dl, double _normal[6], double _s_trial[6],
-				 double *_f_trial) const;
-		void plastic_get_ctan(const material_t *material, const double eps[nvoi],
-				      const double *eps_p_old, const double *alpha_old,
-				      double ctan[nvoi][nvoi]) const;
-		bool plastic_evolute(const material_t *material, const double eps[6],
-				     const double *eps_p_old, const double *alpha_old,
-				     double eps_p_new[6], double *alpha_new, double *f_trial) const;
+		bool plastic_law(const material_t *material,
+				 const double eps[6],
+				 const double *eps_p_old,
+				 const double *alpha_old,
+				 double *dl, double normal[6],
+				 double s_trial[6],
+				 double *f_trial) const;
 
-		void isolin_get_ctan(const material_t *material, double ctan[nvoi][nvoi]) const;
-		void isolin_get_stress(const material_t *material, const double eps[6],
+		void plastic_get_ctan(const material_t *material,
+				      const double eps[nvoi],
+				      const double *eps_p_old,
+				      const double *alpha_old,
+				      double ctan[nvoi][nvoi]) const;
+
+		bool plastic_evolute(const material_t *material,
+				     const double eps[6],
+				     const double *eps_p_old,
+				     const double *alpha_old,
+				     double eps_p_new[6], double *alpha_new,
+				     double *f_trial) const;
+
+		void isolin_get_ctan(const material_t *material,
+				     double ctan[nvoi][nvoi]) const;
+
+		void isolin_get_stress(const material_t *material,
+				       const double eps[6],
 				       double stress[6]) const;
 
 	public:
@@ -211,27 +244,45 @@ class micropp {
 
 		micropp(const int ngp, const int size[3], const int micro_type,
 			const double *micro_params, const material_t *materials,
-			const int _coupling = ONE_WAY, const bool _subiterations = false, const int _nsubiterations = 10,
-			const int max_its = NR_MAX_ITS, const double max_tol = NR_MAX_TOL, const double rel_tol = NR_REL_TOL);
+			const int _coupling = ONE_WAY,
+			const bool _subiterations = false,
+			const int _nsubiterations = 10,
+			const int max_its = NR_MAX_ITS,
+			const double max_tol = NR_MAX_TOL,
+			const double rel_tol = NR_REL_TOL);
 
 		~micropp();
 
 		/* The most important functions */
+
 		void set_strain(const int gp_id, const double *strain);
+
 		void get_stress(const int gp_id, double *stress) const;
+
 		void get_ctan(const int gp_id, double *ctan) const;
+
 		void homogenize();
 
 		/* Extras */
+
 		int is_non_linear(const int gp_id) const;
+
 		int get_non_linear_gps(void) const;
+
 		double get_f_trial_max(void) const;
+
 		int get_cost(int gp_id) const;
+
 		bool has_converged(int gp_id) const;
+
 		bool has_subiterated(int gp_id) const;
+
 		void output(int gp_id, const char *filename);
+
 		void update_vars();
+
 		void print_info() const;
+
 };
 
 

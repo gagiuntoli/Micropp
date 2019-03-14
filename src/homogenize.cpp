@@ -68,13 +68,11 @@ void micropp<tdim>::homogenize()
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
-		double *vars_new_aux = (double *) calloc(num_int_vars, sizeof(double));
+		double *vars_new_aux = (double *) calloc(nvars, sizeof(double));
 
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 		double *vars_new = (gp_ptr->allocated) ? gp_ptr->vars_k : vars_new_aux;
-		gp_ptr->converged = true;
-		gp_ptr->subiterated = false;
 
 		// SIGMA 1 Newton-Raphson
 		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
@@ -82,7 +80,7 @@ void micropp<tdim>::homogenize()
 		newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
 
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
-		gp_ptr->cost = newton.solver_its;
+		gp_ptr->cost += newton.solver_its;
 		gp_ptr->converged = newton.converged;
 
 		/*
@@ -126,12 +124,13 @@ void micropp<tdim>::homogenize()
 		}
 
 		/* Updates <vars_new> and <f_trial_max> */
+
 		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new, &f_trial_max);
 
 		if (nl_flag == true) {
 			if (gp_ptr->allocated == false) {
-				gp_ptr->allocate(num_int_vars);
-				memcpy(gp_ptr->vars_k, vars_new, num_int_vars * sizeof(double));
+				gp_ptr->allocate(nvars);
+				memcpy(gp_ptr->vars_k, vars_new, nvars * sizeof(double));
 			}
 		}
 
