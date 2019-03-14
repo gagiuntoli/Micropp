@@ -189,8 +189,7 @@ double ell_get_norm(const ell_matrix *m)
 }
 
 
-int ell_solve_cgpd(const ell_matrix *m, const double *b,
-		   double *x, double *err_)
+int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 {
 	INST_START;
 
@@ -201,7 +200,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 	const int nn = m->nn;
 	const int nfield = m->nfield;
-	const int shift =  (m->dim == 2) ? 4 : 13;
+	const int shift = (m->dim == 2) ? 4 : 13;
 
 	for (int i = 0; i < nn; i++) {
 		for (int d = 0; d < nfield; d++)
@@ -226,10 +225,6 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 	double pnorm = pnorm_0;
 
 	while (its < m->max_its) {
-
-#ifdef CGDEBUG
-		printf("cgpd : its = %-4d |precon| = %e\n", its, pnorm);
-#endif
 
 		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
 			break;
@@ -259,7 +254,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b,
 
 	}
 
-	*err_ = rz;
+	*err = rz;
 
 	return its;
 }
