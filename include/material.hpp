@@ -42,6 +42,8 @@ struct material_t : public material_base {
 		damage = false;
 	}
 
+	virtual void get_stress(const double eps[6], double stress[6], const double *history_params) {};
+
 	void set(double _E, double _nu, double _Ka, double _Sy, int _type)
 	{
 		material_set(this, _E, _nu, _Ka, _Sy, _type);
@@ -53,6 +55,7 @@ struct material_t : public material_base {
 	}
 };
 
+
 class material_damage : public material_t {
 
 	public:
@@ -63,8 +66,9 @@ class material_damage : public material_t {
 			Xt = _Xt;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *params)
+		void get_stress(const double eps[6], double stress[6], const double *history_params)
 		{
+			/* does not use history_params */
 			for (int i = 0; i < 3; ++i)
 				stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
 					    + 2 * mu * eps[i];
