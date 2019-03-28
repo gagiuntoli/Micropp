@@ -34,6 +34,7 @@ extern "C" {
 
 		double E, nu, Ka, Sy;
 		double k, mu, lambda;
+		double Xt;
 		int type;
 		bool plasticity, damage;
 	};

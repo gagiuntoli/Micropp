@@ -16,6 +16,7 @@ set(testsources
 	test_cg.cpp
 	test_print_vtu_1.cpp
 	test_omp.cpp
+	test_material.cpp
 	test_util_1.cpp)
 
 # Iterate over the list above
@@ -40,3 +41,4 @@ add_test(NAME test_ell_1 COMMAND test_ell_1)
 add_test(NAME test_ell_2 COMMAND test_ell_2)
 add_test(NAME test_ell_3 COMMAND test_ell_3 5 5)
 add_test(NAME test_util_1 COMMAND test_util_1)
+add_test(NAME test_material COMMAND test_material 5)

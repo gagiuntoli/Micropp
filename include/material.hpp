@@ -53,5 +53,26 @@ struct material_t : public material_base {
 	}
 };
 
+class material_damage : public material_t {
+
+	public:
+		material_damage(double _E, double _nu, double _Xt) {
+			type = 2;
+			E = _E;
+			nu = _nu;
+			Xt = _Xt;
+		};
+
+		void get_stress(const double eps[6], double stress[6], const double *params)
+		{
+			for (int i = 0; i < 3; ++i)
+				stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
+					    + 2 * mu * eps[i];
+
+			for (int i = 3; i < 6; ++i)
+				stress[i] = mu * eps[i];
+		}
+};
+
 
 #endif
