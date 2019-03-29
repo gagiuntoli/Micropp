@@ -21,8 +21,9 @@
 
 #include "material_base.h"
 
-void material_set(struct material_base *self, double _E, double _nu,
-                  double _Ka, double _Sy, int _type)
+void material_set(struct material_base *self, const int _type,
+		  const double _E, const double _nu, const double _Ka,
+		  const double _Sy, const double _Xt)
 {
 	self->E = _E;
 	self->nu = _nu;

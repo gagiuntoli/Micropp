@@ -61,7 +61,7 @@ struct material_t : public material_base {
 
 	void set(double _E, double _nu, double _Ka, double _Sy, int _type)
 	{
-		material_set(this, _E, _nu, _Ka, _Sy, _type);
+		material_set(this, _type, _E, _nu, _Ka, _Sy, 0);
 	}
 
 	void print() const

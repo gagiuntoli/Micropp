@@ -45,8 +45,8 @@ int main (int argc, char *argv[])
 	int size[3] = { nx, ny, nz };
 
 	struct material_base matlist[2];
-	material_set(&matlist[0], 1.0e7, 0.25, 1.0e4, 1.0e4, 1);
-	material_set(&matlist[1], 1.0e7, 0.25, 1.0e4, 1.0e7, 0);
+	material_set(&matlist[0], 1, 1.0e7, 0.25, 1.0e4, 1.0e4, 1.0);
+	material_set(&matlist[1], 0, 1.0e7, 0.25, 1.0e4, 1.0e7, 0.0);
 	material_print(&matlist[0]);
 	material_print(&matlist[1]);
 
