@@ -96,8 +96,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int gp = 0; gp < ngp; ++gp)
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 
-	f_trial_max = -1.0e50;
-
 }
 
 
@@ -158,13 +156,6 @@ int micropp<tdim>::get_non_linear_gps(void) const
 		if (gp_list[gp].allocated)
 			count ++;
 	return count;
-}
-
-
-template <int tdim>
-double micropp<tdim>::get_f_trial_max(void) const
-{
-	return f_trial_max;
 }
 
 

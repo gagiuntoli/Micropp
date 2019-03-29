@@ -137,8 +137,6 @@ class micropp {
 			{ +CONSTXG, +CONSTXG, +CONSTXG },
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
-		double f_trial_max;
-
 		const int nr_max_its;
 		const double nr_max_tol;
 		const double nr_rel_tol;
@@ -229,8 +227,6 @@ class micropp {
 		int is_non_linear(const int gp_id) const;
 
 		int get_non_linear_gps(void) const;
-
-		double get_f_trial_max(void) const;
 
 		int get_cost(int gp_id) const;
 

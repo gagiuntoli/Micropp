@@ -79,7 +79,6 @@ int main (int argc, char *argv[])
 		int sigma_cost = micropp3_get_cost(&micro, 0);
 		bool non_linear = micropp3_is_non_linear(&micro, 0);
 		int num_non_linear = micropp3_get_non_linear_gps(&micro);
-		double f_trial_max = micropp3_get_f_trial_max(&micro);
 
 		micropp3_update_vars(&micro);
 
@@ -90,7 +89,6 @@ int main (int argc, char *argv[])
 		printf("sigma_cost       = %d\n", sigma_cost);
 		printf("Non-Linear       = %d\n", non_linear);
 		printf("Non-Linear Total = %d\n", num_non_linear);
-		printf("F trial max      = %e\n", f_trial_max);
 
 		printf("eps =\n");
 		for (i = 0; i < 6; ++i)

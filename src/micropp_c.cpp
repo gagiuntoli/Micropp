@@ -119,10 +119,4 @@ extern "C" {
 		return ptr->get_non_linear_gps();
 	}
 
-	double micropp3_get_f_trial_max(const micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->get_f_trial_max();
-	}
-
 }
