@@ -56,7 +56,6 @@
 #define D_EPS_CTAN_AVE  1.0e-8
 
 #define CONSTXG         0.577350269189626
-#define SQRT_2DIV3      0.816496581
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
@@ -180,7 +179,7 @@ class micropp {
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 
 		bool calc_vars_new(const double *u, const double *vars_old,
-				   double *vars_new, double *f_trial_max) const;
+				   double *vars_new) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],

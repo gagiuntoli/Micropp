@@ -660,12 +660,10 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
  */
 
 template<int tdim>
-bool micropp<tdim>::calc_vars_new(const double *u, const double *vars_old,
-				  double *vars_new, double *_f_trial_max) const
+bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
+				  double *_vars_new) const
 {
 	bool nl_flag = false;
-	double f_trial;
-	double f_trial_max = *_f_trial_max;
 	double eps[nvoi];
 
 	for (int ez = 0; ez < nez; ++ez) {
@@ -677,27 +675,16 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *vars_old,
 
 				for (int gp = 0; gp < npe; ++gp) {
 
-					if (material->plasticity == true) {
+					const double *vars_old = (_vars_old) ? &_vars_old[intvar_ix(e, gp, 0)] : nullptr;
+					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
 
-						const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-						const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
-						double *eps_p_new = &vars_new[intvar_ix(e, gp, 0)];
-						double *alpha_new = &vars_new[intvar_ix(e, gp, 6)];
+					get_strain(u, gp, eps, ex, ey, ez);
 
-						get_strain(u, gp, eps, ex, ey, ez);
-
-						nl_flag |= plastic_evolute(material, eps, eps_p_old, alpha_old,
-									   eps_p_new, alpha_new, &f_trial);
-
-						if (f_trial > f_trial_max)
-							f_trial_max = f_trial;
-					}
+					nl_flag |= material->evolute(eps, vars_old, vars_new);
 				}
 			}
 		}
 	}
-
-	*_f_trial_max = f_trial_max;
 
 	return nl_flag;
 }

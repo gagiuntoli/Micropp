@@ -29,6 +29,8 @@
 #include <cstring>
 #include <iostream>
 
+#define SQRT_2DIV3 0.816496581
+
 using namespace std;
 
 struct material_t : public material_base {
@@ -56,8 +58,9 @@ struct material_t : public material_base {
 	material_t * make_material(double * params, int type);
 	static material_t *make_material(material_t material);
 
-	virtual void get_stress(const double eps[6], double stress[6], const double *history_params) const {};
-	virtual void get_ctan(const double *eps, double *ctan, const double *history_params) const { cout << "QUE VERGA" << endl;};
+	virtual void get_stress(const double *eps, double *stress, const double *history_params) const {};
+	virtual void get_ctan(const double *eps, double *ctan, const double *history_params) const {};
+	virtual bool evolute(const double *eps, const double *vars_old, double *vars_new) const {};
 
 	virtual void print_n() const { cout << "I am base" << endl; };
 
@@ -86,8 +89,9 @@ class material_elastic : public material_t {
 			Xt = 0;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *history_params) const;
+		void get_stress(const double *eps, double *stress, const double *history_params) const;
 		void get_ctan(const double *eps, double *ctan, const double *history_params) const;
+		bool evolute(const double *eps, const double *vars_old, double *vars_new) const;
 		void print_n() const;
 
 };
@@ -106,10 +110,18 @@ class material_plastic : public material_t {
 			Xt = 0;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *history_params) const;
+		void get_stress(const double *eps, double *stress, const double *history_params) const;
 		void get_ctan(const double *eps, double *ctan, const double *history_params) const;
+		bool evolute(const double *eps, const double *vars_old, double *vars_new) const;
 		void print_n() const;
 
+	private:
+		bool plastic_law(const double eps[6],
+				 const double *_eps_p_old,
+				 const double *_alpha_old,
+				 double *_dl,
+				 double _normal[6],
+				 double _s_trial[6]) const;
 };
 
 class material_damage : public material_t {
@@ -126,8 +138,9 @@ class material_damage : public material_t {
 			Xt = _Xt;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *history_params) const;
+		void get_stress(const double *eps, double *stress, const double *history_params) const;
 		void get_ctan(const double *eps, double *ctan, const double *history_params) const;
+		bool evolute(const double *eps, const double *vars_old, double *vars_new) const;
 		void print_n() const;
 
 };
