@@ -57,30 +57,6 @@ void micropp<2>::set_displ_bc(const double eps[nvoi], double *u)
 
 
 template <>
-void micropp<2>::isolin_get_stress(const material_t *material,
-				   const double eps[6],
-				   double stress[6]) const
-{
-	const double E = material->E;
-	const double nu = material->nu;
-
-	double ctan[3][3] = {
-		{ (1 - nu),       nu,                0 },
-		{       nu, (1 - nu),                0 },
-		{        0,        0, (1 - 2 * nu) / 2 } };
-
-	for (int i = 0; i < nvoi; i++)
-		for (int j = 0; j < nvoi; j++)
-			ctan[i][j] *= E / ((1 + nu) * (1 - 2 * nu));
-
-	memset(stress, 0, nvoi * sizeof(double));
-	for (int i = 0; i < nvoi; i++)
-		for (int j = 0; j < nvoi; j++)
-			stress[i] += ctan[i][j] * eps[j];
-}
-
-
-template <>
 void micropp<2>::calc_bmat(int gp, double bmat[nvoi][npe *dim])	const
 {
 	const double dsh[4][2] = {
@@ -184,62 +160,6 @@ void micropp<2>::assembly_mat(ell_matrix *A, const double *u, const double *int_
 		}
 	}
 	ell_set_bc_2D(A);
-}
-
-
-template <>
-bool micropp<2>::plastic_law(const material_t *material,
-			     const double eps[6],
-			     const double *_eps_p_old,
-			     const double *_alpha_old,
-			     double *_dl,
-			     double _normal[6],
-			     double _s_trial[6],
-			     double *_f_trial) const
-{
-	return false;
-}
-
-
-template <>
-void micropp<2>::plastic_get_stress(const material_t *material,
-				    const double eps[6],
-				    const double *eps_p_old,
-				    const double *alpha_old,
-				    double stress[6]) const
-{
-}
-
-
-template <>
-void micropp<2>::plastic_get_ctan(const material_t *material,
-				  const double eps[nvoi],
-				  const double *eps_p_old,
-				  const double *alpha_old,
-				  double ctan[nvoi][nvoi]) const
-{
-	return;
-}
-
-
-template <>
-void micropp<2>::isolin_get_ctan(const material_t *material,
-				 double ctan[nvoi][nvoi]) const
-{
-	return;
-}
-
-
-template <>
-bool micropp<2>::plastic_evolute(const material_t *material,
-				 const double eps[6],
-				 const double *eps_p_old,
-				 const double *alpha_old,
-				 double *eps_p_new,
-				 double *alpha_new,
-				 double *f_trial) const
-{
-	return false;
 }
 
 

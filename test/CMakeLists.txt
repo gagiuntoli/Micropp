@@ -3,7 +3,6 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # The test files I care only (create a list)
 set(testsources
-	test2d_1.cpp
 	test3d_1.cpp
 	test3d_3.f90
 	test3d_4.cpp
@@ -16,6 +15,7 @@ set(testsources
 	test_cg.cpp
 	test_print_vtu_1.cpp
 	test_omp.cpp
+	test_material.cpp
 	test_util_1.cpp)
 
 # Iterate over the list above
@@ -31,7 +31,6 @@ endforeach ()
 # As some tests will require commands and could be executed in loops we add the
 # tests individually here.
 
-add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
 add_test(NAME test3d_1 COMMAND test3d_1 5 0 10)
 add_test(NAME test3d_3 COMMAND test3d_3 5 5 5 10)
 add_test(NAME test3d_4 COMMAND test3d_4 5 3 10)
@@ -40,3 +39,4 @@ add_test(NAME test_ell_1 COMMAND test_ell_1)
 add_test(NAME test_ell_2 COMMAND test_ell_2)
 add_test(NAME test_ell_3 COMMAND test_ell_3 5 5)
 add_test(NAME test_util_1 COMMAND test_util_1)
+add_test(NAME test_material COMMAND test_material 5)

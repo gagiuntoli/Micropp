@@ -34,12 +34,14 @@ extern "C" {
 
 		double E, nu, Ka, Sy;
 		double k, mu, lambda;
+		double Xt;
 		int type;
 		bool plasticity, damage;
 	};
 
-	void material_set(struct material_base *self, double _E, double _nu,
-	                         double _Ka, double _Sy, int _type);
+	void material_set(struct material_base *self, const int _type,
+			  const double E, const double nu, const double Ka,
+			  const double Sy, const double Xt);
 
 	void material_print(const struct material_base *self);
 

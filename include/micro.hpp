@@ -52,11 +52,9 @@
 
 #define FILTER_REL_TOL  1.0e-5
 
-#define D_EPS_CTAN      1.0e-8
 #define D_EPS_CTAN_AVE  1.0e-8
 
 #define CONSTXG         0.577350269189626
-#define SQRT_2DIV3      0.816496581
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
@@ -122,7 +120,7 @@ class micropp {
 
 		double micro_params[5];
 		int numMaterials;
-		material_t material_list[MAX_MATS];
+		material_t *material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
 		int *elem_type;
@@ -139,14 +137,12 @@ class micropp {
 			{ +CONSTXG, +CONSTXG, +CONSTXG },
 			{ -CONSTXG, +CONSTXG, +CONSTXG } };
 
-		double f_trial_max;
-
 		const int nr_max_its;
 		const double nr_max_tol;
 		const double nr_rel_tol;
 
 		void calc_ctan_lin();
-		material_t get_material(const int e) const;
+		material_t *get_material(const int e) const;
 
 		void get_elem_nodes(int n[npe],
 				    int ex, int ey, int ez = 0) const;
@@ -180,7 +176,7 @@ class micropp {
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 
 		bool calc_vars_new(const double *u, const double *vars_old,
-				   double *vars_new, double *f_trial_max) const;
+				   double *vars_new) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],
@@ -200,43 +196,6 @@ class micropp {
 
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);
-
-		void get_dev_tensor(const double tensor[6],
-				    double tensor_dev[6]) const;
-
-		void plastic_get_stress(const material_t *material,
-					const double eps[6],
-					const double *eps_p_old,
-					const double *alpha_old,
-					double stress[6]) const;
-
-		bool plastic_law(const material_t *material,
-				 const double eps[6],
-				 const double *eps_p_old,
-				 const double *alpha_old,
-				 double *dl, double normal[6],
-				 double s_trial[6],
-				 double *f_trial) const;
-
-		void plastic_get_ctan(const material_t *material,
-				      const double eps[nvoi],
-				      const double *eps_p_old,
-				      const double *alpha_old,
-				      double ctan[nvoi][nvoi]) const;
-
-		bool plastic_evolute(const material_t *material,
-				     const double eps[6],
-				     const double *eps_p_old,
-				     const double *alpha_old,
-				     double eps_p_new[6], double *alpha_new,
-				     double *f_trial) const;
-
-		void isolin_get_ctan(const material_t *material,
-				     double ctan[nvoi][nvoi]) const;
-
-		void isolin_get_stress(const material_t *material,
-				       const double eps[6],
-				       double stress[6]) const;
 
 	public:
 
@@ -268,8 +227,6 @@ class micropp {
 		int is_non_linear(const int gp_id) const;
 
 		int get_non_linear_gps(void) const;
-
-		double get_f_trial_max(void) const;
 
 		int get_cost(int gp_id) const;
 

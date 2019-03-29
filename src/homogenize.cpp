@@ -125,7 +125,7 @@ void micropp<tdim>::homogenize()
 
 		/* Updates <vars_new> and <f_trial_max> */
 
-		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new, &f_trial_max);
+		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
 
 		if (nl_flag == true) {
 			if (gp_ptr->allocated == false) {
