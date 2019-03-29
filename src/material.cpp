@@ -1,10 +1,17 @@
 #include "material.hpp"
 
-material_t * material_t::make_material(double * params, int type)
+material_t * material_t::make_material(double *params, int type)
 {
+	/*
+	 * This fabric creates the corresponding subclass according to the <type>
+	 * and the <params> arguments
+	 */
 	switch (type) {
 		case 0:
 			return new material_elastic(params[0], params[1]);
+			break;
+		case 1:
+			return new material_plastic(params[0], params[1], params[2], params[3]);
 			break;
 		case 2:
 			return new material_damage(params[0], params[1], params[2]);
@@ -13,6 +20,7 @@ material_t * material_t::make_material(double * params, int type)
 			break;
 	}
 }
+
 
 material_t *material_t::make_material(material_t material)
 {

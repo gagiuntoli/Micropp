@@ -3,7 +3,6 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # The test files I care only (create a list)
 set(testsources
-	test2d_1.cpp
 	test3d_1.cpp
 	test3d_3.f90
 	test3d_4.cpp
@@ -32,7 +31,6 @@ endforeach ()
 # As some tests will require commands and could be executed in loops we add the
 # tests individually here.
 
-add_test(NAME test2d_1 COMMAND test2d_1 5 5 10)
 add_test(NAME test3d_1 COMMAND test3d_1 5 0 10)
 add_test(NAME test3d_3 COMMAND test3d_3 5 5 5 10)
 add_test(NAME test3d_4 COMMAND test3d_4 5 3 10)

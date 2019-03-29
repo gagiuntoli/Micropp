@@ -258,14 +258,8 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		double eps[6];
 		get_strain(u, gp, eps, ex, ey, ez);
 
-
-		if (material->plasticity) {
-			const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-			const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
-			plastic_get_ctan(material, eps, eps_p_old, alpha_old, ctan);
-		} else {
-			isolin_get_ctan(material, ctan);
-		}
+		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
+		material->get_ctan(eps, (double *)ctan, vars);
 
 		double bmat[nvoi][npedim], cxb[nvoi][npedim];
 		calc_bmat(gp, bmat);
@@ -538,9 +532,12 @@ void micropp<tdim>::print_info() const
        	
 	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :" << nz << " nn :" << nn << endl;
 	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
+	cout << endl;
 
-	for (int i = 0; i < numMaterials; ++i)
-		material_list[i]->print();
+	for (int i = 0; i < numMaterials; ++i) {
+		material_list[i]->print_n();
+		cout << endl;
+	}
 
 	cout << "Number of Subiterations :" << nsubiterations << endl;
 	cout << endl;
@@ -555,19 +552,9 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 {
 	const int e = glo_elem(ex, ey, ez);
 	const material_t *material = get_material(e);
+	const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 
-	if (material->plasticity == true) {
-
-		const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-		const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
-
-		plastic_get_stress(material, eps, eps_p_old, alpha_old, stress_gp);
-
-	} else {
-
-		isolin_get_stress(material, eps, stress_gp);
-	}
-
+	material->get_stress(eps, stress_gp, vars);
 }
 
 

@@ -57,10 +57,9 @@ int main (int argc, char *argv[])
 	file.open("result.dat");
 
 	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 1);
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 0);
 	mat_params[1].set(1.0e3, 0.3, 5.0e4, 1.0e3, 1);
 
-	//micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING);
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
 	micro.print_info();
 

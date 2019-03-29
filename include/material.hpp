@@ -26,6 +26,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 
 using namespace std;
@@ -56,6 +57,7 @@ struct material_t : public material_base {
 	static material_t *make_material(material_t material);
 
 	virtual void get_stress(const double eps[6], double stress[6], const double *history_params) const {};
+	virtual void get_ctan(const double *eps, double *ctan, const double *history_params) const { cout << "QUE VERGA" << endl;};
 
 	virtual void print_n() const { cout << "I am base" << endl; };
 
@@ -95,6 +97,22 @@ class material_elastic : public material_t {
 				stress[i] = mu * eps[i];
 		}
 
+		void get_ctan(const double *eps, double *ctan, const double *history_params) const
+		{
+			// C = lambda * (1x1) + 2 mu I
+			memset(ctan, 0, 6 * 6 * sizeof(double));
+
+			for (int i = 0; i < 3; ++i)
+				for (int j = 0; j < 3; ++j)
+					ctan[i * 6 + j] += lambda;
+
+			for (int i = 0; i < 3; ++i)
+				ctan[i * 6 + i] += 2 * mu;
+
+			for (int i = 3; i < 6; ++i)
+				ctan[i * 6 + i] = mu;
+		}
+
 		void print_n() const {
 			cout << "Type : Elastic" << endl;
 			cout << "E = " << E << " nu = " << nu << endl;
@@ -126,9 +144,25 @@ class material_plastic : public material_t {
 				stress[i] = mu * eps[i];
 		}
 
+		void get_ctan(const double *eps, double *ctan, const double *history_params) const
+		{
+			// C = lambda * (1x1) + 2 mu I
+			memset(ctan, 0, 6 * 6 * sizeof(double));
+
+			for (int i = 0; i < 3; ++i)
+				for (int j = 0; j < 3; ++j)
+					ctan[i * 6 + j] += lambda;
+
+			for (int i = 0; i < 3; ++i)
+				ctan[i * 6 + i] += 2 * mu;
+
+			for (int i = 3; i < 6; ++i)
+				ctan[i * 6 + i] = mu;
+		}
+
 		void print_n() const {
 			cout << "Type : Plastic" << endl;
-			cout << "E = " << E << " nu = " << nu << endl;
+			cout << "E = " << E << " nu = " << nu << " Ka = " << Ka << " Sy = " << Sy << endl;
 		}
 };
 
@@ -155,6 +189,22 @@ class material_damage : public material_t {
 
 			for (int i = 3; i < 6; ++i)
 				stress[i] = mu * eps[i];
+		}
+
+		void get_ctan(const double *eps, double *ctan, const double *history_params) const
+		{
+			// C = lambda * (1x1) + 2 mu I
+			memset(ctan, 0, 6 * 6 * sizeof(double));
+
+			for (int i = 0; i < 3; ++i)
+				for (int j = 0; j < 3; ++j)
+					ctan[i * 6 + j] += lambda;
+
+			for (int i = 0; i < 3; ++i)
+				ctan[i * 6 + i] += 2 * mu;
+
+			for (int i = 3; i < 6; ++i)
+				ctan[i * 6 + i] = mu;
 		}
 
 		void print_n() const
