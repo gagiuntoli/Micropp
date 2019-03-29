@@ -52,7 +52,6 @@
 
 #define FILTER_REL_TOL  1.0e-5
 
-#define D_EPS_CTAN      1.0e-8
 #define D_EPS_CTAN_AVE  1.0e-8
 
 #define CONSTXG         0.577350269189626
@@ -199,43 +198,6 @@ class micropp {
 
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);
-
-		void get_dev_tensor(const double tensor[6],
-				    double tensor_dev[6]) const;
-
-		void plastic_get_stress(const material_t *material,
-					const double eps[6],
-					const double *eps_p_old,
-					const double *alpha_old,
-					double stress[6]) const;
-
-		bool plastic_law(const material_t *material,
-				 const double eps[6],
-				 const double *eps_p_old,
-				 const double *alpha_old,
-				 double *dl, double normal[6],
-				 double s_trial[6],
-				 double *f_trial) const;
-
-		void plastic_get_ctan(const material_t *material,
-				      const double eps[nvoi],
-				      const double *eps_p_old,
-				      const double *alpha_old,
-				      double ctan[nvoi][nvoi]) const;
-
-		bool plastic_evolute(const material_t *material,
-				     const double eps[6],
-				     const double *eps_p_old,
-				     const double *alpha_old,
-				     double eps_p_new[6], double *alpha_new,
-				     double *f_trial) const;
-
-		void isolin_get_ctan(const material_t *material,
-				     double ctan[nvoi][nvoi]) const;
-
-		void isolin_get_stress(const material_t *material,
-				       const double eps[6],
-				       double stress[6]) const;
 
 	public:
 

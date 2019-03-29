@@ -169,20 +169,23 @@ void material_plastic::get_stress(const double *eps, double *stress,
 }
 
 
-void material_plastic::get_ctan(const double *eps, double *ctan, const double *history_params) const
+void material_plastic::get_ctan(const double *eps, double *ctan, const double *vars_old) const
 {
-	// C = lambda * (1x1) + 2 mu I
-	memset(ctan, 0, 6 * 6 * sizeof(double));
+	double stress_0[6];
+	get_stress(eps, stress_0, vars_old);
 
-	for (int i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
-			ctan[i * 6 + j] += lambda;
+	for (int i = 0; i < 6; ++i) {
 
-	for (int i = 0; i < 3; ++i)
-		ctan[i * 6 + i] += 2 * mu;
+		double eps_1[6];
+		memcpy(eps_1, eps, 6 * sizeof(double));
+		eps_1[i] += D_EPS_CTAN;
 
-	for (int i = 3; i < 6; ++i)
-		ctan[i * 6 + i] = mu;
+		double stress_1[6];
+		get_stress(eps_1, stress_1, vars_old);
+
+		for (int j = 0; j < 6; ++j)
+			ctan[j * 6 + i] = (stress_1[j] - stress_0[j]) / D_EPS_CTAN;
+	}
 }
 
 
