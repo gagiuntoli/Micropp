@@ -53,11 +53,11 @@ struct material_t : public material_base {
 	}
 
 	material_t * make_material(double * params, int type);
-	static material_t * make_material(material_t *material);
+	static material_t *make_material(material_t material);
 
-	virtual void get_stress(const double eps[6], double stress[6], const double *history_params) {};
+	virtual void get_stress(const double eps[6], double stress[6], const double *history_params) const {};
 
-	virtual void print_n(void) {};
+	virtual void print_n() const { cout << "I am base" << endl; };
 
 	void set(double _E, double _nu, double _Ka, double _Sy, int _type)
 	{
@@ -76,12 +76,15 @@ class material_elastic : public material_t {
 		material_elastic(double _E, double _nu) {
 			E = _E;
 			nu = _nu;
+			k = _E / (3. * (1. - 2. * _nu));
+			mu = _E / (2. * (1. + _nu));
+			lambda = _nu * _E / ((1. + _nu) * (1. - 2. * _nu));
 			Ka = 0;
 			Sy = 0;
 			Xt = 0;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *history_params)
+		void get_stress(const double eps[6], double stress[6], const double *history_params) const
 		{
 			/* Elastic Material Law*/
 			for (int i = 0; i < 3; ++i)
@@ -92,7 +95,7 @@ class material_elastic : public material_t {
 				stress[i] = mu * eps[i];
 		}
 
-		void print_n(void) {
+		void print_n() const {
 			cout << "Type : Elastic" << endl;
 			cout << "E = " << E << " nu = " << nu << endl;
 		}
@@ -104,12 +107,15 @@ class material_plastic : public material_t {
 		material_plastic(double _E, double _nu, double _Ka, double _Sy) {
 			E = _E;
 			nu = _nu;
+			k = _E / (3. * (1. - 2. * _nu));
+			mu = _E / (2. * (1. + _nu));
+			lambda = _nu * _E / ((1. + _nu) * (1. - 2. * _nu));
 			Ka = _Ka;
 			Sy = _Sy;
 			Xt = 0;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *history_params)
+		void get_stress(const double eps[6], double stress[6], const double *history_params) const
 		{
 			/* Elastic Material Law*/
 			for (int i = 0; i < 3; ++i)
@@ -120,7 +126,7 @@ class material_plastic : public material_t {
 				stress[i] = mu * eps[i];
 		}
 
-		void print_n(void) {
+		void print_n() const {
 			cout << "Type : Plastic" << endl;
 			cout << "E = " << E << " nu = " << nu << endl;
 		}
@@ -132,12 +138,15 @@ class material_damage : public material_t {
 		material_damage(double _E, double _nu, double _Xt) {
 			E = _E;
 			nu = _nu;
+			k = _E / (3. * (1. - 2. * _nu));
+			mu = _E / (2. * (1. + _nu));
+			lambda = _nu * _E / ((1. + _nu) * (1. - 2. * _nu));
 			Ka = 0;
 			Sy = 0;
 			Xt = _Xt;
 		};
 
-		void get_stress(const double eps[6], double stress[6], const double *history_params)
+		void get_stress(const double eps[6], double stress[6], const double *history_params) const
 		{
 			/* does not use history_params */
 			for (int i = 0; i < 3; ++i)
@@ -148,14 +157,13 @@ class material_damage : public material_t {
 				stress[i] = mu * eps[i];
 		}
 
-		void print_n(void)
+		void print_n() const
 		{
 			cout << "Type : Damage" << endl;
 			cout << "E = " << E << " nu = " << nu
 				<< " Xt = " << Xt << endl;
 		}
 };
-
 
 
 #endif

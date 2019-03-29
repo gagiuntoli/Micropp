@@ -29,6 +29,7 @@ void material_set(struct material_base *self, const int _type,
 	self->nu = _nu;
 	self->Ka = _Ka;
 	self->Sy = _Sy;
+	self->Xt = _Xt;
 	self->type = _type;
 
 	self->k = _E / (3. * (1. - 2. * _nu));

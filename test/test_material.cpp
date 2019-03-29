@@ -38,10 +38,20 @@ void micropp_simulator(material_t *materials)
 
 	for (int i = 0; i < 2; ++i) {
 		double params[3];
-		micropp_material_list[i] = material_t::make_material(&materials[i]);
+		micropp_material_list[i] = material_t::make_material(materials[i]);
 	}
 	for (auto it : micropp_material_list)
 		it->print_n();
+
+	double eps[] = { 0.2, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	double sig[] = { 0.2, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	double *vars = nullptr;
+	for (auto it : micropp_material_list) {
+		it->get_stress(eps, sig, vars);
+		for (int i = 0; i < 6; ++i)
+			cout << " " << sig[i];
+		cout << endl;
+	}
 }
 
 int main (void)
@@ -52,6 +62,13 @@ int main (void)
 	mat_params[1].set(1.0e3, 0.3, 5.0e4, 1.0e3, 2);
 
 	micropp_simulator(mat_params);
+
+	material_t *mat_params_n[2];
+	mat_params_n[0] = new material_elastic(1.0, 2.0);
+	mat_params_n[1] = new material_damage(1.0, 2.0, 3.0);
+
+	for (auto it : mat_params_n)
+		it->print_n();
 
 	return 0;
 }
