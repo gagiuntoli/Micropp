@@ -78,7 +78,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		micro_params[i] = _micro_params[i];
 
 	for (int i = 0; i < numMaterials; ++i)
-		material_list[i] = _materials[i];
+		material_list[i] = material_t::make_material(_materials[i]);
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -204,7 +204,7 @@ void micropp<tdim>::calc_ctan_lin()
 
 
 template <int tdim>
-material_t micropp<tdim>::get_material(const int e) const
+material_t *micropp<tdim>::get_material(const int e) const
 {
 	return material_list[elem_type[e]];
 }
@@ -245,7 +245,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 {
 	INST_START;
 	const int e = glo_elem(ex, ey, ez);
-	const material_t material = get_material(e);
+	const material_t *material = get_material(e);
 
 	double ctan[nvoi][nvoi];
 	constexpr int npedim = npe * dim;
@@ -259,12 +259,12 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		get_strain(u, gp, eps, ex, ey, ez);
 
 
-		if (material.plasticity) {
+		if (material->plasticity) {
 			const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 			const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
-			plastic_get_ctan(&material, eps, eps_p_old, alpha_old, ctan);
+			plastic_get_ctan(material, eps, eps_p_old, alpha_old, ctan);
 		} else {
-			isolin_get_ctan(&material, ctan);
+			isolin_get_ctan(material, ctan);
 		}
 
 		double bmat[nvoi][npedim], cxb[nvoi][npedim];
@@ -540,7 +540,7 @@ void micropp<tdim>::print_info() const
 	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
 
 	for (int i = 0; i < numMaterials; ++i)
-		material_list[i].print();
+		material_list[i]->print();
 
 	cout << "Number of Subiterations :" << nsubiterations << endl;
 	cout << endl;
@@ -554,19 +554,18 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 			       int ex, int ey, int ez) const
 {
 	const int e = glo_elem(ex, ey, ez);
-	const material_t material = get_material(e);
-	const double mu = material.mu;
+	const material_t *material = get_material(e);
 
-	if (material.plasticity == true) {
+	if (material->plasticity == true) {
 
 		const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 		const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
 
-		plastic_get_stress(&material, eps, eps_p_old, alpha_old, stress_gp);
+		plastic_get_stress(material, eps, eps_p_old, alpha_old, stress_gp);
 
 	} else {
 
-		isolin_get_stress(&material, eps, stress_gp);
+		isolin_get_stress(material, eps, stress_gp);
 	}
 
 }
@@ -687,11 +686,11 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *vars_old,
 			for (int ex = 0; ex < nex; ++ex){
 
 				const int e = glo_elem(ex, ey, ez);
-				const material_t material = get_material(e);
+				const material_t *material = get_material(e);
 
 				for (int gp = 0; gp < npe; ++gp) {
 
-					if (material.plasticity == true) {
+					if (material->plasticity == true) {
 
 						const double *eps_p_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 						const double *alpha_old = (vars_old) ? &vars_old[intvar_ix(e, gp, 6)] : nullptr;
@@ -700,7 +699,7 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *vars_old,
 
 						get_strain(u, gp, eps, ex, ey, ez);
 
-						nl_flag |= plastic_evolute(&material, eps, eps_p_old, alpha_old,
+						nl_flag |= plastic_evolute(material, eps, eps_p_old, alpha_old,
 									   eps_p_new, alpha_new, &f_trial);
 
 						if (f_trial > f_trial_max)

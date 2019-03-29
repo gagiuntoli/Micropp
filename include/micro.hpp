@@ -122,7 +122,7 @@ class micropp {
 
 		double micro_params[5];
 		int numMaterials;
-		material_t material_list[MAX_MATS];
+		material_t *material_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
 		int *elem_type;
@@ -146,7 +146,7 @@ class micropp {
 		const double nr_rel_tol;
 
 		void calc_ctan_lin();
-		material_t get_material(const int e) const;
+		material_t *get_material(const int e) const;
 
 		void get_elem_nodes(int n[npe],
 				    int ex, int ey, int ez = 0) const;
