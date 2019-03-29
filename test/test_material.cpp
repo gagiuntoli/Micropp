@@ -25,47 +25,33 @@
 #include <ctime>
 #include <cassert>
 
-#include "micro.hpp"
+#include "material.hpp"
 
 using namespace std;
 
-#define D_EPS 5.0e-4
 
-int main (int argc, char *argv[])
+void micropp_simulator(material_t *materials)
 {
-	// Execution ./test3d_1 n [print] [steps]
-	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
-		return(1);
+	cout << endl << "MicroPP Simulator" << endl;
+
+	material_t *micropp_material_list[2];
+
+	for (int i = 0; i < 2; ++i) {
+		double params[3];
+		micropp_material_list[i] = material_t::make_material(&materials[i]);
 	}
+	for (auto it : micropp_material_list)
+		it->print_n();
+}
 
-	const int dir = 1;
-	const int n = atoi(argv[1]);
-
-	const int print = (argc > 2) ? atoi(argv[2]) : 0;
-	if (print < 0 || print > 1) {
-		cerr << "Error in [print] argument, it only can be 0 or 1" << endl;
-		return(1);
-	}
-
-	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
-	const int micro_type = MIC_SPHERES;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.2 };
-	const int size[3] = { n, n, n };
-
-	ofstream file;
-	file.open("result.dat");
+int main (void)
+{
 
 	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 1);
-	mat_params[1].set(1.0e3, 0.3, 5.0e4, 1.0e3, 1);
+	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 0);
+	mat_params[1].set(1.0e3, 0.3, 5.0e4, 1.0e3, 2);
 
-	material_damage mat_damage(1.0e6, 0.3, 5.0e4);
+	micropp_simulator(mat_params);
 
-	//micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING);
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
-	micro.print_info();
-
-	file.close();
 	return 0;
 }

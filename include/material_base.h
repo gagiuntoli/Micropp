@@ -40,7 +40,7 @@ extern "C" {
 	};
 
 	void material_set(struct material_base *self, double _E, double _nu,
-	                         double _Ka, double _Sy, int _type);
+			  double _Ka, double _Sy, int _type);
 
 	void material_print(const struct material_base *self);
 

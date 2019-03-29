@@ -26,6 +26,9 @@
 
 #include <cmath>
 #include <cstdio>
+#include <iostream>
+
+using namespace std;
 
 struct material_t : public material_base {
 
@@ -42,7 +45,19 @@ struct material_t : public material_base {
 		damage = false;
 	}
 
+	material_t(const material_t * material) {
+		E = material->E;
+		nu = material->nu;
+		Ka = material->Ka;
+		Sy = material->Sy;
+	}
+
+	material_t * make_material(double * params, int type);
+	static material_t * make_material(material_t *material);
+
 	virtual void get_stress(const double eps[6], double stress[6], const double *history_params) {};
+
+	virtual void print_n(void) {};
 
 	void set(double _E, double _nu, double _Ka, double _Sy, int _type)
 	{
@@ -55,14 +70,70 @@ struct material_t : public material_base {
 	}
 };
 
+class material_elastic : public material_t {
+
+	public:
+		material_elastic(double _E, double _nu) {
+			E = _E;
+			nu = _nu;
+			Ka = 0;
+			Sy = 0;
+			Xt = 0;
+		};
+
+		void get_stress(const double eps[6], double stress[6], const double *history_params)
+		{
+			/* Elastic Material Law*/
+			for (int i = 0; i < 3; ++i)
+				stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
+					    + 2 * mu * eps[i];
+
+			for (int i = 3; i < 6; ++i)
+				stress[i] = mu * eps[i];
+		}
+
+		void print_n(void) {
+			cout << "Type : Elastic" << endl;
+			cout << "E = " << E << " nu = " << nu << endl;
+		}
+};
+
+class material_plastic : public material_t {
+
+	public:
+		material_plastic(double _E, double _nu, double _Ka, double _Sy) {
+			E = _E;
+			nu = _nu;
+			Ka = _Ka;
+			Sy = _Sy;
+			Xt = 0;
+		};
+
+		void get_stress(const double eps[6], double stress[6], const double *history_params)
+		{
+			/* Elastic Material Law*/
+			for (int i = 0; i < 3; ++i)
+				stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
+					    + 2 * mu * eps[i];
+
+			for (int i = 3; i < 6; ++i)
+				stress[i] = mu * eps[i];
+		}
+
+		void print_n(void) {
+			cout << "Type : Plastic" << endl;
+			cout << "E = " << E << " nu = " << nu << endl;
+		}
+};
 
 class material_damage : public material_t {
 
 	public:
 		material_damage(double _E, double _nu, double _Xt) {
-			type = 2;
 			E = _E;
 			nu = _nu;
+			Ka = 0;
+			Sy = 0;
 			Xt = _Xt;
 		};
 
@@ -76,7 +147,15 @@ class material_damage : public material_t {
 			for (int i = 3; i < 6; ++i)
 				stress[i] = mu * eps[i];
 		}
+
+		void print_n(void)
+		{
+			cout << "Type : Damage" << endl;
+			cout << "E = " << E << " nu = " << nu
+				<< " Xt = " << Xt << endl;
+		}
 };
+
 
 
 #endif
