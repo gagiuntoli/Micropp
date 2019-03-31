@@ -37,7 +37,7 @@ int main (int argc, char *argv[])
 
 		public:
 			test_t(const int size[3], const int micro_type, const double micro_params[5],
-			       const material_t mat_params[2])
+			       const struct material_base mat_params[2])
 				:micropp<3> (1, size, micro_type, micro_params, mat_params, NO_COUPLING)
 			{};
 
@@ -98,9 +98,9 @@ int main (int argc, char *argv[])
 
 	double Em = 1.0e8;
 
-	material_t mat_params[2];
-	mat_params[0].set(Em, 0.25, 1.0e8, 1.0e4, 0);
-	mat_params[1].set(Em * a, 0.25, 1.0e8, 1.0e4, 0);
+	material_base mat_params[2];
+	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
 	test_t test(size, micro_type, micro_params, mat_params);
 	test.assembly_and_solve();

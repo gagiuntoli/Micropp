@@ -36,44 +36,13 @@ using namespace std;
 
 struct material_t : public material_base {
 
-	material_t() {
-		E = NAN;
-		nu = NAN;
-		Ka = NAN;
-		Sy = NAN;
-		k = NAN;
-		mu = NAN;
-		lambda = NAN;
-		type = -1;
-		plasticity = false;
-		damage = false;
-	}
+	static material_t *make_material(const struct material_base material);
 
-	material_t(const material_t * material) {
-		E = material->E;
-		nu = material->nu;
-		Ka = material->Ka;
-		Sy = material->Sy;
-	}
+	virtual void get_stress(const double *eps, double *stress, const double *history_params) const = 0;
+	virtual void get_ctan(const double *eps, double *ctan, const double *history_params) const = 0;
+	virtual bool evolute(const double *eps, const double *vars_old, double *vars_new) const = 0;
 
-	material_t * make_material(double * params, int type);
-	static material_t *make_material(material_t material);
-
-	virtual void get_stress(const double *eps, double *stress, const double *history_params) const {};
-	virtual void get_ctan(const double *eps, double *ctan, const double *history_params) const {};
-	virtual bool evolute(const double *eps, const double *vars_old, double *vars_new) const {};
-
-	virtual void print_n() const { cout << "I am base" << endl; };
-
-	void set(double _E, double _nu, double _Ka, double _Sy, int _type)
-	{
-		material_set(this, _type, _E, _nu, _Ka, _Sy, 0);
-	}
-
-	void print() const
-	{
-		material_print(this);
-	}
+	virtual void print() const = 0;
 };
 
 class material_elastic : public material_t {
@@ -93,7 +62,7 @@ class material_elastic : public material_t {
 		void get_stress(const double *eps, double *stress, const double *history_params) const;
 		void get_ctan(const double *eps, double *ctan, const double *history_params) const;
 		bool evolute(const double *eps, const double *vars_old, double *vars_new) const;
-		void print_n() const;
+		void print() const;
 
 };
 
@@ -114,7 +83,7 @@ class material_plastic : public material_t {
 		void get_stress(const double *eps, double *stress, const double *history_params) const;
 		void get_ctan(const double *eps, double *ctan, const double *history_params) const;
 		bool evolute(const double *eps, const double *vars_old, double *vars_new) const;
-		void print_n() const;
+		void print() const;
 
 	private:
 		bool plastic_law(const double eps[6],
@@ -142,7 +111,7 @@ class material_damage : public material_t {
 		void get_stress(const double *eps, double *stress, const double *history_params) const;
 		void get_ctan(const double *eps, double *ctan, const double *history_params) const;
 		bool evolute(const double *eps, const double *vars_old, double *vars_new) const;
-		void print_n() const;
+		void print() const;
 
 };
 

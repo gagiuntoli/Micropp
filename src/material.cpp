@@ -1,28 +1,7 @@
 #include "material.hpp"
 
-material_t * material_t::make_material(double *params, int type)
-{
-	/*
-	 * This fabric creates the corresponding subclass according to the <type>
-	 * and the <params> arguments
-	 */
-	switch (type) {
-		case 0:
-			return new material_elastic(params[0], params[1]);
-			break;
-		case 1:
-			return new material_plastic(params[0], params[1], params[2], params[3]);
-			break;
-		case 2:
-			return new material_damage(params[0], params[1], params[2]);
-			break;
-		default:
-			break;
-	}
-}
 
-
-material_t *material_t::make_material(material_t material)
+material_t *material_t::make_material(const material_base material)
 {
 	/*
 	 * This fabric creates the corresponding subclass acorrding to the <type>
@@ -90,7 +69,7 @@ bool material_elastic::evolute(const double *eps, const double *vars_old, double
 }
 
 
-void material_elastic::print_n() const
+void material_elastic::print() const
 {
 	cout << "Type : Elastic" << endl;
 	cout << "E = " << E << " nu = " << nu << endl;
@@ -211,7 +190,7 @@ bool material_plastic::evolute(const double *eps, const double *vars_old, double
 }
 
 
-void material_plastic::print_n() const
+void material_plastic::print() const
 {
 	cout << "Type : Plastic" << endl;
 	cout << "E = " << E << " nu = " << nu << " Ka = " << Ka << " Sy = " << Sy << endl;
@@ -255,7 +234,7 @@ bool material_damage::evolute(const double *eps, const double *vars_old, double 
 }
 
 
-void material_damage::print_n() const
+void material_damage::print() const
 {
 	cout << "Type : Plastic" << endl;
 	cout << "E = " << E << " nu = " << nu << " Ka = " << Ka << " Sy = " << Sy << endl;
