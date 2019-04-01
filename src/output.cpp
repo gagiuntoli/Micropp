@@ -157,20 +157,45 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 		<< "<DataArray type=\"Float64\" Name=\"plasticity\" "
 		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
-		double plasticity = 0.;
-		for (int gp = 0; gp < npe; ++gp) {
-			double tmp = 0.0;
-			for (int v = 0; v < nvoi; ++v) {
-				if (vars_old != NULL) {
-					tmp += vars_old[intvar_ix(e, gp, v)] *\
-					       vars_old[intvar_ix(e, gp, v)];
-				} else {
-					tmp += 0.0;
+		double plasticity = 0.0;
+		if (vars_old != NULL) {
+			for (int gp = 0; gp < npe; ++gp) {
+				for (int v = 0; v < nvoi; ++v) {
+					plasticity += vars_old[intvar_ix(e, gp, v)] *\
+						      vars_old[intvar_ix(e, gp, v)];
 				}
 			}
-			plasticity += sqrt(tmp);
 		}
+		plasticity += sqrt(plasticity);
 		file << plasticity / npe << " ";
+	}
+	file << "\n</DataArray>" << endl;
+
+	file
+		<< "<DataArray type=\"Float64\" Name=\"damage_e\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	for (int e = 0; e < nelem; ++e) {
+		double damage = 0.0;
+		if (vars_old != nullptr) {
+			for (int gp = 0; gp < npe; ++gp) {
+				damage += vars_old[intvar_ix(e, gp, 0)];
+			}
+		}
+		file << damage / npe << " ";
+	}
+	file << "\n</DataArray>" << endl;
+
+	file
+		<< "<DataArray type=\"Float64\" Name=\"damage_D\" "
+		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
+	for (int e = 0; e < nelem; ++e) {
+		double damage = 0.0;
+		if (vars_old != nullptr) {
+			for (int gp = 0; gp < npe; ++gp) {
+				damage += vars_old[intvar_ix(e, gp, 1)];
+			}
+		}
+		file << damage / npe << " ";
 	}
 	file << "\n</DataArray>" << endl;
 

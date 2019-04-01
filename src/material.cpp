@@ -299,13 +299,12 @@ void material_damage::get_stress(const double *eps, double *stress,
 	 *
 	 */
 
-	const double e_old = vars_old[0];
+	const double e_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
 	double e, D;
 	damage_law(eps, e_old, &e, &D, stress);
 
 	for (int i = 0; i < 6; ++i)
-		stress[i] *= D;
-
+		stress[i] *= (1 - D);
 }
 
 
@@ -321,9 +320,10 @@ bool material_damage::evolute(const double *eps, const double *vars_old,
 {
 	const double e_old = (vars_old) ? vars_old[0] : 0;
 	double *e_new = (vars_new) ? &(vars_new[0]) : nullptr;
+	double *D_new = (vars_new) ? &(vars_new[1]) : nullptr;
 
-	double D, stress[6];
-	return damage_law(eps, e_old, e_new, &D, stress);
+	double stress[6];
+	return damage_law(eps, e_old, e_new, D_new, stress);
 }
 
 
