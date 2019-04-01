@@ -58,6 +58,16 @@ struct material_t : public material_base {
 			     double *vars_new) const = 0;
 
 	virtual void print() const = 0;
+
+	protected:
+	/*
+	 * Apply_perturbation calculates <ctan> by applying the pertubation
+	 * procedure.
+	 */
+	void apply_perturbation(const double *eps, double *ctan,
+				const double *vars_old) const;
+
+
 };
 
 
@@ -149,6 +159,11 @@ class material_damage : public material_t {
 			     double *vars_new) const;
 
 		void print() const;
+
+	private:
+		bool damage_law(const double *eps, const double e_old,
+				double *_e, double *_D,
+				double *stress_lin) const;
 
 };
 
