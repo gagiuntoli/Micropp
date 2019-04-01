@@ -33,7 +33,7 @@ template <int tdim>
 class test_t : public micropp<tdim> {
 	public:
 		test_t(const int size[3], const double micro_params[5],
-		       const material_t mat_params[2])
+		       const struct material_base mat_params[2])
 			:micropp<tdim> (4, size, 1, micro_params, mat_params)
 		{};
 
@@ -52,9 +52,9 @@ int main (int argc, char *argv[])
 
 	int n[8];
 
-	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
-	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
+	material_base mat_params[2];
+	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
 	test_t<3> test(size, micro_params, mat_params);
 

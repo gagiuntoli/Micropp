@@ -47,9 +47,9 @@ int main (int argc, char *argv[])
 	}
 
 
-	material_t materials[2];
-	materials[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 0);
-	materials[1].set(1.0e6, 0.3, 1.0e4, 5.0e4, 0);
+	material_base materials[2];
+	material_set(&materials[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&materials[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
 	double params[8][4] = {
 		{ 1.0, 1.0, 1.0, 0.1 },

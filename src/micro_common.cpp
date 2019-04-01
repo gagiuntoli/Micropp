@@ -26,9 +26,11 @@
 
 template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
-		       const double _micro_params[4], const material_t *_materials,
-		       const int _coupling, const bool _subiterations, const int _nsubiterations,
-		       const int _nr_max_its, const double _nr_max_tol, const double _nr_rel_tol):
+		       const double _micro_params[4],
+		       const struct material_base *_materials,
+		       const int _coupling, const bool _subiterations,
+		       const int _nsubiterations, const int _nr_max_its,
+		       const double _nr_max_tol, const double _nr_rel_tol):
 
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
@@ -526,7 +528,7 @@ void micropp<tdim>::print_info() const
 	cout << endl;
 
 	for (int i = 0; i < numMaterials; ++i) {
-		material_list[i]->print_n();
+		material_list[i]->print();
 		cout << endl;
 	}
 

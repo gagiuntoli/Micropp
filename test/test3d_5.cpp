@@ -55,9 +55,9 @@ int main(int argc, char **argv)
 
 	double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
-	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 5.0e4, 1);
-	mat_params[1].set(1.0e6, 0.3, 1.0e4, 0.0e-1, 0);
+	material_base mat_params[2];
+	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
 	int dir = 2;
 	const double d_eps_1 = 0.01, d_eps_2 = -0.008;;

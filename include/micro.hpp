@@ -202,7 +202,8 @@ class micropp {
 		micropp() = delete;
 
 		micropp(const int ngp, const int size[3], const int micro_type,
-			const double *micro_params, const material_t *materials,
+			const double *micro_params,
+			const struct material_base *materials,
 			const int _coupling = ONE_WAY,
 			const bool _subiterations = false,
 			const int _nsubiterations = 10,

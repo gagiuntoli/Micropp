@@ -30,7 +30,7 @@
 using namespace std;
 
 
-void micropp_simulator(material_t *materials)
+void micropp_simulator(const struct material_base *materials)
 {
 	cout << endl << "MicroPP Simulator" << endl;
 
@@ -41,7 +41,7 @@ void micropp_simulator(material_t *materials)
 		micropp_material_list[i] = material_t::make_material(materials[i]);
 	}
 	for (auto it : micropp_material_list)
-		it->print_n();
+		it->print();
 
 	double eps[] = { 0.2, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	double sig[] = { 0.2, 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -57,9 +57,9 @@ void micropp_simulator(material_t *materials)
 int main (void)
 {
 
-	material_t mat_params[2];
-	mat_params[0].set(1.0e6, 0.3, 5.0e4, 2.0e4, 0);
-	mat_params[1].set(1.0e3, 0.3, 5.0e4, 1.0e3, 2);
+	material_base mat_params[2];
+	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
 	micropp_simulator(mat_params);
 
@@ -68,7 +68,7 @@ int main (void)
 	mat_params_n[1] = new material_damage(1.0, 2.0, 3.0);
 
 	for (auto it : mat_params_n)
-		it->print_n();
+		it->print();
 
 	return 0;
 }

@@ -36,7 +36,6 @@ extern "C" {
 		double k, mu, lambda;
 		double Xt;
 		int type;
-		bool plasticity, damage;
 	};
 
 	void material_set(struct material_base *self, const int _type,
