@@ -246,11 +246,9 @@ void material_plastic::print() const
 // DAMAGE MATERIAL
 
 
-bool material_damage::damage_law(const double *eps,
-				 const double e_old,
-				 double *_e,
-				 double *_D,
-				 double *stress) const
+bool material_damage::damage_law(const double *eps, const double e_old,
+				 const double D_old, double *_e, 
+				 double *_D, double *stress) const
 {
 	/*
 	 * Calculates the linear stree <stress>, and <e> and <D> using the
@@ -276,6 +274,7 @@ bool material_damage::damage_law(const double *eps,
 	e = sqrt(e);
 
 	e = max(e_old, e);
+	cout << "e = " << e << endl;
 
 	double D = (e < 1.0) ? 0.0 : (1 - exp(1 - e));
 
@@ -285,7 +284,7 @@ bool material_damage::damage_law(const double *eps,
 	if (_D != nullptr)
 		*_D = D;
 
-	return (e < 1.0) ? false : true;
+	return ((e < 1.0) ? false : true);
 }
 
 
@@ -300,8 +299,9 @@ void material_damage::get_stress(const double *eps, double *stress,
 	 */
 
 	const double e_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
-	double e, D;
-	damage_law(eps, e_old, &e, &D, stress);
+	const double D_old = (vars_old != nullptr) ? vars_old[1] : 0.0;
+	double D;
+	damage_law(eps, e_old, D_old, nullptr, &D, stress);
 
 	for (int i = 0; i < 6; ++i)
 		stress[i] *= (1 - D);
@@ -318,12 +318,20 @@ void material_damage::get_ctan(const double *eps, double *ctan,
 bool material_damage::evolute(const double *eps, const double *vars_old,
 			      double *vars_new) const
 {
+	/* Assign new values to <vars_new> according to <eps> and <vars_old>.
+	 * returns <true> if the material has entered in non-linear range, 
+	 * <false> if not.
+	 */
 	const double e_old = (vars_old) ? vars_old[0] : 0;
+	const double D_old = (vars_old) ? vars_old[1] : 0;
 	double *e_new = (vars_new) ? &(vars_new[0]) : nullptr;
 	double *D_new = (vars_new) ? &(vars_new[1]) : nullptr;
 
 	double stress[6];
-	return damage_law(eps, e_old, e_new, D_new, stress);
+
+	bool non_linear = damage_law(eps, e_old, D_old, e_new, D_new, stress);
+
+	return non_linear;
 }
 
 

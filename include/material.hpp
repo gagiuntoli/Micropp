@@ -162,7 +162,7 @@ class material_damage : public material_t {
 
 	private:
 		bool damage_law(const double *eps, const double e_old,
-				double *_e, double *_D,
+				const double D_old, double *_e, double *_D,
 				double *stress_lin) const;
 
 };
