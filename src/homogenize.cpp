@@ -123,11 +123,10 @@ void micropp<tdim>::homogenize()
 
 		}
 
-		/* Updates <vars_new> and <f_trial_max> */
+		// Updates <vars_new>
+		bool non_linear = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
 
-		bool nl_flag = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
-
-		if (nl_flag == true) {
+		if (non_linear == true) {
 			if (gp_ptr->allocated == false) {
 				gp_ptr->allocate(nvars);
 				memcpy(gp_ptr->vars_k, vars_new, nvars * sizeof(double));

@@ -656,8 +656,7 @@ template<int tdim>
 bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 				  double *_vars_new) const
 {
-	bool nl_flag = false;
-	double eps[nvoi];
+	bool non_linear = false;
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -671,15 +670,16 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 					const double *vars_old = (_vars_old) ? &_vars_old[intvar_ix(e, gp, 0)] : nullptr;
 					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
 
+					double eps[nvoi];
 					get_strain(u, gp, eps, ex, ey, ez);
 
-					nl_flag |= material->evolute(eps, vars_old, vars_new);
+					non_linear |= material->evolute(eps, vars_old, vars_new);
 				}
 			}
 		}
 	}
 
-	return nl_flag;
+	return non_linear;
 }
 
 

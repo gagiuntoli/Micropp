@@ -50,6 +50,28 @@ material_t *material_t::make_material(const struct material_base material)
 }
 
 
+void material_t::apply_perturbation(const double *eps, double *ctan,
+				    const double *vars_old) const
+{
+	double stress_0[6];
+	get_stress(eps, stress_0, vars_old);
+
+	for (int i = 0; i < 6; ++i) {
+
+		double eps_1[6];
+		memcpy(eps_1, eps, 6 * sizeof(double));
+		eps_1[i] += D_EPS_CTAN;
+
+		double stress_1[6];
+		get_stress(eps_1, stress_1, vars_old);
+
+		for (int j = 0; j < 6; ++j)
+			ctan[j * 6 + i] =
+				(stress_1[j] - stress_0[j]) / D_EPS_CTAN;
+	}
+}
+
+
 void get_dev_tensor(const double tensor[6], double tensor_dev[6])
 {
 	memcpy(tensor_dev, tensor, 6 * sizeof(double));
@@ -186,22 +208,7 @@ void material_plastic::get_stress(const double *eps, double *stress,
 void material_plastic::get_ctan(const double *eps, double *ctan,
 				const double *vars_old) const
 {
-	double stress_0[6];
-	get_stress(eps, stress_0, vars_old);
-
-	for (int i = 0; i < 6; ++i) {
-
-		double eps_1[6];
-		memcpy(eps_1, eps, 6 * sizeof(double));
-		eps_1[i] += D_EPS_CTAN;
-
-		double stress_1[6];
-		get_stress(eps_1, stress_1, vars_old);
-
-		for (int j = 0; j < 6; ++j)
-			ctan[j * 6 + i] =
-				(stress_1[j] - stress_0[j]) / D_EPS_CTAN;
-	}
+	apply_perturbation(eps, ctan, vars_old);
 }
 
 
@@ -239,45 +246,97 @@ void material_plastic::print() const
 // DAMAGE MATERIAL
 
 
-void material_damage::get_stress(const double *eps, double *stress,
-				 const double *vars_old) const
+bool material_damage::damage_law(const double *eps, const double e_old,
+				 const double D_old, double *_e, 
+				 double *_D, double *stress) const
 {
-	/* Elastic Material Law*/
+	/*
+	 * Calculates the linear stree <stress>, and <e> and <D> using the
+	 * strain <eps> and <e_old>
+	 *
+	 * e_old = vars_old[0]
+	 *
+	 */
+
+	// First suppose we are in linear zone
 	for (int i = 0; i < 3; ++i)
 		stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
 			    + 2 * mu * eps[i];
 
 	for (int i = 3; i < 6; ++i)
 		stress[i] = mu * eps[i];
+
+	// Now check if we have entered in non-linear zone
+	double e = 0.0;
+	for (int i = 0; i < 3; ++i)
+		e += stress[i] * stress[i];
+	e /= (Xt * Xt);
+	e = sqrt(e);
+
+	e = max(e_old, e);
+
+	double D = (e < 1.0) ? 0.0 : (1 - exp(1 - e));
+	D = min(D, D_old + 0.02);
+
+	if (_e != nullptr)
+		*_e = e;
+
+	if (_D != nullptr)
+		*_D = D;
+
+	return ((e < 1.0) ? false : true);
+}
+
+
+void material_damage::get_stress(const double *eps, double *stress,
+				 const double *vars_old) const
+{
+	/*
+	 * Calculates the <stress> according to <eps> and <vars_old>.
+	 *
+	 * e_old = vars_old[0]
+	 *
+	 */
+
+	const double e_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
+	const double D_old = (vars_old != nullptr) ? vars_old[1] : 0.0;
+	double D;
+	damage_law(eps, e_old, D_old, nullptr, &D, stress);
+
+	for (int i = 0; i < 6; ++i)
+		stress[i] *= (1 - D);
 }
 
 
 void material_damage::get_ctan(const double *eps, double *ctan,
 			       const double *vars_old) const
 {
-	// C = lambda * (1x1) + 2 mu I
-	memset(ctan, 0, 6 * 6 * sizeof(double));
-
-	for (int i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
-			ctan[i * 6 + j] += lambda;
-
-	for (int i = 0; i < 3; ++i)
-		ctan[i * 6 + i] += 2 * mu;
-
-	for (int i = 3; i < 6; ++i)
-		ctan[i * 6 + i] = mu;
+	apply_perturbation(eps, ctan, vars_old);
 }
 
 
 bool material_damage::evolute(const double *eps, const double *vars_old,
 			      double *vars_new) const
 {
+	/* Assign new values to <vars_new> according to <eps> and <vars_old>.
+	 * returns <true> if the material has entered in non-linear range, 
+	 * <false> if not.
+	 */
+	const double e_old = (vars_old) ? vars_old[0] : 0;
+	const double D_old = (vars_old) ? vars_old[1] : 0;
+	double *e_new = (vars_new) ? &(vars_new[0]) : nullptr;
+	double *D_new = (vars_new) ? &(vars_new[1]) : nullptr;
+
+	double stress[6];
+
+	bool non_linear = damage_law(eps, e_old, D_old, e_new, D_new, stress);
+
+	return non_linear;
 }
 
 
 void material_damage::print() const
 {
-	cout << "Type : Plastic" << endl;
+	cout << "Type : Damage" << endl;
 	cout << "E = " << E << " nu = " << nu << " Xt = " << Xt << endl;
 }
