@@ -1,11 +1,35 @@
+/*
+ * This source code is part of MicroPP: a finite element library
+ * to solve microstructural problems for composite materials.
+ *
+ * Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                        Guido Giuntoli <gagiuntoli@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 #include "material.hpp"
 
 
-material_t *material_t::make_material(const material_base material)
+material_t *material_t::make_material(const struct material_base material)
 {
 	/*
-	 * This fabric creates the corresponding subclass acorrding to the <type>
-	 * data member of material.
+	 * This fabric creates the corresponding subclass according to the 
+	 * data members of <material>. This last is a "struct" than can be
+	 * manage also from C/Fortran easily and that is why we passed micropp
+	 * constructor the data in this form.
 	 */
 
 	switch (material.type) {
@@ -13,10 +37,12 @@ material_t *material_t::make_material(const material_base material)
 			return new material_elastic(material.E, material.nu);
 			break;
 		case 1:
-			return new material_plastic(material.E, material.nu, material.Ka, material.Sy);
+			return new material_plastic(material.E, material.nu,
+						    material.Ka, material.Sy);
 			break;
 		case 2:
-			return new material_damage(material.E, material.nu, material.Xt);
+			return new material_damage(material.E, material.nu,
+						   material.Xt);
 			break;
 		default:
 			break;
@@ -28,16 +54,18 @@ void get_dev_tensor(const double tensor[6], double tensor_dev[6])
 {
 	memcpy(tensor_dev, tensor, 6 * sizeof(double));
 	for (int i = 0; i < 3; i++)
-		tensor_dev[i] -= (1 / 3.0) * (tensor[0] + tensor[1] + tensor[2]);
+		tensor_dev[i] -= \
+			(1 / 3.0) * (tensor[0] + tensor[1] + tensor[2]);
 }
 
 
 // ELASTIC MATERIAL
 
 
-void material_elastic::get_stress(const double *eps, double *stress, const double *history_params) const
+void material_elastic::get_stress(const double *eps, double *stress,
+				  const double *history_params) const
 {
-	/* Elastic Material Law*/
+	// stress[i][j] = lambda eps[k][k] * delta[i][j] + mu eps[i][j]
 	for (int i = 0; i < 3; ++i)
 		stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
 			    + 2 * mu * eps[i];
@@ -47,7 +75,8 @@ void material_elastic::get_stress(const double *eps, double *stress, const doubl
 }
 
 
-void material_elastic::get_ctan(const double *eps, double *ctan, const double *history_params) const
+void material_elastic::get_ctan(const double *eps, double *ctan,
+				const double *history_params) const
 {
 	// C = lambda * (1x1) + 2 mu I
 	memset(ctan, 0, 6 * 6 * sizeof(double));
@@ -64,15 +93,18 @@ void material_elastic::get_ctan(const double *eps, double *ctan, const double *h
 }
 
 
-bool material_elastic::evolute(const double *eps, const double *vars_old, double *vars_new) const
+bool material_elastic::evolute(const double *eps, const double *vars_old,
+			       double *vars_new) const
 {
+	// we don't have to evolute nothing is always linear
+	return false;
 }
 
 
 void material_elastic::print() const
 {
 	cout << "Type : Elastic" << endl;
-	cout << "E = " << E << " nu = " << nu << endl;
+	cout << scientific << "E = " << E << " nu = " << nu << endl;
 }
 
 
@@ -86,7 +118,10 @@ bool material_plastic::plastic_law(const double eps[6],
 				   double _normal[6],
 				   double _s_trial[6]) const
 {
-	/* Calculates _dl, _normal and _s_trial
+	/*
+	 * Calculates _dl, _normal and _s_trial to used in the other plastic 
+	 * material functions. Returns <true> if it enters in non-linear zone
+	 * <false> if not.
 	 */
 
 	const double zeros[6] = { 0.0 };
@@ -148,7 +183,8 @@ void material_plastic::get_stress(const double *eps, double *stress,
 }
 
 
-void material_plastic::get_ctan(const double *eps, double *ctan, const double *vars_old) const
+void material_plastic::get_ctan(const double *eps, double *ctan,
+				const double *vars_old) const
 {
 	double stress_0[6];
 	get_stress(eps, stress_0, vars_old);
@@ -163,12 +199,14 @@ void material_plastic::get_ctan(const double *eps, double *ctan, const double *v
 		get_stress(eps_1, stress_1, vars_old);
 
 		for (int j = 0; j < 6; ++j)
-			ctan[j * 6 + i] = (stress_1[j] - stress_0[j]) / D_EPS_CTAN;
+			ctan[j * 6 + i] =
+				(stress_1[j] - stress_0[j]) / D_EPS_CTAN;
 	}
 }
 
 
-bool material_plastic::evolute(const double *eps, const double *vars_old, double *vars_new) const
+bool material_plastic::evolute(const double *eps, const double *vars_old,
+			       double *vars_new) const
 {
 	const double *eps_p_old = (vars_old) ? &(vars_old[0]) : nullptr;
 	const double *alpha_old = (vars_old) ? &(vars_old[6]) : nullptr;
@@ -193,14 +231,16 @@ bool material_plastic::evolute(const double *eps, const double *vars_old, double
 void material_plastic::print() const
 {
 	cout << "Type : Plastic" << endl;
-	cout << "E = " << E << " nu = " << nu << " Ka = " << Ka << " Sy = " << Sy << endl;
+	cout << "E = " << E << " nu = " << nu << " Ka = " << Ka << " Sy = "
+		<< Sy << endl;
 }
 
 
 // DAMAGE MATERIAL
 
 
-void material_damage::get_stress(const double *eps, double *stress, const double *history_params) const
+void material_damage::get_stress(const double *eps, double *stress,
+				 const double *vars_old) const
 {
 	/* Elastic Material Law*/
 	for (int i = 0; i < 3; ++i)
@@ -212,7 +252,8 @@ void material_damage::get_stress(const double *eps, double *stress, const double
 }
 
 
-void material_damage::get_ctan(const double *eps, double *ctan, const double *history_params) const
+void material_damage::get_ctan(const double *eps, double *ctan,
+			       const double *vars_old) const
 {
 	// C = lambda * (1x1) + 2 mu I
 	memset(ctan, 0, 6 * 6 * sizeof(double));
@@ -229,7 +270,8 @@ void material_damage::get_ctan(const double *eps, double *ctan, const double *hi
 }
 
 
-bool material_damage::evolute(const double *eps, const double *vars_old, double *vars_new) const
+bool material_damage::evolute(const double *eps, const double *vars_old,
+			      double *vars_new) const
 {
 }
 
@@ -237,5 +279,5 @@ bool material_damage::evolute(const double *eps, const double *vars_old, double 
 void material_damage::print() const
 {
 	cout << "Type : Plastic" << endl;
-	cout << "E = " << E << " nu = " << nu << " Ka = " << Ka << " Sy = " << Sy << endl;
+	cout << "E = " << E << " nu = " << nu << " Xt = " << Xt << endl;
 }

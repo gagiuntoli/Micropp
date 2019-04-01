@@ -19,7 +19,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "material_base.h"
+
 
 void material_set(struct material_base *self, const int _type,
 		  const double _E, const double _nu, const double _Ka,
@@ -35,21 +37,12 @@ void material_set(struct material_base *self, const int _type,
 	self->k = _E / (3. * (1. - 2. * _nu));
 	self->mu = _E / (2. * (1. + _nu));
 	self->lambda = _nu * _E / ((1. + _nu) * (1. - 2. * _nu));
-
-	if (_type == 0) {        // lineal
-		self->plasticity = false;
-		self->damage = false;
-	} else if (_type == 1) { // con plasticidad
-		self->plasticity = true;
-		self->damage = false;
-	} else if (_type == 2) { // con daño
-		self->plasticity = false;
-		self->damage = true;
-	}
 }
+
 
 void material_print(const struct material_base *self)
 {
-	printf("E = %e, nu = %e, Ka = %e, Sy = %e, type = %1d\n",
-	       self->E, self->nu , self->Ka, self->Sy, self->type);
+	printf("E = %e\nnu = %e\nKa = %e\nSy = %e\nXt = %e\nk = %e\nmu = %e\n"
+	       "lambda = %e\ntype = %1d\n", self->E, self->nu , self->Ka,
+	       self->Sy, self->Xt, self->k, self->mu, self->lambda, self->type);
 }
