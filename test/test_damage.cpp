@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-5
+#define D_EPS 5.0e-4
 
 int main (int argc, char *argv[])
 {
@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
 
 	material_base mat_params[2];
 	material_set(&mat_params[0], 2, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
-	material_set(&mat_params[1], 2, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
+	material_set(&mat_params[1], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params, NO_COUPLING, true, 5);
 	micro.print_info();

@@ -274,9 +274,9 @@ bool material_damage::damage_law(const double *eps, const double e_old,
 	e = sqrt(e);
 
 	e = max(e_old, e);
-	cout << "e = " << e << endl;
 
 	double D = (e < 1.0) ? 0.0 : (1 - exp(1 - e));
+	D = min(D, D_old + 0.02);
 
 	if (_e != nullptr)
 		*_e = e;
