@@ -50,9 +50,7 @@ int main(int argc, char **argv)
 	assert(nx > 1 && ny > 1 && nz > 1 && time_steps > 0);
 
 	int size[dim] = {nx, ny, nz};
-
 	int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
-
 	double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
 	material_base mat_params[2];
@@ -92,7 +90,6 @@ int main(int argc, char **argv)
 			cout << endl;
 		}
 
-		double MacroStress[6], MacroCtan[36];
 		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
 

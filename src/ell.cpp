@@ -75,7 +75,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 					const int ni = nod_index2D(xi, yi);
 					int * const cols_ptr = &(m->cols[ni * nfield * nnz + fi * nnz]);
 
-					int ix[num_nodes] = {
+					int ix[9] = {
 						(yi == 0 || xi == 0)           ? 0 : ni - nx - 1,
 						(yi == 0)                      ? 0 : ni - nx,
 						(yi == 0 || xi == nx - 1)      ? 0 : ni - nx + 1,
@@ -103,7 +103,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 						const int ni = nod_index3D(xi, yi, zi);
 						int * const cols_ptr = &(m->cols[ni * nfield * nnz + fi * nnz]);
 
-						int ix[num_nodes] = {
+						int ix[27] = {
 							(zi == 0 || yi == 0 || xi == 0)                ? 0 : ni - nxny - nx - 1,
 							(zi == 0 || yi == 0)                           ? 0 : ni - nxny - nx,
 							(zi == 0 || yi == 0 || xi == nx - 1)           ? 0 : ni - nxny - nx + 1,
@@ -268,7 +268,6 @@ void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 	INST_START;
 
 	const int nx = m->n[0];
-	const int ny = m->n[1];
 	const int nfield = m->nfield;
 	const int npe = 4;
 	const int nnz = m->nnz;
@@ -279,7 +278,8 @@ void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 		{ 1, 2, 5, 4 } };
 
 	const int n0 = ey * nx + ex;
-	const int ix_glo[4] = { n0,
+	const int ix_glo[4] = {
+		n0,
 		n0 + 1,
 		n0 + nx + 1,
 		n0 + nx };
@@ -306,7 +306,6 @@ void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae)
 
 	const int nx = m->n[0];
 	const int ny = m->n[1];
-	const int nz = m->n[2];
 	const int nfield = m->nfield;
 	const int npe = 8;
 	const int nnz = m->nnz;

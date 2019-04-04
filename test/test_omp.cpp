@@ -61,15 +61,14 @@ int main(int argc, char **argv)
 	int dir = 2;
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi];
-	double ctan[nvoi * nvoi];
 
 	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
 
 	double time;
 #ifdef _OPENMP
-	time = omp_get_wtime() - time;
+	time = omp_get_wtime();
 #else
-	time = clock() - time;
+	time = clock();
 #endif
 
 	cout << scientific;

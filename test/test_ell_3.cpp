@@ -45,7 +45,6 @@ int main (int argc, char *argv[])
 
 	const int nex = nx - 1;
 	const int ney = ny - 1;
-	const int nez = (dim == 3) ? nz - 1 : 0;
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = 1;
 
