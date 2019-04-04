@@ -34,23 +34,8 @@ int main (int argc, char *argv[])
 	const int nx = 3;
 	const int ny = 3;
 	const int nz = 3;
-	const int nex = nx - 1;
-	const int ney = ny - 1;
-	const int nez = nz - 1;
 
 	ell_matrix A1;
-	const double Ae[8 * 8] = {
-		3,   1,  -1,   1,   1,  -1,  -3,  -1,
-		1,   3,   1,  -1,  -1,   1,  -1,  -3,
-		-1,   1,   3,   1,   1,  -1,  -3,  -1,
-		1,  -1,  -1,   3,   1,  -1,  -3,  -1,
-		1,  -1,  -1,   1,   3,  -1,  -3,  -1,
-		-1,   1,  -1,   1,   1,   3,  -3,  -1,
-		-3,  -1,  -1,   1,   1,  -1,   3,  -1,
-		-1,  -3,  -1,   1,   1,  -1,  -3,   3 };
-
-	int cg_its;
-	double cg_err;
 
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = 1;

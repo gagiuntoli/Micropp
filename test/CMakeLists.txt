@@ -42,3 +42,5 @@ add_test(NAME test_ell_3 COMMAND test_ell_3 5 5)
 add_test(NAME test_util_1 COMMAND test_util_1)
 add_test(NAME test_material COMMAND test_material 5)
 add_test(NAME test_damage COMMAND test_damage 10)
+
+set_property(TARGET test3d_3 PROPERTY LINKER_LANGUAGE Fortran)

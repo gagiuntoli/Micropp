@@ -36,10 +36,9 @@ void micropp_simulator(const struct material_base *materials)
 
 	material_t *micropp_material_list[2];
 
-	for (int i = 0; i < 2; ++i) {
-		double params[3];
+	for (int i = 0; i < 2; ++i)
 		micropp_material_list[i] = material_t::make_material(materials[i]);
-	}
+
 	for (auto it : micropp_material_list)
 		it->print();
 

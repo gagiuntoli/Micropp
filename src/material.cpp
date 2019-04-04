@@ -35,18 +35,16 @@ material_t *material_t::make_material(const struct material_base material)
 	switch (material.type) {
 		case 0:
 			return new material_elastic(material.E, material.nu);
-			break;
 		case 1:
 			return new material_plastic(material.E, material.nu,
 						    material.Ka, material.Sy);
-			break;
 		case 2:
 			return new material_damage(material.E, material.nu,
 						   material.Xt);
-			break;
 		default:
 			break;
 	}
+	return nullptr;
 }
 
 

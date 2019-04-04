@@ -96,8 +96,6 @@ int main (int argc, char *argv[])
 	int micro_type = 2;
 	double micro_params[4] = { 1., 1., 1., 0.2 };
 
-	double Em = 1.0e8;
-
 	material_base mat_params[2];
 	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
 	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
