@@ -113,13 +113,11 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 		<< "NumberOfComponents=\"3\" format=\"ascii\" >" << endl;
 	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
-			file << (dim == 2 && d == 2 ? 0.0 : \
-				 ((isnan(u[n * dim + d]) ? -1 : u[n * dim + d]))) << " ";
+			file << ((dim == 2 && d == 2) ? 0.0 : u[n * dim + d]) << " ";
 		file << endl;
 	}
 	file << "</DataArray>" << endl;
 
-	//  Deleted here
 	file << "</PointData>" << endl;
 
 	file << "<CellData>" << endl;
@@ -128,8 +126,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 		<< "NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
-			file << ((isnan(elem_strain[e * nvoi + v]) ? -1 : \
-				  elem_strain[e * nvoi + v])) << " ";
+			file << elem_strain[e * nvoi + v] << " ";
 		file << endl;
 	}
 	file << "</DataArray>\n";
@@ -139,8 +136,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 		<< "NumberOfComponents=\"" << nvoi << "\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
-			file << ((isnan(elem_stress[e * nvoi + v]) ? -1 : \
-				  elem_stress[e * nvoi + v])) << " ";
+			file << elem_stress[e * nvoi + v] << " ";
 		file << endl;
 	}
 	file << "</DataArray>\n";
