@@ -11,7 +11,8 @@ set(testsources
 	test_get_elem_nodes.cpp
 	test_ell_1.cpp
 	test_ell_2.cpp
-	test_ell_3.cpp
+	test_ell_mvp_openacc.cpp
+	test_newton_raphson_acc.cpp
 	test_cg.cpp
 	test_print_vtu_1.cpp
 	test_omp.cpp
@@ -38,7 +39,7 @@ add_test(NAME test3d_4 COMMAND test3d_4 5 3 10)
 add_test(NAME test3d_5 COMMAND test3d_5 5 5 5 2 10)
 add_test(NAME test_ell_1 COMMAND test_ell_1)
 add_test(NAME test_ell_2 COMMAND test_ell_2)
-add_test(NAME test_ell_3 COMMAND test_ell_3 5 5)
+add_test(NAME test_ell_mvp_openacc COMMAND test_ell_mvp_openacc 5 5)
 add_test(NAME test_util_1 COMMAND test_util_1)
 add_test(NAME test_material COMMAND test_material 5)
 add_test(NAME test_damage COMMAND test_damage 10)

@@ -79,8 +79,13 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int i = 0; i < nParams; i++)
 		micro_params[i] = _micro_params[i];
 
-	for (int i = 0; i < numMaterials; ++i)
+	for (int i = 0; i < numMaterials; ++i) {
+#ifndef _OPENACC
 		material_list[i] = material_t::make_material(_materials[i]);
+#else
+		material_acc_list[i] = material_acc(_materials[i]);
+#endif
+	}
 
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
@@ -274,8 +279,8 @@ void micropp<tdim>::get_elem_mat(const double *u,
 					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
 			}
 		}
-		memcpy(Ae, TAe, npedim2 * sizeof(double));
 	}
+	memcpy(Ae, TAe, npedim2 * sizeof(double));
 }
 
 

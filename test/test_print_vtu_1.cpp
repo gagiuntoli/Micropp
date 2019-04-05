@@ -31,7 +31,6 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
-	const int dim = 3;
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [mic_type = [0 ... 7]]" << endl;
 		return(1);
