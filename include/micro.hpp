@@ -35,6 +35,7 @@
 #include "util.hpp"
 #include "ell.hpp"
 #include "material.hpp"
+#include "material_acc.hpp"
 #include "gp.hpp"
 #include "instrument.hpp"
 
@@ -124,7 +125,7 @@ class micropp {
 		double micro_params[5];
 		int numMaterials;
 		material_t *material_list[MAX_MATS];
-		material_t *material_acc_list[MAX_MATS];
+		material_acc *material_acc_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
 		int *elem_type;

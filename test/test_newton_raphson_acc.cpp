@@ -64,7 +64,6 @@ class test_t : public micropp<3> {
 			free(b);
 			free(u);
 			free(du);
-
 		};
 
 };

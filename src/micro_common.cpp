@@ -83,7 +83,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 #ifndef _OPENACC
 		material_list[i] = material_t::make_material(_materials[i]);
 #else
-		material_acc_list[i] = material_acc(_materials[i]);
+		material_acc_list[i] = new material_acc(_materials[i]);
 #endif
 	}
 
