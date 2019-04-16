@@ -29,7 +29,7 @@
 using namespace std;
 
 
-void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
+void ell_init_acc(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 	      const double min_err, const double rel_err, const int max_its)
 {
 	memcpy(m->n, ns, 3 * sizeof(int));
@@ -146,12 +146,16 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 
 }
 
-void ell_mvp(const ell_matrix *m, const double *x, double *y)
+void ell_mvp_acc(const ell_matrix *m, const double *x, double *y)
 {
 	INST_START;
+#pragma acc parallel loop gang worker \
+	present(m[:1], m->nrow, m->nnz, m->cols[:m->nrow * m->nnz], \
+		m->vals[:m->nrow * m->nnz], x[:m->nrow], y[:m->nrow])
 	for (int i = 0; i < m->nrow; i++) {
 		double tmp = 0;
 		const int ix = i * m->nnz;
+#pragma acc loop vector
 		for (int j = 0; j < m->nnz; j++){
 			tmp += m->vals[ix + j] * x[m->cols[ix + j]];
 		}
@@ -160,25 +164,27 @@ void ell_mvp(const ell_matrix *m, const double *x, double *y)
 }
 
 
-double get_norm(const double *vector, const int n)
+double get_norm_acc(const double *vector, const int n)
 {
 		double norm = 0.0;
+#pragma acc parallel loop reduction(+:norm) present(n, vector[:n])
 		for (int i = 0; i < n; ++i)
 			norm += vector[i] * vector[i];
 		return sqrt(norm);
 }
 
 
-double get_dot(const double *v1, const double *v2, const int n)
+double get_dot_acc(const double *v1, const double *v2, const int n)
 {
 		double prod = 0.0;
+#pragma acc parallel loop reduction(+:prod) present(v1[:n], v2[:n])
 		for (int i = 0; i < n; ++i)
 			prod += v1[i] * v2[i];
 		return prod;
 }
 
 
-double ell_get_norm(const ell_matrix *m)
+double ell_get_norm_acc(const ell_matrix *m)
 {
 	double norm = 0.0;
 	for (int i = 0; i < m->nn; i++)
@@ -189,7 +195,7 @@ double ell_get_norm(const ell_matrix *m)
 }
 
 
-int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
+int ell_solve_cgpd_acc(const ell_matrix *m, const double *b, double *x, double *err)
 {
 	INST_START;
 
@@ -198,29 +204,40 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 	if (!m || !b || !x)
 		return 1;
 
+#pragma acc enter data copyin(x[:m->nrow], b[:m->nrow])
+
+#pragma acc enter data copyin(m[0:1])
+#pragma acc enter data copyin(m->cols[:m->nrow * m->nnz], m->vals[:m->nrow * m->nnz])
+#pragma acc enter data copyin(m->r[:m->nrow], m->z[:m->nrow], m->k[:m->nrow], m->p[:m->nrow], m->Ap[:m->nrow])
+
+#pragma acc parallel loop present(m[0:1], m->k[:m->nrow], m->vals[:m->nrow * m->nnz])
 	for (int i = 0; i < m->nn; i++) {
 		for (int d = 0; d < m->nfield; d++)
 			m->k[i * m->nfield + d] = 1 / m->vals[i * m->nfield * m->nnz
 				+ m->shift * m->nfield + d * m->nnz + d];
 	}
 
+#pragma acc parallel loop present(m[0:1], m->nrow, x[:m->nrow])
 	for (int i = 0; i < m->nrow; ++i)
 		x[i] = 0.0;
 
-	ell_mvp(m, x, m->r);
+	ell_mvp_acc(m, x, m->r);
 
+#pragma acc parallel loop present(m[0:1], b[:m->nrow], m->r[m->nrow])
 	for (int i = 0; i < m->nrow; ++i)
 		m->r[i] = b[i] - m->r[i];
 
+#pragma acc parallel loop present(m[0:1], m->z[:m->nrow], m->k[:m->nrow], m->r[m->nrow])
 	for (int i = 0; i < m->nrow; ++i)
 		m->z[i] = m->k[i] * m->r[i];
 
+#pragma acc parallel loop present(m[0:1], m->p[:m->nrow], m->z[m->nrow])
 	for (int i = 0; i < m->nrow; ++i)
 		m->p[i] = m->z[i];
 
-	double rz = get_dot(m->r, m->z, m->nrow);
+	double rz = get_dot_acc(m->r, m->z, m->nrow);
 
-	double pnorm_0 = sqrt(get_dot(m->z, m->z, m->nrow));
+	double pnorm_0 = sqrt(get_dot_acc(m->z, m->z, m->nrow));
 	double pnorm = pnorm_0;
 
 	int its = 0;
@@ -229,25 +246,29 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
 			break;
 
-		ell_mvp(m, m->p, m->Ap);
-		double pAp = get_dot(m->p, m->Ap, m->nrow);
+		ell_mvp_acc(m, m->p, m->Ap);
+		double pAp = get_dot_acc(m->p, m->Ap, m->nrow);
 
 		const double alpha = rz / pAp;
 
+#pragma acc parallel loop present(m[0:1], x[:m->nrow], m->p[m->nrow]) copyin(alpha)
 		for (int i = 0; i < m->nrow; ++i)
 			x[i] += alpha * m->p[i];
 
+#pragma acc parallel loop present(m[0:1], m->r[:m->nrow], m->Ap[m->nrow]) copyin(alpha)
 		for (int i = 0; i < m->nrow; ++i)
 			m->r[i] -= alpha * m->Ap[i];
 
+#pragma acc parallel loop present(m[0:1], m->z[:m->nrow], m->k[m->nrow], m->r[m->nrow])
 		for (int i = 0; i < m->nrow; ++i)
 			m->z[i] = m->k[i] * m->r[i];
 
-		pnorm = sqrt(get_dot(m->z, m->z, m->nrow));
+		pnorm = sqrt(get_dot_acc(m->z, m->z, m->nrow));
 		double rz_n = 0;
-		rz_n = get_dot(m->r, m->z, m->nrow);
+		rz_n = get_dot_acc(m->r, m->z, m->nrow);
 
 		const double beta = rz_n / rz;
+#pragma acc parallel loop present(m[0:1], m->z[:m->nrow], m->p[m->nrow]) copyin(beta)
 		for (int i = 0; i < m->nrow; ++i)
 			m->p[i] = m->z[i] + beta * m->p[i];
 
@@ -255,13 +276,19 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 		its++;
 	}
 
+#pragma acc exit data copyout(m->cols[:m->nrow * m->nnz], m->vals[:m->nrow * m->nnz])
+#pragma acc exit data copyout(m->r[:m->nrow], m->z[:m->nrow], m->k[:m->nrow], m->p[:m->nrow], m->Ap[:m->nrow])
+#pragma acc exit data delete(m[0:1])
+
+#pragma acc exit data copyout(x[:m->nrow], b[:m->nrow])
+
 	*err = rz;
 
 	return its;
 }
 
 
-void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
+void ell_add_2D_acc(ell_matrix *m, int ex, int ey, const double *Ae)
 {
 	// assembly Ae in 2D structured grid representation
 	// nFields : number of scalar components on each node
@@ -298,7 +325,7 @@ void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 
 }
 
-void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae)
+void ell_add_3D_acc(ell_matrix *m, int ex, int ey, int ez, const double *Ae)
 {
 	// assembly Ae in 3D structured grid representation
 	// nFields : number of scalar components on each node
@@ -345,12 +372,12 @@ void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae)
 
 }
 
-void ell_set_zero_mat(ell_matrix *m)
+void ell_set_zero_mat_acc(ell_matrix *m)
 {
 	memset(m->vals, 0, m->nrow * m->nnz * sizeof(double));
 }
 
-void ell_set_bc_2D(ell_matrix *m)
+void ell_set_bc_2D_acc(ell_matrix *m)
 {
 	// Sets 1s on the diagonal of the boundaries and 0s
 	// on the columns corresponding to that values
@@ -389,7 +416,7 @@ void ell_set_bc_2D(ell_matrix *m)
 
 }
 
-void ell_set_bc_3D(ell_matrix *m)
+void ell_set_bc_3D_acc(ell_matrix *m)
 {
 	INST_START;
 
@@ -455,7 +482,7 @@ void ell_set_bc_3D(ell_matrix *m)
 
 }
 
-void ell_free(ell_matrix *m)
+void ell_free_acc(ell_matrix *m)
 {
 	if (m->cols != NULL)
 		free(m->cols);
@@ -474,7 +501,7 @@ void ell_free(ell_matrix *m)
 }
 
 
-void print_ell(const ell_matrix *A)
+void print_ell_acc(const ell_matrix *A)
 {
 	FILE *file;
 	file = fopen("A.dat", "w");

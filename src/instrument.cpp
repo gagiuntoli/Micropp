@@ -79,36 +79,6 @@ void instrument::finalize()
 		}
 	}
 
-	uint64_t t_ass_mat, t_ass_rhs, t_sol;
-
-	unordered_map<string, timevect>::iterator it;
-
-	it = times.find("assembly_mat");
-	t_ass_mat = accumulate(it->second.begin(), it->second.end(), 0.0);
-
-	it = times.find("assembly_rhs");
-	t_ass_rhs = accumulate(it->second.begin(), it->second.end(), 0.0);
-
-	it = times.find("ell_solve_cgpd");
-	t_sol = accumulate(it->second.begin(), it->second.end(), 0.0);
-
-	cout
-		<< "ASSEMBLY         :: "
-		<< 1. * (t_ass_mat + t_ass_rhs) * 100
-		/ (t_sol + t_ass_mat + t_ass_rhs) << " \%\t"
-		<< " TIME : " << double(t_ass_mat + t_ass_rhs) / 1.0e3 << " mS"
-		<< endl;
-
-	cout
-		<< "SOLVE            :: "
-		<< 1. * t_sol * 100 / (t_sol + t_ass_mat + t_ass_rhs) << " \%\t"
-		<< " TIME : " << double(t_sol) / 1.0e3 << " mS"
-		<< endl;
-
-	cout
-		<< "ASSEMBLY + SOLVE :: "
-		<< 1. * (t_sol + t_ass_mat + t_ass_rhs) / 1.0e3 << " mS"
-		<< endl;
 }
 
 #endif // TIMER

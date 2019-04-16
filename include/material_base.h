@@ -22,6 +22,14 @@
 #ifndef MATERIAL_BASE_H
 #define MATERIAL_BASE_H
 
+
+enum { MATERIAL_ELASTIC = 0, MATERIAL_PLASTIC, MATERIAL_DAMAGE };
+
+
+#define D_EPS_CTAN 1.0e-8
+#define SQRT_2DIV3 0.816496581
+
+
 #ifdef __cplusplus
 extern "C" {
 	#include <cstdio>

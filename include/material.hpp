@@ -32,10 +32,6 @@
 #include <iostream>
 
 
-#define D_EPS_CTAN 1.0e-8
-#define SQRT_2DIV3 0.816496581
-
-
 using namespace std;
 
 

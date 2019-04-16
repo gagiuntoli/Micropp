@@ -46,10 +46,6 @@
 #define MAX_MATS        10
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
 
-#define CG_MIN_ERR      1.0e-50
-#define CG_MAX_ITS      1000
-#define CG_REL_ERR      1.0e-5
-
 #define FILTER_REL_TOL  1.0e-5
 
 #define D_EPS_CTAN_AVE  1.0e-8
@@ -70,6 +66,13 @@ typedef struct {
 	int its = 0;
 	int solver_its = 0;
 	bool converged = false;
+
+	void print()
+	{
+		cout << "newton.its : " << its << endl;
+		cout << "newton.solver_its : " << solver_its << endl;
+		cout << "newton.converged : " << converged << endl;
+	}
 
 } newton_t;
 
@@ -121,6 +124,7 @@ class micropp {
 		double micro_params[5];
 		int numMaterials;
 		material_t *material_list[MAX_MATS];
+		material_t *material_acc_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
 		int *elem_type;
@@ -181,6 +185,10 @@ class micropp {
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],
 					const double *vars_old = nullptr);
+
+		newton_t newton_raphson_acc(ell_matrix *A, double *b, double *u,
+					    double *du, const double strain[nvoi],
+					    const double *vars_old = nullptr);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
