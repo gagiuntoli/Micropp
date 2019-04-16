@@ -38,7 +38,7 @@ newton_t micropp<tdim>::newton_raphson_acc(ell_matrix *A, double *b, double *u, 
 	set_displ_bc(strain, u);
 
 	int its = 0;
-	double norm = assembly_rhs(u, vars_old, b);
+	double norm = assembly_rhs_acc(u, vars_old, b);
 	const double norm_0 = norm;
 
 	while (its < nr_max_its) {
