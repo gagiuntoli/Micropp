@@ -85,7 +85,7 @@ void apply_perturbation(const material_acc *material,
 }
 
 
-void get_dev_tensor(const double tensor[6], double tensor_dev[6])
+static void get_dev_tensor(const double tensor[6], double tensor_dev[6])
 {
 	memcpy(tensor_dev, tensor, 6 * sizeof(double));
 	for (int i = 0; i < 3; i++)
