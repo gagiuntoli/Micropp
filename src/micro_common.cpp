@@ -210,7 +210,7 @@ material_t *micropp<tdim>::get_material(const int e) const
 
 template <int tdim>
 void micropp<tdim>::get_elem_rhs(const double *u,
-				 const double *int_vars_old,
+				 const double *vars_old,
 				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
@@ -226,7 +226,7 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 		calc_bmat(gp, bmat);
 
 		get_strain(u, gp, strain_gp, ex, ey, ez);
-		get_stress(gp, strain_gp, int_vars_old, stress_gp, ex, ey, ez);
+		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)

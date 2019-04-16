@@ -147,7 +147,10 @@ class micropp {
 		const double nr_rel_tol;
 
 		void calc_ctan_lin();
+
 		material_t *get_material(const int e) const;
+
+		material_acc *get_material_acc(const int e) const;
 
 		void get_elem_nodes(int n[npe],
 				    int ex, int ey, int ez = 0) const;
@@ -164,11 +167,20 @@ class micropp {
 				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
+		void get_stress_acc(int gp, const double eps[nvoi],
+				    const double *vars_old,
+				    double stress_gp[nvoi],
+				    int ex, int ey, int ez = 0) const;
+
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(const double *u, const double *vars_old,
 				  double be[npe * dim], int ex, int ey,
 				  int ez = 0) const;
+
+		void get_elem_rhs_acc(const double *u, const double *vars_old,
+				      double be[npe * dim], int ex, int ey,
+				      int ez = 0) const;
 
 		void calc_ave_stress(const double *u, double stress_ave[nvoi],
 				     const double *vars_old = nullptr) const;
@@ -195,13 +207,23 @@ class micropp {
 				  double Ae[npe * dim * npe * dim],
 				  int ex, int ey, int ez = 0) const;
 
+		void get_elem_mat_acc(const double *u, const double *vars_old,
+				      double Ae[npe * dim * npe * dim],
+				      int ex, int ey, int ez = 0) const;
+
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(const double *u, const double *vars_old,
 				    double *b);
 
+		double assembly_rhs_acc(const double *u, const double *vars_old,
+					double *b);
+
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *vars_old);
+
+		void assembly_mat_acc(ell_matrix *A, const double *u,
+				      const double *vars_old);
 
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);
