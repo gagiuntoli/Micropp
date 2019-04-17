@@ -197,6 +197,8 @@ class micropp {
 
 		bool calc_vars_new(const double *u, const double *vars_old,
 				   double *vars_new) const;
+		bool calc_vars_new_acc(const double *u, const double *vars_old,
+				       double *vars_new) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],

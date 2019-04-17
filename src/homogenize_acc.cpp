@@ -45,7 +45,7 @@ void micropp<tdim>::homogenize_task_acc(int igp)
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
-	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	gp_ptr->cost += newton.solver_its;
@@ -92,7 +92,7 @@ void micropp<tdim>::homogenize_task_acc(int igp)
 	}
 
 	// Updates <vars_new>
-	bool non_linear = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
+	bool non_linear = calc_vars_new_acc(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
 
 	if (non_linear == true) {
 		if (gp_ptr->allocated == false) {

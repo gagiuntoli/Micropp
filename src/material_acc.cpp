@@ -42,12 +42,30 @@ material_acc::material_acc(const material_base material)
 		type = material.type;
 }
 
+void material_acc::print()
+{
+	cout << 
+		"E : " << E <<
+		" nu : " << nu <<
+		" Ka : " << Ka <<
+		" Sy : " << Sy <<
+		" k : " << k  <<
+		" mu : " << mu <<
+		" lambda : " << lambda <<
+		" Xt : " << Xt <<
+		" type : " << type << endl;
+}
+
 
 void material_acc::get_stress(const double *eps, double *stress,
-					const double *history_params) const
+			      const double *history_params) const
 {
 	if(type == MATERIAL_ELASTIC) {
 		get_stress_elastic(this, eps, stress, history_params);
+	}else if(type == MATERIAL_PLASTIC) {
+		get_stress_plastic(this, eps, stress, history_params);
+	}else if(type == MATERIAL_DAMAGE) {
+		get_stress_damage(this, eps, stress, history_params);
 	}
 }
 
@@ -57,7 +75,26 @@ void material_acc::get_ctan(const double *eps, double *ctan,
 {
 	if(type == MATERIAL_ELASTIC) {
 		get_ctan_elastic(this, eps, ctan, history_params);
+	}else if(type == MATERIAL_PLASTIC) {
+		get_ctan_plastic(this, eps, ctan, history_params);
+	}else if(type == MATERIAL_DAMAGE) {
+		get_ctan_damage(this, eps, ctan, history_params);
 	}
+}
+
+
+bool material_acc::evolute(const double *eps, const double *vars_old,
+			   double *vars_new) const
+{
+	if(type == MATERIAL_ELASTIC) {
+		return evolute_elastic(eps, vars_old, vars_new);
+	} else if(type == MATERIAL_PLASTIC) {
+		return evolute_plastic(this, eps, vars_old, vars_new);
+	} else if(type == MATERIAL_DAMAGE) {
+		return evolute_damage(this, eps, vars_old, vars_new);
+	}
+
+	return false;
 }
 
 

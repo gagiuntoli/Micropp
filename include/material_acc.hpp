@@ -59,6 +59,8 @@ struct material_acc : public material_base {
 	bool evolute(const double *eps, const double *vars_old,
 		     double *vars_new) const;
 
+	void print();
+
 };
 
 void get_stress_elastic(const material_acc *material,
@@ -80,7 +82,7 @@ void get_ctan_plastic(const material_acc *material,
 		      const double *eps, double *ctan,
 		      const double *history_params);
 
-bool evolute_plastic(const double *eps, const double *vars_old,
+bool evolute_plastic(const material_acc *material, const double *eps, const double *vars_old,
 		     double *vars_new);
 
 void get_stress_damage(const material_acc *material,
@@ -91,7 +93,7 @@ void get_ctan_damage(const material_acc *material,
 		     const double *eps, double *ctan,
 		     const double *history_params);
 
-bool evolute_damage(const double *eps, const double *vars_old,
+bool evolute_damage(const material_acc *material, const double *eps, const double *vars_old,
 		    double *vars_new);
 
 #endif

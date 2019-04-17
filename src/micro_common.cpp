@@ -537,7 +537,11 @@ void micropp<tdim>::print_info() const
 	cout << endl;
 
 	for (int i = 0; i < numMaterials; ++i) {
+#ifdef _OPENACC
+		material_acc_list[i]->print();
+#else
 		material_list[i]->print();
+#endif
 		cout << endl;
 	}
 
@@ -556,6 +560,7 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 	const material_t *material = get_material(e);
 	const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 
+	cout << "I have entered here" << endl;
 	material->get_stress(eps, stress_gp, vars);
 }
 
@@ -576,7 +581,11 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 
 					double stress_gp[nvoi], strain_gp[nvoi];
 					get_strain(u, gp, strain_gp, ex, ey, ez);
+#ifdef _OPENACC
+					get_stress_acc(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
+#else
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
+#endif
 					for (int v = 0; v < nvoi; ++v)
 						stress_aux[v] += stress_gp[v] * wg;
 
@@ -637,7 +646,11 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
 					double stress_gp[nvoi], strain_gp[nvoi];
 
 					get_strain(u, gp, strain_gp, ex, ey, ez);
+#ifdef _OPENACC
+					get_stress_acc(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
+#else
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
+#endif
 
 					for (int v = 0; v < nvoi; ++v) {
 						eps_a[v] += strain_gp[v] * wg;
@@ -673,6 +686,36 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 
 				const int e = glo_elem(ex, ey, ez);
 				const material_t *material = get_material(e);
+
+				for (int gp = 0; gp < npe; ++gp) {
+
+					const double *vars_old = (_vars_old) ? &_vars_old[intvar_ix(e, gp, 0)] : nullptr;
+					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
+
+					double eps[nvoi];
+					get_strain(u, gp, eps, ex, ey, ez);
+
+					non_linear |= material->evolute(eps, vars_old, vars_new);
+				}
+			}
+		}
+	}
+
+	return non_linear;
+}
+
+template<int tdim>
+bool micropp<tdim>::calc_vars_new_acc(const double *u, const double *_vars_old,
+				      double *_vars_new) const
+{
+	bool non_linear = false;
+
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex){
+
+				const int e = glo_elem(ex, ey, ez);
+				const material_acc *material = get_material_acc(e);
 
 				for (int gp = 0; gp < npe; ++gp) {
 
