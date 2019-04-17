@@ -68,5 +68,4 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, doub
 }
 
 
-template class micropp<2>;
 template class micropp<3>;

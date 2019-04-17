@@ -219,5 +219,4 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 }
 
 
-template class micropp<2>;
 template class micropp<3>;

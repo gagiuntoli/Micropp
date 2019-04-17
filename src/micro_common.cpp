@@ -185,7 +185,11 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
+#ifdef _OPENACC
+		newton_raphson_acc(&A, b, u, du, eps_1);
+#else
 		newton_raphson(&A, b, u, du, eps_1);
+#endif
 
 		calc_ave_stress(u, sig_1);
 
@@ -688,5 +692,4 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 }
 
 
-template class micropp<2>;
 template class micropp<3>;

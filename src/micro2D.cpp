@@ -163,4 +163,4 @@ void micropp<2>::assembly_mat(ell_matrix *A, const double *u, const double *int_
 }
 
 
-template class micropp<2>;
+//template class micropp<2>;
