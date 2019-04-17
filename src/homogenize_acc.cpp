@@ -27,7 +27,7 @@
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_task(int igp)
+void micropp<tdim>::homogenize_task_acc(int igp)
 {
 	const int ns[3] = { nx, ny, nz };
 
@@ -136,5 +136,4 @@ void micropp<tdim>::homogenize_task(int igp)
 }
 
 
-template class micropp<2>;
 template class micropp<3>;

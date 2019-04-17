@@ -191,5 +191,4 @@ void micropp<tdim>::update_vars()
 }
 
 
-template class micropp<2>;
 template class micropp<3>;
