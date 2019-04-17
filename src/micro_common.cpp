@@ -560,7 +560,6 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 	const material_t *material = get_material(e);
 	const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 
-	cout << "I have entered here" << endl;
 	material->get_stress(eps, stress_gp, vars);
 }
 

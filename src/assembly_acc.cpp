@@ -21,8 +21,8 @@
 
 #include "micro.hpp"
 
-template <int tdim>
-material_acc *micropp<tdim>::get_material_acc(const int e) const
+template <>
+material_acc *micropp<3>::get_material_acc(const int e) const
 {
 	return material_acc_list[elem_type[e]];
 }
