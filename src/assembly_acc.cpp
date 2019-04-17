@@ -73,7 +73,7 @@ void micropp<3>::get_elem_mat_acc(const double *u,
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
 					tmp += ctan[i][k] * bmat[k][j];
-				cxb[i][j] = tmp;
+				cxb[i][j] = tmp * wg;
 			}
 		}
 
@@ -82,7 +82,7 @@ void micropp<3>::get_elem_mat_acc(const double *u,
 				const int inpedim = i * npedim;
 				const double bmatmi = bmat[m][i];
 				for (int j = 0; j < npedim; ++j)
-					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
+					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
 		}
 	}

@@ -271,7 +271,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
 					tmp += ctan[i][k] * bmat[k][j];
-				cxb[i][j] = tmp;
+				cxb[i][j] = tmp * wg;
 			}
 		}
 
@@ -280,7 +280,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 				const int inpedim = i * npedim;
 				const double bmatmi = bmat[m][i];
 				for (int j = 0; j < npedim; ++j)
-					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
+					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
 		}
 	}
