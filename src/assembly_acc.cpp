@@ -206,7 +206,7 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 
 template <>
 void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
-			      const double *vars_old)
+				  const double *vars_old)
 {
 	INST_START;
 
@@ -230,18 +230,18 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 	constexpr int npedim = npe * dim;
 	constexpr int npedim2 = npedim * npedim;
 
-	double *bmat = new double[npe*nvoi*npedim];
+	double *bmat = new double[npe * nvoi * npedim];
 	for (int gp = 0; gp < npe; ++gp) {
 		double bmat_temp[nvoi][npedim];
 		calc_bmat(gp, bmat_temp);
 		for (int i = 0; i < nvoi; i++){
-		  for (int j = 0; j < npedim; j++){
+			for (int j = 0; j < npedim; j++){
 				bmat[gp*nvoi*npedim+i*npedim+j] = bmat_temp[i][j];
-	    }
-    }
+			}
+		}
 	}
 
-	double *ctan = new double[nex*ney*nez*npe*nvoi*nvoi];
+	double *ctan = new double[nex * ney * nez * npe * nvoi * nvoi];
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
@@ -256,37 +256,76 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 			}
 		}
 	}
-#pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi],bmat[:npe*nvoi*npedim],A[:1],A->nrow,A->nnz,cols_row[:8][:8])copy(A->vals[:A->nrow * A->nnz])
+
+#pragma acc enter data copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi], bmat[:npe*nvoi*npedim])
+
+	double *Aes = new double[nex * ney * nez * npedim2];
+	double cxb[nvoi][npedim];
+#pragma acc enter data copyin(cxb[:6][:24])
+#pragma acc enter data create(Aes[:nex * ney * nez * npedim2])
+
+#pragma acc parallel loop present (Aes[:nex * ney * nez * npedim2])
+	for(int i = 0; i < nex * ney * nez * npedim2; ++i)
+		Aes[i] = 0.0;
+
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
 
-				double Ae[npedim2];
-				for(int i=0;i<npedim2;i++)Ae[i]=0;
+				const int ctan_ix = ex*ney*nez*npe*nvoi*nvoi + \
+						    ey*nez*npe*nvoi*nvoi + \
+						    ez*npe*nvoi*nvoi;
+
+				const int Aes_ix = (ez * nex * ney + ey * nex + ex) * npedim2;
 
 				for (int gp = 0; gp < npe; ++gp) {
-					double cxb[nvoi][npedim];
+
+					const int gp1_ix = gp * nvoi * nvoi;
+					const int gp2_ix = gp * nvoi * npedim;
+
+					const double *ctan_ptr = &ctan[ctan_ix + gp1_ix];
+					const double *bmat_ptr = &bmat[gp2_ix];
+
+#pragma acc parallel loop gang vector collapse(2) present(cxb[:6][:24], ctan_ptr[:36], bmat_ptr[:6*24])
 					for (int i = 0; i < nvoi; ++i) {
 						for (int j = 0; j < npedim; ++j) {
 							double tmp = 0.0;
+#pragma acc loop reduction(+:tmp)
 							for (int k = 0; k < nvoi; ++k){
-								tmp += ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi+i*nvoi+k] * bmat[gp*nvoi*npedim+k*npedim+j];
+								const double val1 = ctan_ptr[i * nvoi + k];
+								const double val2 = bmat_ptr[k * npedim + j];
+								tmp += val1 * val2;
 							}
 							cxb[i][j] = tmp * wg;
 						}
 					}
-//#pragma acc parallel loop copyin(bmat[:npe*nvoi*npedim]) copy(Ae[:npedim2])
-					for (int m = 0; m < nvoi; ++m) {
-						for (int i = 0; i < npedim; ++i) {
-							const int inpedim = i * npedim;
-							const double bmatmi = bmat[gp*nvoi*npedim+m*npedim+i];
-							for (int j = 0; j < npedim; ++j){
-//#pragma acc atomic update
-								Ae[inpedim + j] += bmatmi * cxb[m][j];
+
+#pragma acc parallel loop gang vector collapse(2) present(cxb[:6][:24], bmat_ptr[:6*24], Aes[:nex * ney * nez * npedim2])
+					for (int i = 0; i < npedim; ++i) {
+						for (int j = 0; j < npedim; ++j){
+							double tmp = 0.0;
+#pragma acc loop reduction(+:tmp)
+							for (int m = 0; m < nvoi; ++m) {
+								const double val1 = bmat_ptr[m * npedim + i];
+								const double val2 = cxb[m][j];
+								tmp += val1 * val2;
 							}
+							Aes[Aes_ix + i * npedim + j] += tmp;
 						}
 					}
 				}
+			}
+		}
+	}
+
+#pragma acc update self (Aes[:nex * ney * nez * npedim2])
+
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) {
+
+				const int Aes_ix = (ez * nex * ney + ey * nex + ex) * npedim2;
+
 				const int n0 = ez * nxny + ey * nx + ex;
 				const int n1 = n0 + 1;
 				const int n2 = n0 + nx + 1;
@@ -306,8 +345,10 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 					for (int fj = 0; fj < nfield; ++fj){
 						for (int i = 0; i < npe; ++i){
 							for (int j = 0; j < npe; ++j){
-#pragma acc atomic update
-								A->vals[ix_glo[i] * nnz_nfield + cols_row[i][j] * nfield + fi * nnz + fj] += Ae[i * npe_nfield2 + fi * npe_nfield + j * nfield + fj];
+								A->vals[ix_glo[i] * nnz_nfield +\
+								       	cols_row[i][j] * nfield + fi * nnz + fj] += \
+									Aes[Aes_ix + i * npe_nfield2 + fi * npe_nfield + \
+								       	j * nfield + fj];
 							}
 						}
 					}
@@ -315,9 +356,11 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 			}
 		}
 	}
+#pragma acc exit data delete(ctan[:nex*ney*nez*npe*nvoi*nvoi], bmat[:npe*nvoi*npedim])
+#pragma acc exit data delete(cxb[:6][:24])
+#pragma acc exit data delete(Aes[:nex * ney * nez * npedim2])
 	delete []bmat;
 	delete []ctan;
+	delete []Aes;
 	ell_set_bc_3D_acc(A);
 }
-
-
