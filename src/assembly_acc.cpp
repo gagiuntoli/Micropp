@@ -240,8 +240,12 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 	    }
     }
 	}
+	const int nnz_nfield = nfield * nnz;
+	const int npe_nfield = npe * nfield;
+	const int npe_nfield2 = npe * nfield * nfield;
 
 	double *ctan = new double[nex*ney*nez*npe*nvoi*nvoi];
+	int *ix_glo = new int[nex*ney*nez*8];
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
@@ -253,13 +257,24 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 					const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 					material->get_ctan(eps, &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi], vars);
 				}
+				const int n0 = ez * nxny + ey * nx + ex;
+				const int n1 = n0 + 1;
+				const int n2 = n0 + nx + 1;
+				const int n3 = n0 + nx;
+
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+0] =n0;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+1] =n1;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+2] =n2;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+3] =n3;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+4] =n0 + nxny;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+5] =n1 + nxny;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+6] =n2 + nxny;
+				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+7] =n3 + nxny;
 			}
 		}
 	}
-#pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi],bmat[:npe*nvoi*npedim],A[:1],A->nrow,A->nnz,cols_row[:8][:8])copy(A->vals[:A->nrow * A->nnz])
-	for (int ex = 0; ex < nex; ++ex) {
-		for (int ey = 0; ey < ney; ++ey) {
-			for (int ez = 0; ez < nez; ++ez) {
+#pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi],bmat[:npe*nvoi*npedim],A[:1],A->nrow,A->nnz,cols_row[:8][:8],ix_glo[:nex*ney*nez*8])copy(A->vals[:A->nrow * A->nnz])
+	for (int ex = 0; ex < nex*ney*nez; ++ex) {
 
 				double Ae[npedim2];
 				for(int i=0;i<npedim2;i++)Ae[i]=0;
@@ -270,51 +285,34 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 						for (int j = 0; j < npedim; ++j) {
 							double tmp = 0.0;
 							for (int k = 0; k < nvoi; ++k){
-								tmp += ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi+i*nvoi+k] * bmat[gp*nvoi*npedim+k*npedim+j];
+								tmp += ctan[ex*npe*nvoi*nvoi+gp*nvoi*nvoi+i*nvoi+k] * bmat[gp*nvoi*npedim+k*npedim+j];
 							}
 							cxb[i][j] = tmp * wg;
 						}
 					}
-//#pragma acc parallel loop copyin(bmat[:npe*nvoi*npedim]) copy(Ae[:npedim2])
 					for (int m = 0; m < nvoi; ++m) {
 						for (int i = 0; i < npedim; ++i) {
 							const int inpedim = i * npedim;
 							const double bmatmi = bmat[gp*nvoi*npedim+m*npedim+i];
 							for (int j = 0; j < npedim; ++j){
-//#pragma acc atomic update
 								Ae[inpedim + j] += bmatmi * cxb[m][j];
 							}
 						}
 					}
 				}
-				const int n0 = ez * nxny + ey * nx + ex;
-				const int n1 = n0 + 1;
-				const int n2 = n0 + nx + 1;
-				const int n3 = n0 + nx;
-
-				const int ix_glo[8] = {	n0, n1, n2, n3,
-					n0 + nxny,
-					n1 + nxny,
-					n2 + nxny,
-					n3 + nxny };
-
-				const int nnz_nfield = nfield * nnz;
-				const int npe_nfield = npe * nfield;
-				const int npe_nfield2 = npe * nfield * nfield;
 
 				for (int fi = 0; fi < nfield; ++fi){
 					for (int fj = 0; fj < nfield; ++fj){
 						for (int i = 0; i < npe; ++i){
 							for (int j = 0; j < npe; ++j){
 #pragma acc atomic update
-								A->vals[ix_glo[i] * nnz_nfield + cols_row[i][j] * nfield + fi * nnz + fj] += Ae[i * npe_nfield2 + fi * npe_nfield + j * nfield + fj];
+								A->vals[ix_glo[ex*8+i] * nnz_nfield + cols_row[i][j] * nfield + fi * nnz + fj] += Ae[i * npe_nfield2 + fi * npe_nfield + j * nfield + fj];
 							}
 						}
 					}
 				}
-			}
-		}
 	}
+	delete []ix_glo;
 	delete []bmat;
 	delete []ctan;
 	ell_set_bc_3D_acc(A);
