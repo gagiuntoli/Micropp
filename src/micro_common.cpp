@@ -63,6 +63,10 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
+	for (int gp = 0; gp < npe; gp++){
+		calc_bmat(gp, calc_bmat_cache[gp]);
+	}
+
 	gp_list = new gp_t<tdim>[ngp]();
 	for (int gp = 0; gp < ngp; ++gp) {
 		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
@@ -221,20 +225,18 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 	INST_START;
 
 	constexpr int npedim = npe * dim;
-	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
+	double stress_gp[nvoi], strain_gp[nvoi];
 
 	memset(be, 0, npedim * sizeof(double));
 
 	for (int gp = 0; gp < npe; ++gp) {
-
-		calc_bmat(gp, bmat);
 
 		get_strain(u, gp, strain_gp, ex, ey, ez);
 		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
-				be[i] += bmat[j][i] * stress_gp[j] * wg;
+				be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
 	}
 }
 
@@ -263,14 +265,13 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 		material->get_ctan(eps, (double *)ctan, vars);
 
-		double bmat[nvoi][npedim], cxb[nvoi][npedim];
-		calc_bmat(gp, bmat);
+		double cxb[nvoi][npedim];
 
 		for (int i = 0; i < nvoi; ++i) {
 			for (int j = 0; j < npedim; ++j) {
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
-					tmp += ctan[i][k] * bmat[k][j];
+					tmp += ctan[i][k] * calc_bmat_cache[gp][k][j];
 				cxb[i][j] = tmp * wg;
 			}
 		}
@@ -278,7 +279,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		for (int m = 0; m < nvoi; ++m) {
 			for (int i = 0; i < npedim; ++i) {
 				const int inpedim = i * npedim;
-				const double bmatmi = bmat[m][i];
+				const double bmatmi = calc_bmat_cache[gp][m][i];
 				for (int j = 0; j < npedim; ++j)
 					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
@@ -471,13 +472,11 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 	double elem_disp[npe * dim];
 	get_elem_displ(u, elem_disp, ex, ey, ez);
 
-	double bmat[nvoi][npe * dim];
-	calc_bmat(gp, bmat);
-
 	memset(strain_gp, 0, nvoi * sizeof(double));
 	for (int v = 0; v < nvoi; ++v)
-		for (int i = 0; i < npe * dim; i++)
-			strain_gp[v] += bmat[v][i] * elem_disp[i];
+		for (int i = 0; i < npe * dim; i++){
+			strain_gp[v] += calc_bmat_cache[gp][v][i] * elem_disp[i];
+		}
 }
 
 

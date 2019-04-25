@@ -65,14 +65,13 @@ void micropp<3>::get_elem_mat_acc(const double *u,
 		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 		material->get_ctan(eps, (double *)ctan, vars);
 
-		double bmat[nvoi][npedim], cxb[nvoi][npedim];
-		calc_bmat(gp, bmat);
+		double cxb[nvoi][npedim];
 
 		for (int i = 0; i < nvoi; ++i) {
 			for (int j = 0; j < npedim; ++j) {
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
-					tmp += ctan[i][k] * bmat[k][j];
+					tmp += ctan[i][k] * calc_bmat_cache[gp][k][j];
 				cxb[i][j] = tmp * wg;
 			}
 		}
@@ -80,7 +79,7 @@ void micropp<3>::get_elem_mat_acc(const double *u,
 		for (int m = 0; m < nvoi; ++m) {
 			for (int i = 0; i < npedim; ++i) {
 				const int inpedim = i * npedim;
-				const double bmatmi = bmat[m][i];
+				const double bmatmi = calc_bmat_cache[gp][m][i];
 				for (int j = 0; j < npedim; ++j)
 					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
@@ -98,20 +97,18 @@ void micropp<3>::get_elem_rhs_acc(const double *u, const double *vars_old,
 	INST_START;
 
 	constexpr int npedim = npe * dim;
-	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
+	double stress_gp[nvoi], strain_gp[nvoi];
 
 	memset(be, 0, npedim * sizeof(double));
 
 	for (int gp = 0; gp < npe; ++gp) {
-
-		calc_bmat(gp, bmat);
 
 		get_strain(u, gp, strain_gp, ex, ey, ez);
 		get_stress_acc(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
-				be[i] += bmat[j][i] * stress_gp[j] * wg;
+				be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
 	}
 }
 
@@ -232,11 +229,9 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 
 	double *bmat = new double[npe*nvoi*npedim];
 	for (int gp = 0; gp < npe; ++gp) {
-		double bmat_temp[nvoi][npedim];
-		calc_bmat(gp, bmat_temp);
 		for (int i = 0; i < nvoi; i++){
 		  for (int j = 0; j < npedim; j++){
-				bmat[gp*nvoi*npedim+i*npedim+j] = bmat_temp[i][j];
+				bmat[gp*nvoi*npedim+i*npedim+j] = calc_bmat_cache[gp][i][j];
 	    }
     }
 	}
