@@ -24,8 +24,8 @@ module libmaterial
   type, bind(C) :: material_base
      real(c_double) :: E, nu, Ka, Sy
      real(c_double) :: k, mu, lambda
+     real(c_double) :: Xt
      integer(c_int) type
-     logical(c_bool) plasticity, damage
   end type material_base
 
   interface
