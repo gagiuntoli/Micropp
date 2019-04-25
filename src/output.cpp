@@ -66,7 +66,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 				const double coor[3] = { i * dx, j * dy, k * dz };
 				for (int d = 0; d < 3; d++)
 					file << coor[d] << " ";
-				file << endl;
+				file << "\n";
 			}
 		}
 	}
@@ -82,7 +82,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 				get_elem_nodes(n, ex, ey, ez);
 				for (int i = 0; i < npe; ++i)
 					file << n[i] << ' ';
-				file << endl;
+				file << "\n";
 			}
 		}
 	}
@@ -114,7 +114,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 	for (int n = 0; n < nn; ++n) {
 		for (int d = 0; d < MAX_DIM; ++d)
 			file << ((dim == 2 && d == 2) ? 0.0 : u[n * dim + d]) << " ";
-		file << endl;
+		file << "\n";
 	}
 	file << "</DataArray>" << endl;
 
@@ -127,7 +127,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
 			file << elem_strain[e * nvoi + v] << " ";
-		file << endl;
+		file << "\n";
 	}
 	file << "</DataArray>\n";
 
@@ -137,7 +137,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 	for (int e = 0; e < nelem; ++e) {
 		for (int v = 0; v < nvoi; ++v)
 			file << elem_stress[e * nvoi + v] << " ";
-		file << endl;
+		file << "\n";
 	}
 	file << "</DataArray>\n";
 
