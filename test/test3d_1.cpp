@@ -88,10 +88,6 @@ int main (int argc, char *argv[])
 		int cost = micro.get_cost(0);
 		bool has_converged = micro.has_converged(0);
 
-		char filename[128];
-		snprintf(filename, 128, "test3d_1_%d", t);
-		micro.output(0, filename);
-
 		micro.update_vars();
 
 		cout 	<< "NL        = " << non_linear << endl

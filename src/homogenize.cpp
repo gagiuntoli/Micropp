@@ -184,8 +184,6 @@ void micropp<tdim>::homogenize_task(int igp)
 template <int tdim>
 void micropp<tdim>::update_vars()
 {
-	INST_START;
-
 	for (int igp = 0; igp < ngp; ++igp)
 		gp_list[igp].update_vars();
 }

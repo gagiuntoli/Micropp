@@ -222,8 +222,6 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
-	INST_START;
-
 	constexpr int npedim = npe * dim;
 	double stress_gp[nvoi], strain_gp[nvoi];
 
@@ -247,7 +245,6 @@ void micropp<tdim>::get_elem_mat(const double *u,
 				 double Ae[npe * dim * npe * dim],
 				 int ex, int ey, int ez) const
 {
-	INST_START;
 	const int e = glo_elem(ex, ey, ez);
 	const material_t *material = get_material(e);
 
