@@ -124,6 +124,18 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 	double be[dim * npe];
 	int index[dim * npe];
 
+	double* strain_gp = new double [nex*ney*nez*npe*nvoi];
+
+#pragma acc parallel loop copy(strain_gp[:nex*ney*nez*npe*nvoi]) copyin(u[:nndim])
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex) {
+				for (int gp = 0; gp < npe; ++gp) {
+					get_strain(u, gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], ex, ey, ez);
+				}
+			}
+		}
+	}
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ex = 0; ex < nex; ++ex) {
@@ -135,13 +147,26 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 					for (int d = 0; d < dim; ++d)
 						index[j * dim + d] = n[j] * dim + d;
 
-				get_elem_rhs_acc(u, vars_old, be, ex, ey, ez);
+				constexpr int npedim = npe * dim;
+				double stress_gp[nvoi];
+
+				memset(be, 0, npedim * sizeof(double));
+
+				for (int gp = 0; gp < npe; ++gp) {
+
+					get_stress_acc(gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], vars_old, stress_gp, ex, ey, ez);
+
+					for (int i = 0; i < npedim; ++i)
+						for (int j = 0; j < nvoi; ++j)
+							be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
+				}
 
 				for (int i = 0; i < npe * dim; ++i)
 					b[index[i]] += be[i];
 			}
 		}
 	}
+	delete[] strain_gp;
 
 	// boundary conditions
 	for (int i = 0; i < nx; ++i) {
@@ -239,6 +264,17 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 	const int npe_nfield = npe * nfield;
 	const int npe_nfield2 = npe * nfield * nfield;
 
+	double* eps = new double[nex*ney*nez*npe*6];
+#pragma acc parallel loop copy(eps[:nex*ney*nez*npe*6]) copyin(u[:nndim])
+	for (int ex = 0; ex < nex; ++ex) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ez = 0; ez < nez; ++ez) {
+				for (int gp = 0; gp < npe; ++gp) {
+					get_strain(u, gp, &eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], ex, ey, ez);
+				}
+			}
+		}
+	}
 	double *ctan = new double[nex*ney*nez*npe*nvoi*nvoi];
 	int *ix_glo = new int[nex*ney*nez*8];
 	for (int ex = 0; ex < nex; ++ex) {
@@ -247,10 +283,8 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 				const int e = glo_elem(ex, ey, ez);
 				const material_acc *material = get_material_acc(e);
 				for (int gp = 0; gp < npe; ++gp) {
-					double eps[6];
-					get_strain(u, gp, eps, ex, ey, ez);
 					const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-					material->get_ctan(eps, &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi], vars);
+					material->get_ctan(&eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi], vars);
 				}
 				const int n0 = ez * nxny + ey * nx + ex;
 				const int n1 = n0 + 1;
@@ -268,6 +302,7 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 			}
 		}
 	}
+	delete[] eps;
 #pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi],bmat[:npe*nvoi*npedim],A[:1],A->nrow,A->nnz,cols_row[:8][:8],ix_glo[:nex*ney*nez*8])copy(A->vals[:A->nrow * A->nnz])
 	for (int ex = 0; ex < nex*ney*nez; ++ex) {
 

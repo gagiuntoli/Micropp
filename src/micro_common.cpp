@@ -286,6 +286,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 }
 
 
+#pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 {
@@ -448,6 +449,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 }
 
 
+#pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
 				   double elem_disp[npe * dim],
@@ -461,7 +463,7 @@ void micropp<tdim>::get_elem_displ(const double *u,
 			elem_disp[i * dim + d] = u[n[i] * dim + d];
 }
 
-
+#pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 			       int ex, int ey, int ez) const
@@ -469,7 +471,8 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 	double elem_disp[npe * dim];
 	get_elem_displ(u, elem_disp, ex, ey, ez);
 
-	memset(strain_gp, 0, nvoi * sizeof(double));
+	for (int i = 0; i < nvoi; ++i)strain_gp[i]=0;
+
 	for (int v = 0; v < nvoi; ++v)
 		for (int i = 0; i < npe * dim; i++){
 			strain_gp[v] += calc_bmat_cache[gp][v][i] * elem_disp[i];
