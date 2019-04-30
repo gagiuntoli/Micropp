@@ -84,11 +84,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		micro_params[i] = _micro_params[i];
 
 	for (int i = 0; i < numMaterials; ++i) {
-#ifndef _OPENACC
 		material_list[i] = material_t::make_material(_materials[i]);
-#else
-		material_acc_list[i] = new material_acc(_materials[i]);
-#endif
 	}
 
 	for (int ez = 0; ez < nez; ++ez) {
@@ -536,11 +532,7 @@ void micropp<tdim>::print_info() const
 	cout << endl;
 
 	for (int i = 0; i < numMaterials; ++i) {
-#ifdef _OPENACC
-		material_acc_list[i]->print();
-#else
 		material_list[i]->print();
-#endif
 		cout << endl;
 	}
 
@@ -579,11 +571,7 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 
 					double stress_gp[nvoi], strain_gp[nvoi];
 					get_strain(u, gp, strain_gp, ex, ey, ez);
-#ifdef _OPENACC
-					get_stress_acc(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-#else
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-#endif
 					for (int v = 0; v < nvoi; ++v)
 						stress_aux[v] += stress_gp[v] * wg;
 
@@ -644,11 +632,7 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
 					double stress_gp[nvoi], strain_gp[nvoi];
 
 					get_strain(u, gp, strain_gp, ex, ey, ez);
-#ifdef _OPENACC
-					get_stress_acc(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-#else
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-#endif
 
 					for (int v = 0; v < nvoi; ++v) {
 						eps_a[v] += strain_gp[v] * wg;
@@ -713,7 +697,7 @@ bool micropp<tdim>::calc_vars_new_acc(const double *u, const double *_vars_old,
 			for (int ex = 0; ex < nex; ++ex){
 
 				const int e = glo_elem(ex, ey, ez);
-				const material_acc *material = get_material_acc(e);
+				const material_t *material = get_material(e);
 
 				for (int gp = 0; gp < npe; ++gp) {
 

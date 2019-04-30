@@ -19,13 +19,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "micro.hpp"
 
-template <>
-material_acc *micropp<3>::get_material_acc(const int e) const
-{
-	return material_acc_list[elem_type[e]];
-}
 
 template <>
 void micropp<3>::get_stress_acc(int gp, const double eps[nvoi],
@@ -34,7 +30,7 @@ void micropp<3>::get_stress_acc(int gp, const double eps[nvoi],
 				int ex, int ey, int ez) const
 {
 	const int e = glo_elem(ex, ey, ez);
-	const material_acc *material = get_material_acc(e);
+	const material_t *material = get_material(e);
 	const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 
 	material->get_stress(eps, stress_gp, vars);
@@ -49,7 +45,7 @@ void micropp<3>::get_elem_mat_acc(const double *u,
 {
 	INST_START;
 	const int e = glo_elem(ex, ey, ez);
-	const material_acc *material = get_material_acc(e);
+	const material_t *material = get_material(e);
 
 	double ctan[nvoi][nvoi];
 	constexpr int npedim = npe * dim;
@@ -281,7 +277,7 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
 				const int e = glo_elem(ex, ey, ez);
-				const material_acc *material = get_material_acc(e);
+				const material_t *material = get_material(e);
 				for (int gp = 0; gp < npe; ++gp) {
 					const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 					material->get_ctan(&eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi], vars);
