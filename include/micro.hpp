@@ -105,6 +105,7 @@ class micropp {
 		static constexpr int dim = tdim;                  // 2, 3
 		static constexpr int npe = mypow(2, dim);         // 4, 8
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
+		double calc_bmat_cache[npe][nvoi][npe*dim];
 
 		const int ngp, nx, ny, nz, nn, nndim;
 		const int nex, ney, nez, nelem;
@@ -124,7 +125,6 @@ class micropp {
 		double micro_params[5];
 		int numMaterials;
 		material_t *material_list[MAX_MATS];
-		material_t *material_acc_list[MAX_MATS];
 		double ctan_lin[nvoi * nvoi];
 
 		int *elem_type;
@@ -145,16 +145,23 @@ class micropp {
 		const double nr_max_tol;
 		const double nr_rel_tol;
 
+		void homogenize_task(int gp);
+		void homogenize_task_acc(int gp);
+
 		void calc_ctan_lin();
+
 		material_t *get_material(const int e) const;
 
+#pragma acc routine seq
 		void get_elem_nodes(int n[npe],
 				    int ex, int ey, int ez = 0) const;
 
+#pragma acc routine seq
 		void get_elem_displ(const double *u,
 				    double elem_disp[npe * dim],
 				    int ex, int ey, int ez = 0) const;
 
+#pragma acc routine seq
 		void get_strain(const double *u, int gp, double strain_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
@@ -163,11 +170,20 @@ class micropp {
 				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
+		void get_stress_acc(int gp, const double eps[nvoi],
+				    const double *vars_old,
+				    double stress_gp[nvoi],
+				    int ex, int ey, int ez = 0) const;
+
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(const double *u, const double *vars_old,
 				  double be[npe * dim], int ex, int ey,
 				  int ez = 0) const;
+
+		void get_elem_rhs_acc(const double *u, const double *vars_old,
+				      double be[npe * dim], int ex, int ey,
+				      int ez = 0) const;
 
 		void calc_ave_stress(const double *u, double stress_ave[nvoi],
 				     const double *vars_old = nullptr) const;
@@ -181,6 +197,8 @@ class micropp {
 
 		bool calc_vars_new(const double *u, const double *vars_old,
 				   double *vars_new) const;
+		bool calc_vars_new_acc(const double *u, const double *vars_old,
+				       double *vars_new) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],
@@ -194,13 +212,23 @@ class micropp {
 				  double Ae[npe * dim * npe * dim],
 				  int ex, int ey, int ez = 0) const;
 
+		void get_elem_mat_acc(const double *u, const double *vars_old,
+				      double Ae[npe * dim * npe * dim],
+				      int ex, int ey, int ez = 0) const;
+
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(const double *u, const double *vars_old,
 				    double *b);
 
+		double assembly_rhs_acc(const double *u, const double *vars_old,
+					double *b);
+
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *vars_old);
+
+		void assembly_mat_acc(ell_matrix *A, const double *u,
+				      const double *vars_old);
 
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);

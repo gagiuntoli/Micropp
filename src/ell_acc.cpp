@@ -148,7 +148,6 @@ void ell_init_acc(ell_matrix *m, const int nfield, const int dim, const int ns[3
 
 void ell_mvp_acc(const ell_matrix *m, const double *x, double *y)
 {
-	INST_START;
 #pragma acc parallel loop gang worker \
 	present(m[:1], m->nrow, m->nnz, m->cols[:m->nrow * m->nnz], \
 		m->vals[:m->nrow * m->nnz], x[:m->nrow], y[:m->nrow])

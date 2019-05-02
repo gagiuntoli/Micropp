@@ -148,7 +148,6 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 
 void ell_mvp(const ell_matrix *m, const double *x, double *y)
 {
-	INST_START;
 	for (int i = 0; i < m->nrow; i++) {
 		double tmp = 0;
 		const int ix = i * m->nnz;
@@ -266,8 +265,6 @@ void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 	// assembly Ae in 2D structured grid representation
 	// nFields : number of scalar components on each node
 
-	INST_START;
-
 	const int nx = m->n[0];
 	const int nfield = m->nfield;
 	const int npe = 4;
@@ -302,8 +299,6 @@ void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae)
 {
 	// assembly Ae in 3D structured grid representation
 	// nFields : number of scalar components on each node
-
-	INST_START;
 
 	const int nx = m->n[0];
 	const int ny = m->n[1];
@@ -391,8 +386,6 @@ void ell_set_bc_2D(ell_matrix *m)
 
 void ell_set_bc_3D(ell_matrix *m)
 {
-	INST_START;
-
 	// Sets 1s on the diagonal of the boundaries and 0s
 	// on the columns corresponding to that values
 	const int nx = m->n[0];

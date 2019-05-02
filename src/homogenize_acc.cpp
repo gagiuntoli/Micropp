@@ -26,53 +26,8 @@
 #include "micro.hpp"
 
 
-template <int tdim>
-void micropp<tdim>::set_strain(const int gp_id, const double *strain)
-{
-	assert(gp_id >= 0);
-	assert(gp_id < ngp);
-	memcpy(gp_list[gp_id].strain, strain, nvoi * sizeof(double));
-}
-
-
-template <int tdim>
-void micropp<tdim>::get_stress(const int gp_id, double *stress) const
-{
-	assert(gp_id >= 0);
-	assert(gp_id < ngp);
-	memcpy(stress, gp_list[gp_id].stress, nvoi * sizeof(double));
-}
-
-
-template <int tdim>
-void micropp<tdim>::get_ctan(const int gp_id, double *ctan) const
-{
-	assert(gp_id >= 0);
-	assert(gp_id < ngp);
-	memcpy(ctan, gp_list[gp_id].ctan, nvoi * nvoi * sizeof(double));
-}
-
-
-template <int tdim>
-void micropp<tdim>::homogenize()
-{
-	INST_START;
-
-#pragma omp parallel for schedule(dynamic,1)
-	for (int igp = 0; igp < ngp; ++igp) {
-
-#ifdef _OPENACC
-		homogenize_task_acc(igp);
-#else
-		homogenize_task(igp);
-#endif
-
-	}
-}
-
-
 template<int tdim>
-void micropp<tdim>::homogenize_task(int igp)
+void micropp<tdim>::homogenize_task_acc(int igp)
 {
 	const int ns[3] = { nx, ny, nz };
 
@@ -90,7 +45,7 @@ void micropp<tdim>::homogenize_task(int igp)
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
-	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	gp_ptr->cost += newton.solver_its;
@@ -114,7 +69,7 @@ void micropp<tdim>::homogenize_task(int igp)
 			for (int j = 0; j < nvoi; ++j)
 				eps_sub[j] += deps_sub[j];
 
-			newton = newton_raphson(&A, b, u, du, eps_sub, gp_ptr->vars_n);
+			newton = newton_raphson_acc(&A, b, u, du, eps_sub, gp_ptr->vars_n);
 			gp_ptr->cost += newton.solver_its;
 		}
 
@@ -137,7 +92,7 @@ void micropp<tdim>::homogenize_task(int igp)
 	}
 
 	// Updates <vars_new>
-	bool non_linear = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
+	bool non_linear = calc_vars_new_acc(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
 
 	if (non_linear == true) {
 		if (gp_ptr->allocated == false) {
@@ -159,7 +114,7 @@ void micropp<tdim>::homogenize_task(int igp)
 			memcpy(eps_1, gp_ptr->strain, nvoi * sizeof(double));
 			eps_1[i] += D_EPS_CTAN_AVE;
 
-			newton_raphson(&A, b, u, du, eps_1, gp_ptr->vars_n);
+			newton_raphson_acc(&A, b, u, du, eps_1, gp_ptr->vars_n);
 
 			gp_ptr->cost += newton.solver_its;
 
@@ -178,14 +133,6 @@ void micropp<tdim>::homogenize_task(int igp)
 	free(u);
 	free(du);
 	free(vars_new_aux);
-}
-
-
-template <int tdim>
-void micropp<tdim>::update_vars()
-{
-	for (int igp = 0; igp < ngp; ++igp)
-		gp_list[igp].update_vars();
 }
 
 

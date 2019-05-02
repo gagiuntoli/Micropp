@@ -42,7 +42,7 @@ class test_t : public micropp<3> {
 	public:
 		test_t(const int size[3], const int micro_type, const double micro_params[5],
 		       const material_base materials[2])
-			:micropp<3> (1, size, micro_type, micro_params, materials, NO_COUPLING)
+			:micropp<3> (1, size, micro_type, micro_params, materials, ONE_WAY)
 		{};
 
 		~test_t() {};
@@ -57,14 +57,13 @@ class test_t : public micropp<3> {
 			double *du = (double *) calloc(nndim, sizeof(double));
 			double *u = (double *) calloc(nndim, sizeof(double));
 
-			newton_t newton = newton_raphson_acc(&A, b, u, du, strain, nullptr);
+			newton_t newton = newton_raphson_acc(&A, b, u, du, strain);
 			newton.print();
 
 			ell_free(&A);
 			free(b);
 			free(u);
 			free(du);
-
 		};
 
 };

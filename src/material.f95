@@ -24,19 +24,18 @@ module libmaterial
   type, bind(C) :: material_base
      real(c_double) :: E, nu, Ka, Sy
      real(c_double) :: k, mu, lambda
-     integer(c_int) type
-     logical(c_bool) plasticity, damage
+     real(c_double) :: Xt
+     integer(c_int) :: type
   end type material_base
 
   interface
-     !subroutine material_set(this, E, nu, Ka, Sy, mtype) bind (C, name='material_set')
-     subroutine material_set(this, E, nu, Ka, Sy, mtype) bind (C)
+     subroutine material_set(this, mtype, E, nu, Ka, Sy, Xt) bind (C, name='material_set')
        use, intrinsic :: iso_c_binding, only: c_int, c_double
        import material_base
        implicit none
        type(material_base) :: this
-       real(c_double), intent(in), value :: E, nu, Ka, Sy
        integer(c_int), intent(in), value :: mtype
+       real(c_double), intent(in), value :: E, nu, Ka, Sy, Xt
      end subroutine material_set
   end interface
 

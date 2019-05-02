@@ -63,6 +63,10 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
+	for (int gp = 0; gp < npe; gp++){
+		calc_bmat(gp, calc_bmat_cache[gp]);
+	}
+
 	gp_list = new gp_t<tdim>[ngp]();
 	for (int gp = 0; gp < ngp; ++gp) {
 		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
@@ -80,11 +84,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		micro_params[i] = _micro_params[i];
 
 	for (int i = 0; i < numMaterials; ++i) {
-#ifndef _OPENACC
 		material_list[i] = material_t::make_material(_materials[i]);
-#else
-		material_acc_list[i] = material_acc(_materials[i]);
-#endif
 	}
 
 	for (int ez = 0; ez < nez; ++ez) {
@@ -185,7 +185,11 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps_1[nvoi] = { 0.0 };
 		eps_1[i] += D_EPS_CTAN_AVE;
 
+#ifdef _OPENACC
+		newton_raphson_acc(&A, b, u, du, eps_1);
+#else
 		newton_raphson(&A, b, u, du, eps_1);
+#endif
 
 		calc_ave_stress(u, sig_1);
 
@@ -210,27 +214,23 @@ material_t *micropp<tdim>::get_material(const int e) const
 
 template <int tdim>
 void micropp<tdim>::get_elem_rhs(const double *u,
-				 const double *int_vars_old,
+				 const double *vars_old,
 				 double be[npe * dim],
 				 int ex, int ey, int ez) const
 {
-	INST_START;
-
 	constexpr int npedim = npe * dim;
-	double bmat[nvoi][npedim], stress_gp[nvoi], strain_gp[nvoi];
+	double stress_gp[nvoi], strain_gp[nvoi];
 
 	memset(be, 0, npedim * sizeof(double));
 
 	for (int gp = 0; gp < npe; ++gp) {
 
-		calc_bmat(gp, bmat);
-
 		get_strain(u, gp, strain_gp, ex, ey, ez);
-		get_stress(gp, strain_gp, int_vars_old, stress_gp, ex, ey, ez);
+		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
-				be[i] += bmat[j][i] * stress_gp[j] * wg;
+				be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
 	}
 }
 
@@ -241,7 +241,6 @@ void micropp<tdim>::get_elem_mat(const double *u,
 				 double Ae[npe * dim * npe * dim],
 				 int ex, int ey, int ez) const
 {
-	INST_START;
 	const int e = glo_elem(ex, ey, ez);
 	const material_t *material = get_material(e);
 
@@ -259,24 +258,23 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 		material->get_ctan(eps, (double *)ctan, vars);
 
-		double bmat[nvoi][npedim], cxb[nvoi][npedim];
-		calc_bmat(gp, bmat);
+		double cxb[nvoi][npedim];
 
 		for (int i = 0; i < nvoi; ++i) {
 			for (int j = 0; j < npedim; ++j) {
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
-					tmp += ctan[i][k] * bmat[k][j];
-				cxb[i][j] = tmp;
+					tmp += ctan[i][k] * calc_bmat_cache[gp][k][j];
+				cxb[i][j] = tmp * wg;
 			}
 		}
 
 		for (int m = 0; m < nvoi; ++m) {
 			for (int i = 0; i < npedim; ++i) {
 				const int inpedim = i * npedim;
-				const double bmatmi = bmat[m][i];
+				const double bmatmi = calc_bmat_cache[gp][m][i];
 				for (int j = 0; j < npedim; ++j)
-					TAe[inpedim + j] += bmatmi * cxb[m][j] * wg;
+					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
 		}
 	}
@@ -284,6 +282,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 }
 
 
+#pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
 {
@@ -446,6 +445,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 }
 
 
+#pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
 				   double elem_disp[npe * dim],
@@ -459,7 +459,7 @@ void micropp<tdim>::get_elem_displ(const double *u,
 			elem_disp[i * dim + d] = u[n[i] * dim + d];
 }
 
-
+#pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 			       int ex, int ey, int ez) const
@@ -467,13 +467,12 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 	double elem_disp[npe * dim];
 	get_elem_displ(u, elem_disp, ex, ey, ez);
 
-	double bmat[nvoi][npe * dim];
-	calc_bmat(gp, bmat);
+	for (int i = 0; i < nvoi; ++i)strain_gp[i]=0;
 
-	memset(strain_gp, 0, nvoi * sizeof(double));
 	for (int v = 0; v < nvoi; ++v)
-		for (int i = 0; i < npe * dim; i++)
-			strain_gp[v] += bmat[v][i] * elem_disp[i];
+		for (int i = 0; i < npe * dim; i++){
+			strain_gp[v] += calc_bmat_cache[gp][v][i] * elem_disp[i];
+		}
 }
 
 
@@ -687,6 +686,35 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 	return non_linear;
 }
 
+template<int tdim>
+bool micropp<tdim>::calc_vars_new_acc(const double *u, const double *_vars_old,
+				      double *_vars_new) const
+{
+	bool non_linear = false;
 
-template class micropp<2>;
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex){
+
+				const int e = glo_elem(ex, ey, ez);
+				const material_t *material = get_material(e);
+
+				for (int gp = 0; gp < npe; ++gp) {
+
+					const double *vars_old = (_vars_old) ? &_vars_old[intvar_ix(e, gp, 0)] : nullptr;
+					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
+
+					double eps[nvoi];
+					get_strain(u, gp, eps, ex, ey, ez);
+
+					non_linear |= material->evolute(eps, vars_old, vars_new);
+				}
+			}
+		}
+	}
+
+	return non_linear;
+}
+
+
 template class micropp<3>;

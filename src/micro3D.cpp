@@ -84,8 +84,6 @@ void micropp<3>::set_displ_bc(const double eps[nvoi], double *u)
 template <>
 void micropp<3>::calc_bmat(int gp, double bmat[nvoi][npe * dim]) const
 {
-	INST_START;
-
 	const double dsh[8][3] = {
 		{
 			-(1 - xg[gp][1]) * (1 - xg[gp][2]) / 8. * 2. / dx,

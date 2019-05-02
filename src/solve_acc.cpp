@@ -38,7 +38,7 @@ newton_t micropp<tdim>::newton_raphson_acc(ell_matrix *A, double *b, double *u, 
 	set_displ_bc(strain, u);
 
 	int its = 0;
-	double norm = assembly_rhs(u, vars_old, b);
+	double norm = assembly_rhs_acc(u, vars_old, b);
 	const double norm_0 = norm;
 
 	while (its < nr_max_its) {
@@ -48,7 +48,7 @@ newton_t micropp<tdim>::newton_raphson_acc(ell_matrix *A, double *b, double *u, 
 			break;
 		}
 
-		assembly_mat(A, u, vars_old);
+		assembly_mat_acc(A, u, vars_old);
 
 		double cg_err;
 		int cg_its = ell_solve_cgpd_acc(A, b, du, &cg_err);
@@ -58,7 +58,7 @@ newton_t micropp<tdim>::newton_raphson_acc(ell_matrix *A, double *b, double *u, 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
-		norm = assembly_rhs(u, vars_old, b);
+		norm = assembly_rhs_acc(u, vars_old, b);
 
 		its++;
 	}
@@ -68,5 +68,4 @@ newton_t micropp<tdim>::newton_raphson_acc(ell_matrix *A, double *b, double *u, 
 }
 
 
-template class micropp<2>;
 template class micropp<3>;
