@@ -149,6 +149,7 @@ class micropp {
 		const double nr_rel_tol;
 
 		void homogenize_task(int gp);
+
 		void homogenize_task_acc(int gp);
 
 		void calc_ctan_lin();
@@ -214,10 +215,6 @@ class micropp {
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
 				  int ex, int ey, int ez = 0) const;
-
-		void get_elem_mat_acc(const double *u, const double *vars_old,
-				      double Ae[npe * dim * npe * dim],
-				      int ex, int ey, int ez = 0) const;
 
 		void set_displ_bc(const double strain[nvoi], double *u);
 

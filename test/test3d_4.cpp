@@ -60,10 +60,8 @@ int main(int argc, char **argv)
 	int dir = 2;
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi], (*sig_test)[nvoi];
-	double ctan[nvoi * nvoi], (*ctan_test)[nvoi * nvoi];
 
 	sig_test = (double (*)[nvoi]) malloc(nvoi * ngp * sizeof(double));
-	ctan_test = (double (*)[nvoi * nvoi]) malloc(nvoi * nvoi * ngp * sizeof(double));
 
 	auto start = high_resolution_clock::now();
 
@@ -96,17 +94,19 @@ int main(int argc, char **argv)
 			micro.get_stress(gp, sig);
 			memcpy(sig_test[gp], sig, 3 * sizeof(double));
 		}
-		cout << " sig  = ";
-		for (int i = 0; i < 6; ++i)
-			cout << sig[i] << "\t";
-		cout << endl;
 
 		double diff_sum_sig = 0.0;
-		for (int gp = 1; gp < ngp; ++gp) {
-			for (int i = 0; i < 6; ++i) {
-				const double tmp = fabs(sig_test[gp][i] - sig_test[0][i]);
-				diff_sum_sig += tmp;
-				assert(tmp < 1.0e-8);
+		for (int gp = 0; gp < ngp; ++gp) {
+			cout << " sig  = ";
+			for (int i = 0; i < 6; ++i)
+				cout << sig[i] << "\t";
+			cout << endl;
+			if (gp != 0) {
+				for (int i = 0; i < 6; ++i) {
+					const double tmp = fabs(sig_test[gp][i] - sig_test[0][i]);
+					diff_sum_sig += tmp;
+					assert(tmp < 1.0e-7);
+				}
 			}
 		}
 		cout << "Diff sig:\t" << diff_sum_sig << endl;
