@@ -186,6 +186,12 @@ void micropp<tdim>::calc_ctan_lin()
 		eps_1[i] += D_EPS_CTAN_AVE;
 
 #ifdef _OPENACC
+#ifdef _OPENMP
+		int ngpus = acc_get_num_devices(acc_device_nvidia);
+		int tnum = omp_get_thread_num();
+		int gpunum = tnum % ngpus;
+		acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
 		newton_raphson_acc(&A, b, u, du, eps_1);
 #else
 		newton_raphson(&A, b, u, du, eps_1);
@@ -527,8 +533,10 @@ void micropp<tdim>::print_info() const
 			break;
 	}
        	
-	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :" << nz << " nn :" << nn << endl;
-	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
+	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :"
+	       	<< nz << " nn :" << nn << endl;
+	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz
+	       	<< " param : " << special_param << endl;
 	cout << endl;
 
 	for (int i = 0; i < numMaterials; ++i) {
@@ -537,6 +545,16 @@ void micropp<tdim>::print_info() const
 	}
 
 	cout << "Number of Subiterations :" << nsubiterations << endl;
+	cout << endl;
+
+#ifdef _OPENACC
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	cout << "NUM OF GPUS : " << ngpus << endl;
+#endif
+#ifdef _OPENMP
+	int tnum = omp_get_thread_num();
+	cout << "OMP THREADS : " << tnum << endl;
+#endif
 	cout << endl;
 }
 

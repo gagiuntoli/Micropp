@@ -23,15 +23,15 @@
 #include <iomanip>
 
 #include <cstring>
-#include <ctime>
 #include <cassert>
+#include <chrono>
 #include <bits/stdc++.h>
 
 #include "micro.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
-#define dim 3
 #define D_EPS 0.01
 
 int main(int argc, char **argv)
@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 
 	assert(n > 1 && ngp > 1 && time_steps > 0);
 
-	const int size[dim] = { n, n, n };
-	const int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
+	const int size[3] = { n, n, n };
+	const int micro_type = MIC_SPHERE; // 2 materiales matriz y fibra (3D esfera en matriz)
 	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
 	material_base mat_params[2];
@@ -65,9 +65,9 @@ int main(int argc, char **argv)
 	sig_test = (double (*)[nvoi]) malloc(nvoi * ngp * sizeof(double));
 	ctan_test = (double (*)[nvoi * nvoi]) malloc(nvoi * nvoi * ngp * sizeof(double));
 
-	micropp<dim> micro(ngp, size, micro_type, micro_params, mat_params);
+	auto start = high_resolution_clock::now();
 
-	double time = clock();
+	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
@@ -81,61 +81,44 @@ int main(int argc, char **argv)
 		else
 			eps[dir] += D_EPS;
 
-		cout << "setting strains ..." << endl;
-		cout << scientific;
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.set_strain(gp, eps);
 		}
 		cout << " eps = ";
 		for (int i = 0; i < 6; ++i)
-			cout << setw(14) << eps[i] << " ";
+			cout << eps[i] << " ";
 		cout << endl;
 
 		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
 
-		cout << "Getting stresses ..." << endl;
 		for (int gp = 0; gp < ngp; ++gp) {
 			micro.get_stress(gp, sig);
 			memcpy(sig_test[gp], sig, 3 * sizeof(double));
 		}
 		cout << " sig  = ";
 		for (int i = 0; i < 6; ++i)
-			cout << setw(14) << sig[i] << "\t";
+			cout << sig[i] << "\t";
 		cout << endl;
 
-		for (int gp = 0; gp < ngp; ++gp) {
-			micro.get_ctan(gp, ctan);
-			memcpy(ctan_test[gp], ctan, 3 * sizeof(double));
-		}
-		cout << " ctan = ";
-		for (int i = 0; i < 6; ++i)
-			cout << setw(14) << ctan[i] << "\t";
-		cout << endl;
-
-		double diff_sum_sig = 0.0, diff_sum_ctan = 0.0;
+		double diff_sum_sig = 0.0;
 		for (int gp = 1; gp < ngp; ++gp) {
 			for (int i = 0; i < 6; ++i) {
 				const double tmp = fabs(sig_test[gp][i] - sig_test[0][i]);
 				diff_sum_sig += tmp;
 				assert(tmp < 1.0e-8);
 			}
-			for (int i = 0; i < 6; ++i) {
-				const double tmp = fabs(ctan_test[gp][i] - ctan_test[0][i]);
-				diff_sum_ctan += tmp;
-				assert(tmp < 1.0e-8);
-			}
 		}
 		cout << "Diff sig:\t" << diff_sum_sig << endl;
-		cout << "Diff ctan:\t" << diff_sum_ctan << endl;
 		cout << endl;
 
 		micro.update_vars();
 
 	}
 
-	time = clock() - time;
-	printf("time = %lf\n", time);
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	cout << "time = " << duration.count() << " ms" << endl;
 
 	return 0;
 }

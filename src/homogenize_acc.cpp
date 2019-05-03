@@ -19,8 +19,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include <cmath>
 #include <cassert>
+
 
 #include "instrument.hpp"
 #include "micro.hpp"
@@ -29,6 +31,13 @@
 template<int tdim>
 void micropp<tdim>::homogenize_task_acc(int igp)
 {
+#ifdef _OPENMP
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	int tnum = omp_get_thread_num();
+	int gpunum = tnum % ngpus;
+	acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+
 	const int ns[3] = { nx, ny, nz };
 
 	ell_matrix A;  // Jacobian

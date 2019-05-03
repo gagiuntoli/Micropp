@@ -38,6 +38,9 @@
 #include "gp.hpp"
 #include "instrument.hpp"
 
+#ifdef _OPENACC
+#include <openacc.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #endif
