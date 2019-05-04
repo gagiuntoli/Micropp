@@ -552,9 +552,17 @@ void micropp<tdim>::print_info() const
 	cout << "NUM OF GPUS : " << ngpus << endl;
 #endif
 #ifdef _OPENMP
-	int tnum = omp_get_thread_num();
+	int tnum = omp_get_num_threads();
 	cout << "OMP THREADS : " << tnum << endl;
 #endif
+	cout << endl;
+	cout << "ctan lin = " << endl;
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < 6; ++j) {
+			cout << ctan_lin[i * 6 + j] << "\t";
+		}
+		cout << endl;
+	}
 	cout << endl;
 }
 

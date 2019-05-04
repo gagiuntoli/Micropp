@@ -54,7 +54,7 @@ int main (int argc, char *argv[])
 	int ngpl = 1;
 	int micro_type = 5;
 	double params[4] = { 1., 1., 1., .15 };
-	micropp3_new(&micro, ngpl, size, micro_type, params, matlist, 10);
+	micropp3_new(&micro, ngpl, size, micro_type, params, matlist);
 	micropp3_print_info(&micro);
 
 	double sig[6], ctan[36];

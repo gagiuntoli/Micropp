@@ -30,7 +30,7 @@ module libmicropp
   interface
 
      subroutine micropp3_new(self, ngp, size, micro_type, micro_params, &
-             materials, nsubiterations) bind(C)
+             materials) bind(C)
        use, intrinsic :: iso_c_binding, only: c_int, c_double
        use libmaterial
        import micropp3
@@ -41,7 +41,6 @@ module libmicropp
        integer(c_int), value :: micro_type
        real(c_double), intent(in), dimension (*) :: micro_params
        type(material_base), intent(in), dimension (*) :: materials
-       integer(c_int), value :: nsubiterations
      end subroutine micropp3_new
 
      subroutine micropp3_free(this) bind(C)
