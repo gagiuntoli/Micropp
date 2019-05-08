@@ -552,7 +552,7 @@ void micropp<tdim>::print_info() const
 	cout << "NUM OF GPUS : " << ngpus << endl;
 #endif
 #ifdef _OPENMP
-	int tnum = omp_get_num_threads();
+	int tnum = omp_get_max_threads();
 	cout << "OMP THREADS : " << tnum << endl;
 #endif
 	cout << endl;
