@@ -47,7 +47,6 @@ int main(int argc, char **argv)
 	}
 
 	const int dir = 1;
-	const int nvoi = 6;
 	const int n = atoi(argv[1]);
 	const int ngp = (argc > 2 ? atoi(argv[2]) : 10);
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);  // Optional value
@@ -68,7 +67,6 @@ int main(int argc, char **argv)
 	micro.print_info();
 
 	double sig[6];
-	double ctan[36];
 	double eps[6] = { 0. };
 
 	cout << scientific;
