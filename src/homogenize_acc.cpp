@@ -28,6 +28,30 @@
 #include "micro.hpp"
 
 
+template <int tdim>
+void micropp<tdim>::homogenize_mulgpu(int rank)
+{
+	INST_START;
+
+#ifdef _OPENACC
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	int gpunum = rank % ngpus;
+	acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+
+#pragma omp parallel for schedule(dynamic,1)
+	for (int igp = 0; igp < ngp; ++igp) {
+
+#ifdef _OPENACC
+		homogenize_task_acc(igp);
+#else
+		homogenize_task(igp);
+#endif
+
+	}
+}
+
+
 template<int tdim>
 void micropp<tdim>::homogenize_task_acc(int igp)
 {

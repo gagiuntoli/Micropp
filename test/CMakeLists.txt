@@ -19,6 +19,7 @@ set(testsources
 	test_omp.cpp
 	test_material.cpp
 	test_damage.cpp
+	multi-gpu-mpi.cpp
 	test_util_1.cpp)
 
 # Iterate over the list above

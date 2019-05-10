@@ -259,6 +259,8 @@ class micropp {
 
 		void homogenize();
 
+		void homogenize_mulgpu(int rank);
+
 		/* Extras */
 
 		int is_non_linear(const int gp_id) const;
