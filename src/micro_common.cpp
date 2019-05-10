@@ -181,9 +181,9 @@ void micropp<tdim>::calc_ctan_lin()
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
 
-		double sig_1[6];
-		double eps_1[nvoi] = { 0.0 };
-		eps_1[i] += D_EPS_CTAN_AVE;
+		double sig[6];
+		double eps[nvoi] = { 0.0 };
+		eps[i] += D_EPS_CTAN_AVE;
 
 #ifdef _OPENACC
 #ifdef _OPENMP
@@ -192,15 +192,15 @@ void micropp<tdim>::calc_ctan_lin()
 		int gpunum = tnum % ngpus;
 		acc_set_device_num(gpunum, acc_device_nvidia);
 #endif
-		newton_raphson_acc(&A, b, u, du, eps_1);
+		newton_raphson_acc(&A, b, u, du, eps);
 #else
-		newton_raphson(&A, b, u, du, eps_1);
+		newton_raphson(&A, b, u, du, eps);
 #endif
 
-		calc_ave_stress(u, sig_1);
+		calc_ave_stress(u, sig);
 
 		for (int v = 0; v < nvoi; ++v)
-			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
+			ctan_lin[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
 
 		ell_free(&A);
 		free(b);
