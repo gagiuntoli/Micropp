@@ -44,9 +44,10 @@ using namespace std::chrono;
 int main(int argc, char **argv)
 {
 
-	int rank;
+	int rank, nproc;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [ngp] [steps]" << endl;
@@ -59,6 +60,8 @@ int main(int argc, char **argv)
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);  // Optional value
 
 	assert(n > 1 && ngp > 0 && time_steps > 0);
+	const int ngp_per_mpi = ngp / nproc + ((ngp % nproc > rank) ? 1 : 0);
+	cout << "RANK = " << rank << " ngp = " << ngp_per_mpi << endl;
 
 	const int size[3] = { n, n, n };
 	const int micro_type = MIC_SPHERE; // 2 materiales matriz y fibra (3D esfera en matriz)
@@ -68,8 +71,8 @@ int main(int argc, char **argv)
 	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
 	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
-	micro.print_info();
+	micropp<3> micro(ngp_per_mpi, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
+	//micro.print_info();
 
 	auto start = high_resolution_clock::now();
 
@@ -89,7 +92,7 @@ int main(int argc, char **argv)
 		else
 			eps[dir] += D_EPS;
 
-		for (int gp = 0; gp < ngp; ++gp) {
+		for (int gp = 0; gp < ngp_per_mpi; ++gp) {
 			micro.set_strain(gp, eps);
 		}
 		cout << "eps = ";
@@ -102,7 +105,7 @@ int main(int argc, char **argv)
 		//micro.homogenize();
 		micro.homogenize_mulgpu(rank);
 
-		for (int gp = 0; gp < ngp; ++gp) {
+		for (int gp = 0; gp < ngp_per_mpi; ++gp) {
 			cout << "sig = ";
 			micro.get_stress(gp, sig);
 			for (int i = 0; i < 6; ++i) {
