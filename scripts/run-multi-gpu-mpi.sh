@@ -4,19 +4,20 @@
 #SBATCH --workdir=.
 #SBATCH --output=%j.out
 #SBATCH --error=%j.err
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=160
+#SBATCH --ntasks=40
+#SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:4
 #SBATCH --exclusive
-#SBATCH --time=00:40:00
+#SBATCH --time=01:30:00
 
 ### #SBATCH --nodes=1
 ### #SBATCH --ntasks-per-node=4
 ### #SBATCH --qos=bsc_case
 ### #SBATCH --qos=debug
 
-N=50
-NGP=20
+N=100
+NGP=32
+STEPS=5
 
 #EXEC="../build-gpu/test/test3d_2"
 EXEC="../test/multi-gpu-mpi"
@@ -30,10 +31,10 @@ export CUDA_VISIBLE_DEVICES="0,1,2,3"
 
 rm -rf times.txt
 
-for i in {1..20}; do
+for i in {1..9}; do
 
 	echo "running" $i MPI processes
-	time mpirun -np $i $EXEC $N $NGP 20 > output-${N}-${NGP}-${i}.out
+	time mpirun -np $i $EXEC $N $NGP $STEPS > output-${N}-${NGP}-${i}.out
 	tim=$(awk '/time =/{print $3}' output-${N}-${NGP}-${i}.out)
 	echo $i $tim >> times.txt
 

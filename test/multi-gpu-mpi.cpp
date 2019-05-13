@@ -59,8 +59,9 @@ int main(int argc, char **argv)
 	const int ngp = (argc > 2 ? atoi(argv[2]) : 10);
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);  // Optional value
 
-	assert(n > 1 && ngp > 0 && time_steps > 0);
+	assert(n > 1 && ngp > 0 && time_steps >= 0);
 	const int ngp_per_mpi = ngp / nproc + ((ngp % nproc > rank) ? 1 : 0);
+	//const int ngp_per_mpi = 1;
 	cout << "RANK = " << rank << " ngp = " << ngp_per_mpi << endl;
 
 	const int size[3] = { n, n, n };
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
 	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
 	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	micropp<3> micro(ngp_per_mpi, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
+	micropp<3> micro(ngp_per_mpi, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5, rank);
 	//micro.print_info();
 
 	auto start = high_resolution_clock::now();
@@ -102,8 +103,7 @@ int main(int argc, char **argv)
 		cout << endl;
 
 		cout << "Homogenizing ..." << endl;
-		//micro.homogenize();
-		micro.homogenize_mulgpu(rank);
+		micro.homogenize();
 
 		for (int gp = 0; gp < ngp_per_mpi; ++gp) {
 			cout << "sig = ";
@@ -116,6 +116,8 @@ int main(int argc, char **argv)
 		cout << endl;
 
 		micro.update_vars();
+
+		MPI_Barrier(MPI_COMM_WORLD);
 	}
 
 	auto stop = high_resolution_clock::now();

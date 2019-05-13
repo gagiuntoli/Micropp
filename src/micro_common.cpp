@@ -29,7 +29,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
 		       const struct material_base *_materials,
 		       const int _coupling, const bool _subiterations,
-		       const int _nsubiterations, const int _nr_max_its,
+		       const int _nsubiterations, const int _mpi_rank,
+		       const int _nr_max_its,
 		       const double _nr_max_tol, const double _nr_rel_tol):
 
 	ngp(_ngp),
@@ -51,6 +52,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	special_param(_micro_params[3]),
 	subiterations(_subiterations),
 	nsubiterations(_nsubiterations),
+	mpi_rank(_mpi_rank),
 
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
@@ -102,6 +104,15 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	for (int gp = 0; gp < ngp; ++gp)
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
+
+	/* GPU device selection */
+#ifdef _OPENACC
+#ifndef _OPENMP
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	int gpunum = mpi_rank % ngpus;
+	acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+#endif
 
 }
 
@@ -185,11 +196,17 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps[nvoi] = { 0.0 };
 		eps[i] += D_EPS_CTAN_AVE;
 
+		/* GPU device selection */
 #ifdef _OPENACC
 #ifdef _OPENMP
 		int ngpus = acc_get_num_devices(acc_device_nvidia);
 		int tnum = omp_get_thread_num();
 		int gpunum = tnum % ngpus;
+		acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+#ifndef _OPENMP
+		int ngpus = acc_get_num_devices(acc_device_nvidia);
+		int gpunum = mpi_rank % ngpus;
 		acc_set_device_num(gpunum, acc_device_nvidia);
 #endif
 		newton_raphson_acc(&A, b, u, du, eps);
