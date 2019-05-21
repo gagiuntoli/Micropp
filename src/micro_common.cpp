@@ -105,15 +105,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int gp = 0; gp < ngp; ++gp)
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 
-	/* GPU device selection */
-#ifdef _OPENACC
-#ifndef _OPENMP
-	int ngpus = acc_get_num_devices(acc_device_nvidia);
-	int gpunum = mpi_rank % ngpus;
-	acc_set_device_num(gpunum, acc_device_nvidia);
-#endif
-#endif
-
 }
 
 
