@@ -32,6 +32,7 @@ template<int tdim>
 void micropp<tdim>::homogenize_task_acc(int igp)
 {
 	/* GPU device selection */
+#ifdef _OPENACC
 #ifdef _OPENMP
 	int ngpus = acc_get_num_devices(acc_device_nvidia);
 	int tnum = omp_get_thread_num();
@@ -42,6 +43,7 @@ void micropp<tdim>::homogenize_task_acc(int igp)
 	int ngpus = acc_get_num_devices(acc_device_nvidia);
 	int gpunum = mpi_rank % ngpus;
 	acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
 #endif
 
 	const int ns[3] = { nx, ny, nz };
