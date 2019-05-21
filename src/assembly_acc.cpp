@@ -38,54 +38,6 @@ void micropp<3>::get_stress_acc(int gp, const double eps[nvoi],
 
 
 template <>
-void micropp<3>::get_elem_mat_acc(const double *u,
-				  const double *vars_old,
-				  double Ae[npe * dim * npe * dim],
-				  int ex, int ey, int ez) const
-{
-	INST_START;
-	const int e = glo_elem(ex, ey, ez);
-	const material_t *material = get_material(e);
-
-	double ctan[nvoi][nvoi];
-	constexpr int npedim = npe * dim;
-	constexpr int npedim2 = npedim * npedim;
-
-	double TAe[npedim2] = { 0.0 };
-
-	for (int gp = 0; gp < npe; ++gp) {
-
-		double eps[6];
-		get_strain(u, gp, eps, ex, ey, ez);
-
-		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-		material->get_ctan(eps, (double *)ctan, vars);
-
-		double cxb[nvoi][npedim];
-
-		for (int i = 0; i < nvoi; ++i) {
-			for (int j = 0; j < npedim; ++j) {
-				double tmp = 0.0;
-				for (int k = 0; k < nvoi; ++k)
-					tmp += ctan[i][k] * calc_bmat_cache[gp][k][j];
-				cxb[i][j] = tmp * wg;
-			}
-		}
-
-		for (int m = 0; m < nvoi; ++m) {
-			for (int i = 0; i < npedim; ++i) {
-				const int inpedim = i * npedim;
-				const double bmatmi = calc_bmat_cache[gp][m][i];
-				for (int j = 0; j < npedim; ++j)
-					TAe[inpedim + j] += bmatmi * cxb[m][j];
-			}
-		}
-	}
-	memcpy(Ae, TAe, npedim2 * sizeof(double));
-}
-
-
-template <>
 void micropp<3>::get_elem_rhs_acc(const double *u, const double *vars_old,
 				  double be[npe * dim],
 				  int ex, int ey, int ez) const
@@ -271,8 +223,10 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 			}
 		}
 	}
+
 	double *ctan = new double[nex*ney*nez*npe*nvoi*nvoi];
 	int *ix_glo = new int[nex*ney*nez*8];
+
 	for (int ex = 0; ex < nex; ++ex) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
@@ -280,26 +234,32 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 				const material_t *material = get_material(e);
 				for (int gp = 0; gp < npe; ++gp) {
 					const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-					material->get_ctan(&eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi], vars);
+					material->get_ctan(&eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6],
+							   &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi],
+							   vars);
 				}
 				const int n0 = ez * nxny + ey * nx + ex;
 				const int n1 = n0 + 1;
 				const int n2 = n0 + nx + 1;
 				const int n3 = n0 + nx;
 
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+0] =n0;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+1] =n1;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+2] =n2;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+3] =n3;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+4] =n0 + nxny;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+5] =n1 + nxny;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+6] =n2 + nxny;
-				ix_glo[ex*ney*nez*8+ey*nez*8+ez*8+7] =n3 + nxny;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 0] = n0;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 1] = n1;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 2] = n2;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 3] = n3;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 4] = n0 + nxny;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 5] = n1 + nxny;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 6] = n2 + nxny;
+				ix_glo[ex*ney*nez*8 + ey*nez*8 + ez*8 + 7] = n3 + nxny;
 			}
 		}
 	}
 	delete[] eps;
-#pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi],bmat[:npe*nvoi*npedim],A[:1],A->nrow,A->nnz,cols_row[:8][:8],ix_glo[:nex*ney*nez*8])copy(A->vals[:A->nrow * A->nnz])
+#pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi], \
+					     bmat[:npe*nvoi*npedim], \
+					     A[:1], A->nrow, A->nnz, cols_row[:8][:8],\
+					     ix_glo[:nex*ney*nez*8]) \
+	copy(A->vals[:A->nrow * A->nnz])
 	for (int ex = 0; ex < nex*ney*nez; ++ex) {
 
 				double Ae[npedim2];
@@ -341,7 +301,5 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 	delete []ix_glo;
 	delete []bmat;
 	delete []ctan;
-	ell_set_bc_3D_acc(A);
+	ell_set_bc_3D(A);
 }
-
-

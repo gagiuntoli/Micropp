@@ -35,7 +35,7 @@ extern "C" {
 	void micropp3_new(struct micropp3 *,int ngp, const int size[3],
 			  const int micro_type, const double *micro_params,
 			  const struct material_base *materials,
-			  const int nsubiteration);
+			  const int nsubiterations, const int mpi_rank);
 
 	void micropp3_free(struct micropp3 *in);
 

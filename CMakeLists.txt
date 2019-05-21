@@ -8,7 +8,12 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithD
 
 option(OPENMP "Enables OpenMP paralelization" OFF)
 if(OPENMP)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mp ")
+		set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -mp ")
+	endif()
 endif()
 
 option(OPENACC "Enable OpenACC" OFF)

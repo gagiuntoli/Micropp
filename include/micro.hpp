@@ -38,6 +38,9 @@
 #include "gp.hpp"
 #include "instrument.hpp"
 
+#ifdef _OPENACC
+#include <openacc.h>
+#endif
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -117,6 +120,7 @@ class micropp {
 		const int micro_type, nvars;
 		const int nsubiterations;
 		const bool subiterations;
+		const int mpi_rank;
 
 		gp_t<tdim> *gp_list;
 
@@ -146,6 +150,7 @@ class micropp {
 		const double nr_rel_tol;
 
 		void homogenize_task(int gp);
+
 		void homogenize_task_acc(int gp);
 
 		void calc_ctan_lin();
@@ -212,10 +217,6 @@ class micropp {
 				  double Ae[npe * dim * npe * dim],
 				  int ex, int ey, int ez = 0) const;
 
-		void get_elem_mat_acc(const double *u, const double *vars_old,
-				      double Ae[npe * dim * npe * dim],
-				      int ex, int ey, int ez = 0) const;
-
 		void set_displ_bc(const double strain[nvoi], double *u);
 
 		double assembly_rhs(const double *u, const double *vars_old,
@@ -243,6 +244,7 @@ class micropp {
 			const int _coupling = ONE_WAY,
 			const bool _subiterations = false,
 			const int _nsubiterations = 10,
+			const int _mpi_rank = 0,
 			const int max_its = NR_MAX_ITS,
 			const double max_tol = NR_MAX_TOL,
 			const double rel_tol = NR_REL_TOL);

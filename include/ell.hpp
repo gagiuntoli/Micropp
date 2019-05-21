@@ -81,25 +81,14 @@ void print_ell(const ell_matrix *A);
 
 // OpenACC compatibility
 
-void ell_init_acc(ell_matrix *m, const int nfield, const int dim,
-		  const int ns[3],
-		  const double min_err = CG_MIN_ERR,
-		  const double rel_err = CG_REL_ERR,
-		  const int max_its = CG_MAX_ITS);
-
 void ell_mvp_acc(const ell_matrix *m, const double *x, double *y);
+
 int ell_solve_cgpd_acc(const ell_matrix *m, const double *b, double *x,
 		       double *err_);
-void ell_add_2D_acc(ell_matrix *m, int ex, int ey, const double *Ae);
-void ell_add_3D_acc(ell_matrix *m, int ex, int ey, int ez, const double *Ae);
-void ell_set_zero_mat_acc(ell_matrix *m);
-void ell_set_bc_2D_acc(ell_matrix *m);
-void ell_set_bc_3D_acc(ell_matrix *m);
-void ell_free_acc(ell_matrix *m);
 
 double get_norm_acc(const double *vector, const int n);
+
 double get_dot_acc(const double *v1, const double *v2, const int n);
-double ell_get_norm_acc(const ell_matrix *m);
 
 void print_ell_acc(const ell_matrix *A);
 

@@ -29,7 +29,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
 		       const struct material_base *_materials,
 		       const int _coupling, const bool _subiterations,
-		       const int _nsubiterations, const int _nr_max_its,
+		       const int _nsubiterations, const int _mpi_rank,
+		       const int _nr_max_its,
 		       const double _nr_max_tol, const double _nr_rel_tol):
 
 	ngp(_ngp),
@@ -51,6 +52,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	special_param(_micro_params[3]),
 	subiterations(_subiterations),
 	nsubiterations(_nsubiterations),
+	mpi_rank(_mpi_rank),
 
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
@@ -181,20 +183,32 @@ void micropp<tdim>::calc_ctan_lin()
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
 
-		double sig_1[6];
-		double eps_1[nvoi] = { 0.0 };
-		eps_1[i] += D_EPS_CTAN_AVE;
+		double sig[6];
+		double eps[nvoi] = { 0.0 };
+		eps[i] += D_EPS_CTAN_AVE;
 
+		/* GPU device selection */
 #ifdef _OPENACC
-		newton_raphson_acc(&A, b, u, du, eps_1);
+#ifdef _OPENMP
+		int ngpus = acc_get_num_devices(acc_device_nvidia);
+		int tnum = omp_get_thread_num();
+		int gpunum = tnum % ngpus;
+		acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+#ifndef _OPENMP
+		int ngpus = acc_get_num_devices(acc_device_nvidia);
+		int gpunum = mpi_rank % ngpus;
+		acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+		newton_raphson_acc(&A, b, u, du, eps);
 #else
-		newton_raphson(&A, b, u, du, eps_1);
+		newton_raphson(&A, b, u, du, eps);
 #endif
 
-		calc_ave_stress(u, sig_1);
+		calc_ave_stress(u, sig);
 
 		for (int v = 0; v < nvoi; ++v)
-			ctan_lin[v * nvoi + i] = sig_1[v] / D_EPS_CTAN_AVE;
+			ctan_lin[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
 
 		ell_free(&A);
 		free(b);
@@ -527,8 +541,10 @@ void micropp<tdim>::print_info() const
 			break;
 	}
        	
-	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :" << nz << " nn :" << nn << endl;
-	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz << " param : " << special_param << endl;
+	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :"
+	       	<< nz << " nn :" << nn << endl;
+	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz
+	       	<< " param : " << special_param << endl;
 	cout << endl;
 
 	for (int i = 0; i < numMaterials; ++i) {
@@ -537,6 +553,24 @@ void micropp<tdim>::print_info() const
 	}
 
 	cout << "Number of Subiterations :" << nsubiterations << endl;
+	cout << endl;
+
+#ifdef _OPENACC
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	cout << "NUM OF GPUS : " << ngpus << endl;
+#endif
+#ifdef _OPENMP
+	int tnum = omp_get_max_threads();
+	cout << "OMP THREADS : " << tnum << endl;
+#endif
+	cout << endl;
+	cout << "ctan lin = " << endl;
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < 6; ++j) {
+			cout << ctan_lin[i * 6 + j] << "\t";
+		}
+		cout << endl;
+	}
 	cout << endl;
 }
 

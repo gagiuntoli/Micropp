@@ -4,6 +4,7 @@ set(CMAKE_BUILD_TYPE Debug)
 # The test files I care only (create a list)
 set(testsources
 	test3d_1.cpp
+	test3d_2.cpp
 	test3d_3.f90
 	test3d_4.cpp
 	test3d_5.cpp
