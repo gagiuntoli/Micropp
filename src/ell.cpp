@@ -262,6 +262,289 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 }
 
 
+int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err)
+{
+	INST_START;
+
+	/* Conjugate Gradient Algorithm (CG) with ILU Preconditioner */
+
+	if (!m || !b || !x)
+		return 1;
+
+	int *ia = new int[m->nrow + 1];
+	int *ua = new int[m->nrow];
+	double *lu = new double[m->nrow * m->nnz];
+
+	ia[0] = 0;
+	for (int i = 1; i < m->nrow + 1; i++) {
+		ia[i] = ia[i - 1] + m->nnz;
+	}
+
+	/*
+	for (int i = 0; i < m->nrow; i++) {
+		ua[i] = -1;
+		int j1 = ia[i];
+		int j2 = ia[i + 1];
+		for (int j = j1; j < j2; j++) {
+			if (m->cols[j] == i) {
+				ua[i] = j;
+			}
+		}
+	}
+	*/
+	ua[0] = 39;
+	ua[1] = 121;
+	ua[2] = 203;
+	for (int i = 1; i < m->nrow; i++) {
+		ua[i * m->dim + 0] = ua[(i - 1) * m->dim + 0] + m->nnz * m->dim;
+		ua[i * m->dim + 1] = ua[(i - 1) * m->dim + 1] + m->nnz * m->dim;
+		ua[i * m->dim + 2] = ua[(i - 1) * m->dim + 2] + m->nnz * m->dim;
+	}
+
+	ilu_cr(m->nrow, m->nnz * m->nrow, ia, m->cols, m->vals, ua, lu);
+
+	for (int i = 0; i < m->nrow; ++i)
+		x[i] = 0.0;
+
+	ell_mvp(m, x, m->r);
+
+	for (int i = 0; i < m->nrow; ++i)
+		m->r[i] = b[i] - m->r[i];
+
+	/*
+	for (int i = 0; i < m->nrow; ++i)
+		m->z[i] = m->k[i] * m->r[i];
+		*/
+
+	lus_cr (m->nrow, m->nnz * m->nrow, ia, m->cols, lu, ua, m->r, m->z);
+
+	for (int i = 0; i < m->nrow; ++i)
+		m->p[i] = m->z[i];
+
+	double rz = get_dot(m->r, m->z, m->nrow);
+
+	double pnorm_0 = sqrt(get_dot(m->z, m->z, m->nrow));
+	double pnorm = pnorm_0;
+
+	int its = 0;
+	while (its < m->max_its) {
+
+		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
+			break;
+
+		ell_mvp(m, m->p, m->Ap);
+		double pAp = get_dot(m->p, m->Ap, m->nrow);
+
+		const double alpha = rz / pAp;
+
+		for (int i = 0; i < m->nrow; ++i)
+			x[i] += alpha * m->p[i];
+
+		for (int i = 0; i < m->nrow; ++i)
+			m->r[i] -= alpha * m->Ap[i];
+
+		/*
+		   for (int i = 0; i < m->nrow; ++i)
+		   m->z[i] = m->k[i] * m->r[i];
+		   */
+		lus_cr (m->nrow, m->nnz * m->nrow, ia, m->cols, lu, ua, m->r, m->z);
+
+		pnorm = sqrt(get_dot(m->z, m->z, m->nrow));
+		double rz_n = 0;
+		rz_n = get_dot(m->r, m->z, m->nrow);
+
+		const double beta = rz_n / rz;
+		for (int i = 0; i < m->nrow; ++i)
+			m->p[i] = m->z[i] + beta * m->p[i];
+
+		rz = rz_n;
+		its++;
+	}
+
+	*err = rz;
+
+
+	delete [] ia;
+	delete [] ua;
+	delete [] lu;
+	return its;
+}
+
+
+void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
+{
+	//****************************************************************************80
+	//
+	//  Purpose:
+	//
+	//    ILU_CR computes the incomplete LU factorization of a matrix.
+	//
+	//  Discussion:
+	//
+	//    The matrix A is assumed to be stored in compressed row format.  Only
+	//    the nonzero entries of A are stored.  The vector JA stores the
+	//    column index of the nonzero value.  The nonzero values are sorted
+	//    by row, and the compressed row vector IA then has the property that
+	//    the entries in A and JA that correspond to row I occur in indices
+	//    IA[I] through IA[I+1]-1.
+	//
+	//  Parameters:
+	//
+	//    Input, int N, the order of the system.
+	//
+	//    Input, int NZ_NUM, the number of nonzeros.
+	//
+	//    Input, int IA[N+1], JA[NZ_NUM], the row and column indices
+	//    of the matrix values.  The row vector has been compressed.
+	//
+	//    Input, double A[NZ_NUM], the matrix values.
+	//
+	//    Input, int UA[N], the index of the diagonal element of each row.
+	//
+	//    Output, double L[NZ_NUM], the ILU factorization of A.
+	//
+	
+	int jj;
+	int jrow;
+	int jw;
+	double tl;
+
+	int *iw = new int[n];
+		
+	// Copy A
+	for (int k = 0; k < nz_num; k++) {
+		l[k] = a[k];
+	}
+
+	for (int i = 0; i < n; i++) {
+
+		for (int j = 0; j < n; j++) {
+			iw[j] = -1;
+		}
+
+		for (int k = ia[i]; k <= ia[i+1] - 1; k++) {
+			iw[ja[k]] = k;
+		}
+
+		int j = ia[i];
+		do {
+			jrow = ja[j];
+			if (i <= jrow) {
+				break;
+			}
+			tl = l[j] * l[ua[jrow]];
+			l[j] = tl;
+			for (int jj = ua[jrow] + 1; jj <= ia[jrow + 1] - 1; jj++) {
+				jw = iw[ja[jj]];
+				if (jw != -1) {
+					l[jw] = l[jw] - tl * l[jj];
+				}
+			}
+			j = j + 1;
+
+		} while (j <= ia[i + 1] - 1);
+
+		ua[i] = j;
+
+		if (jrow != i) {
+			cerr << "\n";
+			cerr << "ILU_CR - Fatal error!\n";
+			cerr << "  JROW != I\n";
+			cerr << "  JROW = " << jrow << "\n";
+			cerr << "  I    = " << i << "\n";
+			exit(1);
+		}
+
+		//if (l[j] == 0.0) {
+		//	cerr << "\n";
+		//	cerr << "ILU_CR - Fatal error!\n";
+		//	cerr << "  Zero pivot on step I = " << i << "\n";
+		//	cerr << "  L[" << j << "] = 0.0\n";
+		//	exit(1);
+		//}
+
+		l[j] = 1.0 / l[j];
+	}
+
+	for (int k = 0; k < n; k++) {
+		l[ua[k]] = 1.0 / l[ua[k]];
+	}
+
+	delete [] iw;
+
+	return;
+}
+
+
+void lus_cr (int n, int nz_num, int *ia, int *ja, double *l, int *ua, 
+	     double *r, double *z)
+{
+//****************************************************************************80
+//
+//  Purpose:
+//
+//    LUS_CR applies the incomplete LU preconditioner.
+//
+//  Discussion:
+//
+//    The linear system M * Z = R is solved for Z.  M is the incomplete
+//    LU preconditioner matrix, and R is a vector supplied by the user.
+//    So essentially, we're solving L * U * Z = R.
+//
+//    The matrix A is assumed to be stored in compressed row format.  Only
+//    the nonzero entries of A are stored.  The vector JA stores the
+//    column index of the nonzero value.  The nonzero values are sorted
+//    by row, and the compressed row vector IA then has the property that
+//    the entries in A and JA that correspond to row I occur in indices
+//    IA[I] through IA[I+1]-1.
+//
+//  Parameters:
+//
+//    Input, int N, the order of the system.
+//
+//    Input, int NZ_NUM, the number of nonzeros.
+//
+//    Input, int IA[N+1], JA[NZ_NUM], the row and column indices
+//    of the matrix values.  The row vector has been compressed.
+//
+//    Input, double L[NZ_NUM], the matrix values.
+//
+//    Input, int UA[N], the index of the diagonal element of each row.
+//
+//    Input, double R[N], the right hand side.
+//
+//    Output, double Z[N], the solution of the system M * Z = R.
+//
+
+	double *w = new double[n];
+
+	//  Copy R in.
+	for (int i = 0; i < n; i++) {
+		w[i] = r[i];
+	}
+
+	// Solve L * w = w where L is unit lower triangular.
+	for (int i = 1; i < n; i++) {
+		for (int j = ia[i]; j < ua[i]; j++) {
+			w[i] = w[i] - l[j] * w[ja[j]];
+		}
+	}
+
+	// Solve U * w = w, where U is upper triangular.
+	for (int i = n - 1; 0 <= i; i--) {
+		for (int j = ua[i] + 1; j < ia[i + 1]; j++) {
+			w[i] = w[i] - l[j] * w[ja[j]];
+		}
+		w[i] = w[i] / l[ua[i]];
+	}
+
+	//  Copy Z out.
+	for (int i = 0; i < n; i++) {
+		z[i] = w[i];
+	}
+}
+
+
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae)
 {
 	// assembly Ae in 2D structured grid representation

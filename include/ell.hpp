@@ -92,4 +92,9 @@ double get_dot_acc(const double *v1, const double *v2, const int n);
 
 void print_ell_acc(const ell_matrix *A);
 
+int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x,
+		    double *err);
+void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l);
+void lus_cr(int n, int nz_num, int *ia, int *ja, double *l, int *ua, double *r, double *z);
+
 #endif
