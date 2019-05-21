@@ -53,8 +53,10 @@ int main (int argc, char *argv[])
 	struct micropp3 micro;
 	int ngpl = 1;
 	int micro_type = 5;
+	int nsubiterations = 1;
+	int mpi_rank = 0;
 	double params[4] = { 1., 1., 1., .15 };
-	micropp3_new(&micro, ngpl, size, micro_type, params, matlist);
+	micropp3_new(&micro, ngpl, size, micro_type, params, matlist, nsubiterations, mpi_rank);
 	micropp3_print_info(&micro);
 
 	double sig[6], ctan[36];
