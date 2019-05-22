@@ -51,9 +51,13 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 
 		assembly_mat(A, u, vars_old);
 
+		if (A->solver == CGPILU && matrix_factorized == false) {
+			ell_ilu_factorization(A);
+			matrix_factorized = true;
+		}
+
 		double cg_err;
-		//int cg_its = ell_solve_cgpd(A, b, du, &cg_err);
-		int cg_its = ell_solve_cgilu(A, b, du, &cg_err);
+		int cg_its = ell_solve(A, b, du, &cg_err);
 
 		newton.solver_its += cg_its;
 

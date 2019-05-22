@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
 {
 	// Execution ./test3d_1 n [print] [steps]
 	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
+		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps] [solver = 0|1]" << endl;
 		return(1);
 	}
 
@@ -49,6 +49,7 @@ int main (int argc, char *argv[])
 	}
 
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
+	const int solver = (argc > 4 ? atoi(argv[4]) : 0);
 	const int micro_type = MIC_SPHERES;
 	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.2 };
 	const int size[3] = { n, n, n };
@@ -60,7 +61,7 @@ int main (int argc, char *argv[])
 	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
 	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
+	micropp<3> micro(1, size, micro_type, micro_params, mat_params, ONE_WAY, solver, true, 5);
 	micro.print_info();
 
 	double sig[6];

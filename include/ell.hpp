@@ -59,6 +59,10 @@ typedef struct {
 	double rel_err;    // relative error
 	double *k, *r, *z, *p, *Ap;
 
+	// ILU
+	int *ia, *ua;
+	double *lu;
+
 } ell_matrix;
 
 void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
@@ -70,8 +74,6 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 void ell_mvp_0(const ell_matrix *m, const double *x, double *y);
 void ell_mvp_1(const ell_matrix *m, const double *x, double *y);
 void ell_mvp_2(const ell_matrix *m, const double *x, double *y);
-int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x,
-		   double *err_);
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae);
 void ell_add_3D(ell_matrix *m, int ex, int ey, int ez, const double *Ae);
 void ell_set_zero_mat(ell_matrix *m);
@@ -82,6 +84,7 @@ void ell_free(ell_matrix *m);
 double get_norm(const double *vector, const int n);
 double get_dot(const double *v1, const double *v2, const int n);
 double ell_get_norm(const ell_matrix *m);
+void ell_ilu_factorization(ell_matrix *m);
 
 void print_ell(const ell_matrix *A);
 
@@ -98,8 +101,12 @@ double get_dot_acc(const double *v1, const double *v2, const int n);
 
 void print_ell_acc(const ell_matrix *A);
 
-int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x,
-		    double *err);
+int ell_solve(const ell_matrix *m, const double *b, double *x,
+	      double *err);
+int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x,
+		   double *err_);
+int ell_solve_cgpilu(const ell_matrix *m, const double *b, double *x,
+		     double *err);
 void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l);
 void lus_cr(int n, int nz_num, int *ia, int *ja, double *l, int *ua, double *r, double *z);
 

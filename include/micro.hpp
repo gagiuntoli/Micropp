@@ -122,10 +122,13 @@ class micropp {
 		const bool subiterations;
 		const int mpi_rank;
 		const int solver;
+		bool matrix_factorized;
 
 		gp_t<tdim> *gp_list;
 
 		int coupling;
+
+		ell_matrix A;  // Jacobian
 
 		double micro_params[5];
 		int numMaterials;

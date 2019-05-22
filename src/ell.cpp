@@ -148,6 +148,28 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 		}
 	}
 
+	if (solver == CGPILU) {
+		m->lu = (double *) malloc(nnz * nrow * sizeof(double));
+		m->ia = (int *) malloc((nrow + 1) * sizeof(int));
+		m->ua = (int *) malloc(nrow * sizeof(int));
+
+		m->ia[0] = 0;
+		for (int i = 1; i < m->nrow + 1; i++) {
+			m->ia[i] = m->ia[i - 1] + m->nnz;
+		}
+
+		for (int i = 0; i < m->nrow; i++) {
+			m->ua[i] = -1;
+			int j1 = m->ia[i];
+			int j2 = m->ia[i + 1];
+			for (int j = j1; j < j2; j++) {
+				if (m->cols[j] == i) {
+					m->ua[i] = j;
+				}
+			}
+		}
+	}
+
 }
 
 
@@ -220,6 +242,22 @@ double ell_get_norm(const ell_matrix *m)
 			for (int d = 0; d < m->nnz; d++)
 				norm += m->vals[i * m->nfield * m->nnz + j * m->nnz + d];
 	return sqrt(norm);
+}
+
+
+int ell_solve(const ell_matrix *m, const double *b, double *x, double *err)
+{
+	switch (m->solver) {
+		case CGPD:
+			return ell_solve_cgpd(m, b, x, err);
+			break;
+		case CGPILU:
+			return ell_solve_cgpilu(m, b, x, err);
+			break;
+		default:
+			break;
+	}
+	return -1;
 }
 
 
@@ -296,7 +334,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 }
 
 
-int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err)
+int ell_solve_cgpilu(const ell_matrix *m, const double *b, double *x, double *err)
 {
 	INST_START;
 
@@ -304,28 +342,6 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 
 	if (!m || !b || !x)
 		return 1;
-
-	int *ia = new int[m->nrow + 1];
-	int *ua = new int[m->nrow];
-	double *lu = new double[m->nrow * m->nnz];
-
-	ia[0] = 0;
-	for (int i = 1; i < m->nrow + 1; i++) {
-		ia[i] = ia[i - 1] + m->nnz;
-	}
-
-	for (int i = 0; i < m->nrow; i++) {
-		ua[i] = -1;
-		int j1 = ia[i];
-		int j2 = ia[i + 1];
-		for (int j = j1; j < j2; j++) {
-			if (m->cols[j] == i) {
-				ua[i] = j;
-			}
-		}
-	}
-
-	ilu_cr(m->nrow, m->nnz * m->nrow, ia, m->cols, m->vals, ua, lu);
 
 	for (int i = 0; i < m->nrow; ++i)
 		x[i] = 0.0;
@@ -340,7 +356,7 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 		m->z[i] = m->k[i] * m->r[i];
 		*/
 
-	lus_cr (m->nrow, m->nnz * m->nrow, ia, m->cols, lu, ua, m->r, m->z);
+	lus_cr(m->nrow, m->nnz * m->nrow, m->ia, m->cols, m->lu, m->ua, m->r, m->z);
 
 	for (int i = 0; i < m->nrow; ++i)
 		m->p[i] = m->z[i];
@@ -371,7 +387,7 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 		   for (int i = 0; i < m->nrow; ++i)
 		   m->z[i] = m->k[i] * m->r[i];
 		   */
-		lus_cr (m->nrow, m->nnz * m->nrow, ia, m->cols, lu, ua, m->r, m->z);
+		lus_cr(m->nrow, m->nnz * m->nrow, m->ia, m->cols, m->lu, m->ua, m->r, m->z);
 
 		pnorm = sqrt(get_dot(m->z, m->z, m->nrow));
 		double rz_n = 0;
@@ -387,11 +403,19 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 
 	*err = rz;
 
-
-	delete [] ia;
-	delete [] ua;
-	delete [] lu;
 	return its;
+}
+
+
+void ell_ilu_factorization(ell_matrix *m)
+{
+	/*
+	 * Completes m->lu once m->vals has been assembled
+	 */
+
+	INST_START;
+
+	ilu_cr(m->nrow, m->nnz * m->nrow, m->ia, m->cols, m->vals, m->ua, m->lu);
 }
 
 
@@ -426,7 +450,6 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 	 *
 	 *    Output, double L[NZ_NUM], the ILU factorization of A.
 	 */
-	INST_START;
 	
 	int *iw = new int[n];
 		
@@ -477,7 +500,8 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 			exit(1);
 		}
 
-		if (fabs(l[j]) < 1.0e-10) {
+		//if (fabs(l[j]) < 1.0e-10) {
+		if (l[j] == 0.0) {
 			cerr << "\n";
 			cerr << "ILU_CR - Fatal error!\n";
 			cerr << "  Zero pivot on step I = " << i << "\n";
@@ -563,6 +587,8 @@ void lus_cr(int n, int nz_num, int *ia, int *ja, double *l, int *ua,
 	for (int i = 0; i < n; ++i) {
 		z[i] = w[i];
 	}
+
+	delete [] w;
 }
 
 
@@ -770,6 +796,12 @@ void ell_free(ell_matrix *m)
 		free(m->p);
 	if (m->Ap != NULL)
 		free(m->Ap);
+
+	if (m->solver == CGPILU) {
+		free(m->ia);
+		free(m->ua);
+		free(m->lu);
+	}
 }
 
 
