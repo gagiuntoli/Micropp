@@ -28,7 +28,8 @@ template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
 		       const struct material_base *_materials,
-		       const int _coupling, const bool _subiterations,
+		       const int _coupling, const int _solver,
+		       const bool _subiterations,
 		       const int _nsubiterations, const int _mpi_rank,
 		       const int _nr_max_its,
 		       const double _nr_max_tol, const double _nr_rel_tol):
@@ -53,6 +54,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	subiterations(_subiterations),
 	nsubiterations(_nsubiterations),
 	mpi_rank(_mpi_rank),
+	solver(_solver),
 
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
@@ -178,7 +180,8 @@ void micropp<tdim>::calc_ctan_lin()
 		const int ns[3] = { nx, ny, nz };
 
 		ell_matrix A;  // Jacobian
-		ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A, dim, dim, ns, solver,
+			 CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));

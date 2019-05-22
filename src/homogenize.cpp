@@ -77,7 +77,7 @@ void micropp<tdim>::homogenize_task(int igp)
 	const int ns[3] = { nx, ny, nz };
 
 	ell_matrix A;  // Jacobian
-	ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+	ell_init(&A, dim, dim, ns, solver, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 	double *b = (double *) calloc(nndim, sizeof(double));
 	double *du = (double *) calloc(nndim, sizeof(double));
 	double *u = (double *) calloc(nndim, sizeof(double));

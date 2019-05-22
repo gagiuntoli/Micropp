@@ -101,7 +101,7 @@ int main (int argc, char *argv[])
 	assert(n > 0 && nmul > 0);
 
 	ell_matrix A1;
-	ell_init(&A1, nfield, dim, size, 1.0e-5, 1.0e-5, 20);
+	ell_init(&A1, nfield, dim, size, CGPD, 1.0e-5, 1.0e-5, 20);
 
 	cout << "Matrix size = " << A1.nrow << " x " << A1.nrow << endl;
 	cout << "Number of non-zeros per row = " << A1.nnz << endl;

@@ -121,6 +121,7 @@ class micropp {
 		const int nsubiterations;
 		const bool subiterations;
 		const int mpi_rank;
+		const int solver;
 
 		gp_t<tdim> *gp_list;
 
@@ -242,6 +243,7 @@ class micropp {
 			const double *micro_params,
 			const struct material_base *materials,
 			const int _coupling = ONE_WAY,
+			const int solver = CGPD,
 			const bool _subiterations = false,
 			const int _nsubiterations = 10,
 			const int _mpi_rank = 0,

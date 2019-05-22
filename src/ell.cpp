@@ -32,7 +32,8 @@ using namespace std;
 
 
 void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
-	      const double min_err, const double rel_err, const int max_its)
+	      const int solver, const double min_err, const double rel_err,
+	      const int max_its)
 {
 	memcpy(m->n, ns, 3 * sizeof(int));
 	assert(ns[0] >= 0 && ns[1] >= 0 && ns[2] >= 0);
@@ -60,6 +61,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 	m->cols = (int *) malloc(nnz * nrow * sizeof(int));
 	m->vals = (double *) malloc(nnz * nrow * sizeof(double));
 
+	m->solver = solver;
 	m->max_its = max_its;
 	m->min_err = min_err;
 	m->rel_err = rel_err;
@@ -312,7 +314,6 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 		ia[i] = ia[i - 1] + m->nnz;
 	}
 
-	/*
 	for (int i = 0; i < m->nrow; i++) {
 		ua[i] = -1;
 		int j1 = ia[i];
@@ -322,15 +323,6 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 				ua[i] = j;
 			}
 		}
-	}
-	*/
-	ua[0] = 39;
-	ua[1] = 121;
-	ua[2] = 203;
-	for (int i = 1; i < m->nrow; i++) {
-		ua[i * m->dim + 0] = ua[(i - 1) * m->dim + 0] + m->nnz * m->dim;
-		ua[i * m->dim + 1] = ua[(i - 1) * m->dim + 1] + m->nnz * m->dim;
-		ua[i * m->dim + 2] = ua[(i - 1) * m->dim + 2] + m->nnz * m->dim;
 	}
 
 	ilu_cr(m->nrow, m->nnz * m->nrow, ia, m->cols, m->vals, ua, lu);
@@ -434,6 +426,7 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 	 *
 	 *    Output, double L[NZ_NUM], the ILU factorization of A.
 	 */
+	INST_START;
 	
 	int *iw = new int[n];
 		
@@ -450,7 +443,7 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 		}
 
 		for (int k = ia[i]; k < ia[i + 1]; ++k) {
-			iw[ja[k]] = k;
+			if (ja[k] != -1) iw[ja[k]] = k;
 		}
 
 		int j = ia[i];
@@ -464,7 +457,7 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 
 			l[j] = tl;
 			for (int jj = ua[jrow] + 1; jj < ia[jrow + 1]; ++jj) {
-				int jw = iw[ja[jj]];
+				int jw = (ja[jj] != -1) ? iw[ja[jj]] : -1;
 				if (jw != -1) {
 					l[jw] = l[jw] - tl * l[jj];
 				}
@@ -484,7 +477,7 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 			exit(1);
 		}
 
-		if (l[j] == 0.0) {
+		if (fabs(l[j]) < 1.0e-10) {
 			cerr << "\n";
 			cerr << "ILU_CR - Fatal error!\n";
 			cerr << "  Zero pivot on step I = " << i << "\n";
@@ -543,6 +536,7 @@ void lus_cr(int n, int nz_num, int *ia, int *ja, double *l, int *ua,
 	 * 
 	 *     Output, double Z[N], the solution of the system M * Z = R.
 	 */
+	INST_START;
 
 	double *w = new double[n];
 

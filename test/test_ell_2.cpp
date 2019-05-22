@@ -40,7 +40,7 @@ int main (int argc, char *argv[])
 	const int ns[3] = { nx, ny, nz };
 	const int nfield = 1;
 	const int dim = 3;
-	ell_init(&A1, nfield, dim, ns, 1.0e-5, 1.0e-5, 20);
+	ell_init(&A1, nfield, dim, ns, CGPD, 1.0e-5, 1.0e-5, 20);
 
 	cout << "A1.nrow =\t" << A1.nrow << endl;
 	cout << "A1.ncol =\t" << A1.ncol << endl;
