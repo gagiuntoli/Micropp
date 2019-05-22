@@ -107,39 +107,39 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 						int * const cols_ptr = &(m->cols[ni * nfield * nnz + fi * nnz]);
 
 						int ix[27] = {
-							(zi == 0 || yi == 0 || xi == 0)                ? 0 : ni - nxny - nx - 1,
-							(zi == 0 || yi == 0)                           ? 0 : ni - nxny - nx,
-							(zi == 0 || yi == 0 || xi == nx - 1)           ? 0 : ni - nxny - nx + 1,
-							(zi == 0 || xi == 0)                           ? 0 : ni - nxny - 1,
-							(zi == 0)                                      ? 0 : ni - nxny,
-							(zi == 0 || xi == nx - 1)                      ? 0 : ni - nxny + 1,
-							(zi == 0 || yi == ny - 1 || xi == 0)           ? 0 : ni - nxny + nx - 1,
-							(zi == 0 || yi == ny - 1)                      ? 0 : ni - nxny + nx,
-							(zi == 0 || yi == ny - 1 || xi == nx - 1)      ? 0 : ni - nxny + nx + 1,
+							(zi == 0 || yi == 0 || xi == 0)                ? -1 : ni - nxny - nx - 1,
+							(zi == 0 || yi == 0)                           ? -1 : ni - nxny - nx,
+							(zi == 0 || yi == 0 || xi == nx - 1)           ? -1 : ni - nxny - nx + 1,
+							(zi == 0 || xi == 0)                           ? -1 : ni - nxny - 1,
+							(zi == 0)                                      ? -1 : ni - nxny,
+							(zi == 0 || xi == nx - 1)                      ? -1 : ni - nxny + 1,
+							(zi == 0 || yi == ny - 1 || xi == 0)           ? -1 : ni - nxny + nx - 1,
+							(zi == 0 || yi == ny - 1)                      ? -1 : ni - nxny + nx,
+							(zi == 0 || yi == ny - 1 || xi == nx - 1)      ? -1 : ni - nxny + nx + 1,
 
-							(yi == 0 || xi == 0)                           ? 0 : ni - nx - 1,
-							(yi == 0)                                      ? 0 : ni - nx,
-							(yi == 0 || xi == nx - 1)                      ? 0 : ni - nx + 1,
-							(xi == 0)                                      ? 0 : ni - 1,
+							(yi == 0 || xi == 0)                           ? -1 : ni - nx - 1,
+							(yi == 0)                                      ? -1 : ni - nx,
+							(yi == 0 || xi == nx - 1)                      ? -1 : ni - nx + 1,
+							(xi == 0)                                      ? -1 : ni - 1,
 							ni,
-							(xi == nx - 1)                                 ? 0 : ni + 1,
-							(yi == ny - 1 || xi == 0)                      ? 0 : ni + nx - 1,
-							(yi == ny - 1)                                 ? 0 : ni + nx,
-							(yi == ny - 1 || xi == nx - 1)                 ? 0 : ni + nx + 1,
+							(xi == nx - 1)                                 ? -1 : ni + 1,
+							(yi == ny - 1 || xi == 0)                      ? -1 : ni + nx - 1,
+							(yi == ny - 1)                                 ? -1 : ni + nx,
+							(yi == ny - 1 || xi == nx - 1)                 ? -1 : ni + nx + 1,
 
-							(zi == nz - 1 || yi == 0 || xi == 0)           ? 0 : ni + nxny - nx - 1,
-							(zi == nz - 1 || yi == 0)                      ? 0 : ni + nxny - nx,
-							(zi == nz - 1 || yi == 0 || xi == nx - 1)      ? 0 : ni + nxny - nx + 1,
-							(zi == nz - 1 || xi == 0)                      ? 0 : ni + nxny - 1,
-							(zi == nz - 1)                                 ? 0 : ni + nxny,
-							(zi == nz - 1 || xi == nx - 1)                 ? 0 : ni + nxny + 1,
-							(zi == nz - 1 || yi == ny - 1 || xi == 0)      ? 0 : ni + nxny + nx - 1,
-							(zi == nz - 1 || yi == ny - 1)                 ? 0 : ni + nxny + nx,
-							(zi == nz - 1 || yi == ny - 1 || xi == nx - 1) ? 0 : ni + nxny + nx + 1 };
+							(zi == nz - 1 || yi == 0 || xi == 0)           ? -1 : ni + nxny - nx - 1,
+							(zi == nz - 1 || yi == 0)                      ? -1 : ni + nxny - nx,
+							(zi == nz - 1 || yi == 0 || xi == nx - 1)      ? -1 : ni + nxny - nx + 1,
+							(zi == nz - 1 || xi == 0)                      ? -1 : ni + nxny - 1,
+							(zi == nz - 1)                                 ? -1 : ni + nxny,
+							(zi == nz - 1 || xi == nx - 1)                 ? -1 : ni + nxny + 1,
+							(zi == nz - 1 || yi == ny - 1 || xi == 0)      ? -1 : ni + nxny + nx - 1,
+							(zi == nz - 1 || yi == ny - 1)                 ? -1 : ni + nxny + nx,
+							(zi == nz - 1 || yi == ny - 1 || xi == nx - 1) ? -1 : ni + nxny + nx + 1 };
 
 						for (int n = 0; n < num_nodes; ++n)
 							for (int fj = 0; fj < nfield; ++fj)
-								cols_ptr[n * nfield + fj] = ix[n] * nfield + fj;
+								cols_ptr[n * nfield + fj] = (ix[n] != -1) ? ix[n] * nfield + fj : -1;
 					}
 				}
 			}
@@ -149,7 +149,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 }
 
 
-void ell_mvp(const ell_matrix *m, const double *x, double *y)
+void ell_mvp_0(const ell_matrix *m, const double *x, double *y)
 {
 	for (int i = 0; i < m->nrow; i++) {
 		double tmp = 0;
@@ -239,7 +239,7 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 	for (int i = 0; i < m->nrow; ++i)
 		x[i] = 0.0;
 
-	ell_mvp(m, x, m->r);
+	ell_mvp_1(m, x, m->r);
 
 	for (int i = 0; i < m->nrow; ++i)
 		m->r[i] = b[i] - m->r[i];
@@ -261,7 +261,8 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
 			break;
 
-		ell_mvp(m, m->p, m->Ap);
+		ell_mvp_1(m, m->p, m->Ap);
+
 		double pAp = get_dot(m->p, m->Ap, m->nrow);
 
 		const double alpha = rz / pAp;
@@ -337,7 +338,7 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 	for (int i = 0; i < m->nrow; ++i)
 		x[i] = 0.0;
 
-	ell_mvp(m, x, m->r);
+	ell_mvp_1(m, x, m->r);
 
 	for (int i = 0; i < m->nrow; ++i)
 		m->r[i] = b[i] - m->r[i];
@@ -363,7 +364,7 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
 			break;
 
-		ell_mvp(m, m->p, m->Ap);
+		ell_mvp_1(m, m->p, m->Ap);
 		double pAp = get_dot(m->p, m->Ap, m->nrow);
 
 		const double alpha = rz / pAp;

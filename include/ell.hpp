@@ -63,7 +63,9 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 	      const double rel_err = CG_REL_ERR,
 	      const int max_its = CG_MAX_ITS);
 
-void ell_mvp(const ell_matrix *m, const double *x, double *y);
+void ell_mvp_0(const ell_matrix *m, const double *x, double *y);
+void ell_mvp_1(const ell_matrix *m, const double *x, double *y);
+void ell_mvp_2(const ell_matrix *m, const double *x, double *y);
 int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x,
 		   double *err_);
 void ell_add_2D(ell_matrix *m, int ex, int ey, const double *Ae);
