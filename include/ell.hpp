@@ -20,6 +20,7 @@
  */
 
 #include <fstream>
+#include <iostream>
 
 #include <cstdlib>
 #include <cstring>

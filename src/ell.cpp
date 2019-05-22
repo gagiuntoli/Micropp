@@ -193,7 +193,7 @@ void ell_mvp_1(const ell_matrix *m, const double *x, double *y)
 		const int ix = i * m->nnz;
 		for (int j = 0; j < m->nnz; j++){
 			const int col = (m->cols[ix + j] != -1) ? m->cols[ix + j] : 0;
-			tmp += m->vals[ix + j] * x[m->cols[ix + j]];
+			tmp += m->vals[ix + j] * x[col];
 		}
 		y[i] = tmp;
 	}
@@ -250,10 +250,8 @@ int ell_solve(const ell_matrix *m, const double *b, double *x, double *err)
 	switch (m->solver) {
 		case CGPD:
 			return ell_solve_cgpd(m, b, x, err);
-			break;
 		case CGPILU:
 			return ell_solve_cgpilu(m, b, x, err);
-			break;
 		default:
 			break;
 	}
