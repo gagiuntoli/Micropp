@@ -33,13 +33,15 @@ const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
 int main (int argc, char *argv[])
 {
+
+
 	class test_t : public micropp<3> {
 
 		public:
 			test_t(const int size[3], const int micro_type, const double micro_params[5],
-			       const struct material_base mat_params[2])
-				:micropp<3> (1, size, micro_type, micro_params, mat_params, NO_COUPLING)
-			{};
+			       const struct material_base mat_params[2], const int solver)
+				:micropp<3> (1, size, micro_type, micro_params, mat_params, NO_COUPLING, solver)
+			{cout << solver <<endl;};
 
 			~test_t() {};
 
@@ -49,8 +51,6 @@ int main (int argc, char *argv[])
 				const int ns[3] = { nx, ny, nz };
 				const int nfield = dim;
 
-				ell_matrix A;  // Jacobian
-				ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 				double *b = (double *) calloc(nndim, sizeof(double));
 				double *du = (double *) calloc(nndim, sizeof(double));
 				double *u = (double *) calloc(nndim, sizeof(double));
@@ -62,7 +62,10 @@ int main (int argc, char *argv[])
 				lerr = assembly_rhs(u, nullptr, b);
 
 				assembly_mat(&A, u, nullptr);
-				int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+				if (solver == CGPILU)
+					ell_ilu_factorization(&A);
+
+				int cg_its = ell_solve(&A, b, du, &cg_err);
 
 				for (int i = 0; i < nndim; ++i)
 					u[i] += du[i];
@@ -73,7 +76,6 @@ int main (int argc, char *argv[])
 					<< " CG_ITS : " << cg_its
 					<< " CG_TOL : " << cg_err << endl;
 
-				ell_free(&A);
 				free(b);
 				free(u);
 				free(du);
@@ -85,11 +87,13 @@ int main (int argc, char *argv[])
 		/* argv[1] (n) : Problem size
 		 * argv[2] (a) : Factor that says Ef = Em x a
 		 */
-		cerr << "Usage: " << argv[0] << " [n = 10] [a = 1]" << endl;
+		cerr << "Usage: " << argv[0] << " [n = 10] [solver = 0|1] [a = 1]" << endl;
+		exit(1);
 	}
 
 	const int n = (argc > 1) ? atoi(argv[1]) : 10;
-	const double a = (argc > 2) ? atoi(argv[2]) : 1.0;
+	const int solver = (argc > 2) ? atoi(argv[2]) : 0;
+	const double a = (argc > 3) ? atoi(argv[3]) : 1.0;
 
 	int size[3] = { n, n, n };
 
@@ -97,10 +101,10 @@ int main (int argc, char *argv[])
 	double micro_params[4] = { 1., 1., 1., 0.2 };
 
 	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	material_set(&mat_params[0], 0, 1.0e8, 0.25, 5.0e4, 2.0e4, 0.0);
+	material_set(&mat_params[1], 0, a * 1.0e8, 0.25, 5.0e4, 1.0e3, 0.0);
 
-	test_t test(size, micro_type, micro_params, mat_params);
+	test_t test(size, micro_type, micro_params, mat_params, solver);
 	test.assembly_and_solve();
 
 	return 0;

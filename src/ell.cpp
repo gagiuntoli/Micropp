@@ -170,6 +170,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 		}
 	}
 
+
 }
 
 
@@ -349,11 +350,6 @@ int ell_solve_cgpilu(const ell_matrix *m, const double *b, double *x, double *er
 	for (int i = 0; i < m->nrow; ++i)
 		m->r[i] = b[i] - m->r[i];
 
-	/*
-	for (int i = 0; i < m->nrow; ++i)
-		m->z[i] = m->k[i] * m->r[i];
-		*/
-
 	lus_cr(m->nrow, m->nnz * m->nrow, m->ia, m->cols, m->lu, m->ua, m->r, m->z);
 
 	for (int i = 0; i < m->nrow; ++i)
@@ -381,10 +377,6 @@ int ell_solve_cgpilu(const ell_matrix *m, const double *b, double *x, double *er
 		for (int i = 0; i < m->nrow; ++i)
 			m->r[i] -= alpha * m->Ap[i];
 
-		/*
-		   for (int i = 0; i < m->nrow; ++i)
-		   m->z[i] = m->k[i] * m->r[i];
-		   */
 		lus_cr(m->nrow, m->nnz * m->nrow, m->ia, m->cols, m->lu, m->ua, m->r, m->z);
 
 		pnorm = sqrt(get_dot(m->z, m->z, m->nrow));
@@ -455,8 +447,6 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 		l[i] = a[i];
 	}
 
-	int jrow;
-
 	for (int i = 0; i < n; ++i) {
 
 		for (int j = 0; j < n; ++j) {
@@ -467,7 +457,9 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 			if (ja[k] != -1) iw[ja[k]] = k;
 		}
 
+		int jrow;
 		int j = ia[i];
+
 		do {
 			jrow = ja[j];
 			if (i <= jrow) {
@@ -569,20 +561,23 @@ void lus_cr(int n, int nz_num, int *ia, int *ja, double *l, int *ua,
 	// Solve L * w = w where L is unit lower triangular.
 	for (int i = 1; i < n; ++i) {
 		for (int j = ia[i]; j < ua[i]; ++j) {
-			w[i] = w[i] - l[j] * w[ja[j]];
+			if (ja[j] != -1) {
+				w[i] -= l[j] * w[ja[j]];
+			}
 		}
 	}
 
 	// Solve U * w = w, where U is upper triangular.
 	for (int i = n - 1; i >= 0; --i) {
 		for (int j = ua[i] + 1; j < ia[i + 1]; ++j) {
-			w[i] = w[i] - l[j] * w[ja[j]];
+			if (ja[j] != -1) {
+				w[i] -= l[j] * w[ja[j]];
+			}
 		}
-		w[i] = w[i] / l[ua[i]];
+		w[i] /= l[ua[i]];
 	}
 
-	//  Copy Z out.
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i){
 		z[i] = w[i];
 	}
 
