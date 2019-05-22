@@ -148,6 +148,7 @@ void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
 
 }
 
+
 void ell_mvp(const ell_matrix *m, const double *x, double *y)
 {
 	for (int i = 0; i < m->nrow; i++) {
@@ -155,6 +156,36 @@ void ell_mvp(const ell_matrix *m, const double *x, double *y)
 		const int ix = i * m->nnz;
 		for (int j = 0; j < m->nnz; j++){
 			tmp += m->vals[ix + j] * x[m->cols[ix + j]];
+		}
+		y[i] = tmp;
+	}
+}
+
+
+void ell_mvp_1(const ell_matrix *m, const double *x, double *y)
+{
+	for (int i = 0; i < m->nrow; i++) {
+		double tmp = 0;
+		const int ix = i * m->nnz;
+		for (int j = 0; j < m->nnz; j++){
+			const int col = (m->cols[ix + j] != -1) ? m->cols[ix + j] : 0;
+			tmp += m->vals[ix + j] * x[m->cols[ix + j]];
+		}
+		y[i] = tmp;
+	}
+}
+
+
+void ell_mvp_2(const ell_matrix *m, const double *x, double *y)
+{
+	for (int i = 0; i < m->nrow; i++) {
+		double tmp = 0;
+		const int ix = i * m->nnz;
+		for (int j = 0; j < m->nnz; j++){
+			const int col = m->cols[ix + j];
+			if (col != -1) {
+				tmp += m->vals[ix + j] * x[m->cols[ix + j]];
+			}
 		}
 		y[i] = tmp;
 	}
@@ -373,56 +404,51 @@ int ell_solve_cgilu(const ell_matrix *m, const double *b, double *x, double *err
 
 void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 {
-	//****************************************************************************80
-	//
-	//  Purpose:
-	//
-	//    ILU_CR computes the incomplete LU factorization of a matrix.
-	//
-	//  Discussion:
-	//
-	//    The matrix A is assumed to be stored in compressed row format.  Only
-	//    the nonzero entries of A are stored.  The vector JA stores the
-	//    column index of the nonzero value.  The nonzero values are sorted
-	//    by row, and the compressed row vector IA then has the property that
-	//    the entries in A and JA that correspond to row I occur in indices
-	//    IA[I] through IA[I+1]-1.
-	//
-	//  Parameters:
-	//
-	//    Input, int N, the order of the system.
-	//
-	//    Input, int NZ_NUM, the number of nonzeros.
-	//
-	//    Input, int IA[N+1], JA[NZ_NUM], the row and column indices
-	//    of the matrix values.  The row vector has been compressed.
-	//
-	//    Input, double A[NZ_NUM], the matrix values.
-	//
-	//    Input, int UA[N], the index of the diagonal element of each row.
-	//
-	//    Output, double L[NZ_NUM], the ILU factorization of A.
-	//
+	/*
+	 *  Purpose:
+	 *
+	 *    ILU_CR computes the incomplete LU factorization of a matrix.
+	 *
+	 *  Discussion:
+	 *
+	 *    The matrix A is assumed to be stored in compressed row format.  Only
+	 *    the nonzero entries of A are stored.  The vector JA stores the
+	 *    column index of the nonzero value.  The nonzero values are sorted
+	 *    by row, and the compressed row vector IA then has the property that
+	 *    the entries in A and JA that correspond to row I occur in indices
+	 *    IA[I] through IA[I+1]-1.
+	 *
+	 *  Parameters:
+	 *
+	 *    Input, int N, the order of the system.
+	 *
+	 *    Input, int NZ_NUM, the number of nonzeros.
+	 *
+	 *    Input, int IA[N+1], JA[NZ_NUM], the row and column indices
+	 *    of the matrix values.  The row vector has been compressed.
+	 *
+	 *    Input, double A[NZ_NUM], the matrix values.
+	 *
+	 *    Input, int UA[N], the index of the diagonal element of each row.
+	 *
+	 *    Output, double L[NZ_NUM], the ILU factorization of A.
+	 */
 	
-	int jj;
-	int jrow;
-	int jw;
-	double tl;
-
 	int *iw = new int[n];
 		
-	// Copy A
-	for (int k = 0; k < nz_num; k++) {
-		l[k] = a[k];
+	for (int i = 0; i < nz_num; ++i) {
+		l[i] = a[i];
 	}
 
-	for (int i = 0; i < n; i++) {
+	int jrow;
 
-		for (int j = 0; j < n; j++) {
+	for (int i = 0; i < n; ++i) {
+
+		for (int j = 0; j < n; ++j) {
 			iw[j] = -1;
 		}
 
-		for (int k = ia[i]; k <= ia[i+1] - 1; k++) {
+		for (int k = ia[i]; k < ia[i + 1]; ++k) {
 			iw[ja[k]] = k;
 		}
 
@@ -432,17 +458,19 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 			if (i <= jrow) {
 				break;
 			}
-			tl = l[j] * l[ua[jrow]];
+
+			double tl = l[j] * l[ua[jrow]];
+
 			l[j] = tl;
-			for (int jj = ua[jrow] + 1; jj <= ia[jrow + 1] - 1; jj++) {
-				jw = iw[ja[jj]];
+			for (int jj = ua[jrow] + 1; jj < ia[jrow + 1]; ++jj) {
+				int jw = iw[ja[jj]];
 				if (jw != -1) {
 					l[jw] = l[jw] - tl * l[jj];
 				}
 			}
 			j = j + 1;
 
-		} while (j <= ia[i + 1] - 1);
+		} while (j < ia[i + 1]);
 
 		ua[i] = j;
 
@@ -455,18 +483,18 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 			exit(1);
 		}
 
-		//if (l[j] == 0.0) {
-		//	cerr << "\n";
-		//	cerr << "ILU_CR - Fatal error!\n";
-		//	cerr << "  Zero pivot on step I = " << i << "\n";
-		//	cerr << "  L[" << j << "] = 0.0\n";
-		//	exit(1);
-		//}
+		if (l[j] == 0.0) {
+			cerr << "\n";
+			cerr << "ILU_CR - Fatal error!\n";
+			cerr << "  Zero pivot on step I = " << i << "\n";
+			cerr << "  L[" << j << "] = 0.0\n";
+			exit(1);
+		}
 
 		l[j] = 1.0 / l[j];
 	}
 
-	for (int k = 0; k < n; k++) {
+	for (int k = 0; k < n; ++k) {
 		l[ua[k]] = 1.0 / l[ua[k]];
 	}
 
@@ -476,70 +504,68 @@ void ilu_cr(int n, int nz_num, int *ia, int *ja, double *a, int *ua, double *l)
 }
 
 
-void lus_cr (int n, int nz_num, int *ia, int *ja, double *l, int *ua, 
-	     double *r, double *z)
+void lus_cr(int n, int nz_num, int *ia, int *ja, double *l, int *ua, 
+	    double *r, double *z)
 {
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    LUS_CR applies the incomplete LU preconditioner.
-//
-//  Discussion:
-//
-//    The linear system M * Z = R is solved for Z.  M is the incomplete
-//    LU preconditioner matrix, and R is a vector supplied by the user.
-//    So essentially, we're solving L * U * Z = R.
-//
-//    The matrix A is assumed to be stored in compressed row format.  Only
-//    the nonzero entries of A are stored.  The vector JA stores the
-//    column index of the nonzero value.  The nonzero values are sorted
-//    by row, and the compressed row vector IA then has the property that
-//    the entries in A and JA that correspond to row I occur in indices
-//    IA[I] through IA[I+1]-1.
-//
-//  Parameters:
-//
-//    Input, int N, the order of the system.
-//
-//    Input, int NZ_NUM, the number of nonzeros.
-//
-//    Input, int IA[N+1], JA[NZ_NUM], the row and column indices
-//    of the matrix values.  The row vector has been compressed.
-//
-//    Input, double L[NZ_NUM], the matrix values.
-//
-//    Input, int UA[N], the index of the diagonal element of each row.
-//
-//    Input, double R[N], the right hand side.
-//
-//    Output, double Z[N], the solution of the system M * Z = R.
-//
+	/*
+	 *   Purpose:
+	 * 
+	 *     LUS_CR applies the incomplete LU preconditioner.
+	 * 
+	 *   Discussion:
+	 * 
+	 *     The linear system M * Z = R is solved for Z.  M is the incomplete
+	 *     LU preconditioner matrix, and R is a vector supplied by the user.
+	 *     So essentially, we're solving L * U * Z = R.
+	 * 
+	 *     The matrix A is assumed to be stored in compressed row format.  Only
+	 *     the nonzero entries of A are stored.  The vector JA stores the
+	 *     column index of the nonzero value.  The nonzero values are sorted
+	 *     by row, and the compressed row vector IA then has the property that
+	 *     the entries in A and JA that correspond to row I occur in indices
+	 *     IA[I] through IA[I+1]-1.
+	 * 
+	 *   Parameters:
+	 * 
+	 *     Input, int N, the order of the system.
+	 * 
+	 *     Input, int NZ_NUM, the number of nonzeros.
+	 * 
+	 *     Input, int IA[N+1], JA[NZ_NUM], the row and column indices
+	 *     of the matrix values.  The row vector has been compressed.
+	 * 
+	 *     Input, double L[NZ_NUM], the matrix values.
+	 * 
+	 *     Input, int UA[N], the index of the diagonal element of each row.
+	 * 
+	 *     Input, double R[N], the right hand side.
+	 * 
+	 *     Output, double Z[N], the solution of the system M * Z = R.
+	 */
 
 	double *w = new double[n];
 
-	//  Copy R in.
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; ++i) {
 		w[i] = r[i];
 	}
 
 	// Solve L * w = w where L is unit lower triangular.
-	for (int i = 1; i < n; i++) {
-		for (int j = ia[i]; j < ua[i]; j++) {
+	for (int i = 1; i < n; ++i) {
+		for (int j = ia[i]; j < ua[i]; ++j) {
 			w[i] = w[i] - l[j] * w[ja[j]];
 		}
 	}
 
 	// Solve U * w = w, where U is upper triangular.
-	for (int i = n - 1; 0 <= i; i--) {
-		for (int j = ua[i] + 1; j < ia[i + 1]; j++) {
+	for (int i = n - 1; i >= 0; --i) {
+		for (int j = ua[i] + 1; j < ia[i + 1]; ++j) {
 			w[i] = w[i] - l[j] * w[ja[j]];
 		}
 		w[i] = w[i] / l[ua[i]];
 	}
 
 	//  Copy Z out.
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; ++i) {
 		z[i] = w[i];
 	}
 }
