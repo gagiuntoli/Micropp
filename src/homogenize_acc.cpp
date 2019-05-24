@@ -94,14 +94,14 @@ void micropp<tdim>::homogenize_task_acc(int igp)
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	}
 
-	if (coupling == ONE_WAY) {
+	if (gp_ptr->coupling == ONE_WAY) {
 
 		memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 		for (int i = 0; i < nvoi; ++i)
 			for (int j = 0; j < nvoi; ++j)
 				gp_ptr->stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
 
-	} else if (coupling == FULL || coupling == NO_COUPLING) {
+	} else if (gp_ptr->coupling == FULL || gp_ptr->coupling == NO_COUPLING) {
 
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->stress, gp_ptr->vars_n);
 		filter(gp_ptr->stress, nvoi, FILTER_REL_TOL);
@@ -118,7 +118,7 @@ void micropp<tdim>::homogenize_task_acc(int igp)
 		}
 	}
 
-	if (gp_ptr->allocated && coupling == FULL) {
+	if (gp_ptr->allocated && gp_ptr->coupling == FULL) {
 
 		// CTAN 3/6 Newton-Raphsons in 2D/3D
 		double eps_1[6], sig_0[6], sig_1[6];

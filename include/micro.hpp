@@ -124,8 +124,6 @@ class micropp {
 
 		gp_t<tdim> *gp_list;
 
-		int coupling;
-
 		double micro_params[5];
 		int numMaterials;
 		material_t *material_list[MAX_MATS];
@@ -148,6 +146,9 @@ class micropp {
 		const int nr_max_its;
 		const double nr_max_tol;
 		const double nr_rel_tol;
+		const bool calc_ctan_lin_flag;
+
+		int num_no_coupling, num_one_way, num_full;
 
 		void homogenize_task(int gp);
 
@@ -241,13 +242,14 @@ class micropp {
 		micropp(const int ngp, const int size[3], const int micro_type,
 			const double *micro_params,
 			const struct material_base *materials,
-			const int _coupling = ONE_WAY,
+			const int *coupling = nullptr,
 			const bool _subiterations = false,
 			const int _nsubiterations = 10,
 			const int _mpi_rank = 0,
 			const int max_its = NR_MAX_ITS,
 			const double max_tol = NR_MAX_TOL,
-			const double rel_tol = NR_REL_TOL);
+			const double rel_tol = NR_REL_TOL,
+			const bool calc_ctan_lin_flag = true);
 
 		~micropp();
 

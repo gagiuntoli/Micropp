@@ -28,10 +28,10 @@ template<int tdim>
 micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const double _micro_params[4],
 		       const struct material_base *_materials,
-		       const int _coupling, const bool _subiterations,
+		       const int *coupling, const bool _subiterations,
 		       const int _nsubiterations, const int _mpi_rank,
-		       const int _nr_max_its,
-		       const double _nr_max_tol, const double _nr_rel_tol):
+		       const int _nr_max_its, const double _nr_max_tol,
+		       const double _nr_rel_tol, const bool _calc_ctan_lin_flag):
 
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
@@ -42,7 +42,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	nex(nx - 1), ney(ny - 1),
 	nez((tdim == 3) ? (nz - 1) : 1),
-	coupling(_coupling),
 
 	nelem(nex * ney * nez),
 	lx(_micro_params[0]), ly(_micro_params[1]),
@@ -61,7 +60,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	nr_max_its(_nr_max_its),
 	nr_max_tol(_nr_max_tol),
-	nr_rel_tol(_nr_rel_tol)
+	nr_rel_tol(_nr_rel_tol),
+	calc_ctan_lin_flag(_calc_ctan_lin_flag)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -71,6 +71,22 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	gp_list = new gp_t<tdim>[ngp]();
 	for (int gp = 0; gp < ngp; ++gp) {
+		if(coupling != nullptr) {
+			gp_list[gp].coupling = coupling[gp];
+			switch (coupling[gp]) {
+				case NO_COUPLING:
+					num_no_coupling ++;
+					break;
+				case ONE_WAY:
+					num_one_way ++;
+					break;
+				case FULL:
+					num_full ++;
+					break;
+			}
+		} else {
+			gp_list[gp].coupling = ONE_WAY;
+		}
 		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
 		gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));
 	}
@@ -82,8 +98,9 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	int nParams = 4;
 	numMaterials = 2;
 
-	for (int i = 0; i < nParams; i++)
+	for (int i = 0; i < nParams; i++) {
 		micro_params[i] = _micro_params[i];
+	}
 
 	for (int i = 0; i < numMaterials; ++i) {
 		material_list[i] = material_t::make_material(_materials[i]);
@@ -99,8 +116,9 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	}
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
-	if (coupling != NO_COUPLING)
+	if (calc_ctan_lin_flag) {
 		calc_ctan_lin();
+	}
 
 	for (int gp = 0; gp < ngp; ++gp)
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
@@ -526,24 +544,14 @@ void micropp<tdim>::print_info() const
 			break;
 	}
 
-	cout << "Coupling : ";
-	switch(coupling) {
-		case(NO_COUPLING):
-			cout << "NO_COUPLING" << endl;
-			break;
-		case(ONE_WAY):
-			cout << "ONE_WAY" << endl;
-			break;
-		case(FULL):
-			cout << "FULL" << endl;
-			break;
-		default:
-			break;
-	}
+	cout << "NO_COUPLING : " << num_no_coupling << " GPs" << endl;
+	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
+	cout << "FULL        : " << num_full        << " GPs" << endl;
        	
-	cout << "ngp :" << ngp << " nx :" << nx << " ny :" << ny << " nz :"
-	       	<< nz << " nn :" << nn << endl;
-	cout << "lx : " << lx << " ly : " << ly << " lz : " << lz
+	cout    << "ngp :" << ngp 
+		<< " nx :" << nx << " ny :" << ny << " nz :" << nz
+		<< " nn :" << nn << endl
+		<< "lx : " << lx << " ly : " << ly << " lz : " << lz
 	       	<< " param : " << special_param << endl;
 	cout << endl;
 
