@@ -152,8 +152,6 @@ class micropp {
 
 		void homogenize_task(int gp);
 
-		void homogenize_task_acc(int gp);
-
 		void calc_ctan_lin();
 
 		material_t *get_material(const int e) const;

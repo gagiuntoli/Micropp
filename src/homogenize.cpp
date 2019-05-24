@@ -60,13 +60,7 @@ void micropp<tdim>::homogenize()
 
 #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
-
-#ifdef _OPENACC
-		homogenize_task_acc(igp);
-#else
 		homogenize_task(igp);
-#endif
-
 	}
 }
 
@@ -104,7 +98,11 @@ void micropp<tdim>::homogenize_task(int igp)
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
+#ifdef _OPENACC
+	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+#else
 	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+#endif
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	gp_ptr->cost += newton.solver_its;
@@ -182,7 +180,11 @@ void micropp<tdim>::homogenize_task(int igp)
 			memcpy(eps_1, gp_ptr->strain, nvoi * sizeof(double));
 			eps_1[i] += D_EPS_CTAN_AVE;
 
+#ifdef _OPENACC
+			newton_raphson_acc(&A, b, u, du, eps_1, gp_ptr->vars_n);
+#else
 			newton_raphson(&A, b, u, du, eps_1, gp_ptr->vars_n);
+#endif
 
 			gp_ptr->cost += newton.solver_its;
 
