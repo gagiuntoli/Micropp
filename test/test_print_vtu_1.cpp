@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 			cout << "Plotting Micro Type : " << micro_type << endl;
 			micropp<3> *micro = new micropp<3>(1, size, micro_type,
 							   params[micro_type],
-							   materials, NO_COUPLING);
+							   materials);
 			micro->print_info();
 
 			char filename[128];
@@ -82,7 +82,7 @@ int main (int argc, char *argv[])
 		cout << "Plotting Micro Type : " << mic_selected << endl;
 		micropp<3> *micro = new micropp<3>(1, size, mic_selected,
 						   params[mic_selected],
-						   materials, NO_COUPLING);
+						   materials);
 		micro->print_info();
 
 		char filename[128];

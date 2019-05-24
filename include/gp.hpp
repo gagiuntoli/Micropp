@@ -46,6 +46,7 @@ class gp_t {
 	long int cost;
 	bool converged;
 	bool subiterated;
+	int coupling;
 
 	gp_t():
 		u_n(nullptr),

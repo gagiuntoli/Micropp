@@ -60,13 +60,7 @@ void micropp<tdim>::homogenize()
 
 #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
-
-#ifdef _OPENACC
-		homogenize_task_acc(igp);
-#else
 		homogenize_task(igp);
-#endif
-
 	}
 }
 
@@ -74,6 +68,20 @@ void micropp<tdim>::homogenize()
 template<int tdim>
 void micropp<tdim>::homogenize_task(int igp)
 {
+
+#ifdef _OPENACC
+#ifdef _OPENMP
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	int tnum = omp_get_thread_num();
+	int gpunum = tnum % ngpus;
+	acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+#ifndef _OPENMP
+	int ngpus = acc_get_num_devices(acc_device_nvidia);
+	int gpunum = mpi_rank % ngpus;
+	acc_set_device_num(gpunum, acc_device_nvidia);
+#endif
+#endif
 	const int ns[3] = { nx, ny, nz };
 
 	ell_matrix A;  // Jacobian
@@ -90,7 +98,11 @@ void micropp<tdim>::homogenize_task(int igp)
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
+#ifdef _OPENACC
+	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+#else
 	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+#endif
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	gp_ptr->cost += newton.solver_its;
@@ -122,14 +134,23 @@ void micropp<tdim>::homogenize_task(int igp)
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	}
 
-	if (coupling == ONE_WAY) {
+	if (gp_ptr->coupling == NO_COUPLING || gp_ptr->coupling == ONE_WAY) {
 
-		memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
-		for (int i = 0; i < nvoi; ++i)
-			for (int j = 0; j < nvoi; ++j)
-				gp_ptr->stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
+		if (calc_ctan_lin_flag) {
+			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
+			for (int i = 0; i < nvoi; ++i) {
+				for (int j = 0; j < nvoi; ++j) {
+					gp_ptr->stress[i] += 
+						ctan_lin[i * nvoi + j] *
+						gp_ptr->strain[j];
+				}
+			}
+		} else {
+			cout << "ctan not calculated return value" << endl;
+			exit (1);
+		}
 
-	} else if (coupling == FULL || coupling == NO_COUPLING) {
+	} else if (gp_ptr->coupling == FULL) {
 
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->stress, gp_ptr->vars_n);
 		filter(gp_ptr->stress, nvoi, FILTER_REL_TOL);
@@ -146,7 +167,7 @@ void micropp<tdim>::homogenize_task(int igp)
 		}
 	}
 
-	if (gp_ptr->allocated && coupling == FULL) {
+	if (gp_ptr->allocated && gp_ptr->coupling == FULL) {
 
 		// CTAN 3/6 Newton-Raphsons in 2D/3D
 		double eps_1[6], sig_0[6], sig_1[6];
@@ -159,7 +180,11 @@ void micropp<tdim>::homogenize_task(int igp)
 			memcpy(eps_1, gp_ptr->strain, nvoi * sizeof(double));
 			eps_1[i] += D_EPS_CTAN_AVE;
 
+#ifdef _OPENACC
+			newton_raphson_acc(&A, b, u, du, eps_1, gp_ptr->vars_n);
+#else
 			newton_raphson(&A, b, u, du, eps_1, gp_ptr->vars_n);
+#endif
 
 			gp_ptr->cost += newton.solver_its;
 

@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
 	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
 	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5);
+	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();
 
 	double sig[6];

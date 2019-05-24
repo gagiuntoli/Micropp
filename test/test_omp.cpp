@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi];
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
+	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
 
 	double time;
 #ifdef _OPENMP
