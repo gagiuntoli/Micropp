@@ -22,7 +22,7 @@ module libmicropp
   implicit none
 
   ! Important: if you change this remember to change also the equivalent
-  ! one in the C_wrapper
+  ! one in the C wrapper (micropp_c.cpp)
   type, bind(C) :: micropp3
      type(c_ptr) :: ptr ! pointer
   end type micropp3
@@ -30,7 +30,7 @@ module libmicropp
   interface
 
      subroutine micropp3_new(self, ngp, size, micro_type, micro_params, &
-                     materials, nsubiterations, mpi_rank) bind(C)
+                     materials, coupling, nsubiterations, mpi_rank) bind(C)
        use, intrinsic :: iso_c_binding, only: c_int, c_double
        use libmaterial
        import micropp3
@@ -41,6 +41,7 @@ module libmicropp
        integer(c_int), value :: micro_type
        real(c_double), intent(in), dimension (*) :: micro_params
        type(material_base), intent(in), dimension (*) :: materials
+       integer(c_int), intent(in), dimension (*) :: coupling
        integer(c_int), value :: nsubiterations
        integer(c_int), value :: mpi_rank
      end subroutine micropp3_new

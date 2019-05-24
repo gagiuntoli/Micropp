@@ -46,6 +46,7 @@ program test3d_3
         Character(len = 16) :: time_char
 
         real(8), dimension(*) :: eps(6), sig(6), ctan(36)
+        integer, dimension(:) :: coupling(1)
 
         real(8) :: micro_params(4)
         type(material_base) :: mat_params(2)
@@ -73,12 +74,13 @@ program test3d_3
         nsubiterations = 1
         mpi_rank = 0
         micro_params = (/ 1.0, 1.0, 1.0, 0.1 /)
+        coupling(1) = 1
 
         call material_set(mat_params(1), 1, 1.0D6, 0.3D0, 5.0D4, 5.0D4, 3.0D3)
         call material_set(mat_params(2), 1, 1.0D6, 0.3D0, 1.0D4, 0.0D1, 3.0D3)
 
         call micropp3_new(micro, 1, sizes, micro_type, micro_params, &
-                mat_params, nsubiterations, mpi_rank)
+                mat_params, coupling, nsubiterations, mpi_rank)
         call micropp3_print_info(micro)
 
         eps = (/ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 /)

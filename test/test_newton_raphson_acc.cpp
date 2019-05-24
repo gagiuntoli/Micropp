@@ -42,7 +42,7 @@ class test_t : public micropp<3> {
 	public:
 		test_t(const int size[3], const int micro_type, const double micro_params[5],
 		       const material_base materials[2])
-			:micropp<3> (1, size, micro_type, micro_params, materials, ONE_WAY)
+			:micropp<3> (1, size, micro_type, micro_params, materials)
 		{};
 
 		~test_t() {};

@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
 	auto start = high_resolution_clock::now();
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params, NO_COUPLING);
+	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
