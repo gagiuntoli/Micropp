@@ -60,7 +60,27 @@ void micropp<tdim>::homogenize()
 
 #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
-		homogenize_task(igp);
+
+		gp_t<tdim> * const gp_ptr = &gp_list[igp];
+		if (gp_ptr->coupling == NO_COUPLING) {
+
+			if (calc_ctan_lin_flag) {
+				memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
+				for (int i = 0; i < nvoi; ++i) {
+					for (int j = 0; j < nvoi; ++j) {
+						gp_ptr->stress[i] += 
+							ctan_lin[i * nvoi + j] *
+							gp_ptr->strain[j];
+					}
+				}
+			} else {
+				cout << "ctan not calculated return value" << endl;
+				exit (1);
+			}
+
+		} else {
+			homogenize_task(igp);
+		}
 	}
 }
 
@@ -134,7 +154,7 @@ void micropp<tdim>::homogenize_task(int igp)
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	}
 
-	if (gp_ptr->coupling == NO_COUPLING || gp_ptr->coupling == ONE_WAY) {
+	if (gp_ptr->coupling == ONE_WAY) {
 
 		if (calc_ctan_lin_flag) {
 			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
