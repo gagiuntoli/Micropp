@@ -61,18 +61,20 @@ int main(int argc, char **argv)
 
 	assert(n > 1 && ngp > 0 && time_steps >= 0);
 	const int ngp_per_mpi = ngp / nproc + ((ngp % nproc > rank) ? 1 : 0);
-	//const int ngp_per_mpi = 1;
+
 	cout << "RANK = " << rank << " ngp = " << ngp_per_mpi << endl;
 
 	const int size[3] = { n, n, n };
 	const int micro_type = MIC_SPHERE; // 2 materiales matriz y fibra (3D esfera en matriz)
 	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
-	material_base mat_params[2];
+	material_base mat_params[3];
 	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
 	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mat_params[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	micropp<3> micro(ngp_per_mpi, size, micro_type, micro_params, mat_params, ONE_WAY, true, 5, rank);
+	micropp<3> micro(ngp_per_mpi, size, micro_type, micro_params, mat_params,
+			 nullptr, false, 0, rank);
 	//micro.print_info();
 
 	auto start = high_resolution_clock::now();
