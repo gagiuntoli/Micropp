@@ -211,10 +211,11 @@ void micropp<tdim>::calc_ctan_lin()
 		/* GPU device selection if they are accessible */
 #ifdef _OPENACC
 		int gpu_id;
+		int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 #ifdef _OPENMP
 		int tid = omp_get_thread_num();
-		gpu_id = tid % ngpus;
-		acc_set_device_num(gpuid, acc_device_nvidia);
+		gpu_id = tid % acc_num_gpus;
+		acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 #ifndef _OPENMP
 		gpu_id = mpi_rank % acc_num_gpus;
@@ -487,7 +488,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		const double rad_cilinder = special_param;
 		const double width_flat_layer = 0.02;
-		const double width_cili_layer = 0.01;
+		const double width_cili_layer = 0.02;
 
 		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
 		double tmp_1 = 0.0;
@@ -505,12 +506,12 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 			return 0;
 
-		} else if ((tmp_1 < pow(rad_cilinder + width_flat_layer, 2)) &&
+		} else if ((tmp_1 < pow(rad_cilinder + width_cili_layer, 2)) &&
 			   (tmp_1 > pow(rad_cilinder, 2))) {
 
 			return 1;
 
-		} else if ((tmp_2 < pow(rad_cilinder + width_flat_layer, 2)) &&
+		} else if ((tmp_2 < pow(rad_cilinder + width_cili_layer, 2)) &&
 			   (tmp_2 > pow(rad_cilinder, 2))) {
 
 			return 1;
@@ -618,11 +619,11 @@ void micropp<tdim>::print_info() const
 	cout << endl;
 
 #ifdef _OPENACC
-	acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
 #endif
 #ifdef _OPENMP
-	omp_max_threads = omp_get_max_threads();
+	int omp_max_threads = omp_get_max_threads();
 	cout << "OMP NUM THREADS   : " << omp_max_threads << endl;
 #endif
 	cout << endl;

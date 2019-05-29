@@ -156,9 +156,6 @@ class micropp {
 		const double nr_rel_tol;
 		const bool calc_ctan_lin_flag;
 
-		int omp_max_threads;
-		int acc_num_gpus;
-
 		int num_no_coupling;
 		int num_one_way;
 		int num_full;

@@ -87,10 +87,11 @@ void micropp<tdim>::homogenize_task(int igp)
 	/* GPU device selection if they are accessible */
 #ifdef _OPENACC
 	int gpu_id;
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 #ifdef _OPENMP
 	int tid = omp_get_thread_num();
-	gpu_id = tid % ngpus;
-	acc_set_device_num(gpuid, acc_device_nvidia);
+	gpu_id = tid % acc_num_gpus;
+	acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 #ifndef _OPENMP
 	gpu_id = mpi_rank % acc_num_gpus;
