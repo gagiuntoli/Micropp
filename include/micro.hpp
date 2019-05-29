@@ -134,7 +134,6 @@ class micropp {
 		gp_t<tdim> *gp_list;
 
 		double micro_params[5];
-		int numMaterials;
 		material_t *material_list[MAX_MATERIALS];
 		double ctan_lin[nvoi * nvoi];
 

@@ -49,7 +49,7 @@ program test3d_3
         integer, dimension(:) :: coupling(1)
 
         real(8) :: micro_params(4)
-        type(material_base) :: mat_params(2)
+        type(material_base) :: mat_params(3)
 
         argc = command_argument_count()
 
@@ -78,6 +78,7 @@ program test3d_3
 
         call material_set(mat_params(1), 1, 1.0D6, 0.3D0, 5.0D4, 5.0D4, 3.0D3)
         call material_set(mat_params(2), 1, 1.0D6, 0.3D0, 1.0D4, 0.0D1, 3.0D3)
+        call material_set(mat_params(3), 1, 1.0D6, 0.3D0, 1.0D4, 0.0D1, 3.0D3)
 
         call micropp3_new(micro, 1, sizes, micro_type, micro_params, &
                 mat_params, coupling, nsubiterations, mpi_rank)

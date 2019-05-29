@@ -49,9 +49,10 @@ int main (int argc, char *argv[])
 	ofstream file;
 	file.open("result.dat");
 
-	material_base mat_params[2];
+	material_base mat_params[3];
 	material_set(&mat_params[0], 2, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
 	material_set(&mat_params[1], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+	material_set(&mat_params[2], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();

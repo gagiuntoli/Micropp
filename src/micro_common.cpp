@@ -604,7 +604,7 @@ void micropp<tdim>::print_info() const
 	       	<< " param : " << special_param << endl;
 	cout << endl;
 
-	for (int i = 0; i < numMaterials; ++i) {
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
 		material_list[i]->print();
 		cout << endl;
 	}
