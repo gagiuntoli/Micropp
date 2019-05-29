@@ -114,13 +114,18 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	}
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
+
 	if (calc_ctan_lin_flag) {
 		calc_ctan_lin();
+	} else if ((num_one_way + num_full) > 0) {
+		cout << "WARNING: Linear tangent matrix is not being calculated"
+			"and it is needed for the <one-way> & <full> coupling"
+			<< endl;
 	}
 
-	for (int gp = 0; gp < ngp; ++gp)
+	for (int gp = 0; gp < ngp; ++gp) {
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
-
+	}
 }
 
 
@@ -203,19 +208,18 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps[nvoi] = { 0.0 };
 		eps[i] += D_EPS_CTAN_AVE;
 
-		/* GPU device selection */
+		/* GPU device selection if they are accessible */
 #ifdef _OPENACC
+		int gpu_id;
 #ifdef _OPENMP
-		int ngpus = acc_get_num_devices(acc_device_nvidia);
-		int tnum = omp_get_thread_num();
-		int gpunum = tnum % ngpus;
-		acc_set_device_num(gpunum, acc_device_nvidia);
+		int tid = omp_get_thread_num();
+		gpu_id = tid % ngpus;
+		acc_set_device_num(gpuid, acc_device_nvidia);
 #endif
 #ifndef _OPENMP
-		int ngpus = acc_get_num_devices(acc_device_nvidia);
-		int gpunum = mpi_rank % ngpus;
-		acc_set_device_num(gpunum, acc_device_nvidia);
+		gpu_id = mpi_rank % acc_num_gpus;
 #endif
+		acc_set_device_num(gpu_id, acc_device_nvidia);
 		newton_raphson_acc(&A, b, u, du, eps);
 #else
 		newton_raphson(&A, b, u, du, eps);
@@ -223,8 +227,9 @@ void micropp<tdim>::calc_ctan_lin()
 
 		calc_ave_stress(u, sig);
 
-		for (int v = 0; v < nvoi; ++v)
+		for (int v = 0; v < nvoi; ++v) {
 			ctan_lin[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
+		}
 
 		ell_free(&A);
 		free(b);
@@ -609,16 +614,16 @@ void micropp<tdim>::print_info() const
 		cout << endl;
 	}
 
-	cout << "Number of Subiterations :" << nsubiterations << endl;
+	cout << "NUM SUBITERATIONS :" << nsubiterations << endl;
 	cout << endl;
 
 #ifdef _OPENACC
-	int ngpus = acc_get_num_devices(acc_device_nvidia);
-	cout << "NUM OF GPUS : " << ngpus << endl;
+	acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
+	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
 #endif
 #ifdef _OPENMP
-	int tnum = omp_get_max_threads();
-	cout << "OMP THREADS : " << tnum << endl;
+	omp_max_threads = omp_get_max_threads();
+	cout << "OMP NUM THREADS   : " << omp_max_threads << endl;
 #endif
 	cout << endl;
 	cout << "ctan lin = " << endl;
