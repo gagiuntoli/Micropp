@@ -64,18 +64,13 @@ void micropp<tdim>::homogenize()
 		gp_t<tdim> * const gp_ptr = &gp_list[igp];
 		if (gp_ptr->coupling == NO_COUPLING) {
 
-			if (calc_ctan_lin_flag) {
-				memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
-				for (int i = 0; i < nvoi; ++i) {
-					for (int j = 0; j < nvoi; ++j) {
-						gp_ptr->stress[i] += 
-							ctan_lin[i * nvoi + j] *
-							gp_ptr->strain[j];
-					}
+			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
+			for (int i = 0; i < nvoi; ++i) {
+				for (int j = 0; j < nvoi; ++j) {
+					gp_ptr->stress[i] += 
+						ctan_lin[i * nvoi + j] *
+						gp_ptr->strain[j];
 				}
-			} else {
-				cout << "ctan not calculated return value" << endl;
-				exit (1);
 			}
 
 		} else {
@@ -89,19 +84,21 @@ template<int tdim>
 void micropp<tdim>::homogenize_task(int igp)
 {
 
+	/* GPU device selection if they are accessible */
 #ifdef _OPENACC
+	int gpu_id;
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 #ifdef _OPENMP
-	int ngpus = acc_get_num_devices(acc_device_nvidia);
-	int tnum = omp_get_thread_num();
-	int gpunum = tnum % ngpus;
-	acc_set_device_num(gpunum, acc_device_nvidia);
+	int tid = omp_get_thread_num();
+	gpu_id = tid % acc_num_gpus;
+	acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 #ifndef _OPENMP
-	int ngpus = acc_get_num_devices(acc_device_nvidia);
-	int gpunum = mpi_rank % ngpus;
-	acc_set_device_num(gpunum, acc_device_nvidia);
+	gpu_id = mpi_rank % acc_num_gpus;
 #endif
+	acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
+
 	const int ns[3] = { nx, ny, nz };
 
 	ell_matrix A;  // Jacobian
@@ -119,9 +116,11 @@ void micropp<tdim>::homogenize_task(int igp)
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
 #ifdef _OPENACC
-	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain,
+					     gp_ptr->vars_n);
 #else
-	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain,
+					 gp_ptr->vars_n);
 #endif
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
@@ -156,18 +155,12 @@ void micropp<tdim>::homogenize_task(int igp)
 
 	if (gp_ptr->coupling == ONE_WAY) {
 
-		if (calc_ctan_lin_flag) {
-			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
-			for (int i = 0; i < nvoi; ++i) {
-				for (int j = 0; j < nvoi; ++j) {
-					gp_ptr->stress[i] += 
-						ctan_lin[i * nvoi + j] *
-						gp_ptr->strain[j];
-				}
+		memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
+		for (int i = 0; i < nvoi; ++i) {
+			for (int j = 0; j < nvoi; ++j) {
+				gp_ptr->stress[i] += ctan_lin[i * nvoi + j] *
+					gp_ptr->strain[j];
 			}
-		} else {
-			cout << "ctan not calculated return value" << endl;
-			exit (1);
 		}
 
 	} else if (gp_ptr->coupling == FULL) {

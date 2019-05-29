@@ -53,9 +53,10 @@ int main(int argc, char **argv)
 	const int micro_type = MIC_SPHERE; // 2 materiales matriz y fibra (3D esfera en matriz)
 	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 
-	material_base mat_params[2];
+	material_base mat_params[3];
 	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
 	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	material_set(&mat_params[2], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
 	int dir = 2;
 	double eps[nvoi] = { 0.0 };

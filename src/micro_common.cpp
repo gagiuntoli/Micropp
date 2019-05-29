@@ -44,8 +44,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nez((tdim == 3) ? (nz - 1) : 1),
 
 	nelem(nex * ney * nez),
-	lx(_micro_params[0]), ly(_micro_params[1]),
-	lz((tdim == 3) ? _micro_params[2] : 0.0),
+	lx(1.0), ly(1.0), lz((tdim == 3) ? 1.0 : 0.0),
 	dx(lx / nex), dy(ly / ney), dz((tdim == 3) ? lz / nez : 0.0),
 
 	special_param(_micro_params[3]),
@@ -96,13 +95,12 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
 
 	int nParams = 4;
-	numMaterials = 2;
 
 	for (int i = 0; i < nParams; i++) {
 		micro_params[i] = _micro_params[i];
 	}
 
-	for (int i = 0; i < numMaterials; ++i) {
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
 		material_list[i] = material_t::make_material(_materials[i]);
 	}
 
@@ -116,13 +114,18 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	}
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
+
 	if (calc_ctan_lin_flag) {
 		calc_ctan_lin();
+	} else if ((num_one_way + num_full) > 0) {
+		cout << "WARNING: Linear tangent matrix is not being calculated"
+			"and it is needed for the <one-way> & <full> coupling"
+			<< endl;
 	}
 
-	for (int gp = 0; gp < ngp; ++gp)
+	for (int gp = 0; gp < ngp; ++gp) {
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
-
+	}
 }
 
 
@@ -205,19 +208,19 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps[nvoi] = { 0.0 };
 		eps[i] += D_EPS_CTAN_AVE;
 
-		/* GPU device selection */
+		/* GPU device selection if they are accessible */
 #ifdef _OPENACC
+		int gpu_id;
+		int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 #ifdef _OPENMP
-		int ngpus = acc_get_num_devices(acc_device_nvidia);
-		int tnum = omp_get_thread_num();
-		int gpunum = tnum % ngpus;
-		acc_set_device_num(gpunum, acc_device_nvidia);
+		int tid = omp_get_thread_num();
+		gpu_id = tid % acc_num_gpus;
+		acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 #ifndef _OPENMP
-		int ngpus = acc_get_num_devices(acc_device_nvidia);
-		int gpunum = mpi_rank % ngpus;
-		acc_set_device_num(gpunum, acc_device_nvidia);
+		gpu_id = mpi_rank % acc_num_gpus;
 #endif
+		acc_set_device_num(gpu_id, acc_device_nvidia);
 		newton_raphson_acc(&A, b, u, du, eps);
 #else
 		newton_raphson(&A, b, u, du, eps);
@@ -225,8 +228,9 @@ void micropp<tdim>::calc_ctan_lin()
 
 		calc_ave_stress(u, sig);
 
-		for (int v = 0; v < nvoi; ++v)
+		for (int v = 0; v < nvoi; ++v) {
 			ctan_lin[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
+		}
 
 		ell_free(&A);
 		free(b);
@@ -470,6 +474,57 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		}
 
 		return 0;
+
+	} else if (micro_type == MIC3D_8) {
+
+		/* 
+		 * returns
+		 * 0 : for the cilinders
+		 * 1 : for the layer around the cilinders
+		 * 1 : for the flat layer
+		 * 2 : for the matrix
+		 *
+		 */
+
+		const double rad_cilinder = special_param;
+		const double width_flat_layer = 0.02;
+		const double width_cili_layer = 0.02;
+
+		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
+		double tmp_1 = 0.0;
+		for (int i = 0; i < 2; ++i) {
+			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
+		}
+
+		const double cen_2[3] = { lx / 2., ly * .25, lz / 2. };
+		double tmp_2 = 0.0;
+		for (int i = 1; i < 3; ++i) {
+			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
+		}
+
+		if (tmp_1 < pow(rad_cilinder, 2) || tmp_2 < pow(rad_cilinder, 2)) {
+
+			return 0;
+
+		} else if ((tmp_1 < pow(rad_cilinder + width_cili_layer, 2)) &&
+			   (tmp_1 > pow(rad_cilinder, 2))) {
+
+			return 1;
+
+		} else if ((tmp_2 < pow(rad_cilinder + width_cili_layer, 2)) &&
+			   (tmp_2 > pow(rad_cilinder, 2))) {
+
+			return 1;
+
+		} else if ((coor[1] < (ly / 2 + width_flat_layer / 2)) &&
+			   (coor[1] > (ly / 2 - width_flat_layer / 2))) {
+
+			return 1;
+
+		} else {
+
+			return 2;
+		}
 	}
 
 	cerr << "Invalid micro_type = " << micro_type << endl;
@@ -555,21 +610,21 @@ void micropp<tdim>::print_info() const
 	       	<< " param : " << special_param << endl;
 	cout << endl;
 
-	for (int i = 0; i < numMaterials; ++i) {
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
 		material_list[i]->print();
 		cout << endl;
 	}
 
-	cout << "Number of Subiterations :" << nsubiterations << endl;
+	cout << "NUM SUBITERATIONS :" << nsubiterations << endl;
 	cout << endl;
 
 #ifdef _OPENACC
-	int ngpus = acc_get_num_devices(acc_device_nvidia);
-	cout << "NUM OF GPUS : " << ngpus << endl;
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
+	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
 #endif
 #ifdef _OPENMP
-	int tnum = omp_get_max_threads();
-	cout << "OMP THREADS : " << tnum << endl;
+	int omp_max_threads = omp_get_max_threads();
+	cout << "OMP NUM THREADS   : " << omp_max_threads << endl;
 #endif
 	cout << endl;
 	cout << "ctan lin = " << endl;

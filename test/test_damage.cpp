@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-4
+#define D_EPS 5.0e-3
 
 int main (int argc, char *argv[])
 {
@@ -42,16 +42,17 @@ int main (int argc, char *argv[])
 	const int n = atoi(argv[1]);
 
 	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
-	const int micro_type = MIC_SPHERES;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.2 };
+	const int micro_type = MIC3D_8;
+	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
 	const int size[3] = { n, n, n };
 
 	ofstream file;
 	file.open("result.dat");
 
-	material_base mat_params[2];
-	material_set(&mat_params[0], 2, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
-	material_set(&mat_params[1], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+	material_base mat_params[3];
+	material_set(&mat_params[0], 0, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
+	material_set(&mat_params[1], 2, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+	material_set(&mat_params[2], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
 
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
 	micro.print_info();
@@ -96,19 +97,9 @@ int main (int argc, char *argv[])
 			cout << sig[i] << "\t";
 		cout << endl;
 
-		cout << "ctan = " << endl;
-		for (int i = 0; i < 6; ++i) {
-			for (int j = 0; j < 6; ++j) {
-				cout << ctan[i * 6 + j] << "\t";
-			}
-			cout << endl;
-		}
-		cout << endl;
-
 		file    << setw(14)
 			<< eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
-
 	}
 
 	file.close();
