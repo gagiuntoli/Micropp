@@ -46,8 +46,8 @@
 #endif
 
 #define MAX_DIM         3
-#define MAX_MATS        10
 #define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
+#define MAX_MATERIALS   3
 
 #define FILTER_REL_TOL  1.0e-5
 
@@ -72,9 +72,9 @@ typedef struct {
 
 	void print()
 	{
-		cout << "newton.its : " << its << endl;
+		cout << "newton.its        : " << its << endl;
 		cout << "newton.solver_its : " << solver_its << endl;
-		cout << "newton.converged : " << converged << endl;
+		cout << "newton.converged  : " << converged << endl;
 	}
 
 } newton_t;
@@ -88,8 +88,17 @@ enum {
        	MIC_QUAD_FIB_XYZ,
        	MIC_QUAD_FIB_XZ,
 	MIC_QUAD_FIB_XZ_BROKEN_X,
-	MIC_SPHERES
+	MIC_SPHERES,
+	MIC3D_8
 };
+
+/*
+ *
+ *
+ * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the 
+ * perimeter and a flat layer between the fibers.
+ *
+ */
 
 enum {
        	NO_COUPLING,
@@ -126,7 +135,7 @@ class micropp {
 
 		double micro_params[5];
 		int numMaterials;
-		material_t *material_list[MAX_MATS];
+		material_t *material_list[MAX_MATERIALS];
 		double ctan_lin[nvoi * nvoi];
 
 		int *elem_type;

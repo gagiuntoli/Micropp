@@ -44,8 +44,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nez((tdim == 3) ? (nz - 1) : 1),
 
 	nelem(nex * ney * nez),
-	lx(_micro_params[0]), ly(_micro_params[1]),
-	lz((tdim == 3) ? _micro_params[2] : 0.0),
+	lx(1.0), ly(1.0), lz((tdim == 3) ? 1.0 : 0.0),
 	dx(lx / nex), dy(ly / ney), dz((tdim == 3) ? lz / nez : 0.0),
 
 	special_param(_micro_params[3]),
@@ -96,13 +95,12 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
 
 	int nParams = 4;
-	numMaterials = 2;
 
 	for (int i = 0; i < nParams; i++) {
 		micro_params[i] = _micro_params[i];
 	}
 
-	for (int i = 0; i < numMaterials; ++i) {
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
 		material_list[i] = material_t::make_material(_materials[i]);
 	}
 
@@ -470,6 +468,57 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		}
 
 		return 0;
+
+	} else if (micro_type == MIC3D_8) {
+
+		/* 
+		 * returns
+		 * 0 : for the cilinders
+		 * 1 : for the layer around the cilinders
+		 * 1 : for the flat layer
+		 * 2 : for the matrix
+		 *
+		 */
+
+		const double rad_cilinder = special_param;
+		const double width_flat_layer = 0.02;
+		const double width_cili_layer = 0.01;
+
+		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
+		double tmp_1 = 0.0;
+		for (int i = 0; i < 2; ++i) {
+			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
+		}
+
+		const double cen_2[3] = { lx / 2., ly * .25, lz / 2. };
+		double tmp_2 = 0.0;
+		for (int i = 1; i < 3; ++i) {
+			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
+		}
+
+		if (tmp_1 < pow(rad_cilinder, 2) || tmp_2 < pow(rad_cilinder, 2)) {
+
+			return 0;
+
+		} else if ((tmp_1 < pow(rad_cilinder + width_flat_layer, 2)) &&
+			   (tmp_1 > pow(rad_cilinder, 2))) {
+
+			return 1;
+
+		} else if ((tmp_2 < pow(rad_cilinder + width_flat_layer, 2)) &&
+			   (tmp_2 > pow(rad_cilinder, 2))) {
+
+			return 1;
+
+		} else if ((coor[1] < (ly / 2 + width_flat_layer / 2)) &&
+			   (coor[1] > (ly / 2 - width_flat_layer / 2))) {
+
+			return 1;
+
+		} else {
+
+			return 2;
+		}
 	}
 
 	cerr << "Invalid micro_type = " << micro_type << endl;

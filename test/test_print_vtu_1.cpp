@@ -31,26 +31,26 @@ using namespace std;
 
 int main (int argc, char *argv[])
 {
-	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [mic_type = [0 ... 7]]" << endl;
-		return(1);
+	if (argc < 3) {
+		cerr << "Usage: " << argv[0] << " <n> <mic_type = [0 ... 8]>" << endl;
+		exit(1);
 	}
 
 	const int n = atoi(argv[1]);
 	const int size[3] = { n, n, n };
 
-	const int mic_selected = (argc == 3) ? atoi(argv[2]) : -1;
-	if (mic_selected > MIC_SPHERES) {
-		cerr << "mic_type > " << MIC_SPHERES << endl;
-		return(1);
+	const int mic_selected = atoi(argv[2]);
+	if (mic_selected < 0 || mic_selected > MIC3D_8) {
+		cerr << "<mic_type = [0 ... 8]>" << endl;
+		exit(1);
 	}
 
-
-	material_base materials[2];
+	material_base materials[3];
 	material_set(&materials[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
 	material_set(&materials[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	material_set(&materials[2], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
-	double params[8][4] = {
+	double params[9][4] = {
 		{ 1.0, 1.0, 1.0, 0.1 },
 		{ 1.0, 1.0, 1.0, 0.1 },
 		{ 1.0, 1.0, 1.0, 0.1 },
@@ -58,39 +58,20 @@ int main (int argc, char *argv[])
 		{ 1.0, 1.0, 1.0, 0.1 },
 		{ 1.0, 1.0, 1.0, 0.1 },
 		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.6 }
+		{ 1.0, 1.0, 1.0, 0.6 },
+		{ 1.0, 1.0, 1.0, 0.1 }
 	};
 
-	if (mic_selected < 0) {
+	micropp<3> *micro = new micropp<3>(1, size, mic_selected, params[mic_selected],
+					   materials, nullptr, false, 0, 0,
+					   NR_MAX_ITS, NR_MAX_TOL, NR_REL_TOL,
+					   false);
+	micro->print_info();
 
-		for(int micro_type = 0; micro_type < MIC_SPHERES + 1; ++micro_type) {
-
-			cout << "Plotting Micro Type : " << micro_type << endl;
-			micropp<3> *micro = new micropp<3>(1, size, micro_type,
-							   params[micro_type],
-							   materials);
-			micro->print_info();
-
-			char filename[128];
-			snprintf(filename, 128, "micro_type_%d", micro_type);
-			micro->output (0, filename);
-			delete micro;
-		}
-
-	} else {
-
-		cout << "Plotting Micro Type : " << mic_selected << endl;
-		micropp<3> *micro = new micropp<3>(1, size, mic_selected,
-						   params[mic_selected],
-						   materials);
-		micro->print_info();
-
-		char filename[128];
-		snprintf(filename, 128, "micro_type_%d", mic_selected);
-		micro->output (0, filename);
-		delete micro;
-	}
-
+	char filename[128];
+	snprintf(filename, 128, "micro_type_%d", mic_selected);
+	micro->output (0, filename);
+	delete micro;
 
 	return 0;
 }
