@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,20 +27,11 @@
 
 
 template<int tdim>
-micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
-		       const double _micro_params[4],
-		       const struct material_base *_materials,
-		       const int *coupling, const bool _subiterations,
-		       const int _nsubiterations, const int _mpi_rank,
-		       const int _nr_max_its, const double _nr_max_tol,
-		       const double _nr_rel_tol,
-		       const bool _calc_ctan_lin_flag,
-		       const bool _use_A0,
-		       const int _its_with_A0):
+micropp<tdim>::micropp(const micropp_params_t &params):
 
-	ngp(_ngp),
-	nx(size[0]), ny(size[1]),
-	nz((tdim == 3) ? size[2] : 1),
+	ngp(params.ngp),
+	nx(params.size[0]), ny(params.size[1]),
+	nz((tdim == 3) ? params.size[2] : 1),
 
 	nn(nx * ny * nz),
 	nndim(nn * dim),
@@ -50,35 +43,35 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	lx(1.0), ly(1.0), lz((tdim == 3) ? 1.0 : 0.0),
 	dx(lx / nex), dy(ly / ney), dz((tdim == 3) ? lz / nez : 0.0),
 
-	special_param(_micro_params[3]),
-	subiterations(_subiterations),
-	nsubiterations(_nsubiterations),
-	mpi_rank(_mpi_rank),
+	special_param(params.geo_params[3]),
+	subiterations(params.subiterations),
+	nsubiterations(params.nsubiterations),
+	mpi_rank(params.mpi_rank),
 
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
 	ivol(1.0 / (wg * npe)),
-	micro_type(_micro_type), nvars(nelem * npe * NUM_VAR_GP),
+	micro_type(params.type), nvars(nelem * npe * NUM_VAR_GP),
 
-	nr_max_its(_nr_max_its),
-	nr_max_tol(_nr_max_tol),
-	nr_rel_tol(_nr_rel_tol),
-	calc_ctan_lin_flag(_calc_ctan_lin_flag),
+	nr_max_its(params.nr_max_its),
+	nr_max_tol(params.nr_max_tol),
+	nr_rel_tol(params.nr_rel_tol),
+	calc_ctan_lin_flag(params.calc_ctan_lin),
 
-	use_A0(_use_A0),
-	its_with_A0(_its_with_A0)
+	use_A0(params.use_A0),
+	its_with_A0(params.its_with_A0)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
-	for (int gp = 0; gp < npe; gp++){
+	for (int gp = 0; gp < npe; gp++) {
 		calc_bmat(gp, calc_bmat_cache[gp]);
 	}
 
 	gp_list = new gp_t<tdim>[ngp]();
 	for (int gp = 0; gp < ngp; ++gp) {
-		if(coupling != nullptr) {
-			gp_list[gp].coupling = coupling[gp];
-			switch (coupling[gp]) {
+		if(params.coupling != nullptr) {
+			gp_list[gp].coupling = params.coupling[gp];
+			switch (params.coupling[gp]) {
 				case NO_COUPLING:
 					num_no_coupling ++;
 					break;
@@ -103,11 +96,11 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	int nParams = 4;
 
 	for (int i = 0; i < nParams; i++) {
-		micro_params[i] = _micro_params[i];
+		micro_params[i] = params.geo_params[i];
 	}
 
 	for (int i = 0; i < MAX_MATERIALS; ++i) {
-		material_list[i] = material_t::make_material(_materials[i]);
+		material_list[i] = material_t::make_material(params.materials[i]);
 	}
 
 	for (int ez = 0; ez < nez; ++ez) {
@@ -119,8 +112,8 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		}
 	}
 
-	if (use_A0) {
-		ell_init(&A0, dim, dim, size, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+	if (params.use_A0) {
+		ell_init(&A0, dim, dim, params.size, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
 		double *u = (double *) calloc(nndim, sizeof(double));
 		assembly_mat(&A0, u, nullptr);
 		free(u);

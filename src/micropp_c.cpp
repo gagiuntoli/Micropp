@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,9 +35,8 @@ extern "C" {
 			  const int *coupling, const int nsubiterations,
 			  const int mpi_rank)
 	{
-		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params,
-					   materials, coupling, true,
-					   nsubiterations, mpi_rank);
+		micropp_params_t params;
+		self->ptr = new micropp<3>(params);
 	}
 
 	void micropp3_free(micropp3 *self)

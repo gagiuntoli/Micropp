@@ -1,22 +1,24 @@
 /*
- * This source code is part of MicroPP: a finite element library
- * to solve microstructural problems for composite materials.
+ *  This source code is part of MicroPP: a finite element library
+ *  to solve microstructural problems for composite materials.
  *
- * Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                        Guido Giuntoli <gagiuntoli@gmail.com>
+ *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef MICRO_HPP
@@ -85,18 +87,18 @@ typedef struct {
 	int ngp = 1;
 	int size[3];
 	int type = 0;
-	double geo_params[4];
-	struct material_base *materials = nullptr;
+	double geo_params[4] = {1.0, 1.0, 1.0, 0.1};
+	struct material_base materials[4];
 	int *coupling = nullptr;
 	bool subiterations = false;
 	int nsubiterations = 10;
 	int mpi_rank = 0;
-	int max_its = NR_MAX_ITS;
-	double max_tol = NR_MAX_TOL;
-	double rel_tol = NR_REL_TOL;
-	bool calc_ctan_lin_flag = true;
+	int nr_max_its = NR_MAX_ITS;
+	double nr_max_tol = NR_MAX_TOL;
+	double nr_rel_tol = NR_REL_TOL;
+	bool calc_ctan_lin = true;
 	bool use_A0 = false;
-	int its_with_A0 = 0;
+	int its_with_A0 = 1;
 
 	void print()
 	{
@@ -107,10 +109,10 @@ typedef struct {
 		cout << "subiterations : " << subiterations << endl;
 		cout << "nsubiterations : " << nsubiterations << endl;
 		cout << "mpi_rank : " << mpi_rank << endl;
-		cout << "max_its : " << max_its << endl;
-		cout << "max_tol : " << max_tol << endl;
-		cout << "rel_tol : " << rel_tol << endl;
-		cout << "calc_ctan_lin_flag : " << calc_ctan_lin_flag << endl;
+		cout << "nr_max_its : " << nr_max_its << endl;
+		cout << "nr_max_tol : " << nr_max_tol << endl;
+		cout << "nr_rel_tol : " << nr_rel_tol << endl;
+		cout << "calc_ctan_lin : " << calc_ctan_lin << endl;
 		cout << "use_A0 : " << use_A0 << endl;
 		cout << "its_with_A0 : " << its_with_A0 << endl;
 	}
@@ -293,19 +295,7 @@ class micropp {
 
 		micropp() = delete;
 
-		micropp(const int ngp, const int size[3], const int micro_type,
-			const double *micro_params,
-			const struct material_base *materials,
-			const int *coupling = nullptr,
-			const bool subiterations = false,
-			const int nsubiterations = 10,
-			const int mpi_rank = 0,
-			const int max_its = NR_MAX_ITS,
-			const double max_tol = NR_MAX_TOL,
-			const double rel_tol = NR_REL_TOL,
-			const bool calc_ctan_lin_flag = true,
-			const bool use_A0 = false,
-			const int its_with_A0 = 0);
+		micropp(const micropp_params_t &params);
 
 		~micropp();
 
