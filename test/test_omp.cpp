@@ -25,12 +25,13 @@
 #include <cstring>
 #include <ctime>
 #include <cassert>
-
+#include <chrono>
 #include <bits/stdc++.h>
 
 #include "micro.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
 #define D_EPS 0.01
 
@@ -64,12 +65,7 @@ int main(int argc, char **argv)
 
 	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
 
-	double time;
-#ifdef _OPENMP
-	time = omp_get_wtime();
-#else
-	time = clock();
-#endif
+	auto start = high_resolution_clock::now();
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
@@ -110,12 +106,9 @@ int main(int argc, char **argv)
 
 	}
 
-#ifdef _OPENMP
-	time = omp_get_wtime() - time;
-#else
-	time = clock() - time;
-#endif
-	printf("time = %lf\n", time);
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	cout << "time = " << duration.count() << " ms" << endl;
 
 	return 0;
 }
