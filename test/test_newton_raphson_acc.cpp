@@ -40,9 +40,8 @@ using namespace std;
 class test_t : public micropp<3> {
 
 	public:
-		test_t(const int size[3], const int micro_type, const double micro_params[5],
-		       const material_base materials[2])
-			:micropp<3> (1, size, micro_type, micro_params, materials)
+		test_t(const micropp_params_t params)
+			:micropp<3> (params)
 		{};
 
 		~test_t() {};
@@ -76,17 +75,22 @@ int main (int argc, char *argv[])
 	}
 
 	const int n = (argc > 1) ? atoi(argv[1]) : 10;
-	const int size[3] = { n, n, n };
-	const int micro_type = 2;
-	const double micro_params[4] = { 1., 1., 1., 0.2 };
-
-	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
-	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-
 	const double strain[6] = { 1., 2., 3., 1., 1., 1. };
 
-	test_t test(size, micro_type, micro_params, mat_params);
+	micropp_params_t mic_params;
+
+	mic_params.ngp = 1;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+
+	mic_params.print();
+
+	test_t test(mic_params);
 
 	for (int i = 0; i < REPETITIONS; ++i)
 		test.newton_raphson(strain);

@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,10 +64,20 @@ int main (int argc, char *argv[])
 		{ 1.0, 1.0, 1.0, 0.1 }
 	};
 
-	micropp<3> *micro = new micropp<3>(1, size, mic_selected, params[mic_selected],
-					   materials, nullptr, false, 0, 0,
-					   NR_MAX_ITS, NR_MAX_TOL, NR_REL_TOL,
-					   false);
+	micropp_params_t mic_params;
+
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = mic_selected;
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.calc_ctan_lin = false;
+
+	mic_params.print();
+
+	micropp<3> *micro = new micropp<3>(mic_params);
 	micro->print_info();
 
 	char filename[128];

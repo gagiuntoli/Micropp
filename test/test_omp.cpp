@@ -37,7 +37,6 @@ using namespace std::chrono;
 
 int main(int argc, char **argv)
 {
-
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [ngp] [steps]" << endl;
 		return(1);
@@ -48,22 +47,24 @@ int main(int argc, char **argv)
 	const int ngp = (argc > 2 ? atoi(argv[2]) : 2);
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 1);  // Optional value
 
-	assert(n > 1 && ngp > 0 && time_steps > 0);
-
-	int size[3] = { n, n, n };
-
-	const int micro_type = 3;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
-
-	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
-
 	int dir = 2;
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi];
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
+	micropp_params_t mic_params;
+
+	mic_params.ngp = ngp;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+
+	mic_params.print();
+
+	micropp<3> micro(mic_params);
 
 	auto start = high_resolution_clock::now();
 

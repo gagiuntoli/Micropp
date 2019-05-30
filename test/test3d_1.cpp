@@ -49,19 +49,24 @@ int main (int argc, char *argv[])
 	}
 
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
-	const int micro_type = MIC_SPHERES;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.2 };
-	const int size[3] = { n, n, n };
 
 	ofstream file;
 	file.open("result.dat");
 
-	material_base mat_params[3];
-	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 1.0e1);
-	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	material_set(&mat_params[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	micropp_params_t mic_params;
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
+	mic_params.ngp = 1;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+
+	mic_params.print();
+
+	micropp<3> micro(mic_params);
 	micro.print_info();
 
 	double sig[6];
