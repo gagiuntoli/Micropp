@@ -80,6 +80,44 @@ typedef struct {
 } newton_t;
 
 
+typedef struct {
+
+	int ngp = 1;
+	int size[3];
+	int type = 0;
+	double geo_params[4];
+	struct material_base *materials = nullptr;
+	int *coupling = nullptr;
+	bool subiterations = false;
+	int nsubiterations = 10;
+	int mpi_rank = 0;
+	int max_its = NR_MAX_ITS;
+	double max_tol = NR_MAX_TOL;
+	double rel_tol = NR_REL_TOL;
+	bool calc_ctan_lin_flag = true;
+	bool use_A0 = false;
+	int its_with_A0 = 0;
+
+	void print()
+	{
+		cout << "ngp  : " << ngp << endl;
+		cout << "size : " << size[0] << endl;
+		cout << "type  : " << type << endl;
+		cout << "geo_params : " << geo_params[0] << endl;
+		cout << "subiterations : " << subiterations << endl;
+		cout << "nsubiterations : " << nsubiterations << endl;
+		cout << "mpi_rank : " << mpi_rank << endl;
+		cout << "max_its : " << max_its << endl;
+		cout << "max_tol : " << max_tol << endl;
+		cout << "rel_tol : " << rel_tol << endl;
+		cout << "calc_ctan_lin_flag : " << calc_ctan_lin_flag << endl;
+		cout << "use_A0 : " << use_A0 << endl;
+		cout << "its_with_A0 : " << its_with_A0 << endl;
+	}
+
+} micropp_params_t;
+
+
 enum {
        	MIC_SPHERE,
        	MIC_LAYER_Y,

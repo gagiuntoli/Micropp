@@ -59,24 +59,12 @@ int main (int argc, char *argv[])
 	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mat_params[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
+	micropp_params_t mic_params;
+	mic_params.print();
+
 	micropp<3> micro(1, size, micro_type, micro_params, mat_params,
 			 nullptr, false, 0, 0, NR_MAX_ITS, NR_MAX_TOL,
 			 1.0e-1, true, use_A0, 1);
-	/*
-		micropp(const int ngp, const int size[3], const int micro_type,
-			const double *micro_params,
-			const struct material_base *materials,
-			const int *coupling = nullptr,
-			const bool subiterations = false,
-			const int nsubiterations = 10,
-			const int mpi_rank = 0,
-			const int max_its = NR_MAX_ITS,
-			const double max_tol = NR_MAX_TOL,
-			const double rel_tol = NR_REL_TOL,
-			const bool calc_ctan_lin_flag = true,
-			const bool use_A0 = false,
-			const int its_with_A0 = 0);
-			*/
 
 	micro.print_info();
 
