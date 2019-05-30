@@ -21,6 +21,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+//#include <string.h>
+
 #include "micropp_c.h"
 #include "micro.hpp"
 #include "material_base.h"
@@ -30,12 +32,22 @@ extern "C" {
 	// IMPORTANT!! This struct should match with the one in FORTRAN
 
 	void micropp3_new(struct micropp3 *self, int ngp, const int size[3],
-			  const int micro_type, const double *micro_params,
+			  const int type, const double *geo_params,
 	                  const struct material_base *materials,
 			  const int *coupling, const int nsubiterations,
 			  const int mpi_rank)
 	{
 		micropp_params_t params;
+		params.ngp = ngp;
+		memcpy(params.size, size, 3 * sizeof(int));
+		params.type = type;
+		memcpy(params.geo_params, geo_params, 4 * sizeof(double));
+		for (int i = 0; i < 4; ++i) {
+			memcpy(&params.materials[i], &materials[i], sizeof(struct material_base));
+		}
+		params.nsubiterations = nsubiterations;
+		params.mpi_rank = mpi_rank;
+
 		self->ptr = new micropp<3>(params);
 	}
 
