@@ -119,6 +119,13 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		}
 	}
 
+	if (use_A0) {
+		ell_init(&A0, dim, dim, size, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		double *u = (double *) calloc(nndim, sizeof(double));
+		assembly_mat(&A0, u, nullptr);
+		free(u);
+	}
+
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
 
 	if (calc_ctan_lin_flag) {
@@ -131,13 +138,6 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 
 	for (int gp = 0; gp < ngp; ++gp) {
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
-	}
-
-	if (use_A0) {
-		ell_init(&A0, dim, dim, size, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
-		double *u = (double *) calloc(nndim, sizeof(double));
-		assembly_mat(&A0, u, nullptr);
-		free(u);
 	}
 }
 
@@ -619,6 +619,7 @@ void micropp<tdim>::print_info() const
 	cout << "NO_COUPLING : " << num_no_coupling << " GPs" << endl;
 	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
 	cout << "FULL        : " << num_full        << " GPs" << endl;
+	cout << "USE A0      : " << use_A0 << endl;
        	
 	cout    << "ngp :" << ngp 
 		<< " nx :" << nx << " ny :" << ny << " nz :" << nz
