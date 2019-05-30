@@ -160,6 +160,11 @@ class micropp {
 		int num_one_way;
 		int num_full;
 
+		/* Linear jacobian for optimization */
+		bool use_A0;
+		int its_with_A0;
+		ell_matrix A0;
+
 
 		/* Private function members */
 
@@ -254,13 +259,15 @@ class micropp {
 			const double *micro_params,
 			const struct material_base *materials,
 			const int *coupling = nullptr,
-			const bool _subiterations = false,
-			const int _nsubiterations = 10,
-			const int _mpi_rank = 0,
+			const bool subiterations = false,
+			const int nsubiterations = 10,
+			const int mpi_rank = 0,
 			const int max_its = NR_MAX_ITS,
 			const double max_tol = NR_MAX_TOL,
 			const double rel_tol = NR_REL_TOL,
-			const bool calc_ctan_lin_flag = true);
+			const bool calc_ctan_lin_flag = true,
+			const bool use_A0 = false,
+			const int its_with_A0 = 0);
 
 		~micropp();
 

@@ -31,7 +31,10 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 		       const int *coupling, const bool _subiterations,
 		       const int _nsubiterations, const int _mpi_rank,
 		       const int _nr_max_its, const double _nr_max_tol,
-		       const double _nr_rel_tol, const bool _calc_ctan_lin_flag):
+		       const double _nr_rel_tol,
+		       const bool _calc_ctan_lin_flag,
+		       const bool _use_A0,
+		       const int _its_with_A0):
 
 	ngp(_ngp),
 	nx(size[0]), ny(size[1]),
@@ -60,7 +63,10 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	nr_max_its(_nr_max_its),
 	nr_max_tol(_nr_max_tol),
 	nr_rel_tol(_nr_rel_tol),
-	calc_ctan_lin_flag(_calc_ctan_lin_flag)
+	calc_ctan_lin_flag(_calc_ctan_lin_flag),
+
+	use_A0(_use_A0),
+	its_with_A0(_its_with_A0)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -126,6 +132,13 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	for (int gp = 0; gp < ngp; ++gp) {
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 	}
+
+	if (use_A0) {
+		ell_init(&A0, dim, dim, size, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		double *u = (double *) calloc(nndim, sizeof(double));
+		assembly_mat(&A0, u, nullptr);
+		free(u);
+	}
 }
 
 
@@ -137,6 +150,10 @@ micropp<tdim>::~micropp()
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
+
+	if (use_A0) {
+		ell_free(&A0);
+	}
 
 	delete [] gp_list;
 }

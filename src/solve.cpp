@@ -27,8 +27,9 @@ using namespace std;
 
 
 template <int tdim>
-newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, double *du,
-				       const double strain[nvoi], const double *vars_old)
+newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
+				       double *du, const double strain[nvoi],
+				       const double *vars_old)
 {
 
 	INST_START;
@@ -48,10 +49,22 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, doub
 			break;
 		}
 
-		assembly_mat(A, u, vars_old);
+		/*
+		 * Matrix selection according if it's linear or non-linear.
+		 * All OpenMP threads can access to A0 with no cost because
+		 * is a read-only matrix.
+		 *
+		 */
+		ell_matrix *A_ptr;
+		if (!use_A0 || its > (its_with_A0 - 1)) {
+			assembly_mat(A, u, vars_old);
+			A_ptr = A;
+		} else {
+			A_ptr = &A0;
+		}
 
 		double cg_err;
-		int cg_its = ell_solve_cgpd(A, b, du, &cg_err);
+		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 
 		newton.solver_its += cg_its;
 
