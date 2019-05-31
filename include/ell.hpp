@@ -30,9 +30,9 @@ using namespace std;
 #ifndef ELL_H_
 #define ELL_H_
 
-#define CG_MIN_ERR      1.0e-50
+#define CG_ABS_TOL      1.0e-50
 #define CG_MAX_ITS      1000
-#define CG_REL_ERR      1.0e-5
+#define CG_REL_TOL      1.0e-5
 
 #define nod_index(i,j,k)   ((k)*nx*ny + (j)*nx + (i))
 #define nod_index3D(i,j,k) ((k)*nx*ny + (j)*nx + (i))
@@ -59,8 +59,8 @@ typedef struct {
 } ell_matrix;
 
 void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
-	      const double min_err = CG_MIN_ERR,
-	      const double rel_err = CG_REL_ERR,
+	      const double min_err = CG_ABS_TOL,
+	      const double rel_err = CG_REL_TOL,
 	      const int max_its = CG_MAX_ITS);
 
 void ell_mvp(const ell_matrix *m, const double *x, double *y);

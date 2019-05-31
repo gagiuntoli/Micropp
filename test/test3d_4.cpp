@@ -49,24 +49,28 @@ int main(int argc, char **argv)
 
 	assert(n > 1 && ngp > 1 && time_steps > 0);
 
-	const int size[3] = { n, n, n };
-	const int micro_type = MIC_SPHERE; // 2 materiales matriz y fibra (3D esfera en matriz)
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
-
-	material_base mat_params[3];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
-	material_set(&mat_params[2], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
-
 	int dir = 2;
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi], (*sig_test)[nvoi];
 
 	sig_test = (double (*)[nvoi]) malloc(nvoi * ngp * sizeof(double));
 
-	auto start = high_resolution_clock::now();
+	micropp_params_t mic_params;
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
+	mic_params.ngp = ngp;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&mic_params.materials[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	material_set(&mic_params.materials[2], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+
+	mic_params.print();
+
+	micropp<3> micro(mic_params);
+
+	auto start = high_resolution_clock::now();
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {

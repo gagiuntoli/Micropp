@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,17 +27,11 @@
 
 
 template<int tdim>
-micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
-		       const double _micro_params[4],
-		       const struct material_base *_materials,
-		       const int *coupling, const bool _subiterations,
-		       const int _nsubiterations, const int _mpi_rank,
-		       const int _nr_max_its, const double _nr_max_tol,
-		       const double _nr_rel_tol, const bool _calc_ctan_lin_flag):
+micropp<tdim>::micropp(const micropp_params_t &params):
 
-	ngp(_ngp),
-	nx(size[0]), ny(size[1]),
-	nz((tdim == 3) ? size[2] : 1),
+	ngp(params.ngp),
+	nx(params.size[0]), ny(params.size[1]),
+	nz((tdim == 3) ? params.size[2] : 1),
 
 	nn(nx * ny * nz),
 	nndim(nn * dim),
@@ -47,32 +43,35 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	lx(1.0), ly(1.0), lz((tdim == 3) ? 1.0 : 0.0),
 	dx(lx / nex), dy(ly / ney), dz((tdim == 3) ? lz / nez : 0.0),
 
-	special_param(_micro_params[3]),
-	subiterations(_subiterations),
-	nsubiterations(_nsubiterations),
-	mpi_rank(_mpi_rank),
+	special_param(params.geo_params[3]),
+	subiterations(params.subiterations),
+	nsubiterations(params.nsubiterations),
+	mpi_rank(params.mpi_rank),
 
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
 	ivol(1.0 / (wg * npe)),
-	micro_type(_micro_type), nvars(nelem * npe * NUM_VAR_GP),
+	micro_type(params.type), nvars(nelem * npe * NUM_VAR_GP),
 
-	nr_max_its(_nr_max_its),
-	nr_max_tol(_nr_max_tol),
-	nr_rel_tol(_nr_rel_tol),
-	calc_ctan_lin_flag(_calc_ctan_lin_flag)
+	nr_max_its(params.nr_max_its),
+	nr_max_tol(params.nr_max_tol),
+	nr_rel_tol(params.nr_rel_tol),
+	calc_ctan_lin_flag(params.calc_ctan_lin),
+
+	use_A0(params.use_A0),
+	its_with_A0(params.its_with_A0)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
-	for (int gp = 0; gp < npe; gp++){
+	for (int gp = 0; gp < npe; gp++) {
 		calc_bmat(gp, calc_bmat_cache[gp]);
 	}
 
 	gp_list = new gp_t<tdim>[ngp]();
 	for (int gp = 0; gp < ngp; ++gp) {
-		if(coupling != nullptr) {
-			gp_list[gp].coupling = coupling[gp];
-			switch (coupling[gp]) {
+		if(params.coupling != nullptr) {
+			gp_list[gp].coupling = params.coupling[gp];
+			switch (params.coupling[gp]) {
 				case NO_COUPLING:
 					num_no_coupling ++;
 					break;
@@ -85,6 +84,7 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 			}
 		} else {
 			gp_list[gp].coupling = ONE_WAY;
+			num_one_way ++;
 		}
 		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
 		gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));
@@ -97,11 +97,11 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 	int nParams = 4;
 
 	for (int i = 0; i < nParams; i++) {
-		micro_params[i] = _micro_params[i];
+		micro_params[i] = params.geo_params[i];
 	}
 
 	for (int i = 0; i < MAX_MATERIALS; ++i) {
-		material_list[i] = material_t::make_material(_materials[i]);
+		material_list[i] = material_t::make_material(params.materials[i]);
 	}
 
 	for (int ez = 0; ez < nez; ++ez) {
@@ -110,6 +110,23 @@ micropp<tdim>::micropp(const int _ngp, const int size[3], const int _micro_type,
 				const int e_i = glo_elem(ex, ey, ez);
 				elem_type[e_i] = get_elem_type(ex, ey, ez);
 			}
+		}
+	}
+
+	if (params.use_A0) {
+#ifdef _OPENMP
+		int num_of_A0s = omp_get_max_threads();
+#else
+		int num_of_A0s = 1;
+#endif
+		A0 = (ell_matrix *) malloc(num_of_A0s * sizeof(ell_matrix));
+
+#pragma omp parallel for schedule(dynamic,1)
+		for (int i = 0; i < num_of_A0s; ++i) {
+			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+			double *u = (double *) calloc(nndim, sizeof(double));
+			assembly_mat(&A0[i], u, nullptr);
+			free(u);
 		}
 	}
 
@@ -137,6 +154,20 @@ micropp<tdim>::~micropp()
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);
+
+	if (use_A0) {
+#ifdef _OPENMP
+		int num_of_A0s = omp_get_max_threads();
+#else
+		int num_of_A0s = 1;
+#endif
+
+#pragma omp parallel for schedule(dynamic,1)
+		for (int i = 0; i < num_of_A0s; ++i) {
+			ell_free(&A0[i]);
+		}
+		free(A0);
+	}
 
 	delete [] gp_list;
 }
@@ -199,7 +230,7 @@ void micropp<tdim>::calc_ctan_lin()
 		const int ns[3] = { nx, ny, nz };
 
 		ell_matrix A;  // Jacobian
-		ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));
@@ -221,10 +252,8 @@ void micropp<tdim>::calc_ctan_lin()
 		gpu_id = mpi_rank % acc_num_gpus;
 #endif
 		acc_set_device_num(gpu_id, acc_device_nvidia);
-		newton_raphson_acc(&A, b, u, du, eps);
-#else
-		newton_raphson(&A, b, u, du, eps);
 #endif
+		newton_raphson(&A, b, u, du, eps);
 
 		calc_ave_stress(u, sig);
 
@@ -602,6 +631,7 @@ void micropp<tdim>::print_info() const
 	cout << "NO_COUPLING : " << num_no_coupling << " GPs" << endl;
 	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
 	cout << "FULL        : " << num_full        << " GPs" << endl;
+	cout << "USE A0      : " << use_A0 << endl;
        	
 	cout    << "ngp :" << ngp 
 		<< " nx :" << nx << " ny :" << ny << " nz :" << nz
@@ -756,36 +786,6 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
 template<int tdim>
 bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 				  double *_vars_new) const
-{
-	bool non_linear = false;
-
-	for (int ez = 0; ez < nez; ++ez) {
-		for (int ey = 0; ey < ney; ++ey) {
-			for (int ex = 0; ex < nex; ++ex){
-
-				const int e = glo_elem(ex, ey, ez);
-				const material_t *material = get_material(e);
-
-				for (int gp = 0; gp < npe; ++gp) {
-
-					const double *vars_old = (_vars_old) ? &_vars_old[intvar_ix(e, gp, 0)] : nullptr;
-					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
-
-					double eps[nvoi];
-					get_strain(u, gp, eps, ex, ey, ez);
-
-					non_linear |= material->evolute(eps, vars_old, vars_new);
-				}
-			}
-		}
-	}
-
-	return non_linear;
-}
-
-template<int tdim>
-bool micropp<tdim>::calc_vars_new_acc(const double *u, const double *_vars_old,
-				      double *_vars_new) const
 {
 	bool non_linear = false;
 

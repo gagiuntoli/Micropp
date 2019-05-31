@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,23 +37,21 @@ int main (int argc, char *argv[])
 {
 	// Execution ./test3d_1 n [print] [steps]
 	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
+		cerr << "Usage: " << argv[0] << " n [use_A0 = 0|1] [steps]" << endl;
 		return(1);
 	}
 
 	const int dir = 1;
 	const int n = atoi(argv[1]);
 
-	const int print = (argc > 2) ? atoi(argv[2]) : 0;
-	if (print < 0 || print > 1) {
-		cerr << "Error in [print] argument, it only can be 0 or 1" << endl;
-		return(1);
+	const int use_A0 = (argc > 2) ? atoi(argv[2]) : 0;
+	if (use_A0 < 0 || use_A0 > 1) {
+		cerr    << "Error in [use_A0] argument, it only can be 0 or 1"
+			<< endl;
+		exit(1);
 	}
 
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
-
-	ofstream file;
-	file.open("result.dat");
 
 	micropp_params_t mic_params;
 
@@ -63,10 +63,13 @@ int main (int argc, char *argv[])
 	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.calc_ctan_lin = true;
+	mic_params.use_A0 = use_A0;
 
 	mic_params.print();
 
 	micropp<3> micro(mic_params);
+
 	micro.print_info();
 
 	double sig[6];
@@ -118,18 +121,7 @@ int main (int argc, char *argv[])
 			cout << endl;
 		}
 		cout << endl;
-
-		file    << setw(14)
-			<< eps[dir] << "\t"
-			<< sig[dir] << "\t" << endl;
-
-		if (print) {
-			char filename[128];
-			snprintf(filename, 128, "micropp_%d", t);
-			micro.output (0, filename);
-		}
 	}
 
-	file.close();
 	return 0;
 }

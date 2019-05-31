@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -102,7 +104,7 @@ void micropp<tdim>::homogenize_task(int igp)
 	const int ns[3] = { nx, ny, nz };
 
 	ell_matrix A;  // Jacobian
-	ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+	ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 	double *b = (double *) calloc(nndim, sizeof(double));
 	double *du = (double *) calloc(nndim, sizeof(double));
 	double *u = (double *) calloc(nndim, sizeof(double));
@@ -115,13 +117,8 @@ void micropp<tdim>::homogenize_task(int igp)
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
-#ifdef _OPENACC
-	newton_t newton = newton_raphson_acc(&A, b, u, du, gp_ptr->strain,
-					     gp_ptr->vars_n);
-#else
 	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain,
 					 gp_ptr->vars_n);
-#endif
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	gp_ptr->cost += newton.solver_its;
@@ -193,11 +190,7 @@ void micropp<tdim>::homogenize_task(int igp)
 			memcpy(eps_1, gp_ptr->strain, nvoi * sizeof(double));
 			eps_1[i] += D_EPS_CTAN_AVE;
 
-#ifdef _OPENACC
-			newton_raphson_acc(&A, b, u, du, eps_1, gp_ptr->vars_n);
-#else
 			newton_raphson(&A, b, u, du, eps_1, gp_ptr->vars_n);
-#endif
 
 			gp_ptr->cost += newton.solver_its;
 

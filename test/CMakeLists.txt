@@ -13,13 +13,13 @@ set(testsources
 	test_ell_1.cpp
 	test_ell_2.cpp
 	test_ell_mvp_openacc.cpp
-	test_newton_raphson_acc.cpp
 	test_cg.cpp
 	test_print_vtu_1.cpp
 	test_omp.cpp
 	test_material.cpp
 	test_damage.cpp
-	test_util_1.cpp)
+	test_util_1.cpp
+	test_A0.cpp)
 
 # Iterate over the list above
 foreach (testfile ${testsources})

@@ -1,22 +1,24 @@
 /*
- * This source code is part of MicroPP: a finite element library
- * to solve microstructural problems for composite materials.
+ *  This source code is part of MicroPP: a finite element library
+ *  to solve microstructural problems for composite materials.
  *
- * Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                        Guido Giuntoli <gagiuntoli@gmail.com>
+ *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef MICRO_HPP
@@ -78,6 +80,47 @@ typedef struct {
 	}
 
 } newton_t;
+
+
+typedef struct {
+
+	int ngp = 1;
+	int size[3];
+	int type = 0;
+	double geo_params[4] = {1.0, 1.0, 1.0, 0.1};
+	struct material_base materials[4];
+	int *coupling = nullptr;
+	bool subiterations = false;
+	int nsubiterations = 10;
+	int mpi_rank = 0;
+	int nr_max_its = NR_MAX_ITS;
+	double nr_max_tol = NR_MAX_TOL;
+	double nr_rel_tol = NR_REL_TOL;
+	int cg_max_its = CG_MAX_ITS;
+	double cg_abs_tol = CG_ABS_TOL;
+	double cg_rel_tol = CG_REL_TOL;
+	bool calc_ctan_lin = true;
+	bool use_A0 = false;
+	int its_with_A0 = 1;
+
+	void print()
+	{
+		cout << "ngp  : " << ngp << endl;
+		cout << "size : " << size[0] << endl;
+		cout << "type  : " << type << endl;
+		cout << "geo_params : " << geo_params[0] << endl;
+		cout << "subiterations : " << subiterations << endl;
+		cout << "nsubiterations : " << nsubiterations << endl;
+		cout << "mpi_rank : " << mpi_rank << endl;
+		cout << "nr_max_its : " << nr_max_its << endl;
+		cout << "nr_max_tol : " << nr_max_tol << endl;
+		cout << "nr_rel_tol : " << nr_rel_tol << endl;
+		cout << "calc_ctan_lin : " << calc_ctan_lin << endl;
+		cout << "use_A0 : " << use_A0 << endl;
+		cout << "its_with_A0 : " << its_with_A0 << endl;
+	}
+
+} micropp_params_t;
 
 
 enum {
@@ -156,9 +199,14 @@ class micropp {
 		const double nr_rel_tol;
 		const bool calc_ctan_lin_flag;
 
-		int num_no_coupling;
-		int num_one_way;
-		int num_full;
+		int num_no_coupling = 0;
+		int num_one_way = 0;
+		int num_full = 0;
+
+		/* Linear jacobian for optimization */
+		bool use_A0;
+		int its_with_A0;
+		ell_matrix *A0;
 
 
 		/* Private function members */
@@ -187,20 +235,11 @@ class micropp {
 				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
-		void get_stress_acc(int gp, const double eps[nvoi],
-				    const double *vars_old,
-				    double stress_gp[nvoi],
-				    int ex, int ey, int ez = 0) const;
-
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(const double *u, const double *vars_old,
 				  double be[npe * dim], int ex, int ey,
 				  int ez = 0) const;
-
-		void get_elem_rhs_acc(const double *u, const double *vars_old,
-				      double be[npe * dim], int ex, int ey,
-				      int ez = 0) const;
 
 		void calc_ave_stress(const double *u, double stress_ave[nvoi],
 				     const double *vars_old = nullptr) const;
@@ -214,16 +253,10 @@ class micropp {
 
 		bool calc_vars_new(const double *u, const double *vars_old,
 				   double *vars_new) const;
-		bool calc_vars_new_acc(const double *u, const double *vars_old,
-				       double *vars_new) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],
 					const double *vars_old = nullptr);
-
-		newton_t newton_raphson_acc(ell_matrix *A, double *b, double *u,
-					    double *du, const double strain[nvoi],
-					    const double *vars_old = nullptr);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],
@@ -250,17 +283,7 @@ class micropp {
 
 		micropp() = delete;
 
-		micropp(const int ngp, const int size[3], const int micro_type,
-			const double *micro_params,
-			const struct material_base *materials,
-			const int *coupling = nullptr,
-			const bool _subiterations = false,
-			const int _nsubiterations = 10,
-			const int _mpi_rank = 0,
-			const int max_its = NR_MAX_ITS,
-			const double max_tol = NR_MAX_TOL,
-			const double rel_tol = NR_REL_TOL,
-			const bool calc_ctan_lin_flag = true);
+		micropp(const micropp_params_t &params);
 
 		~micropp();
 

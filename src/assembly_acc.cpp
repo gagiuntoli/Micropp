@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,44 +23,6 @@
 
 
 #include "micro.hpp"
-
-
-template <>
-void micropp<3>::get_stress_acc(int gp, const double eps[nvoi],
-				const double *vars_old,
-				double stress_gp[nvoi],
-				int ex, int ey, int ez) const
-{
-	const int e = glo_elem(ex, ey, ez);
-	const material_t *material = get_material(e);
-	const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-
-	material->get_stress(eps, stress_gp, vars);
-}
-
-
-template <>
-void micropp<3>::get_elem_rhs_acc(const double *u, const double *vars_old,
-				  double be[npe * dim],
-				  int ex, int ey, int ez) const
-{
-	INST_START;
-
-	constexpr int npedim = npe * dim;
-	double stress_gp[nvoi], strain_gp[nvoi];
-
-	memset(be, 0, npedim * sizeof(double));
-
-	for (int gp = 0; gp < npe; ++gp) {
-
-		get_strain(u, gp, strain_gp, ex, ey, ez);
-		get_stress_acc(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-
-		for (int i = 0; i < npedim; ++i)
-			for (int j = 0; j < nvoi; ++j)
-				be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
-	}
-}
 
 
 template<>
@@ -102,7 +66,7 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 
 				for (int gp = 0; gp < npe; ++gp) {
 
-					get_stress_acc(gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], vars_old, stress_gp, ex, ey, ez);
+					get_stress(gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], vars_old, stress_gp, ex, ey, ez);
 
 					for (int i = 0; i < npedim; ++i)
 						for (int j = 0; j < nvoi; ++j)

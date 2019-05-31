@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,10 +38,8 @@ int main (int argc, char *argv[])
 	class test_t : public micropp<3> {
 
 		public:
-			test_t(const int size[3], const int micro_type, const double micro_params[5],
-			       const struct material_base mat_params[2])
-				:micropp<3> (1, size, micro_type, micro_params, mat_params)
-			{};
+			test_t(const micropp_params_t params)
+				:micropp<3> (params){};
 
 			~test_t() {};
 
@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
 				const int nfield = dim;
 
 				ell_matrix A;  // Jacobian
-				ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+				ell_init(&A, nfield, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 				double *b = (double *) calloc(nndim, sizeof(double));
 				double *du = (double *) calloc(nndim, sizeof(double));
 				double *u = (double *) calloc(nndim, sizeof(double));
@@ -91,16 +91,20 @@ int main (int argc, char *argv[])
 	const int n = (argc > 1) ? atoi(argv[1]) : 10;
 	const double a = (argc > 2) ? atoi(argv[2]) : 1.0;
 
-	int size[3] = { n, n, n };
+	micropp_params_t mic_params;
 
-	int micro_type = 2;
-	double micro_params[4] = { 1., 1., 1., 0.2 };
+	mic_params.ngp = 1;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, a * 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	mic_params.print();
 
-	test_t test(size, micro_type, micro_params, mat_params);
+	test_t test(mic_params);
 	test.assembly_and_solve();
 
 	return 0;

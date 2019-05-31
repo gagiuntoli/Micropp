@@ -1,6 +1,12 @@
 !
-! This file is part of the Fortran_C++ program.
-! Copyright (c) 2018 Jimmy Aguilar Mena.
+!  This source code is part of MicroPP: a finite element library
+!  to solve microstructural problems for composite materials.
+!
+!  Copyright (c) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+!                         Guido Giuntoli <gagiuntoli@gmail.com>
+!                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+!                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
+! 
 !
 ! This program is free software: you can redistribute it and/or modify
 ! it under the terms of the GNU General Public License as published by

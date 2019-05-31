@@ -4,6 +4,8 @@
  *
  *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,14 +30,27 @@ extern "C" {
 	// IMPORTANT!! This struct should match with the one in FORTRAN
 
 	void micropp3_new(struct micropp3 *self, int ngp, const int size[3],
-			  const int micro_type, const double *micro_params,
+			  const int type, const double *geo_params,
 	                  const struct material_base *materials,
 			  const int *coupling, const int nsubiterations,
 			  const int mpi_rank)
 	{
-		self->ptr = new micropp<3>(ngp, size, micro_type, micro_params,
-					   materials, coupling, true,
-					   nsubiterations, mpi_rank);
+		micropp_params_t params;
+		params.ngp = ngp;
+		memcpy(params.size, size, 3 * sizeof(int));
+		params.type = type;
+		memcpy(params.geo_params, geo_params, 4 * sizeof(double));
+		for (int i = 0; i < MAX_MATERIALS; ++i) {
+			params.materials[i] = materials[i];
+		}
+		params.coupling = new int[ngp];
+		memcpy(params.coupling, coupling, ngp * sizeof(int));
+		params.nsubiterations = nsubiterations;
+		params.mpi_rank = mpi_rank;
+		params.use_A0 = true;
+		params.its_with_A0 = 1;
+
+		self->ptr = new micropp<3>(params);
 	}
 
 	void micropp3_free(micropp3 *self)

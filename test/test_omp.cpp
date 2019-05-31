@@ -25,18 +25,18 @@
 #include <cstring>
 #include <ctime>
 #include <cassert>
-
+#include <chrono>
 #include <bits/stdc++.h>
 
 #include "micro.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
 #define D_EPS 0.01
 
 int main(int argc, char **argv)
 {
-
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [ngp] [steps]" << endl;
 		return(1);
@@ -47,29 +47,30 @@ int main(int argc, char **argv)
 	const int ngp = (argc > 2 ? atoi(argv[2]) : 2);
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 1);  // Optional value
 
-	assert(n > 1 && ngp > 0 && time_steps > 0);
-
-	int size[3] = { n, n, n };
-
-	const int micro_type = 3;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
-
-	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
-
 	int dir = 2;
 	double eps[nvoi] = { 0.0 };
 	double sig[nvoi];
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
+	micropp_params_t mic_params;
 
-	double time;
-#ifdef _OPENMP
-	time = omp_get_wtime();
-#else
-	time = clock();
-#endif
+	mic_params.ngp = ngp;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.calc_ctan_lin = false;
+	mic_params.use_A0 = false;
+
+	mic_params.print();
+
+	micropp<3> micro(mic_params);
+	micro.print_info();
+
+	auto start = high_resolution_clock::now();
 
 	cout << scientific;
 	for (int t = 0; t < time_steps; ++t) {
@@ -110,12 +111,9 @@ int main(int argc, char **argv)
 
 	}
 
-#ifdef _OPENMP
-	time = omp_get_wtime() - time;
-#else
-	time = clock() - time;
-#endif
-	printf("time = %lf\n", time);
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	cout << "time = " << duration.count() << " ms" << endl;
 
 	return 0;
 }

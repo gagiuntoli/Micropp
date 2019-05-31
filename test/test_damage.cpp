@@ -40,21 +40,24 @@ int main (int argc, char *argv[])
 
 	const int dir = 1;
 	const int n = atoi(argv[1]);
-
 	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
-	const int micro_type = MIC3D_8;
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
-	const int size[3] = { n, n, n };
 
 	ofstream file;
 	file.open("result.dat");
 
-	material_base mat_params[3];
-	material_set(&mat_params[0], 0, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
-	material_set(&mat_params[1], 2, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
-	material_set(&mat_params[2], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+	micropp_params_t mic_params;
 
-	micropp<3> micro(1, size, micro_type, micro_params, mat_params);
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC3D_8;
+	material_set(&mic_params.materials[0], 0, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
+	material_set(&mic_params.materials[1], 2, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+	material_set(&mic_params.materials[2], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+
+	mic_params.print();
+
+	micropp<3> micro(mic_params);
 	micro.print_info();
 
 	double sig[6];

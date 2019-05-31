@@ -32,9 +32,8 @@ using namespace std;
 template <int tdim>
 class test_t : public micropp<tdim> {
 	public:
-		test_t(const int size[3], const double micro_params[5],
-		       const struct material_base mat_params[2])
-			:micropp<tdim> (4, size, 1, micro_params, mat_params)
+		test_t(const micropp_params_t params)
+			:micropp<tdim> (params)
 		{};
 
 		~test_t() {};
@@ -47,16 +46,14 @@ class test_t : public micropp<tdim> {
 
 int main (int argc, char *argv[])
 {
-	const int size[3] = { 5, 5, 5 };
-	const double micro_params[5] = { 1., 1., 1., 0.1, 0. };
-
 	int n[8];
 
-	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	micropp_params_t mic_params;
+	mic_params.size[0] = 5;
+	mic_params.size[1] = 5;
+	mic_params.size[2] = 5;
 
-	test_t<3> test(size, micro_params, mat_params);
+	test_t<3> test(mic_params);
 
 	test.public_get_elem_nodes(n, 0, 0, 0);
 	const int n_1_exact[8] = { 0, 1, 6, 5, 25, 26, 31, 30 };

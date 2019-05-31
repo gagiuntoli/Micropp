@@ -53,15 +53,20 @@ int main(int argc, char **argv)
 
 	assert(n > 1 && ngp > 0 && time_steps > 0);
 
-	const int size[3] = { n, n, n };
-	const int micro_type = MIC_SPHERE; // 2 materiales matriz y fibra (3D esfera en matriz)
-	const double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
+	micropp_params_t mic_params;
 
-	material_base mat_params[2];
-	material_set(&mat_params[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	material_set(&mat_params[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.ngp = ngp;
+	mic_params.size[0] = n;
+	mic_params.size[1] = n;
+	mic_params.size[2] = n;
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 
-	micropp<3> micro(ngp, size, micro_type, micro_params, mat_params);
+	mic_params.print();
+
+	micropp<3> micro(mic_params);
 	micro.print_info();
 
 	auto start = high_resolution_clock::now();

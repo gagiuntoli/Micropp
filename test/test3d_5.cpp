@@ -41,22 +41,21 @@ int main(int argc, char **argv)
 		return(1);
 	}
 
-	const int nx = atoi(argv[1]);
-	const int ny = atoi(argv[2]);
-	const int nz = atoi(argv[3]);
-	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
 	const int ngp = 10;
+	const int time_steps = (argc > 4 ? atoi(argv[4]) : 10);  // Optional value
 
-	assert(nx > 1 && ny > 1 && nz > 1 && time_steps > 0);
+	micropp_params_t mic_params;
 
-	int size[dim] = {nx, ny, nz};
-	int micro_type = 1;	// 2 materiales matriz y fibra (3D esfera en matriz)
-	double micro_params[4] = { 1.0, 1.0, 1.0, 0.1 };
+	mic_params.ngp = ngp;
+	mic_params.size[0] = atoi(argv[1]);
+	mic_params.size[1] = atoi(argv[2]);
+	mic_params.size[2] = atoi(argv[3]);
+	mic_params.type = MIC_SPHERE;
+	material_set(&mic_params.materials[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
+	material_set(&mic_params.materials[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 
-	material_base mat_params[3];
-	material_set(&mat_params[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
-	material_set(&mat_params[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
-	material_set(&mat_params[2], 0, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
+	micropp<dim> micro(mic_params);
 
 	int dir = 2;
 	const double d_eps_1 = 0.01, d_eps_2 = -0.008;;
@@ -64,8 +63,6 @@ int main(int argc, char **argv)
 	double sig[6], (*sig_test)[3];
 
 	sig_test = (double (*)[3]) malloc (3 * ngp * sizeof(double));
-
-	micropp<dim> micro(ngp, size, micro_type, micro_params, mat_params);
 
 	for (int t = 0; t < time_steps; ++t) {
 		cout << "Time step = " << t << endl;
