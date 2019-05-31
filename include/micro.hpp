@@ -206,7 +206,7 @@ class micropp {
 		/* Linear jacobian for optimization */
 		bool use_A0;
 		int its_with_A0;
-		ell_matrix A0;
+		ell_matrix *A0;
 
 
 		/* Private function members */

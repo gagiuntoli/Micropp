@@ -62,7 +62,12 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 			assembly_mat(A, u, vars_old);
 			A_ptr = A;
 		} else {
-			A_ptr = &A0;
+#ifdef _OPENMP
+			int tid = omp_get_thread_num();
+#else
+			int tid = 0;
+#endif
+			A_ptr = &A0[tid];
 		}
 
 		double cg_err;

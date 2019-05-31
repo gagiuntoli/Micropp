@@ -114,10 +114,20 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	}
 
 	if (params.use_A0) {
-		ell_init(&A0, dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
-		double *u = (double *) calloc(nndim, sizeof(double));
-		assembly_mat(&A0, u, nullptr);
-		free(u);
+#ifdef _OPENMP
+		int num_of_A0s = omp_get_max_threads();
+#else
+		int num_of_A0s = 1;
+#endif
+		A0 = (ell_matrix *) malloc(num_of_A0s * sizeof(ell_matrix));
+
+#pragma omp parallel for schedule(dynamic,1)
+		for (int i = 0; i < num_of_A0s; ++i) {
+			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+			double *u = (double *) calloc(nndim, sizeof(double));
+			assembly_mat(&A0[i], u, nullptr);
+			free(u);
+		}
 	}
 
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
@@ -146,7 +156,17 @@ micropp<tdim>::~micropp()
 	free(elem_type);
 
 	if (use_A0) {
-		ell_free(&A0);
+#ifdef _OPENMP
+		int num_of_A0s = omp_get_max_threads();
+#else
+		int num_of_A0s = 1;
+#endif
+
+#pragma omp parallel for schedule(dynamic,1)
+		for (int i = 0; i < num_of_A0s; ++i) {
+			ell_free(&A0[i]);
+		}
+		free(A0);
 	}
 
 	delete [] gp_list;
