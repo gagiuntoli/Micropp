@@ -96,6 +96,9 @@ typedef struct {
 	int nr_max_its = NR_MAX_ITS;
 	double nr_max_tol = NR_MAX_TOL;
 	double nr_rel_tol = NR_REL_TOL;
+	int cg_max_its = CG_MAX_ITS;
+	double cg_abs_tol = CG_ABS_TOL;
+	double cg_rel_tol = CG_REL_TOL;
 	bool calc_ctan_lin = true;
 	bool use_A0 = false;
 	int its_with_A0 = 1;

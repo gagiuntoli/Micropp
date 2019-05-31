@@ -113,7 +113,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	}
 
 	if (params.use_A0) {
-		ell_init(&A0, dim, dim, params.size, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A0, dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 		double *u = (double *) calloc(nndim, sizeof(double));
 		assembly_mat(&A0, u, nullptr);
 		free(u);
@@ -209,7 +209,7 @@ void micropp<tdim>::calc_ctan_lin()
 		const int ns[3] = { nx, ny, nz };
 
 		ell_matrix A;  // Jacobian
-		ell_init(&A, dim, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+		ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));

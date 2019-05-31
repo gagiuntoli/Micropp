@@ -21,8 +21,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#include <string.h>
-
 #include "micropp_c.h"
 #include "micro.hpp"
 #include "material_base.h"
@@ -42,11 +40,15 @@ extern "C" {
 		memcpy(params.size, size, 3 * sizeof(int));
 		params.type = type;
 		memcpy(params.geo_params, geo_params, 4 * sizeof(double));
-		for (int i = 0; i < 4; ++i) {
-			memcpy(&params.materials[i], &materials[i], sizeof(struct material_base));
+		for (int i = 0; i < MAX_MATERIALS; ++i) {
+			params.materials[i] = materials[i];
 		}
+		params.coupling = new int[ngp];
+		memcpy(params.coupling, coupling, ngp * sizeof(int));
 		params.nsubiterations = nsubiterations;
 		params.mpi_rank = mpi_rank;
+		params.use_A0 = true;
+		params.its_with_A0 = 1;
 
 		self->ptr = new micropp<3>(params);
 	}

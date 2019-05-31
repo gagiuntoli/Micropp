@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
 				const int nfield = dim;
 
 				ell_matrix A;  // Jacobian
-				ell_init(&A, nfield, dim, ns, CG_MIN_ERR, CG_REL_ERR, CG_MAX_ITS);
+				ell_init(&A, nfield, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 				double *b = (double *) calloc(nndim, sizeof(double));
 				double *du = (double *) calloc(nndim, sizeof(double));
 				double *u = (double *) calloc(nndim, sizeof(double));
