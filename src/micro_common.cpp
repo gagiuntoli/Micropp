@@ -84,6 +84,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 			}
 		} else {
 			gp_list[gp].coupling = ONE_WAY;
+			num_one_way ++;
 		}
 		gp_list[gp].u_n = (double *) calloc(nndim, sizeof(double));
 		gp_list[gp].u_k = (double *) calloc(nndim, sizeof(double));

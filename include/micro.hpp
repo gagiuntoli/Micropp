@@ -199,9 +199,9 @@ class micropp {
 		const double nr_rel_tol;
 		const bool calc_ctan_lin_flag;
 
-		int num_no_coupling;
-		int num_one_way;
-		int num_full;
+		int num_no_coupling = 0;
+		int num_one_way = 0;
+		int num_full = 0;
 
 		/* Linear jacobian for optimization */
 		bool use_A0;

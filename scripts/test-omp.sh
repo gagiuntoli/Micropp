@@ -11,11 +11,11 @@
 ##SBATCH --qos=bsc_case
 #SBATCH --qos=debug
 
-N=30
-NGP=96
-STEPS=10
+N=25
+NGP=480
+STEPS=2
 
-procs=(8 16 24 48)
+procs=(6 12 24 48 96)
 
 rm -f times-${N}-${NGP}-${STEPS}.txt
 

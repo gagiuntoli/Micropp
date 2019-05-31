@@ -58,13 +58,16 @@ int main(int argc, char **argv)
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
 	mic_params.type = MIC_SPHERE;
+
 	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.use_A0 = false;
 
 	mic_params.print();
 
 	micropp<3> micro(mic_params);
+	micro.print_info();
 
 	auto start = high_resolution_clock::now();
 
