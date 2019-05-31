@@ -25,28 +25,6 @@
 #include "micro.hpp"
 
 
-template <>
-void micropp<3>::get_elem_rhs_acc(const double *u, const double *vars_old,
-				  double be[npe * dim],
-				  int ex, int ey, int ez) const
-{
-	constexpr int npedim = npe * dim;
-	double stress_gp[nvoi], strain_gp[nvoi];
-
-	memset(be, 0, npedim * sizeof(double));
-
-	for (int gp = 0; gp < npe; ++gp) {
-
-		get_strain(u, gp, strain_gp, ex, ey, ez);
-		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-
-		for (int i = 0; i < npedim; ++i)
-			for (int j = 0; j < nvoi; ++j)
-				be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
-	}
-}
-
-
 template<>
 double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 				    double *b)

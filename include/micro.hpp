@@ -241,10 +241,6 @@ class micropp {
 				  double be[npe * dim], int ex, int ey,
 				  int ez = 0) const;
 
-		void get_elem_rhs_acc(const double *u, const double *vars_old,
-				      double be[npe * dim], int ex, int ey,
-				      int ez = 0) const;
-
 		void calc_ave_stress(const double *u, double stress_ave[nvoi],
 				     const double *vars_old = nullptr) const;
 
