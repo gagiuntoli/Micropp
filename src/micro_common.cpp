@@ -252,10 +252,10 @@ void micropp<tdim>::calc_ctan_lin()
 		gpu_id = mpi_rank % acc_num_gpus;
 #endif
 		acc_set_device_num(gpu_id, acc_device_nvidia);
-		newton_raphson_acc(&A, b, u, du, eps);
-#else
-		newton_raphson(&A, b, u, du, eps);
 #endif
+		//newton_raphson_acc(&A, b, u, du, eps);
+//#else
+		newton_raphson(&A, b, u, du, eps);
 
 		calc_ave_stress(u, sig);
 
@@ -788,36 +788,6 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
 template<int tdim>
 bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 				  double *_vars_new) const
-{
-	bool non_linear = false;
-
-	for (int ez = 0; ez < nez; ++ez) {
-		for (int ey = 0; ey < ney; ++ey) {
-			for (int ex = 0; ex < nex; ++ex){
-
-				const int e = glo_elem(ex, ey, ez);
-				const material_t *material = get_material(e);
-
-				for (int gp = 0; gp < npe; ++gp) {
-
-					const double *vars_old = (_vars_old) ? &_vars_old[intvar_ix(e, gp, 0)] : nullptr;
-					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
-
-					double eps[nvoi];
-					get_strain(u, gp, eps, ex, ey, ez);
-
-					non_linear |= material->evolute(eps, vars_old, vars_new);
-				}
-			}
-		}
-	}
-
-	return non_linear;
-}
-
-template<int tdim>
-bool micropp<tdim>::calc_vars_new_acc(const double *u, const double *_vars_old,
-				      double *_vars_new) const
 {
 	bool non_linear = false;
 

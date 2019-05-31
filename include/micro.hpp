@@ -262,16 +262,10 @@ class micropp {
 
 		bool calc_vars_new(const double *u, const double *vars_old,
 				   double *vars_new) const;
-		bool calc_vars_new_acc(const double *u, const double *vars_old,
-				       double *vars_new) const;
 
 		newton_t newton_raphson(ell_matrix *A, double *b, double *u,
 					double *du, const double strain[nvoi],
 					const double *vars_old = nullptr);
-
-		newton_t newton_raphson_acc(ell_matrix *A, double *b, double *u,
-					    double *du, const double strain[nvoi],
-					    const double *vars_old = nullptr);
 
 		void get_elem_mat(const double *u, const double *vars_old,
 				  double Ae[npe * dim * npe * dim],

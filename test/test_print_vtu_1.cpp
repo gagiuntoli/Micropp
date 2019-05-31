@@ -39,7 +39,6 @@ int main (int argc, char *argv[])
 	}
 
 	const int n = atoi(argv[1]);
-	const int size[3] = { n, n, n };
 
 	const int mic_selected = atoi(argv[2]);
 	if (mic_selected < 0 || mic_selected > MIC3D_8) {
@@ -51,18 +50,6 @@ int main (int argc, char *argv[])
 	material_set(&materials[0], 0, 1.0e6, 0.3, 5.0e4, 2.0e4, 0.0);
 	material_set(&materials[1], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
 	material_set(&materials[2], 1, 1.0e3, 0.3, 5.0e4, 1.0e3, 0.0);
-
-	double params[9][4] = {
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.1 },
-		{ 1.0, 1.0, 1.0, 0.6 },
-		{ 1.0, 1.0, 1.0, 0.1 }
-	};
 
 	micropp_params_t mic_params;
 

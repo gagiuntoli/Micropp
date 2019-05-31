@@ -81,7 +81,7 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 
 		double cg_err;
 #ifdef _OPENACC
-		int cg_its = ell_solve_cgpd_acc(A, b, du, &cg_err);
+		int cg_its = ell_solve_cgpd_acc(A_ptr, b, du, &cg_err);
 #else
 		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 #endif
