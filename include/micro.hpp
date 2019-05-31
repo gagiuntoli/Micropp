@@ -235,11 +235,6 @@ class micropp {
 				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
-		void get_stress_acc(int gp, const double eps[nvoi],
-				    const double *vars_old,
-				    double stress_gp[nvoi],
-				    int ex, int ey, int ez = 0) const;
-
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(const double *u, const double *vars_old,

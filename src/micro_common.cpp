@@ -253,8 +253,6 @@ void micropp<tdim>::calc_ctan_lin()
 #endif
 		acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
-		//newton_raphson_acc(&A, b, u, du, eps);
-//#else
 		newton_raphson(&A, b, u, du, eps);
 
 		calc_ave_stress(u, sig);
