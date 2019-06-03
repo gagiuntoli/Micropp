@@ -102,6 +102,7 @@ typedef struct {
 	bool calc_ctan_lin = true;
 	bool use_A0 = false;
 	int its_with_A0 = 1;
+	bool lin_stress = true;
 
 	void print()
 	{
@@ -118,6 +119,7 @@ typedef struct {
 		cout << "calc_ctan_lin : " << calc_ctan_lin << endl;
 		cout << "use_A0 : " << use_A0 << endl;
 		cout << "its_with_A0 : " << its_with_A0 << endl;
+		cout << "lin_stress : " << lin_stress << endl;
 	}
 
 } micropp_params_t;
@@ -198,6 +200,8 @@ class micropp {
 		const double nr_max_tol;
 		const double nr_rel_tol;
 		const bool calc_ctan_lin_flag;
+
+		const bool lin_stress;
 
 		int num_no_coupling = 0;
 		int num_one_way = 0;

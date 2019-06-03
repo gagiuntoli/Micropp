@@ -150,7 +150,7 @@ void micropp<tdim>::homogenize_task(int igp)
 		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	}
 
-	if (gp_ptr->coupling == ONE_WAY) {
+	if (lin_stress) {
 
 		memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 		for (int i = 0; i < nvoi; ++i) {
@@ -160,7 +160,7 @@ void micropp<tdim>::homogenize_task(int igp)
 			}
 		}
 
-	} else if (gp_ptr->coupling == FULL) {
+	} else {
 
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->stress, gp_ptr->vars_n);
 		filter(gp_ptr->stress, nvoi, FILTER_REL_TOL);

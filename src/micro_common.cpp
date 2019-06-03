@@ -59,7 +59,8 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	calc_ctan_lin_flag(params.calc_ctan_lin),
 
 	use_A0(params.use_A0),
-	its_with_A0(params.its_with_A0)
+	its_with_A0(params.its_with_A0),
+	lin_stress(params.lin_stress)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -134,9 +135,9 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 	if (calc_ctan_lin_flag) {
 		calc_ctan_lin();
-	} else if ((num_one_way + num_full) > 0) {
-		cout << "WARNING: Linear tangent matrix is not being calculated"
-			"and it is needed for the <one-way> & <full> coupling"
+	} else if (lin_stress) {
+		cout    << "WARNING: Linear tangent matrix is not being calculated"
+			"and it is needed for the linear stress calculation"
 			<< endl;
 	}
 
