@@ -84,6 +84,11 @@ void get_dev_tensor(const double tensor[6], double tensor_dev[6])
 // ELASTIC MATERIAL
 
 
+void material_elastic::init_vars(double *vars_old) const
+{
+}
+
+
 void material_elastic::get_stress(const double *eps, double *stress,
 				  const double *history_params) const
 {
@@ -131,6 +136,11 @@ void material_elastic::print() const
 
 
 // PLASTIC MATERIAL
+
+
+void material_plastic::init_vars(double *vars_old) const
+{
+}
 
 
 bool material_plastic::plastic_law(const double eps[6],
@@ -243,12 +253,71 @@ void material_plastic::print() const
 }
 
 
-// DAMAGE MATERIAL
+/*
+ * DAMAGE MATERIAL
+ */
 
 
-bool material_damage::damage_law(const double *eps, const double e_old,
-				 const double D_old, double *_e, 
-				 double *_D, double *stress) const
+void material_damage::init_vars(double *vars_old) const
+{
+	if (vars_old != nullptr) {
+		const double Ey = 10.0e5;
+		vars_old[0] = Ey / sqrt(E);
+		vars_old[1] = 0.0;
+	}
+}
+
+
+double material_damage::hardening_modulus(const double r)
+{
+
+    const double Ey = 10.0e4;
+    const double inf_Ey = 1.1 * Ey;
+
+    const double H0 = 10.0;
+    const double H1 = 20.0;
+
+    const double r0 = Ey / sqrt(E);
+    const double q0 = r0; // strain_variable_init
+    const double q1 = inf_Ey / sqrt(E); // stress_variable_inf
+    const double r1 = r0 + (q1 - q0) / H0;
+
+    if (r < r0) {
+	    return 0.;
+    } else if (r >= r0 && r < r1) {
+	    return H0;
+    } else {
+	    return H1;
+    }
+}
+
+
+double material_damage::hardening_law(const double r) const
+{
+    const double Ey = 10.0e4;
+    const double inf_Ey = 1.1 * Ey;
+
+    const double H0 = 10.0;
+    const double H1 = 20.0;
+
+    const double r0 = Ey / sqrt(E);
+    const double q0 = r0; // strain_variable_init
+    const double q1 = inf_Ey / sqrt(E); // stress_variable_inf
+    const double r1 = r0 + (q1 - q0) / H0;
+
+    if (r < r0) {
+	    return 0.0;
+    } else if (r >= r0 && r < r1) {
+	    return q0 + H0 * (r - r0);
+    } else {
+	    return q1 + H1 * (r - r1);
+    }
+}
+
+
+bool material_damage::damage_law(const double *eps, const double r_old,
+				 const double D_old, double *_r, 
+				 double *_D, double *_stress) const
 {
 	/*
 	 * Calculates the linear stree <stress>, and <e> and <D> using the
@@ -256,17 +325,46 @@ bool material_damage::damage_law(const double *eps, const double e_old,
 	 *
 	 * e_old = vars_old[0]
 	 *
+	 * The function returns the real stress if stress != nullptr
+	 * if not returns D
+	 *
 	 */
+	double stress_local[6] = { 0.0 };
+
+	double *stress_ptr = (_stress != nullptr) ? _stress : stress_local;
 
 	// First suppose we are in linear zone
 	for (int i = 0; i < 3; ++i)
-		stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
+		stress_ptr[i] = lambda * (eps[0] + eps[1] + eps[2]) \
 			    + 2 * mu * eps[i];
 
 	for (int i = 3; i < 6; ++i)
-		stress[i] = mu * eps[i];
+		stress_ptr[i] = mu * eps[i];
 
+        double product = 0.0;
+	for (int i = 0; i < 6; ++i) {
+		product += stress_ptr[i] * eps[i];
+	}
+	const double r = (product >= 0) ? sqrt(product) : 0;
+
+	const double Ey = 10.0e4;
+	double r_old_a = (r_old < Ey / sqrt(E)) ? Ey / sqrt(E) : r_old;
+        //cout << r << " " << r_old_a << endl;
+
+	if (r <= r_old_a) {
+		// Elastic
+		*_r = r_old_a;
+		*_D = D_old;
+		return false;
+	} else {
+		// Inelastic (Damage)
+		const double q = hardening_law(r);
+		*_r = r;
+		*_D = 1. - q / r;
+		return true;
+	}
 	// Now check if we have entered in non-linear zone
+	/*
 	double e = 0.0;
 	for (int i = 0; i < 3; ++i)
 		e += stress[i] * stress[i];
@@ -285,6 +383,8 @@ bool material_damage::damage_law(const double *eps, const double e_old,
 		*_D = D;
 
 	return ((e < 1.0) ? false : true);
+	*/
+	return true;
 }
 
 
@@ -298,10 +398,10 @@ void material_damage::get_stress(const double *eps, double *stress,
 	 *
 	 */
 
-	const double e_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
+	const double r_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
 	const double D_old = (vars_old != nullptr) ? vars_old[1] : 0.0;
-	double D;
-	damage_law(eps, e_old, D_old, nullptr, &D, stress);
+	double D, r;
+	damage_law(eps, r_old, D_old, &r, &D, stress);
 
 	for (int i = 0; i < 6; ++i)
 		stress[i] *= (1 - D);
@@ -312,6 +412,29 @@ void material_damage::get_ctan(const double *eps, double *ctan,
 			       const double *vars_old) const
 {
 	apply_perturbation(eps, ctan, vars_old);
+
+	/*
+	const double e_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
+	const double D_old = (vars_old != nullptr) ? vars_old[1] : 0.0;
+	double D;
+	damage_law(eps, e_old, D_old, nullptr, &D, nullptr);
+
+	// C = lambda * (1x1) + 2 mu I
+	memset(ctan, 0, 6 * 6 * sizeof(double));
+
+	for (int i = 0; i < 3; ++i)
+		for (int j = 0; j < 3; ++j)
+			ctan[i * 6 + j] += lambda;
+
+	for (int i = 0; i < 3; ++i)
+		ctan[i * 6 + i] += 2 * mu;
+
+	for (int i = 3; i < 6; ++i)
+		ctan[i * 6 + i] = mu;
+
+	for (int i = 0; i < 36; ++i)
+		ctan[i] *= (1 - D);
+		*/
 }
 
 
@@ -322,14 +445,14 @@ bool material_damage::evolute(const double *eps, const double *vars_old,
 	 * returns <true> if the material has entered in non-linear range, 
 	 * <false> if not.
 	 */
-	const double e_old = (vars_old) ? vars_old[0] : 0;
+	const double r_old = (vars_old) ? vars_old[0] : 0;
 	const double D_old = (vars_old) ? vars_old[1] : 0;
-	double *e_new = (vars_new) ? &(vars_new[0]) : nullptr;
+	double *r_new = (vars_new) ? &(vars_new[0]) : nullptr;
 	double *D_new = (vars_new) ? &(vars_new[1]) : nullptr;
 
 	double stress[6];
 
-	bool non_linear = damage_law(eps, e_old, D_old, e_new, D_new, stress);
+	bool non_linear = damage_law(eps, r_old, D_old, r_new, D_new, stress);
 
 	return non_linear;
 }
