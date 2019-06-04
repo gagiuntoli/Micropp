@@ -58,6 +58,7 @@ int main (int argc, char *argv[])
 	//material_set(&mic_params.materials[0], 0, 1.0e5, 0.3, 0.0, 0.0, 1.0e2);
 	//material_set(&mic_params.materials[1], 2, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
 	//material_set(&mic_params.materials[2], 0, 1.0e3, 0.3, 0.0, 0.0, 1.0e2);
+	mic_params.lin_stress = false;
 
 	mic_params.print();
 
