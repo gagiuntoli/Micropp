@@ -376,7 +376,11 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		ey * dy + dy / 2.,
 		ez * dz + dz / 2. }; // 2D -> dz = 0
 
-	if (micro_type == MIC_SPHERE) { // sphere in the center
+	if (micro_type == MIC_HOMOGENEOUS) { // Only one material (mat[0])
+
+		return 0;
+
+	} else if (micro_type == MIC_SPHERE) { // sphere in the center
 
 		const double rad = special_param;
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
@@ -520,19 +524,32 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		const double width_flat_layer = 0.02;
 		const double width_cili_layer = 0.02;
 
-		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
+		const double cen_1[3] = { lx * .25, ly * .75, -1000.0 };
 		double tmp_1 = 0.0;
 		for (int i = 0; i < 2; ++i) {
 			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
 		}
 
-		const double cen_2[3] = { lx / 2., ly * .25, lz / 2. };
+		const double cen_2[3] = { -1000.0, ly * .25, lz * .25 };
 		double tmp_2 = 0.0;
 		for (int i = 1; i < 3; ++i) {
 			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
 		}
 
-		if (tmp_1 < pow(rad_cilinder, 2) || tmp_2 < pow(rad_cilinder, 2)) {
+		const double cen_3[3] = { lx * .75, ly * .75, -1000.0 };
+		double tmp_3 = 0.0;
+		for (int i = 0; i < 2; ++i) {
+			tmp_3 += (cen_3[i] - coor[i]) * (cen_3[i] - coor[i]);
+		}
+
+		const double cen_4[3] = { -1000.0, ly * .25, lz * .75 };
+		double tmp_4 = 0.0;
+		for (int i = 1; i < 3; ++i) {
+			tmp_4 += (cen_4[i] - coor[i]) * (cen_4[i] - coor[i]);
+		}
+
+		if (tmp_1 < pow(rad_cilinder, 2) || tmp_2 < pow(rad_cilinder, 2) ||
+		    tmp_3 < pow(rad_cilinder, 2) || tmp_4 < pow(rad_cilinder, 2)) {
 
 			return 0;
 
@@ -543,6 +560,16 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		} else if ((tmp_2 < pow(rad_cilinder + width_cili_layer, 2)) &&
 			   (tmp_2 > pow(rad_cilinder, 2))) {
+
+			return 1;
+
+		} else if ((tmp_3 < pow(rad_cilinder + width_cili_layer, 2)) &&
+			   (tmp_3 > pow(rad_cilinder, 2))) {
+
+			return 1;
+
+		} else if ((tmp_4 < pow(rad_cilinder + width_cili_layer, 2)) &&
+			   (tmp_4 > pow(rad_cilinder, 2))) {
 
 			return 1;
 
