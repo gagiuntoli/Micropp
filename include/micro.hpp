@@ -126,6 +126,7 @@ typedef struct {
 
 
 enum {
+	MIC_HOMOGENEOUS,
        	MIC_SPHERE,
        	MIC_LAYER_Y,
        	MIC_CILI_FIB_Z,
@@ -138,7 +139,7 @@ enum {
 };
 
 /*
- *
+ * MIC_HOMOGENEOUS : Only one material (mat[0])
  *
  * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the 
  * perimeter and a flat layer between the fibers.
