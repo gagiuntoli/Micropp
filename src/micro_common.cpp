@@ -170,6 +170,10 @@ micropp<tdim>::~micropp()
 		free(A0);
 	}
 
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
+		delete material_list[i];
+	}
+
 	delete [] gp_list;
 }
 
