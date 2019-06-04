@@ -295,10 +295,10 @@ double material_damage::hardening_modulus(const double r)
 double material_damage::hardening_law(const double r) const
 {
     const double Ey = 10.0e4;
-    const double inf_Ey = 1.1 * Ey;
+    const double inf_Ey = 10. * Ey;
 
     const double H0 = 10.0;
-    const double H1 = 20.0;
+    const double H1 = 5.0;
 
     const double r0 = Ey / sqrt(E);
     const double q0 = r0; // strain_variable_init
@@ -405,6 +405,7 @@ void material_damage::get_stress(const double *eps, double *stress,
 
 	for (int i = 0; i < 6; ++i)
 		stress[i] *= (1 - D);
+	//cout << D << endl;
 }
 
 
@@ -450,9 +451,7 @@ bool material_damage::evolute(const double *eps, const double *vars_old,
 	double *r_new = (vars_new) ? &(vars_new[0]) : nullptr;
 	double *D_new = (vars_new) ? &(vars_new[1]) : nullptr;
 
-	double stress[6];
-
-	bool non_linear = damage_law(eps, r_old, D_old, r_new, D_new, stress);
+	bool non_linear = damage_law(eps, r_old, D_old, r_new, D_new, nullptr);
 
 	return non_linear;
 }
