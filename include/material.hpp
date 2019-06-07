@@ -39,6 +39,8 @@ struct material_t : public material_base {
 
 	static material_t *make_material(const struct material_base material);
 
+	virtual void init_vars(double *vars_old) const = 0;
+
 	virtual void get_stress(const double *eps, double *stress,
 				const double *history_params) const = 0;
 
@@ -81,6 +83,8 @@ class material_elastic : public material_t {
 			Xt = -1.0;
 		};
 
+		void init_vars(double *vars_old) const;
+
 		void get_stress(const double *eps, double *stress,
 				const double *history_params) const;
 
@@ -109,6 +113,8 @@ class material_plastic : public material_t {
 			Sy = _Sy;
 			Xt = -1.0;
 		};
+
+		void init_vars(double *vars_old) const;
 
 		void get_stress(const double *eps, double *stress,
 				const double *history_params) const;
@@ -145,6 +151,8 @@ class material_damage : public material_t {
 			Xt = _Xt;
 		};
 
+		void init_vars(double *vars_old) const;
+
 		void get_stress(const double *eps, double *stress,
 				const double *history_params) const;
 
@@ -157,6 +165,8 @@ class material_damage : public material_t {
 		void print() const;
 
 	private:
+		double hardening_modulus(const double r);
+		double hardening_law(const double r) const;
 		bool damage_law(const double *eps, const double e_old,
 				const double D_old, double *_e, double *_D,
 				double *stress_lin) const;
