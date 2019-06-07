@@ -136,13 +136,8 @@ program test3d_3
 
         write(*,*) ""
 
-        !if (t < 10) then
-        !        write(filename, "(A16,I1)") "micropp_fortran_", t
-        !else if (t >= 10 .and. t < 100) then
-        !        write(filename, "(A16,I2)") "micropp_fortran_", t
-        !end if
-        !print *, filename
-        !call micro%output(0, trim(filename));
+        !write(filename, "(A,I1)") "micropp_fortran_", t
+        !call micropp3_output(micro, 0, trim(filename))
 
         end do
 

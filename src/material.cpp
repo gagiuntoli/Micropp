@@ -349,7 +349,6 @@ bool material_damage::damage_law(const double *eps, const double r_old,
 
 	const double Ey = 10.0e4;
 	double r_old_a = (r_old < Ey / sqrt(E)) ? Ey / sqrt(E) : r_old;
-        //cout << r << " " << r_old_a << endl;
 
 	if (r <= r_old_a) {
 		// Elastic
@@ -363,27 +362,6 @@ bool material_damage::damage_law(const double *eps, const double r_old,
 		*_D = 1. - q / r;
 		return true;
 	}
-	// Now check if we have entered in non-linear zone
-	/*
-	double e = 0.0;
-	for (int i = 0; i < 3; ++i)
-		e += stress[i] * stress[i];
-	e /= (Xt * Xt);
-	e = sqrt(e);
-
-	e = max(e_old, e);
-
-	double D = (e < 1.0) ? 0.0 : (1 - exp(1 - e));
-	D = min(D, D_old + 0.02);
-
-	if (_e != nullptr)
-		*_e = e;
-
-	if (_D != nullptr)
-		*_D = D;
-
-	return ((e < 1.0) ? false : true);
-	*/
 	return true;
 }
 
@@ -413,29 +391,6 @@ void material_damage::get_ctan(const double *eps, double *ctan,
 			       const double *vars_old) const
 {
 	apply_perturbation(eps, ctan, vars_old);
-
-	/*
-	const double e_old = (vars_old != nullptr) ? vars_old[0] : 0.0;
-	const double D_old = (vars_old != nullptr) ? vars_old[1] : 0.0;
-	double D;
-	damage_law(eps, e_old, D_old, nullptr, &D, nullptr);
-
-	// C = lambda * (1x1) + 2 mu I
-	memset(ctan, 0, 6 * 6 * sizeof(double));
-
-	for (int i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
-			ctan[i * 6 + j] += lambda;
-
-	for (int i = 0; i < 3; ++i)
-		ctan[i * 6 + i] += 2 * mu;
-
-	for (int i = 3; i < 6; ++i)
-		ctan[i * 6 + i] = mu;
-
-	for (int i = 0; i < 36; ++i)
-		ctan[i] *= (1 - D);
-		*/
 }
 
 
