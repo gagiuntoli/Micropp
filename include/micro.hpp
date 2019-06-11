@@ -316,6 +316,9 @@ class micropp {
 
 		void output(int gp_id, const char *filename);
 
+		void output2(const int gp_id, const int elem_global,
+			     const int time_step);
+
 		void update_vars();
 
 		void print_info() const;

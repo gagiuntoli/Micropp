@@ -134,8 +134,18 @@ module libmicropp
        implicit none
        type(micropp3), intent(inout) :: this
        integer(c_int), intent(in), value :: gp_id
-       character(kind=c_char), intent(in) :: filename(128)
+       character(kind=c_char), intent(in) :: filename(129)
      end subroutine micropp3_output
+
+     subroutine micropp3_output2(this, gp_id, elem_global, time_step) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int, c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+       integer(c_int), intent(in), value :: gp_id
+       integer(c_int), intent(in), value :: elem_global
+       integer(c_int), intent(in), value :: time_step
+     end subroutine micropp3_output2
 
      subroutine micropp3_print_info(this) bind(C)
        import micropp3

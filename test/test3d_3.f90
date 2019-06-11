@@ -137,7 +137,7 @@ program test3d_3
         write(*,*) ""
 
         !write(filename, "(A,I1)") "micropp_fortran_", t
-        !call micropp3_output(micro, 0, trim(filename))
+        call micropp3_output2(micro, 0, 1234, t) 
 
         end do
 

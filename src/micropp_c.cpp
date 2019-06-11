@@ -111,10 +111,17 @@ extern "C" {
 	}
 
 	void micropp3_output(micropp3 *self, const int gp_id,
-	                        const char *filename)
+			     const char *filename)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->output(gp_id, filename);
+	}
+
+	void micropp3_output2(micropp3 *self, const int gp_id,
+			      const int elem_global, const int time_step)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->output2(gp_id, elem_global, time_step);
 	}
 
 	void micropp3_print_info(micropp3 *self)

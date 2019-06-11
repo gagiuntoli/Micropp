@@ -43,6 +43,26 @@ void micropp<tdim>::output(int gp_id, const char *filename)
 
 
 template <int tdim>
+void micropp<tdim>::output2(const int gp_id, const int elem_global,
+			    const int time_step)
+{
+	INST_START;
+
+	assert(gp_id < ngp);
+	assert(gp_id >= 0);
+
+	char filename[128];
+	std::stringstream filename_stream;
+	filename_stream << "micropp-" << elem_global << "-" << time_step;
+	std::string file_name_string = filename_stream.str();
+	strcpy(filename, file_name_string.c_str());
+
+	calc_fields(gp_list[gp_id].u_k, gp_list[gp_id].vars_n);
+	write_vtu(gp_list[gp_id].u_k, gp_list[gp_id].vars_n, filename);
+}
+
+
+template <int tdim>
 void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 {
 	std::stringstream fname_vtu_s;
