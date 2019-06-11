@@ -1,21 +1,21 @@
 #!/bin/bash
 
-#SBATCH --job-name=MICROMP
+#SBATCH --job-name=OPENMP
 #SBATCH --workdir=.
-#SBATCH --output=omp_%j.out
-#SBATCH --error=omp_%j.err
+#SBATCH --output=%j.out
+#SBATCH --error=%j.err
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=48
 #SBATCH --exclusive
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 ##SBATCH --qos=bsc_case
 #SBATCH --qos=debug
 
-N=25
+N=30
 NGP=480
 STEPS=2
 
-procs=(6 12 24 48 96)
+procs=(65 70 80 85 90 95 100)
 
 rm -f times-${N}-${NGP}-${STEPS}.txt
 
