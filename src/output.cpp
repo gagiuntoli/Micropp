@@ -272,13 +272,13 @@ void micropp<tdim>::write_restart() const
 	strcpy(filename, file_name_string.c_str());
 
 	ofstream file;
-	file.open (filename, ios::out | ios::app | ios::binary);
+	//file.open (filename, ios::out | ios::binary);
+	file.open (filename, ios::out);
 	for (int igp = 0; igp < ngp; ++igp) {
 		gp_list[igp].write_restart(file);
 	}
 	file.close();
 }
-
 
 
 template class micropp<3>;

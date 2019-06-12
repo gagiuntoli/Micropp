@@ -35,20 +35,13 @@ int main (int argc, char *argv[])
 {
 	// Execution ./test3d_1 n [print] [steps]
 	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
+		cerr << "Usage: " << argv[0] << " n [steps]" << endl;
 		return(1);
 	}
 
 	const int dir = 1;
 	const int n = atoi(argv[1]);
-
-	const int print = (argc > 2) ? atoi(argv[2]) : 0;
-	if (print < 0 || print > 1) {
-		cerr << "Error in [print] argument, it only can be 0 or 1" << endl;
-		return(1);
-	}
-
-	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
+	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
 
 	ofstream file;
 	file.open("result.dat");
@@ -59,12 +52,12 @@ int main (int argc, char *argv[])
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC_SPHERE;
-	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.type = MIC_HOMOGENEOUS;
+	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	mic_params.calc_ctan_lin = true;
-	mic_params.lin_stress = true;
+	mic_params.calc_ctan_lin = false;
+	mic_params.lin_stress = false;
 
 	mic_params.print();
 
@@ -124,12 +117,6 @@ int main (int argc, char *argv[])
 		file    << setw(14)
 			<< eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
-
-		if (print) {
-			char filename[128];
-			snprintf(filename, 128, "micropp_%d", t);
-			micro.output (0, filename);
-		}
 
 		micro.write_restart();
 	}
