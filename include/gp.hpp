@@ -20,10 +20,12 @@
  */
 
 
+#include <iostream>
 #include <fstream>
 #include <cassert>
 #include <cstdlib>
 
+using namespace std;
 
 template <int dim>
 class gp_t {
@@ -103,10 +105,25 @@ class gp_t {
 
 	void write_restart(std::ofstream& file)
 	{
+		file.write((char *)&allocated, sizeof(bool));
+		file.write((char *)&nvars, sizeof(int));
+		cout << "write allocated = " << allocated << endl;
+		cout << "write nvars = " << nvars << endl;
 		if (allocated) {
-			//std::fwrite(vars_n, sizeof(double), nvars, file);
-			file.write(reinterpret_cast<const char*>(vars_n),
-				   std::streamsize(nvars * sizeof(double)));
+			file.write((char *)vars_n, nvars * sizeof(double));
+		}
+	}
+
+	void read_restart(std::ifstream& file)
+	{
+		file.read((char *)&allocated, sizeof(bool));
+		file.read((char *)&nvars, sizeof(int));
+		cout << "read allocated = " << allocated << endl;
+		cout << "read nvars = " << nvars << endl;
+		if (allocated) {
+			vars_n = (double *) calloc(nvars, sizeof(double));
+			vars_k = (double *) calloc(nvars, sizeof(double));
+			file.read((char *)vars_n, nvars * sizeof(double));
 		}
 	}
 };

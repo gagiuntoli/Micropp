@@ -254,28 +254,54 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 
 
 template <int tdim>
-void micropp<tdim>::write_restart() const
+void micropp<tdim>::write_restart(const int restart_id) const
 {
 	/*
 	 *
 	 * micropp-restart-<mpi_rank>-<#restart>.dat
+	 *
 	 */
 	INST_START;
 
-	int num_restart = 0;
-
 	char filename[128];
 	std::stringstream filename_stream;
-	filename_stream << "micropp-restart-" << mpi_rank << "-" << num_restart
+	filename_stream << "micropp-restart-" << mpi_rank << "-" << restart_id
 	         	<< ".bin";
 	std::string file_name_string = filename_stream.str();
 	strcpy(filename, file_name_string.c_str());
 
 	ofstream file;
-	//file.open (filename, ios::out | ios::binary);
-	file.open (filename, ios::out);
+	file.open(filename, ios::out | ios::binary);
+	//file.open (filename, ios::out);
 	for (int igp = 0; igp < ngp; ++igp) {
 		gp_list[igp].write_restart(file);
+	}
+	file.close();
+}
+
+
+template <int tdim>
+void micropp<tdim>::read_restart(const int restart_id) const
+{
+	/*
+	 *
+	 * micropp-restart-<mpi_rank>-<#restart>.dat
+	 *
+	 */
+	INST_START;
+
+	char filename[128];
+	std::stringstream filename_stream;
+	filename_stream << "micropp-restart-" << mpi_rank << "-" << restart_id
+	         	<< ".bin";
+	std::string file_name_string = filename_stream.str();
+	strcpy(filename, file_name_string.c_str());
+
+	ifstream file;
+	file.open(filename, ios::in | ios::binary);
+	//file.open (filename, ios::out);
+	for (int igp = 0; igp < ngp; ++igp) {
+		gp_list[igp].read_restart(file);
 	}
 	file.close();
 }

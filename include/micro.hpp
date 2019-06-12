@@ -321,9 +321,9 @@ class micropp {
 
 		void update_vars();
 
-		void write_restart() const;
+		void write_restart(const int restart_id) const;
 
-		void read_restart() const;
+		void read_restart(const int restart_id) const;
 
 		void print_info() const;
 

@@ -41,6 +41,11 @@ int main (int argc, char *argv[])
 	const int dir = 1;
 	const int n = atoi(argv[1]);
 	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
+	const double t2 = 1.0;
+	const double t1 = t2 / 2.0;
+	const double dt = t2 / time_steps;
+	const double eps_max = 1.0e-1;
+	double time = 0.0;
 
 	ofstream file;
 	file.open("result.dat");
@@ -71,7 +76,11 @@ int main (int argc, char *argv[])
 
 		cout << "time step = " << t << endl;
 
-		eps[dir] += D_EPS;
+		if (time < t1) {
+			eps[dir] = eps_max * time;
+		} else {
+			eps[dir] = eps_max * (t2 - time);
+		}
 
 		micro.set_strain(0, eps);
 		micro.homogenize();
@@ -104,6 +113,8 @@ int main (int argc, char *argv[])
 		file    << setw(14)
 			<< eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
+
+		time += dt;
 	}
 
 	file.close();
