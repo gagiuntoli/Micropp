@@ -20,6 +20,7 @@
  */
 
 
+#include <fstream>
 #include <cassert>
 #include <cstdlib>
 
@@ -42,6 +43,7 @@ class gp_t {
 	double *vars_k;
 	double *u_n;
 	double *u_k;
+	int nvars;
 
 	long int cost;
 	bool converged;
@@ -73,6 +75,8 @@ class gp_t {
 	{
 		assert(!allocated);
 
+		this->nvars = nvars;
+
 		vars_n = (double *) calloc(nvars, sizeof(double));
 		vars_k = (double *) calloc(nvars, sizeof(double));
 
@@ -95,5 +99,14 @@ class gp_t {
 
 		cost = 0;
 		subiterated = false;
+	}
+
+	void write_restart(std::ofstream& file)
+	{
+		if (allocated) {
+			//std::fwrite(vars_n, sizeof(double), nvars, file);
+			file.write(reinterpret_cast<const char*>(vars_n),
+				   std::streamsize(nvars * sizeof(double)));
+		}
 	}
 };

@@ -69,7 +69,7 @@ void micropp<tdim>::homogenize()
 			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 			for (int i = 0; i < nvoi; ++i) {
 				for (int j = 0; j < nvoi; ++j) {
-					gp_ptr->stress[i] += 
+					gp_ptr->stress[i] +=
 						ctan_lin[i * nvoi + j] *
 						gp_ptr->strain[j];
 				}

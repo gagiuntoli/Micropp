@@ -362,7 +362,6 @@ bool material_damage::damage_law(const double *eps, const double r_old,
 		*_D = 1. - q / r;
 		return true;
 	}
-	return true;
 }
 
 

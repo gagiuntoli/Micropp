@@ -141,7 +141,7 @@ enum {
 /*
  * MIC_HOMOGENEOUS : Only one material (mat[0])
  *
- * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the 
+ * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the
  * perimeter and a flat layer between the fibers.
  *
  */
@@ -320,6 +320,10 @@ class micropp {
 			     const int time_step);
 
 		void update_vars();
+
+		void write_restart() const;
+
+		void read_restart() const;
 
 		void print_info() const;
 
