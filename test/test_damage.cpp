@@ -38,12 +38,22 @@ int main (int argc, char *argv[])
 		return(1);
 	}
 
-	const int dir = 1;
 	const int n = atoi(argv[1]);
-	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
-	const double t2 = 1.0;
-	const double t1 = t2 / 2.0;
-	const double dt = t2 / time_steps;
+
+	const int print = (argc > 2) ? atoi(argv[2]) : 0;
+	if (print < 0 || print > 1) {
+		cerr << "Error in [print] argument, it only can be 0 or 1" << endl;
+		return(1);
+	}
+
+	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
+
+	const int dir = 1;
+	const double t4 = 1.0;
+	const double t1 = (1.0 / 4.0) * t4;
+	const double t2 = (2.0 / 4.0) * t4;
+	const double t3 = (3.0 / 4.0) * t4;
+	const double dt = t4 / time_steps;
 	const double eps_max = 1.0e-1;
 	double time = 0.0;
 
@@ -77,9 +87,13 @@ int main (int argc, char *argv[])
 		cout << "time step = " << t << endl;
 
 		if (time < t1) {
-			eps[dir] = eps_max * time;
+			eps[dir] = 0.5 * eps_max * time;
+		} else if (time >= t1 && time < t2) {
+			eps[dir] = 0.5 * eps_max * (t2 - time);
+		} else if (time >= t2 && time < t3) {
+			eps[dir] = eps_max * (time - t2);
 		} else {
-			eps[dir] = eps_max * (t2 - time);
+			eps[dir] = eps_max * (t4 - time);
 		}
 
 		micro.set_strain(0, eps);
@@ -92,7 +106,12 @@ int main (int argc, char *argv[])
 
 		char filename[128];
 		snprintf(filename, 128, "test_damage_%d", t);
-		micro.output(0, filename);
+
+		if (print) {
+			char filename[128];
+			snprintf(filename, 128, "micropp_%d", t);
+			micro.output (0, filename);
+		}
 
 		micro.update_vars();
 
