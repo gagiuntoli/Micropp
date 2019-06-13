@@ -137,10 +137,12 @@ program test3d_3
         write(*,*) ""
 
         !write(filename, "(A,I1)") "micropp_fortran_", t
-        call micropp3_output2(micro, 0, 1234, t) 
+        call micropp3_output2(micro, 0, 1234, t)
 
         end do
 
+        call micropp3_write_restart(micro, 16)
+        call micropp3_read_restart(micro, 16)
         call micropp3_free(micro)
 
 end program test3d_3

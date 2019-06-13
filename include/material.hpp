@@ -165,7 +165,6 @@ class material_damage : public material_t {
 		void print() const;
 
 	private:
-		double hardening_modulus(const double r);
 		double hardening_law(const double r) const;
 		bool damage_law(const double *eps, const double e_old,
 				const double D_old, double *_e, double *_D,

@@ -28,7 +28,7 @@
 material_t *material_t::make_material(const struct material_base material)
 {
 	/*
-	 * This fabric creates the corresponding subclass according to the 
+	 * This fabric creates the corresponding subclass according to the
 	 * data members of <material>. This last is a "struct" than can be
 	 * manage also from C/Fortran easily and that is why we passed micropp
 	 * constructor the data in this form.
@@ -151,7 +151,7 @@ bool material_plastic::plastic_law(const double eps[6],
 				   double _s_trial[6]) const
 {
 	/*
-	 * Calculates _dl, _normal and _s_trial to used in the other plastic 
+	 * Calculates _dl, _normal and _s_trial to used in the other plastic
 	 * material functions. Returns <true> if it enters in non-linear zone
 	 * <false> if not.
 	 */
@@ -268,30 +268,6 @@ void material_damage::init_vars(double *vars_old) const
 }
 
 
-double material_damage::hardening_modulus(const double r)
-{
-
-    const double Ey = 10.0e4;
-    const double inf_Ey = 1.1 * Ey;
-
-    const double H0 = 10.0;
-    const double H1 = 20.0;
-
-    const double r0 = Ey / sqrt(E);
-    const double q0 = r0; // strain_variable_init
-    const double q1 = inf_Ey / sqrt(E); // stress_variable_inf
-    const double r1 = r0 + (q1 - q0) / H0;
-
-    if (r < r0) {
-	    return 0.;
-    } else if (r >= r0 && r < r1) {
-	    return H0;
-    } else {
-	    return H1;
-    }
-}
-
-
 double material_damage::hardening_law(const double r) const
 {
     const double Ey = 10.0e4;
@@ -397,7 +373,7 @@ bool material_damage::evolute(const double *eps, const double *vars_old,
 			      double *vars_new) const
 {
 	/* Assign new values to <vars_new> according to <eps> and <vars_old>.
-	 * returns <true> if the material has entered in non-linear range, 
+	 * returns <true> if the material has entered in non-linear range,
 	 * <false> if not.
 	 */
 	const double r_old = (vars_old) ? vars_old[0] : 0;

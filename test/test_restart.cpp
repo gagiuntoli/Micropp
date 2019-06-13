@@ -29,7 +29,26 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-4
+
+double eps_vs_t(double time, double t_final)
+{
+	double eps;
+	const double eps_max = 1.0e-1;
+	const double t1 = (1.0 / 4.0) * t_final;
+	const double t2 = (2.0 / 4.0) * t_final;
+	const double t3 = (3.0 / 4.0) * t_final;
+	if (time < t1) {
+		eps = 0.5 * eps_max * time;
+	} else if (time >= t1 && time < t2) {
+		eps = 0.5 * eps_max * (t2 - time);
+	} else if (time >= t2 && time < t3) {
+		eps = eps_max * (time - t2);
+	} else {
+		eps = eps_max * (t_final - time);
+	}
+	return eps;
+}
+
 
 int main (int argc, char *argv[])
 {
@@ -42,10 +61,8 @@ int main (int argc, char *argv[])
 	const int dir = 1;
 	const int n = atoi(argv[1]);
 	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
-	const double t2 = 1.0;
-	const double t1 = t2 / 2.0;
-	const double dt = t2 / (2 * time_steps);
-	const double eps_max = 1.0e-1;
+	const double t_final = 1.0;
+	const double dt = t_final / time_steps;
 	double time = 0.0;
 
 	ofstream file;
@@ -57,9 +74,9 @@ int main (int argc, char *argv[])
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC_HOMOGENEOUS;
-	material_set(&mic_params.materials[0], 1, 1.0e7, 0.3, 1.0e3, 1.0e5, 0.0);
-	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.type = MIC_CILI_FIB_Z;
+	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.7e3, 1.0e5, 0.0);
+	material_set(&mic_params.materials[1], 0, 2.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	mic_params.calc_ctan_lin = false;
 	mic_params.lin_stress = false;
@@ -75,15 +92,11 @@ int main (int argc, char *argv[])
 
 	cout << scientific;
 
-	for (int t = 0; t < time_steps; ++t) {
+	for (int t = 0; t < time_steps / 2; ++t) {
 
 		cout << "time step = " << t << endl;
 
-		if (time < t1) {
-			eps[dir] = eps_max * time;
-		} else {
-			eps[dir] = eps_max * (t2 - time);
-		}
+		eps[dir] = eps_vs_t(time, t_final);
 
 		micro->set_strain(0, eps);
 		micro->homogenize();
@@ -135,19 +148,15 @@ int main (int argc, char *argv[])
 	micro = new micropp<3>(mic_params);
 	micro->print_info();
 
-	//micro->read_restart(12);
+	micro->read_restart(12);
 
 	cout << scientific;
 
-	for (int t = 0; t < time_steps; ++t) {
+	for (int t = time_steps / 2; t < time_steps; ++t) {
 
 		cout << "time step = " << t << endl;
 
-		if (time < t1) {
-			eps[dir] = eps_max * time;
-		} else {
-			eps[dir] = eps_max * (t2 - time);
-		}
+		eps[dir] = eps_vs_t(time, t_final);
 
 		micro->set_strain(0, eps);
 		micro->homogenize();

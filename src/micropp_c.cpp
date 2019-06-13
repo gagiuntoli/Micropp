@@ -142,4 +142,15 @@ extern "C" {
 		return ptr->get_non_linear_gps();
 	}
 
+	void micropp3_write_restart(const micropp3 *self, const int restart_id)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->write_restart(restart_id);
+	}
+
+	void micropp3_read_restart(const micropp3 *self, const int restart_id)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->read_restart(restart_id);
+	}
 }
