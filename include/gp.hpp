@@ -20,9 +20,12 @@
  */
 
 
+#include <iostream>
+#include <fstream>
 #include <cassert>
 #include <cstdlib>
 
+using namespace std;
 
 template <int dim>
 class gp_t {
@@ -42,6 +45,8 @@ class gp_t {
 	double *vars_k;
 	double *u_n;
 	double *u_k;
+	int nvars;
+	int nndim;
 
 	long int cost;
 	bool converged;
@@ -69,7 +74,7 @@ class gp_t {
 		}
 	}
 
-	void allocate(const int nvars)
+	void allocate()
 	{
 		assert(!allocated);
 
@@ -95,5 +100,26 @@ class gp_t {
 
 		cost = 0;
 		subiterated = false;
+	}
+
+	void write_restart(std::ofstream& file)
+	{
+		file.write((char *)&allocated, sizeof(bool));
+		if (allocated) {
+			file.write((char *)vars_n, nvars * sizeof(double));
+			file.write((char *)u_n, nndim * sizeof(double));
+		}
+	}
+
+	void read_restart(std::ifstream& file)
+	{
+		file.read((char *)&allocated, sizeof(bool));
+		if (allocated) {
+			vars_n = (double *)calloc(nvars, sizeof(double));
+			vars_k = (double *)calloc(nvars, sizeof(double));
+
+			file.read((char *)vars_n, nvars * sizeof(double));
+			file.read((char *)u_n, nndim * sizeof(double));
+		}
 	}
 };

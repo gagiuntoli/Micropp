@@ -52,22 +52,15 @@ double eps_vs_t(double time, double t_final)
 
 int main (int argc, char *argv[])
 {
+	// Execution ./test3d_1 n [print] [steps]
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [steps]" << endl;
 		return(1);
 	}
 
-	const int n = atoi(argv[1]);
-
-	const int print = (argc > 2) ? atoi(argv[2]) : 0;
-	if (print < 0 || print > 1) {
-		cerr << "Error in [print] argument, it only can be 0 or 1" << endl;
-		return(1);
-	}
-
-	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
-
 	const int dir = 1;
+	const int n = atoi(argv[1]);
+	const int time_steps = (argc > 2 ? atoi(argv[2]) : 10);
 	const double t_final = 1.0;
 	const double dt = t_final / time_steps;
 	double time = 0.0;
@@ -77,19 +70,21 @@ int main (int argc, char *argv[])
 
 	micropp_params_t mic_params;
 
+	mic_params.ngp = 1;
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC_HOMOGENEOUS;
-	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	material_set(&mic_params.materials[1], 0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	material_set(&mic_params.materials[2], 0, 0.0, 0.0, 0.0, 0.0, 0.0);
+	mic_params.type = MIC_CILI_FIB_Z;
+	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.7e3, 1.0e5, 0.0);
+	material_set(&mic_params.materials[1], 0, 2.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
+	mic_params.calc_ctan_lin = false;
 	mic_params.lin_stress = false;
 
 	mic_params.print();
 
-	micropp<3> micro(mic_params);
-	micro.print_info();
+	micropp<3> *micro = new micropp<3>(mic_params);
+	micro->print_info();
 
 	double sig[6];
 	double ctan[36];
@@ -97,30 +92,21 @@ int main (int argc, char *argv[])
 
 	cout << scientific;
 
-	for (int t = 0; t < time_steps; ++t) {
+	for (int t = 0; t < time_steps / 2; ++t) {
 
 		cout << "time step = " << t << endl;
 
 		eps[dir] = eps_vs_t(time, t_final);
 
-		micro.set_strain(0, eps);
-		micro.homogenize();
-		micro.get_stress(0, sig);
-		micro.get_ctan(0, ctan);
-		int non_linear = micro.is_non_linear(0);
-		int cost = micro.get_cost(0);
-		bool has_converged = micro.has_converged(0);
+		micro->set_strain(0, eps);
+		micro->homogenize();
+		micro->get_stress(0, sig);
+		micro->get_ctan(0, ctan);
+		int non_linear = micro->is_non_linear(0);
+		int cost = micro->get_cost(0);
+		bool has_converged = micro->has_converged(0);
 
-		char filename[128];
-		snprintf(filename, 128, "test_damage_%d", t);
-
-		if (print) {
-			char filename[128];
-			snprintf(filename, 128, "micropp_%d", t);
-			micro.output (0, filename);
-		}
-
-		micro.update_vars();
+		micro->update_vars();
 
 		cout 	<< "NL        = " << non_linear << endl
 			<< "Cost      = " << cost << endl
@@ -136,12 +122,84 @@ int main (int argc, char *argv[])
 			cout << sig[i] << "\t";
 		cout << endl;
 
+		cout << "ctan = " << endl;
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				cout << ctan[i * 6 + j] << "\t";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
 		file    << setw(14)
 			<< eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
 
 		time += dt;
 	}
+
+	micro->write_restart(12);
+	delete micro;
+
+	//
+	//------------------------------------------------------------
+	//
+
+	micro = new micropp<3>(mic_params);
+	micro->print_info();
+
+	micro->read_restart(12);
+
+	cout << scientific;
+
+	for (int t = time_steps / 2; t < time_steps; ++t) {
+
+		cout << "time step = " << t << endl;
+
+		eps[dir] = eps_vs_t(time, t_final);
+
+		micro->set_strain(0, eps);
+		micro->homogenize();
+		micro->get_stress(0, sig);
+		micro->get_ctan(0, ctan);
+		int non_linear = micro->is_non_linear(0);
+		int cost = micro->get_cost(0);
+		bool has_converged = micro->has_converged(0);
+
+		micro->update_vars();
+
+		cout 	<< "NL        = " << non_linear << endl
+			<< "Cost      = " << cost << endl
+			<< "Converged = " << has_converged << endl;
+
+		cout << "eps =\t";
+		for (int i = 0; i < 6; ++i)
+			cout << eps[i] << "\t";
+		cout << endl;
+
+		cout << "sig =\t";
+		for (int i = 0; i < 6; ++i)
+			cout << sig[i] << "\t";
+		cout << endl;
+
+		cout << "ctan =\t" << endl;
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				cout << ctan[i * 6 + j] << "\t";
+			}
+			cout << endl;
+		}
+		cout << endl;
+
+		file    << setw(14)
+			<< eps[dir] << "\t"
+			<< sig[dir] << "\t" << endl;
+
+		time += dt;
+	}
+
+	micro->write_restart(13);
+	delete micro;
 
 	file.close();
 	return 0;

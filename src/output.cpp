@@ -46,6 +46,16 @@ template <int tdim>
 void micropp<tdim>::output2(const int gp_id, const int elem_global,
 			    const int time_step)
 {
+	/*
+	 * This function writes the outfile
+	 * "micropp-<elem_global>-<time_step>.vtu"
+	 *
+	 * gp_id       : is the local numeration of the Gauss point.
+	 * elem_global : is the global numeration of th element in the
+	 *               macro-scale.
+	 * time_step   : is the time step in the macro-scale.
+	 *
+	 */
 	INST_START;
 
 	assert(gp_id < ngp);
@@ -178,7 +188,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 		<< "NumberOfComponents=\"1\" format=\"ascii\">" << endl;
 	for (int e = 0; e < nelem; ++e) {
 		double plasticity = 0.0;
-		if (vars_old != NULL) {
+		if (vars_old != nullptr) {
 			for (int gp = 0; gp < npe; ++gp) {
 				for (int v = 0; v < nvoi; ++v) {
 					plasticity += vars_old[intvar_ix(e, gp, v)] *\
@@ -225,7 +235,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 	for (int e = 0; e < nelem; ++e) {
 		double hardening = 0.;
 		for (int gp = 0; gp < npe; ++gp) {
-			if (vars_old != NULL) {
+			if (vars_old != nullptr) {
 				hardening += vars_old[intvar_ix(e, gp, 6)];
 			} else {
 				hardening += 0.0;
@@ -239,6 +249,60 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 	file << "</UnstructuredGrid>" << endl;
 	file << "</VTKFile>" << endl;
 
+	file.close();
+}
+
+
+template <int tdim>
+void micropp<tdim>::write_restart(const int restart_id) const
+{
+	/*
+	 *
+	 * micropp-restart-<mpi_rank>-<#restart>.dat
+	 *
+	 */
+	INST_START;
+
+	char filename[128];
+	std::stringstream filename_stream;
+	filename_stream << "micropp-restart-" << mpi_rank << "-" << restart_id
+	         	<< ".bin";
+	std::string file_name_string = filename_stream.str();
+	strcpy(filename, file_name_string.c_str());
+
+	ofstream file;
+	file.open(filename, ios::out | ios::binary);
+	//file.open (filename, ios::out);
+	for (int igp = 0; igp < ngp; ++igp) {
+		gp_list[igp].write_restart(file);
+	}
+	file.close();
+}
+
+
+template <int tdim>
+void micropp<tdim>::read_restart(const int restart_id) const
+{
+	/*
+	 *
+	 * micropp-restart-<mpi_rank>-<#restart>.dat
+	 *
+	 */
+	INST_START;
+
+	char filename[128];
+	std::stringstream filename_stream;
+	filename_stream << "micropp-restart-" << mpi_rank << "-" << restart_id
+	         	<< ".bin";
+	std::string file_name_string = filename_stream.str();
+	strcpy(filename, file_name_string.c_str());
+
+	ifstream file;
+	file.open(filename, ios::in | ios::binary);
+	//file.open (filename, ios::out);
+	for (int igp = 0; igp < ngp; ++igp) {
+		gp_list[igp].read_restart(file);
+	}
 	file.close();
 }
 

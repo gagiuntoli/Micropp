@@ -6,19 +6,19 @@
 !                         Guido Giuntoli <gagiuntoli@gmail.com>
 !                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
 !                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
-! 
+!
 !  This program is free software: you can redistribute it and/or modify
 !  it under the terms of the GNU General Public License as published by
 !  the Free Software Foundation, version 3.
-! 
+!
 !  This program is distributed in the hope that it will be useful, but
 !  WITHOUT ANY WARRANTY; without even the implied warranty of
 !  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 !  General Public License for more details.
-! 
+!
 !  You should have received a copy of the GNU General Public License
 !  along with this program. If not, see <http://www.gnu.org/licenses/>.
-! 
+!
 
 module libmicropp
   use libmaterial
@@ -28,6 +28,7 @@ module libmicropp
 
   ! Important: if you change this remember to change also the equivalent
   ! one in the C wrapper (micropp_c.cpp)
+
   type, bind(C) :: micropp3
      type(c_ptr) :: ptr ! pointer
   end type micropp3
@@ -138,7 +139,7 @@ module libmicropp
      end subroutine micropp3_output
 
      subroutine micropp3_output2(this, gp_id, elem_global, time_step) bind(C)
-       use, intrinsic :: iso_c_binding, only: c_int, c_int
+       use, intrinsic :: iso_c_binding, only: c_int
        import micropp3
        implicit none
        type(micropp3), intent(inout) :: this
@@ -152,6 +153,22 @@ module libmicropp
        implicit none
        type(micropp3), intent(in) :: this
      end subroutine micropp3_print_info
+
+     subroutine micropp3_write_restart(this, restart_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+       integer(c_int), intent(in), value :: restart_id
+     end subroutine micropp3_write_restart
+
+     subroutine micropp3_read_restart(this, restart_id) bind(C)
+       use, intrinsic :: iso_c_binding, only: c_int
+       import micropp3
+       implicit none
+       type(micropp3), intent(in) :: this
+       integer(c_int), intent(in), value :: restart_id
+     end subroutine micropp3_read_restart
 
   end interface
 

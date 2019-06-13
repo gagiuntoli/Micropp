@@ -19,7 +19,8 @@ set(testsources
 	test_material.cpp
 	test_damage.cpp
 	test_util_1.cpp
-	test_A0.cpp)
+	test_A0.cpp
+	test_restart.cpp)
 
 # Iterate over the list above
 foreach (testfile ${testsources})

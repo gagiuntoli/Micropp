@@ -69,7 +69,9 @@ extern "C" {
 
 	int micropp3_get_non_linear_gps(const struct micropp3 *self);
 
-	double micropp3_get_f_trial_max(const struct micropp3 *self);
+	void micropp3_write_restart(const struct micropp3 *self, const int restart_id);
+	void micropp3_read_restart(const struct micropp3 *self, const int restart_id);
+
 
 #ifdef __cplusplus
 }

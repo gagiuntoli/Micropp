@@ -69,7 +69,7 @@ void micropp<tdim>::homogenize()
 			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 			for (int i = 0; i < nvoi; ++i) {
 				for (int j = 0; j < nvoi; ++j) {
-					gp_ptr->stress[i] += 
+					gp_ptr->stress[i] +=
 						ctan_lin[i * nvoi + j] *
 						gp_ptr->strain[j];
 				}
@@ -101,9 +101,8 @@ void micropp<tdim>::homogenize_task(int igp)
 	acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 
-	const int ns[3] = { nx, ny, nz };
-
 	ell_matrix A;  // Jacobian
+	const int ns[3] = { nx, ny, nz };
 	ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 	double *b = (double *) calloc(nndim, sizeof(double));
 	double *du = (double *) calloc(nndim, sizeof(double));
@@ -172,7 +171,7 @@ void micropp<tdim>::homogenize_task(int igp)
 
 	if (non_linear == true) {
 		if (gp_ptr->allocated == false) {
-			gp_ptr->allocate(nvars);
+			gp_ptr->allocate();
 			memcpy(gp_ptr->vars_k, vars_new, nvars * sizeof(double));
 		}
 	}
