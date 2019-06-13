@@ -87,7 +87,7 @@ typedef struct {
 	int ngp = 1;
 	int size[3];
 	int type = 0;
-	double geo_params[4] = {1.0, 1.0, 1.0, 0.1};
+	double geo_params[4] = {0.1, 0.1, 0.1, 0.1};
 	struct material_base materials[4];
 	int *coupling = nullptr;
 	bool subiterations = false;
@@ -170,7 +170,7 @@ class micropp {
 		const double lx, ly, lz;
 		const double dx, dy, dz;
 		const double vol_tot;
-		const double special_param, wg, ivol;
+		const double wg, ivol;
 
 		const int micro_type, nvars;
 		const int nsubiterations;
@@ -179,7 +179,9 @@ class micropp {
 
 		gp_t<tdim> *gp_list;
 
-		double micro_params[5];
+		static const int num_geo_params = 4;
+		double geo_params[num_geo_params];
+
 		material_t *material_list[MAX_MATERIALS];
 		double ctan_lin[nvoi * nvoi];
 

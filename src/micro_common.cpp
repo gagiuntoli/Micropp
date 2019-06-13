@@ -43,7 +43,6 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	lx(1.0), ly(1.0), lz((tdim == 3) ? 1.0 : 0.0),
 	dx(lx / nex), dy(ly / ney), dz((tdim == 3) ? lz / nez : 0.0),
 
-	special_param(params.geo_params[3]),
 	subiterations(params.subiterations),
 	nsubiterations(params.nsubiterations),
 	mpi_rank(params.mpi_rank),
@@ -97,10 +96,8 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	elem_stress = (double *) calloc(nelem * nvoi, sizeof(double));
 	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
 
-	int nParams = 4;
-
-	for (int i = 0; i < nParams; i++) {
-		micro_params[i] = params.geo_params[i];
+	for (int i = 0; i < num_geo_params; i++) {
+		geo_params[i] = params.geo_params[i];
 	}
 
 	for (int i = 0; i < MAX_MATERIALS; ++i) {
@@ -388,7 +385,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	} else if (micro_type == MIC_SPHERE) { // sphere in the center
 
-		const double rad = special_param;
+		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
 		double tmp = 0.;
 		for (int i = 0; i < dim; ++i)
@@ -398,12 +395,12 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	} else if (micro_type == MIC_LAYER_Y) { // 2 flat layers in y dir
 
-		const double width = special_param;
+		const double width = geo_params[0];
 		return (coor[1] < width);
 
 	} else if (micro_type == MIC_CILI_FIB_Z) { // a cilindrical fiber in z dir
 
-		const double rad = special_param;
+		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
 		double tmp = 0.;
 		for (int i = 0; i < 2; ++i)
@@ -413,7 +410,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	} else if (micro_type == MIC_CILI_FIB_XZ) { // 2 cilindrical fibers one in x and z dirs
 
-		const double rad = special_param;
+		const double rad = geo_params[0];
 		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
 		double tmp_1 = 0.;
 		for (int i = 0; i < 2; ++i)
@@ -430,7 +427,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	       	/* 3 quad fibers in x, y and z dirs */
 
-		const double width = special_param;
+		const double width = geo_params[0];
 		const double center[3] = { lx / 2., ly / 2., lz / 2. };
 
 		if (fabs(coor[0] - center[0]) < width &&
@@ -451,7 +448,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	       	/* 2 quad fibers in x and z dirs */
 
-		const double width = special_param;
+		const double width = geo_params[0];
 		const double center[3] = { lx / 2., ly / 2., lz / 2. };
 
 		if (fabs(coor[0] - center[0]) < width &&
@@ -468,7 +465,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	       	/* 2 quad fibers in x and z dirs and the one in x is broken */
 
-		const double width = special_param;
+		const double width = geo_params[0];
 		const double center[3] = { lx / 2., ly / 2., lz / 2. };
 
 		if (fabs(coor[0] - center[0]) < width &&
@@ -486,7 +483,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	       	/* Distribution of Several Spheres of diferent sizes */
 
-		const double factor = special_param;
+		const double factor = geo_params[0];
 
 		const int num = 9;
 		const double centers[num][3] = {
@@ -526,9 +523,9 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		 *
 		 */
 
-		const double rad_cilinder = special_param;
-		const double width_flat_layer = 0.02;
-		const double width_cili_layer = 0.02;
+		const double rad_cilinder = geo_params[0];
+		const double width_flat_layer = geo_params[1];
+		const double width_cili_layer = geo_params[2];
 
 		const double cen_1[3] = { lx * .25, ly * .75, -1000.0 };
 		double tmp_1 = 0.0;
@@ -604,10 +601,13 @@ void micropp<tdim>::get_elem_displ(const double *u,
 	int n[npe] ;
 	get_elem_nodes(n, ex, ey, ez);
 
-	for (int i = 0 ; i < npe; ++i)
-		for (int d = 0; d < dim; ++d)
+	for (int i = 0 ; i < npe; ++i) {
+		for (int d = 0; d < dim; ++d) {
 			elem_disp[i * dim + d] = u[n[i] * dim + d];
+		}
+	}
 }
+
 
 #pragma acc routine seq
 template <int tdim>
@@ -617,12 +617,15 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 	double elem_disp[npe * dim];
 	get_elem_displ(u, elem_disp, ex, ey, ez);
 
-	for (int i = 0; i < nvoi; ++i)strain_gp[i]=0;
+	for (int i = 0; i < nvoi; ++i) {
+		strain_gp[i] = 0;
+	}
 
-	for (int v = 0; v < nvoi; ++v)
+	for (int v = 0; v < nvoi; ++v) {
 		for (int i = 0; i < npe * dim; i++){
 			strain_gp[v] += calc_bmat_cache[gp][v][i] * elem_disp[i];
 		}
+	}
 }
 
 
@@ -666,12 +669,17 @@ void micropp<tdim>::print_info() const
 	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
 	cout << "FULL        : " << num_full        << " GPs" << endl;
 	cout << "USE A0      : " << use_A0 << endl;
-       	
-	cout    << "ngp :" << ngp 
+
+	cout    << "ngp :" << ngp
 		<< " nx :" << nx << " ny :" << ny << " nz :" << nz
 		<< " nn :" << nn << endl
-		<< "lx : " << lx << " ly : " << ly << " lz : " << lz
-	       	<< " param : " << special_param << endl;
+		<< "lx : " << lx << " ly : " << ly << " lz : " << lz;
+	cout << endl;
+
+	cout << "geo_params:";
+	for (int i = 0; i < num_geo_params; ++i) {
+		cout << " " << geo_params[i];
+	}
 	cout << endl;
 
 	for (int i = 0; i < MAX_MATERIALS; ++i) {
