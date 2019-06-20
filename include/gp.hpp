@@ -66,12 +66,22 @@ class gp_t {
 
 	~gp_t()
 	{
-		free(u_n);
-		free(u_k);
+		if (u_n != nullptr) {
+			free(u_n);
+		}
+		if (u_k != nullptr) {
+			free(u_k);
+		}
 		if (allocated) {
 			free(vars_n);
 			free(vars_k);
 		}
+	}
+
+	void allocate_u()
+	{
+		u_n = (double *) calloc(nndim, sizeof(double));
+		u_k = (double *) calloc(nndim, sizeof(double));
 	}
 
 	void allocate()

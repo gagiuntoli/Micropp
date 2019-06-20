@@ -47,7 +47,7 @@ extern "C" {
 		memcpy(params.coupling, coupling, ngp * sizeof(int));
 		params.nsubiterations = nsubiterations;
 		params.mpi_rank = mpi_rank;
-		params.use_A0 = true;
+		params.use_A0 = false;
 		params.its_with_A0 = 1;
 
 		self->ptr = new micropp<3>(params);
