@@ -155,6 +155,20 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	strcpy(filename, file_name_string.c_str());
 	ofstream_profiling.open(filename, ios::out);
 	ofstream_profiling << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
+
+	/* GPU device selection if they are accessible */
+
+#ifdef _OPENACC
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
+#ifdef _OPENMP
+	int tid = omp_get_thread_num();
+	gpu_id = tid % acc_num_gpus;
+#endif
+#ifndef _OPENMP
+	gpu_id = mpi_rank % acc_num_gpus;
+#endif
+#endif
+
 }
 
 
@@ -255,18 +269,7 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps[nvoi] = { 0.0 };
 		eps[i] += D_EPS_CTAN_AVE;
 
-		/* GPU device selection if they are accessible */
 #ifdef _OPENACC
-		int gpu_id;
-		int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
-#ifdef _OPENMP
-		int tid = omp_get_thread_num();
-		gpu_id = tid % acc_num_gpus;
-		acc_set_device_num(gpu_id, acc_device_nvidia);
-#endif
-#ifndef _OPENMP
-		gpu_id = mpi_rank % acc_num_gpus;
-#endif
 		acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 		newton_raphson(&A, b, u, du, eps);

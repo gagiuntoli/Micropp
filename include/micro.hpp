@@ -208,6 +208,7 @@ class micropp {
 
 		const bool lin_stress;
 
+		/* Number of micro-problems depending on the type */
 		int num_no_coupling = 0;
 		int num_one_way = 0;
 		int num_full = 0;
@@ -220,9 +221,14 @@ class micropp {
 		/* IO files */
 		ofstream ofstream_profiling;
 
+		/* GPU number of device selection */
+		int gpu_id = 0;
+
+
 		/* Private function members */
 
-		void homogenize_task(int gp);
+		void homogenize_linear(gp_t<tdim> *gp_ptr);
+		void homogenize_task(gp_t<tdim> *gp_ptr);
 
 		void calc_ctan_lin();
 

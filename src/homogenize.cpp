@@ -63,41 +63,43 @@ void micropp<tdim>::homogenize()
 #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
 
-		gp_t<tdim> * const gp_ptr = &gp_list[igp];
+		gp_t<tdim> *gp_ptr = &gp_list[igp];
+
 		if (gp_ptr->coupling == NO_COUPLING) {
 
-			memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
-			for (int i = 0; i < nvoi; ++i) {
-				for (int j = 0; j < nvoi; ++j) {
-					gp_ptr->stress[i] +=
-						ctan_lin[i * nvoi + j] *
-						gp_ptr->strain[j];
-				}
-			}
+			/*
+			 * Computational cheap calculation
+			 * stress = ctan_lin * strain
+			 */
+
+			homogenize_linear(gp_ptr);
 
 		} else {
-			homogenize_task(igp);
+
+			homogenize_task(gp_ptr);
+
 		}
 	}
 }
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_task(int igp)
+void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr)
+{
+	memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
+	for (int i = 0; i < nvoi; ++i) {
+		for (int j = 0; j < nvoi; ++j) {
+			gp_ptr->stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
+		}
+	}
+}
+
+
+template<int tdim>
+void micropp<tdim>::homogenize_task(gp_t<tdim> * gp_ptr)
 {
 
-	/* GPU device selection if they are accessible */
 #ifdef _OPENACC
-	int gpu_id;
-	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
-#ifdef _OPENMP
-	int tid = omp_get_thread_num();
-	gpu_id = tid % acc_num_gpus;
-	acc_set_device_num(gpu_id, acc_device_nvidia);
-#endif
-#ifndef _OPENMP
-	gpu_id = mpi_rank % acc_num_gpus;
-#endif
 	acc_set_device_num(gpu_id, acc_device_nvidia);
 #endif
 
@@ -108,8 +110,6 @@ void micropp<tdim>::homogenize_task(int igp)
 	double *du = (double *) calloc(nndim, sizeof(double));
 	double *u = (double *) calloc(nndim, sizeof(double));
 	double *vars_new_aux = (double *) calloc(nvars, sizeof(double));
-
-	gp_t<tdim> * const gp_ptr = &gp_list[igp];
 
 	double *vars_new = (gp_ptr->allocated) ? gp_ptr->vars_k : vars_new_aux;
 
