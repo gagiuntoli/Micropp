@@ -96,6 +96,7 @@ int main (int argc, char *argv[])
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
 		bool has_converged = micro.has_converged(0);
+		micro.write_profiling(t);
 
 		micro.update_vars();
 
@@ -131,6 +132,7 @@ int main (int argc, char *argv[])
 			snprintf(filename, 128, "micropp_%d", t);
 			micro.output (0, filename);
 		}
+
 	}
 
 	file.close();

@@ -21,7 +21,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "micro.hpp"
 #include "material.hpp"
 
@@ -135,19 +134,26 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		}
 	}
 
+	/* Average tangent constitutive tensor initialization */
+
 	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
 
 	if (calc_ctan_lin_flag) {
 		calc_ctan_lin();
-	} else if (lin_stress) {
-		cout    << "WARNING: Linear tangent matrix is not being calculated"
-			"and it is needed for the linear stress calculation"
-			<< endl;
 	}
 
 	for (int gp = 0; gp < ngp; ++gp) {
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 	}
+
+	/* Open the profiling file */
+
+	char filename[128];
+	std::stringstream filename_stream;
+	filename_stream << "micropp-profiling-" << mpi_rank << ".log";
+	std::string file_name_string = filename_stream.str();
+	strcpy(filename, file_name_string.c_str());
+	ofstream_profiling.open(filename, ios::out);
 }
 
 
