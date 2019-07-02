@@ -665,6 +665,9 @@ void micropp<tdim>::print_info() const
 		case(MIC_SPHERES):
 			cout << "MIC_SPHERES" << endl;
 			break;
+		case(MIC3D_8):
+			cout << "MIC3D_8" << endl;
+			break;
 		default:
 			cout << "NO TYPE" << endl;
 			break;
