@@ -153,4 +153,10 @@ extern "C" {
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->read_restart(restart_id);
 	}
+
+	void micropp3_write_profiling(const micropp3 *self, const int profile_id)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->write_profiling(profile_id);
+	}
 }

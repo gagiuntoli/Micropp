@@ -21,10 +21,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <cmath>
 #include "micro.hpp"
 
 using namespace std;

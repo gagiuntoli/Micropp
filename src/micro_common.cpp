@@ -154,6 +154,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	std::string file_name_string = filename_stream.str();
 	strcpy(filename, file_name_string.c_str());
 	ofstream_profiling.open(filename, ios::out);
+	ofstream_profiling << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
 }
 
 

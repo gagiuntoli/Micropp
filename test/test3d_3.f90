@@ -111,6 +111,8 @@ program test3d_3
         subiterated = micropp3_has_subiterated(micro, gp_id)
         cost = micropp3_get_cost(micro, gp_id)
 
+        call micropp3_write_profiling(micro, t)
+
         call micropp3_update_vars(micro)
 
         write(*,'(A,L)') "Non-linear = ", non_linear
