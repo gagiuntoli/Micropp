@@ -28,6 +28,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <string>
+#include <sstream>
 
 #include <cmath>
 #include <cassert>
@@ -215,6 +217,8 @@ class micropp {
 		int its_with_A0;
 		ell_matrix *A0;
 
+		/* IO files */
+		ofstream ofstream_profiling;
 
 		/* Private function members */
 
@@ -329,6 +333,7 @@ class micropp {
 
 		void print_info() const;
 
+		void write_profiling(const int profile_id);
 };
 
 

@@ -29,17 +29,22 @@
 
 using namespace std;
 
-#define D_EPS 5.0e-4
+
+double eps_vs_t(double time, double t_final)
+{
+	const double eps_max = 4.0e-3;
+	double eps = eps_max * time;
+	return eps;
+}
+
 
 int main (int argc, char *argv[])
 {
-	// Execution ./test3d_1 n [print] [steps]
 	if (argc < 2) {
-		cerr << "Usage: " << argv[0] << " n [print = 0|1] [steps]" << endl;
+		cerr << "Usage: " << argv[0] << " n [steps]" << endl;
 		return(1);
 	}
 
-	const int dir = 1;
 	const int n = atoi(argv[1]);
 
 	const int print = (argc > 2) ? atoi(argv[2]) : 0;
@@ -50,22 +55,27 @@ int main (int argc, char *argv[])
 
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);
 
+	const int dir = 0;
+	const double t_final = 0.15;
+	const double dt = t_final / time_steps;
+	double time = 0.0;
+
 	ofstream file;
 	file.open("result.dat");
 
 	micropp_params_t mic_params;
 
-	mic_params.ngp = 1;
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.geo_params[3] = 0.12;
-	mic_params.type = MIC_SPHERE;
-	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	mic_params.calc_ctan_lin = true;
-	mic_params.lin_stress = true;
+	mic_params.type = MIC3D_8;
+	mic_params.geo_params[0] = 0.1;
+	mic_params.geo_params[1] = 0.02;
+	mic_params.geo_params[2] = 0.01;
+	material_set(&mic_params.materials[0], 2, 3.0e8, 0.25, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
+	mic_params.lin_stress = false;
 
 	mic_params.print();
 
@@ -74,7 +84,7 @@ int main (int argc, char *argv[])
 
 	double sig[6];
 	double ctan[36];
-	double eps[6] = { 0. };
+	double eps[6] = { 0.0 };
 
 	cout << scientific;
 
@@ -82,12 +92,7 @@ int main (int argc, char *argv[])
 
 		cout << "time step = " << t << endl;
 
-		if (t < 80)
-			eps[dir] += D_EPS;
-		else if (t < 160)
-			eps[dir] -= D_EPS;
-		else
-			eps[dir] += D_EPS;
+		eps[dir] = eps_vs_t(time, t_final);
 
 		micro.set_strain(0, eps);
 		micro.homogenize();
@@ -96,7 +101,15 @@ int main (int argc, char *argv[])
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
 		bool has_converged = micro.has_converged(0);
-		micro.write_profiling(t);
+
+		char filename[128];
+		snprintf(filename, 128, "test_damage_%d", t);
+
+		if (print) {
+			char filename[128];
+			snprintf(filename, 128, "micropp_%d", t);
+			micro.output(0, filename);
+		}
 
 		micro.update_vars();
 
@@ -114,25 +127,11 @@ int main (int argc, char *argv[])
 			cout << sig[i] << "\t";
 		cout << endl;
 
-		cout << "ctan = " << endl;
-		for (int i = 0; i < 6; ++i) {
-			for (int j = 0; j < 6; ++j) {
-				cout << ctan[i * 6 + j] << "\t";
-			}
-			cout << endl;
-		}
-		cout << endl;
-
 		file    << setw(14)
 			<< eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
 
-		if (print) {
-			char filename[128];
-			snprintf(filename, 128, "micropp_%d", t);
-			micro.output (0, filename);
-		}
-
+		time += dt;
 	}
 
 	file.close();

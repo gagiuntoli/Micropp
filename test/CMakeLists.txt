@@ -8,6 +8,7 @@ set(testsources
 	test3d_3.f90
 	test3d_4.cpp
 	test3d_5.cpp
+	test_MIC3D_8.cpp
 	test3d_6.c
 	test_get_elem_nodes.cpp
 	test_ell_1.cpp

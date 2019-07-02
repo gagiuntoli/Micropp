@@ -21,10 +21,6 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <cmath>
 #include "micro.hpp"
 
 using namespace std;
@@ -304,6 +300,32 @@ void micropp<tdim>::read_restart(const int restart_id) const
 		gp_list[igp].read_restart(file);
 	}
 	file.close();
+}
+
+
+template <int tdim>
+void micropp<tdim>::write_profiling(const int profile_id) 
+{
+
+	/*
+	 * Writes profile file
+	 *
+	 * profile_id : <profile_id>
+	 *
+	 * <gp_id>  <non-linear>  <cost>   <converged>
+	 *
+	 */
+
+	ofstream_profiling << "profile_id : " << profile_id << endl;
+
+	for (int gp_id = 0; gp_id < ngp; ++gp_id) {
+
+		ofstream_profiling
+			<< "\t" << gp_list[gp_id].allocated
+			<< "\t" << gp_list[gp_id].cost
+			<< "\t" << gp_list[gp_id].converged
+			<< endl;
+	}
 }
 
 
