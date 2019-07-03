@@ -321,6 +321,7 @@ void micropp<tdim>::write_profiling(const int profile_id)
 	for (int gp_id = 0; gp_id < ngp; ++gp_id) {
 
 		ofstream_profiling
+			<< "\t" << gp_id
 			<< "\t" << gp_list[gp_id].allocated
 			<< "\t" << gp_list[gp_id].cost
 			<< "\t" << gp_list[gp_id].converged
