@@ -253,6 +253,12 @@ class micropp {
 				double stress_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
+#pragma acc routine seq
+		void get_ctan(int gp, const double eps[nvoi],
+			      const double *vars_old,
+			      double ctan_gp[nvoi],
+			      int ex, int ey, int ez = 0) const;
+
 		int get_elem_type(int ex, int ey, int ez = 0) const;
 
 		void get_elem_rhs(const double *u, const double *vars_old,
@@ -305,8 +311,6 @@ class micropp {
 		micropp(const micropp_params_t &params);
 
 		~micropp();
-
-		/* The most important functions */
 
 		void set_strain(const int gp_id, const double *strain);
 

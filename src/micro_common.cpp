@@ -743,6 +743,19 @@ void micropp<tdim>::get_stress(int gp, const double eps[nvoi],
 
 
 template <int tdim>
+void micropp<tdim>::get_ctan(int gp, const double eps[nvoi],
+			     const double *vars_old, double ctan_gp[nvoi],
+			     int ex, int ey, int ez) const
+{
+	const int e = glo_elem(ex, ey, ez);
+	const material_t *material = get_material(e);
+	const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
+
+	material->get_ctan(eps, ctan_gp, vars);
+}
+
+
+template <int tdim>
 void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 				    const double *vars_old) const
 {

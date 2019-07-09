@@ -191,9 +191,7 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 				const material_t *material = get_material(e);
 				for (int gp = 0; gp < npe; ++gp) {
 					const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
-					material->get_ctan(&eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6],
-							   &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi],
-							   vars);
+					get_ctan(gp, &eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], vars_old, &ctan[ex*ney*nez*npe*nvoi*nvoi+ey*nez*npe*nvoi*nvoi+ez*npe*nvoi*nvoi+gp*nvoi*nvoi], ex, ey, ez);
 				}
 				const int n0 = ez * nxny + ey * nx + ex;
 				const int n1 = n0 + 1;
