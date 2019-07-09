@@ -27,58 +27,51 @@
 
 template<>
 double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
-				    double *b)
+				    double * __restrict__ b)
 {
 	INST_START;
 
 	memset(b, 0., nndim * sizeof(double));
 
-	double be[dim * npe];
-	int index[dim * npe];
-
-	double* strain_gp = new double [nex*ney*nez*npe*nvoi];
-
-#pragma acc parallel loop copy(strain_gp[:nex*ney*nez*npe*nvoi]) copyin(u[:nndim])
+	constexpr int npedim = npe * dim;
+#pragma acc parallel loop copy(b[:nndim]) collapse(3)
 	for (int ez = 0; ez < nez; ++ez) {
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ex = 0; ex < nex; ++ex) {
-				for (int gp = 0; gp < npe; ++gp) {
-					get_strain(u, gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], ex, ey, ez);
-				}
-			}
-		}
-	}
-	for (int ez = 0; ez < nez; ++ez) {
-		for (int ey = 0; ey < ney; ++ey) {
-			for (int ex = 0; ex < nex; ++ex) {
-
+				double be[npedim];
 				int n[npe];
 				get_elem_nodes(n, ex, ey, ez);
 
+				int index[npedim];
 				for (int j = 0; j < npe; ++j)
 					for (int d = 0; d < dim; ++d)
 						index[j * dim + d] = n[j] * dim + d;
 
-				constexpr int npedim = npe * dim;
-				double stress_gp[nvoi];
 
-				memset(be, 0, npedim * sizeof(double));
-
-				for (int gp = 0; gp < npe; ++gp) {
-
-					get_stress(gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], vars_old, stress_gp, ex, ey, ez);
-
-					for (int i = 0; i < npedim; ++i)
-						for (int j = 0; j < nvoi; ++j)
-							be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
+				for(size_t i = 0; i<npedim;i++){
+					be[i] = 0;
 				}
 
-				for (int i = 0; i < npe * dim; ++i)
+				for (int gp = 0; gp < npe; ++gp) {
+					double stress_gp[nvoi];
+					double strain_gp[nvoi];
+					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, ex, ey, ez);
+
+					double bmat[nvoi][npedim];
+					calc_bmat(gp, bmat);
+					for (int i = 0; i < npedim; ++i)
+						for (int j = 0; j < nvoi; ++j)
+#pragma acc atomic
+							be[i] += bmat[j][i] * stress_gp[j] * wg;
+				}
+
+				for (int i = 0; i < npedim; ++i)
+#pragma acc atomic
 					b[index[i]] += be[i];
 			}
 		}
 	}
-	delete[] strain_gp;
 
 	// boundary conditions
 	for (int i = 0; i < nx; ++i) {

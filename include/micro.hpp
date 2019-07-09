@@ -247,6 +247,7 @@ class micropp {
 		void get_strain(const double *u, int gp, double strain_gp[nvoi],
 				int ex, int ey, int ez = 0) const;
 
+#pragma acc routine seq
 		void get_stress(int gp, const double eps[nvoi],
 				const double *vars_old,
 				double stress_gp[nvoi],
@@ -266,6 +267,7 @@ class micropp {
 
 		void calc_fields(double *u, double *vars_old);
 
+#pragma acc routine seq
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
 
 		bool calc_vars_new(const double *u, const double *vars_old,
