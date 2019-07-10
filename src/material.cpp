@@ -323,8 +323,7 @@ bool material_damage::damage_law(const double *eps, const double r_old,
 	}
 	const double r = (product >= 0) ? sqrt(product) : 0;
 
-	const double Ey = 10.0e4;
-	double r_old_a = (r_old < Ey / sqrt(E)) ? Ey / sqrt(E) : r_old;
+	double r_old_a = (r_old < Xt / sqrt(E)) ? Xt / sqrt(E) : r_old;
 
 	if (r <= r_old_a) {
 		// Elastic

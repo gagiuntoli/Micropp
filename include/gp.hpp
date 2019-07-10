@@ -107,9 +107,6 @@ class gp_t {
 		u_k = tmp;
 
 		memcpy(strain_old, strain, nvoi * sizeof(double));
-
-		cost = 0;
-		subiterated = false;
 	}
 
 	void write_restart(std::ofstream& file)

@@ -113,6 +113,9 @@ void micropp<tdim>::homogenize_task(gp_t<tdim> * gp_ptr)
 
 	double *vars_new = (gp_ptr->allocated) ? gp_ptr->vars_k : vars_new_aux;
 
+	gp_ptr->cost = 0;
+	gp_ptr->subiterated = false;
+
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 

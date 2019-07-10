@@ -45,6 +45,7 @@ extern "C" {
 		}
 		params.coupling = new int[ngp];
 		memcpy(params.coupling, coupling, ngp * sizeof(int));
+		params.subiterations = true;
 		params.nsubiterations = nsubiterations;
 		params.mpi_rank = mpi_rank;
 		params.use_A0 = false;
