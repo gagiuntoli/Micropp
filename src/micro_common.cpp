@@ -62,6 +62,14 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
+	/* GPU device selection if they are accessible */
+
+#ifdef _OPENACC
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
+	gpu_id = mpi_rank % acc_num_gpus;
+	acc_set_device_num(gpu_id, acc_device_nvidia);
+#endif
+
 	for (int gp = 0; gp < npe; gp++) {
 		calc_bmat(gp, calc_bmat_cache[gp]);
 	}
@@ -155,19 +163,6 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	strcpy(filename, file_name_string.c_str());
 	ofstream_profiling.open(filename, ios::out);
 	ofstream_profiling << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
-
-	/* GPU device selection if they are accessible */
-
-#ifdef _OPENACC
-	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
-#ifdef _OPENMP
-	int tid = omp_get_thread_num();
-	gpu_id = tid % acc_num_gpus;
-#endif
-#ifndef _OPENMP
-	gpu_id = mpi_rank % acc_num_gpus;
-#endif
-#endif
 
 }
 
@@ -269,9 +264,6 @@ void micropp<tdim>::calc_ctan_lin()
 		double eps[nvoi] = { 0.0 };
 		eps[i] += D_EPS_CTAN_AVE;
 
-#ifdef _OPENACC
-		acc_set_device_num(gpu_id, acc_device_nvidia);
-#endif
 		newton_raphson(&A, b, u, du, eps);
 
 		calc_ave_stress(u, sig);
@@ -687,6 +679,17 @@ void micropp<tdim>::print_info() const
 	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
 	cout << "FULL        : " << num_full        << " GPs" << endl;
 	cout << "USE A0      : " << use_A0 << endl;
+	cout << "NUM SUBITS  : " << nsubiterations << endl;
+	cout << "MPI RANK    : " << mpi_rank << endl;
+#ifdef _OPENACC
+	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
+	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
+	cout << "GPU ID            : " << gpu_id << endl;
+#endif
+#ifdef _OPENMP
+	int omp_max_threads = omp_get_max_threads();
+	cout << "OMP NUM THREADS   : " << omp_max_threads << endl;
+#endif
 
 	cout    << "ngp :" << ngp
 		<< " nx :" << nx << " ny :" << ny << " nz :" << nz
@@ -705,17 +708,6 @@ void micropp<tdim>::print_info() const
 		cout << endl;
 	}
 
-	cout << "NUM SUBITERATIONS :" << nsubiterations << endl;
-	cout << endl;
-
-#ifdef _OPENACC
-	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
-	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
-#endif
-#ifdef _OPENMP
-	int omp_max_threads = omp_get_max_threads();
-	cout << "OMP NUM THREADS   : " << omp_max_threads << endl;
-#endif
 	cout << endl;
 	cout << "ctan lin = " << endl;
 	for (int i = 0; i < 6; ++i) {

@@ -99,10 +99,6 @@ template<int tdim>
 void micropp<tdim>::homogenize_task(gp_t<tdim> * gp_ptr)
 {
 
-#ifdef _OPENACC
-	acc_set_device_num(gpu_id, acc_device_nvidia);
-#endif
-
 	ell_matrix A;  // Jacobian
 	const int ns[3] = { nx, ny, nz };
 	ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
