@@ -277,7 +277,6 @@ void micropp<tdim>::calc_ctan_lin()
 		free(u);
 		free(du);
 	}
-	filter(ctan_lin, nvoi * nvoi, FILTER_REL_TOL);
 }
 
 

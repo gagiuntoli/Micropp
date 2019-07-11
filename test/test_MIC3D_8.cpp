@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
-	material_set(&mic_params.materials[0], 2, 3.0e8, 0.25, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[0], 2, 3.0e8, 0.25, 0.0, 0.0, 1.0e5);
 	material_set(&mic_params.materials[1], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
 	mic_params.lin_stress = false;

@@ -159,10 +159,7 @@ void micropp<tdim>::homogenize_task(gp_t<tdim> * gp_ptr)
 		}
 
 	} else {
-
 		calc_ave_stress(gp_ptr->u_k, gp_ptr->stress, gp_ptr->vars_n);
-		filter(gp_ptr->stress, nvoi, FILTER_REL_TOL);
-
 	}
 
 	// Updates <vars_new>
@@ -199,7 +196,6 @@ void micropp<tdim>::homogenize_task(gp_t<tdim> * gp_ptr)
 					(sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
 
 		}
-		filter(gp_ptr->ctan, nvoi * nvoi, FILTER_REL_TOL);
 	}
 
 	ell_free(&A);

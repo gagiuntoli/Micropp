@@ -57,20 +57,6 @@ inline uint64_t devest(const vector<uint64_t>  &in, const uint64_t mean)
 }
 
 
-inline void filter(double *arr, int n, double rel_tol)
-{
-#ifdef FILTER
-	double max = arr[0];
-	for (int i = 1; i < n; ++i)
-		if (arr[i] > max)
-			max = arr[i];
-
-	for (int i = 0; i < n; ++i)
-		arr[i] = (fabs(arr[i]) > max * rel_tol) ? arr[i] : 0.0;
-#endif
-}
-
-
 constexpr int mypow(int v, int e)
 {
 	return (e == 0) ? 1 : v * mypow(v, e - 1);
