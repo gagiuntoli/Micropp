@@ -1,6 +1,6 @@
-# Micropp
+# _micropp_
 
-Code to localize and average strain and stress over a micro structure.
+Code to _localize_ strains and _homogenize_ stress in a Representative Volume Element (RVE) by using Finite Element Method (FEM).
 
 # Characteristics
 
@@ -13,9 +13,13 @@ Code to localize and average strain and stress over a micro structure.
 
 # Main Characteristics
 
-`MicroPP` can simulate different kind of microstructures in 2D and 3D 
+_micropp_ solves the FE problem on heterogeneous RVEs composed with more than one material and calculates the average properties of it. In the next figure a typical micro-structure is solved.
 
-<img src="./pics/micros.png" alt="drawing" width="300"/>
+<img src="./pics/mic_1.png" alt="drawing" width="300"/>
+
+_micropp_ is designed to be coupled with a macro-scale code in order to simulate multi-scale physical systems like an composite aircraft panel:
+
+<img src="./pics/coupling-micropp-macro.png" alt="drawing" width="300"/>
 
 `MicroPP` has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the Barcelona Supercomputing center ([BSC](https://www.bsc.es/)) to performed **FE2** calculations. Also it was coupled with [MacroC](https://github.com/GG1991/macroc), a FE code that uses PETSc library on structured meshes. With this good performance was reach until 30720 processors on Marenostrum IV supercomputer.
 
