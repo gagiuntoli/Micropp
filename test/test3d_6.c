@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
 			eps[dir] += D_EPS;
 
 		micropp3_set_strain(&micro, 0, eps);
-		micropp3_homogenize(&micro);
+		micropp3_homogenize(&micro, 1);
 		micropp3_get_stress(&micro, 0, sig);
 		micropp3_get_ctan(&micro, 0, ctan);
 		int sigma_cost = micropp3_get_cost(&micro, 0);

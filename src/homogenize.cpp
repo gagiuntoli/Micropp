@@ -56,7 +56,7 @@ void micropp<tdim>::get_ctan(const int gp_id, double *ctan) const
 
 
 template <int tdim>
-void micropp<tdim>::homogenize()
+void micropp<tdim>::homogenize(const int homog_type)
 {
 	INST_START;
 
@@ -65,7 +65,8 @@ void micropp<tdim>::homogenize()
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
-		if (gp_ptr->coupling == NO_COUPLING) {
+		if ((homog_type == HOMOG_LINEAR && gp_ptr->coupling == ONE_WAY)
+		    || gp_ptr->coupling == NO_COUPLING) {
 
 			/*
 			 * Computational cheap calculation
@@ -76,7 +77,7 @@ void micropp<tdim>::homogenize()
 
 		} else {
 
-			homogenize_task(gp_ptr);
+			homogenize_non_linear(gp_ptr);
 
 		}
 	}
@@ -96,7 +97,7 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr)
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_task(gp_t<tdim> * gp_ptr)
+void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 {
 
 	ell_matrix A;  // Jacobian

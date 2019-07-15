@@ -154,6 +154,11 @@ enum {
        	FULL
 };
 
+enum {
+	HOMOG_LINEAR,
+	HOMOG_NON_LINEAR
+};
+
 
 using namespace std;
 
@@ -228,7 +233,7 @@ class micropp {
 		/* Private function members */
 
 		void homogenize_linear(gp_t<tdim> *gp_ptr);
-		void homogenize_task(gp_t<tdim> *gp_ptr);
+		void homogenize_non_linear(gp_t<tdim> *gp_ptr);
 
 		void calc_ctan_lin();
 
@@ -312,7 +317,7 @@ class micropp {
 
 		void get_ctan(const int gp_id, double *ctan) const;
 
-		void homogenize();
+		void homogenize(const int homog_type = HOMOG_NON_LINEAR);
 
 		/* Extras */
 

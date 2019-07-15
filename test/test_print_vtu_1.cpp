@@ -56,6 +56,9 @@ int main (int argc, char *argv[])
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
+	mic_params.geo_params[0] = 0.1;
+	mic_params.geo_params[1] = 0.02;
+	mic_params.geo_params[2] = 0.01;
 	mic_params.type = mic_selected;
 	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[1], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
