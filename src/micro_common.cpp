@@ -58,7 +58,8 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 	use_A0(params.use_A0),
 	its_with_A0(params.its_with_A0),
-	lin_stress(params.lin_stress)
+	lin_stress(params.lin_stress),
+	write_log_flag(params.write_log)
 {
 	INST_CONSTRUCT; // Initialize the Intrumentation
 
@@ -154,15 +155,18 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
 	}
 
-	/* Open the profiling file */
+	/* Open the log file */
 
-	char filename[128];
-	std::stringstream filename_stream;
-	filename_stream << "micropp-profiling-" << mpi_rank << ".log";
-	std::string file_name_string = filename_stream.str();
-	strcpy(filename, file_name_string.c_str());
-	ofstream_profiling.open(filename, ios::out);
-	ofstream_profiling << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
+	if (write_log_flag) {
+		char filename[128];
+		std::stringstream filename_stream;
+		filename_stream << "micropp-profiling-" << mpi_rank << ".log";
+		std::string file_name_string = filename_stream.str();
+		strcpy(filename, file_name_string.c_str());
+
+		ofstream_log.open(filename, ios::out);
+		ofstream_log << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
+	}
 
 }
 

@@ -81,6 +81,10 @@ void micropp<tdim>::homogenize(const int homog_type)
 
 		}
 	}
+
+	if (write_log_flag) {
+		write_log();
+	}
 }
 
 

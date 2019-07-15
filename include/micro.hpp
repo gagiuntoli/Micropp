@@ -105,6 +105,7 @@ typedef struct {
 	bool use_A0 = false;
 	int its_with_A0 = 1;
 	bool lin_stress = true;
+	bool write_log = false;
 
 	void print()
 	{
@@ -122,6 +123,7 @@ typedef struct {
 		cout << "use_A0 : " << use_A0 << endl;
 		cout << "its_with_A0 : " << its_with_A0 << endl;
 		cout << "lin_stress : " << lin_stress << endl;
+		cout << "write_log : " << write_log << endl;
 	}
 
 } micropp_params_t;
@@ -224,7 +226,9 @@ class micropp {
 		ell_matrix *A0;
 
 		/* IO files */
-		ofstream ofstream_profiling;
+		const bool write_log_flag;
+		int log_id = 0;
+		ofstream ofstream_log;
 
 		/* GPU number of device selection */
 		int gpu_id = 0;
@@ -301,6 +305,8 @@ class micropp {
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);
 
+		void write_log();
+
 	public:
 
 		micropp() = delete;
@@ -344,7 +350,6 @@ class micropp {
 
 		void print_info() const;
 
-		void write_profiling(const int profile_id);
 };
 
 

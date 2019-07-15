@@ -66,6 +66,7 @@ int main (int argc, char *argv[])
 	material_set(&mic_params.materials[2], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
 	mic_params.calc_ctan_lin = true;
 	mic_params.lin_stress = true;
+	mic_params.write_log = true;
 
 	mic_params.print();
 
@@ -96,7 +97,6 @@ int main (int argc, char *argv[])
 		int non_linear = micro.is_non_linear(0);
 		int cost = micro.get_cost(0);
 		bool has_converged = micro.has_converged(0);
-		micro.write_profiling(t);
 
 		micro.update_vars();
 

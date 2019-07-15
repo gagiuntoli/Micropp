@@ -172,13 +172,6 @@ module libmicropp
        integer(c_int), intent(in), value :: restart_id
      end subroutine micropp3_read_restart
 
-     subroutine micropp3_write_profiling(this, profile_id) bind(C)
-       use, intrinsic :: iso_c_binding, only: c_int
-       import micropp3
-       implicit none
-       type(micropp3), intent(in) :: this
-       integer(c_int), intent(in), value :: profile_id
-     end subroutine micropp3_write_profiling
   end interface
 
 end module libmicropp

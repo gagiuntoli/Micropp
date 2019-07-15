@@ -50,6 +50,7 @@ extern "C" {
 		params.mpi_rank = mpi_rank;
 		params.use_A0 = false;
 		params.its_with_A0 = 1;
+		params.write_log = true;
 
 		self->ptr = new micropp<3>(params);
 	}
@@ -153,11 +154,5 @@ extern "C" {
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->read_restart(restart_id);
-	}
-
-	void micropp3_write_profiling(const micropp3 *self, const int profile_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->write_profiling(profile_id);
 	}
 }
