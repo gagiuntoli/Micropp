@@ -74,14 +74,16 @@ int main(int argc, char **argv)
 
 	micropp_params_t mic_params;
 
+	mic_params.ngp = ngp_per_mpi;
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC3D_8;
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
-	material_set(&mic_params.materials[0], 2, 3.0e8, 0.25, 0.0, 0.0, 1.0e5);
+	mic_params.subiterations = true;
+	mic_params.nsubiterations = 10;
+	material_set(&mic_params.materials[0], 2, 6.0e7, 0.25, 0.0, 0.0, 5.0e4);
 	material_set(&mic_params.materials[1], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
 	mic_params.mpi_rank = rank;
