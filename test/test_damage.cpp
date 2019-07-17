@@ -81,6 +81,7 @@ int main (int argc, char *argv[])
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
 	mic_params.type = MIC_HOMOGENEOUS;
+	mic_params.nr_max_its = 8;
 	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.0, 0.0, 1.0e5);
 	material_set(&mic_params.materials[1], 0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 0.0, 0.0, 0.0, 0.0, 0.0);

@@ -39,7 +39,7 @@ using namespace std::chrono;
 
 
 double eps_vs_t(double time, double t_final) {
-	const double eps_max = 4.0e-3;
+	const double eps_max = 1.0e-1;
 	double eps = eps_max * time;
 	return eps;
 }
@@ -78,14 +78,16 @@ int main(int argc, char **argv)
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
+	mic_params.type = MIC_HOMOGENEOUS;
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
-	mic_params.subiterations = true;
-	mic_params.nsubiterations = 10;
-	material_set(&mic_params.materials[0], 2, 6.0e7, 0.25, 0.0, 0.0, 5.0e4);
-	material_set(&mic_params.materials[1], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
-	material_set(&mic_params.materials[2], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
+	//mic_params.subiterations = true;
+	//mic_params.nsubiterations = 10;
+	mic_params.nr_max_its = 12;
+	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.0, 0.0, 1.0e5);
+	material_set(&mic_params.materials[1], 0, 3.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[2], 0, 3.0e7, 0.3, 0.0, 0.0, 0.0);
 	mic_params.mpi_rank = rank;
 	mic_params.calc_ctan_lin = false;
 	mic_params.lin_stress = false;
