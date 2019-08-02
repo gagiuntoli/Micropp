@@ -21,7 +21,11 @@ set(testsources
 	test_damage.cpp
 	test_util_1.cpp
 	test_A0.cpp
-	test_restart.cpp)
+	test_restart.cpp
+	benchmark-mic-1.cpp
+	benchmark-mic-2.cpp
+	benchmark-mic-3.cpp
+	)
 
 # Iterate over the list above
 foreach (testfile ${testsources})
