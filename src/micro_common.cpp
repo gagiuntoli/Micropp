@@ -136,7 +136,8 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 #pragma omp parallel for schedule(dynamic,1)
 		for (int i = 0; i < num_of_A0s; ++i) {
-			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL,
+				 CG_REL_TOL, CG_MAX_ITS);
 			double *u = (double *) calloc(nndim, sizeof(double));
 			assembly_mat(&A0[i], u, nullptr);
 			free(u);
@@ -165,7 +166,9 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		strcpy(filename, file_name_string.c_str());
 
 		ofstream_log.open(filename, ios::out);
-		ofstream_log << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
+		ofstream_log
+			<< "#<gp_id>  <non-linear>  <cost>  <converged>"
+			<< endl;
 	}
 
 }
@@ -493,7 +496,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	       	/* Distribution of Several Spheres of diferent sizes */
 
-		const int num_spheres = 20;
+		const int num_spheres = 40;
 
 		const double centers[num_spheres][3] = {
 			{ .8663, .0689, .1568 },
@@ -515,30 +518,70 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 			{ .7319, .7146, .8150 },
 			{ .8796, .2858, .6701 },
 			{ .1427, .9309, .9830 },
-			{ .1388, .3126, .8054 }
+			{ .1388, .3126, .8054 },
+			{ .0729, .4754, .4950 },
+			{ .5038, .7755, .7333 },
+			{ .0242, .2185, .9884 },
+			{ .5371, .5372, .8269 },
+			{ .4564, .0039, .1715 },
+			{ .7410, .0799, .8775 },
+			{ .2627, .9047, .5681 },
+			{ .7894, .1908, .2993 },
+			{ .1373, .5370, .9916 },
+			{ .0207, .8020, .9283 },
+			{ .6540, .2359, .0286 },
+			{ .7801, .3568, .5086 },
+			{ .7322, .5706, .1114 },
+			{ .5479, .1493, .1267 },
+			{ .6722, .1530, .1003 },
+			{ .7659, .3426, .9181 },
+			{ .4582, .4636, .6310 },
+			{ .1811, .9665, .4713 },
+			{ .0834, .6066, .6936 },
+			{ .4865, .7584, .3635 }
 		};
 
 		const double rads[num_spheres] = {
-			0.1 * .5741, 
-			0.1 * .1735, 
-			0.1 * .5065, 
-			0.1 * .8565, 
-			0.1 * .9735, 
-			0.1 * .7087, 
-			0.1 * .9585, 
-			0.1 * .2843, 
-			0.1 * .4029, 
-			0.1 * .2574, 
-			0.1 * .1575, 
-			0.1 * .3316, 
-			0.1 * .1874, 
-			0.1 * .6300, 
-			0.1 * .7049, 
-			0.1 * .7258, 
-			0.1 * .8002, 
-			0.1 * .8176, 
-			0.1 * .9970, 
-			0.1 * .4736
+			0.1 * .5741,
+			0.1 * .1735,
+			0.1 * .5065,
+			0.1 * .8565,
+			0.1 * .9735,
+			0.1 * .7087,
+			0.1 * .9585,
+			0.1 * .2843,
+			0.1 * .4029,
+			0.1 * .2574,
+			0.1 * .1575,
+			0.1 * .3316,
+			0.1 * .1874,
+			0.1 * .6300,
+			0.1 * .7049,
+			0.1 * .7258,
+			0.1 * .8002,
+			0.1 * .8176,
+			0.1 * .9970,
+			0.1 * .4736,
+			0.1 * .6351,
+			0.1 * .3140,
+			0.1 * .3440,
+			0.1 * .2444,
+			0.1 * .3894,
+			0.1 * .5234,
+			0.1 * .1658,
+			0.1 * .4020,
+			0.1 * .6813,
+			0.1 * .2060,
+			0.1 * .1427,
+			0.1 * .9332,
+			0.1 * .5406,
+			0.1 * .9765,
+			0.1 * .0956,
+			0.1 * .6432,
+			0.1 * .9998,
+			0.1 * .4166,
+			0.1 * .6907,
+			0.1 * .0404
 		};
 
 
@@ -553,7 +596,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	} else if (micro_type == MIC3D_8) {
 
-		/* 
+		/*
 		 * returns
 		 * 0 : for the cilinders
 		 * 1 : for the layer around the cilinders

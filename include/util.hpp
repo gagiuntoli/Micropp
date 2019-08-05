@@ -19,15 +19,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #ifndef UTIL_HPP
 #define UTIL_HPP
-
-// Debug print macro.
-#ifdef NDEBUG
-#define dprintf(...)
-#else
-#define dprintf(...) fprintf(stderr, __VA_ARGS__)
-#endif
 
 
 #include <vector>
@@ -66,29 +60,21 @@ constexpr int mypow(int v, int e)
 inline void print_vec(const double *vec, int n, const char file_name[])
 {
 	FILE *file = fopen(file_name, "w");
-	for (int i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i) {
 		fprintf(file, "[%lf]\n", vec[i]);
+	}
 	fclose(file);
 }
 
 
-inline void mvp(const double m[2][2], const double x[2], double *y)
+template<typename T, int n>
+inline void mvp(const T m[n][n], const T x[n], T *y)
 {
-	for (int i = 0; i < 2; ++i) {
-		double tmp = 0.0;
-		for (int j = 0; j < 2; ++j)
+	for (int i = 0; i < n; ++i) {
+		T tmp = 0.0;
+		for (int j = 0; j < n; ++j) {
 			tmp += m[i][j] * x[j];
-		y[i] = tmp;
-	}
-}
-
-
-inline void mvp(const double m[3][3], const double x[3], double *y)
-{
-	for (int i = 0; i < 3; ++i) {
-		double tmp = 0.0;
-		for (int j = 0; j < 3; ++j)
-			tmp += m[i][j] * x[j];
+		}
 		y[i] = tmp;
 	}
 }
@@ -135,7 +121,7 @@ inline bool point_inside_sphere(const double center[3], const double radius,
 	const double v[3] = {
 		point[0] - center[0],
 		point[1] - center[1],
-		point[2] - center[2]};
+		point[2] - center[2] };
 
 	return (norm<double, 3>(v) < radius) ? true : false;
 }

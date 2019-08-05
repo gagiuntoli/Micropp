@@ -89,6 +89,12 @@ int main(int argc, char **argv)
 	micropp<3> micro(mic_params);
 	//micro.print_info();
 
+	if (print) {
+		char filename[128];
+		snprintf(filename, 128, "micropp_%d", 0);
+		micro.output (0, filename);
+	}
+
 	ofstream file;
 	file.open("result.dat");
 
