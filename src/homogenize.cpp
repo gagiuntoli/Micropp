@@ -66,7 +66,7 @@ void micropp<tdim>::homogenize(const int homog_type)
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
 		if ((homog_type == HOMOG_LINEAR && gp_ptr->coupling == ONE_WAY)
-		    || gp_ptr->coupling == NO_COUPLING) {
+		    || gp_ptr->coupling == LINEAR) {
 
 			/*
 			 * Computational cheap calculation

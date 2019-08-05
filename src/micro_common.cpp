@@ -80,7 +80,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		if(params.coupling != nullptr) {
 			gp_list[gp].coupling = params.coupling[gp];
 			switch (params.coupling[gp]) {
-				case NO_COUPLING:
+				case LINEAR:
 					num_no_coupling ++;
 					break;
 				case ONE_WAY:
@@ -489,35 +489,64 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return 0;
 
-	} else if (micro_type == MIC_SPHERES) {
+	} else if (micro_type == MIC3D_SPHERES) {
 
 	       	/* Distribution of Several Spheres of diferent sizes */
 
-		const double factor = geo_params[0];
+		const int num_spheres = 20;
 
-		const int num = 9;
-		const double centers[num][3] = {
-			{ 0.50 * lx, 0.50 * ly, 0.50 * lz },
-			{ 0.22 * lx, 0.65 * ly, 0.10 * lz },
-			{ 0.21 * lx, 0.80 * ly, 0.90 * lz },
-			{ 0.10 * lx, 0.19 * ly, 0.35 * lz },
-			{ 0.20 * lx, 0.17 * ly, 0.85 * lz },
-			{ 0.65 * lx, 0.81 * ly, 0.15 * lz },
-			{ 0.81 * lx, 0.78 * ly, 0.60 * lz },
-			{ 0.77 * lx, 0.35 * ly, 0.25 * lz },
-			{ 0.70 * lx, 0.15 * ly, 0.80 * lz }
+		const double centers[num_spheres][3] = {
+			{ .8663, .0689, .1568 },
+			{ .2305, .4008, .2093 },
+			{ .1987, .8423, .2126 },
+			{ .6465, .7095, .4446 },
+			{ .6151, .9673, .2257 },
+			{ .1311, .9739, .4129 },
+			{ .8433, .0738, .2233 },
+			{ .5124, .2111, .0369 },
+			{ .4094, .7030, .6241 },
+			{ .1215, .8289, .3812 },
+			{ .1125, .9266, .6872 },
+			{ .7422, .4030, .6000 },
+			{ .0791, .3819, .9297 },
+			{ .1201, .7712, .0069 },
+			{ .9339, .2177, .1976 },
+			{ .3880, .1331, .9032 },
+			{ .7319, .7146, .8150 },
+			{ .8796, .2858, .6701 },
+			{ .1427, .9309, .9830 },
+			{ .1388, .3126, .8054 }
 		};
 
-		double rads[num] = { 0.3, 0.22, 0.13, 0.08, 0.20, 0.17, 0.19, 0.21, 0.15 };
-		for (int i = 0; i < num; ++i)
-			rads[i] *= factor;
+		const double rads[num_spheres] = {
+			0.1 * .5741, 
+			0.1 * .1735, 
+			0.1 * .5065, 
+			0.1 * .8565, 
+			0.1 * .9735, 
+			0.1 * .7087, 
+			0.1 * .9585, 
+			0.1 * .2843, 
+			0.1 * .4029, 
+			0.1 * .2574, 
+			0.1 * .1575, 
+			0.1 * .3316, 
+			0.1 * .1874, 
+			0.1 * .6300, 
+			0.1 * .7049, 
+			0.1 * .7258, 
+			0.1 * .8002, 
+			0.1 * .8176, 
+			0.1 * .9970, 
+			0.1 * .4736
+		};
 
-		for (int i = 0; i < num; ++i) {
-			double tmp = 0.;
-			for (int d = 0; d < dim; ++d)
-				tmp += (centers[i][d] - coor[d]) * (centers[i][d] - coor[d]);
-			if (tmp < rads[i] * rads[i])
+
+		for (int i = 0; i < num_spheres; ++i) {
+			if (point_inside_sphere(centers[i], rads[i],
+						coor)) {
 				return 1;
+			}
 		}
 
 		return 0;
@@ -595,6 +624,69 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 			return 2;
 		}
+
+	} else if (micro_type == MIC3D_FIBS_20_DISORDER) {
+
+		const int num_fibs = 20;
+		const double radius = 0.05;
+
+		const double dirs[num_fibs][3] = {
+			{ 1, .5741, .8515 },
+			{ 1, .1735, .1103 },
+			{ 1, .5065, .4600 },
+			{ 1, .8565, .9045 },
+			{ 1, .9735, .6313 },
+			{ 1, .7087, .1547 },
+			{ 1, .9585, .0220 },
+			{ 1, .2843, .4062 },
+			{ 1, .4029, .8095 },
+			{ 1, .2574, .4742 },
+			{ 1, .1575, .0768 },
+			{ 1, .3316, .0320 },
+			{ 1, .1874, .6364 },
+			{ 1, .6300, .2688 },
+			{ 1, .7049, .5137 },
+			{ 1, .7258, .2799 },
+			{ 1, .8002, .4794 },
+			{ 1, .8176, .4142 },
+			{ 1, .9970, .2189 },
+			{ 1, .4736, .6202 }
+		};
+
+
+		const double centers[num_fibs][3] = {
+			{ .8663, .0689, .1568 },
+			{ .2305, .4008, .2093 },
+			{ .1987, .8423, .2126 },
+			{ .6465, .7095, .4446 },
+			{ .6151, .9673, .2257 },
+			{ .1311, .9739, .4129 },
+			{ .8433, .0738, .2233 },
+			{ .5124, .2111, .0369 },
+			{ .4094, .7030, .6241 },
+			{ .1215, .8289, .3812 },
+			{ .1125, .9266, .6872 },
+			{ .7422, .4030, .6000 },
+			{ .0791, .3819, .9297 },
+			{ .1201, .7712, .0069 },
+			{ .9339, .2177, .1976 },
+			{ .3880, .1331, .9032 },
+			{ .7319, .7146, .8150 },
+			{ .8796, .2858, .6701 },
+			{ .1427, .9309, .9830 },
+			{ .1388, .3126, .8054 }
+		};
+
+		for (int i = 0; i < num_fibs; ++i) {
+			if(point_inside_cilinder_inf(dirs[i], centers[i],
+						     radius, coor)) {
+				// Is in a Fiber
+				return 1;
+			}
+		}
+		// Is in the Matrix
+		return 0;
+
 	}
 
 	cerr << "Invalid micro_type = " << micro_type << endl;
@@ -667,18 +759,21 @@ void micropp<tdim>::print_info() const
 		case(MIC_QUAD_FIB_XZ_BROKEN_X):
 			cout << "MIC_QUAD_FIB_XZ_BROKEN_X" << endl;
 			break;
-		case(MIC_SPHERES):
-			cout << "MIC_SPHERES" << endl;
+		case(MIC3D_SPHERES):
+			cout << "MIC3D_SPHERES" << endl;
 			break;
 		case(MIC3D_8):
 			cout << "MIC3D_8" << endl;
+			break;
+		case(MIC3D_FIBS_20_DISORDER):
+			cout << "MIC3D_FIBS_20_DISORDER" << endl;
 			break;
 		default:
 			cout << "NO TYPE" << endl;
 			break;
 	}
 
-	cout << "NO_COUPLING : " << num_no_coupling << " GPs" << endl;
+	cout << "LINEAR : " << num_no_coupling << " GPs" << endl;
 	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
 	cout << "FULL        : " << num_full        << " GPs" << endl;
 	cout << "USE A0      : " << use_A0 << endl;

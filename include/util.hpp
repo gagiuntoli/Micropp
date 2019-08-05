@@ -124,8 +124,25 @@ inline T dot_prod(const T v1[n], const T v2[n])
 }
 
 
-inline bool point_inf_cilinder(const double dir[3], const double center[3],
-			       const double radius, const double point[3])
+inline bool point_inside_sphere(const double center[3], const double radius,
+				const double point[3])
+{
+	/*
+	 * Returns <true> if <point> is inside the sphere with <center> and 
+	 * <radius>. Returns <false> otherwise.
+	 */
+
+	const double v[3] = {
+		point[0] - center[0],
+		point[1] - center[1],
+		point[2] - center[2]};
+
+	return (norm<double, 3>(v) < radius) ? true : false;
+}
+
+
+inline bool point_inside_cilinder_inf(const double dir[3], const double center[3],
+				      const double radius, const double point[3])
 {
 	/*
 	 * Returns <true> if <point> is inside the infinite cilinder with 
@@ -143,6 +160,7 @@ inline bool point_inf_cilinder(const double dir[3], const double center[3],
 	const double cos_tetha = dir_dot_v / (norm_dir * norm_v);
 	const double sin_tetha = sqrt(1 - cos_tetha * cos_tetha);
 	const double d_1 = norm_v * sin_tetha;
+
 	return (d_1 <= radius) ? true : false;
 }
 

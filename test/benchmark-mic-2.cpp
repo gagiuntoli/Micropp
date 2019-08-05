@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC3D_8;
+	mic_params.type = MIC3D_SPHERES;
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
@@ -88,6 +88,12 @@ int main(int argc, char **argv)
 
 	micropp<3> micro(mic_params);
 	//micro.print_info();
+
+	if (print) {
+		char filename[128];
+		snprintf(filename, 128, "micropp_%d", 0);
+		micro.output (0, filename);
+	}
 
 	ofstream file;
 	file.open("result.dat");

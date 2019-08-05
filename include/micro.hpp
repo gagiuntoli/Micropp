@@ -138,20 +138,25 @@ enum {
        	MIC_QUAD_FIB_XYZ,
        	MIC_QUAD_FIB_XZ,
 	MIC_QUAD_FIB_XZ_BROKEN_X,
-	MIC_SPHERES,
-	MIC3D_8
+	MIC3D_SPHERES,
+	MIC3D_8,
+	MIC3D_FIBS_20_DISORDER
 };
 
 /*
  * MIC_HOMOGENEOUS : Only one material (mat[0])
  *
+ * MIC3D_SPHERES : (2 materials) Random spheres.
+ *
  * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the
  * perimeter and a flat layer between the fibers.
+ *
+ * MIC3D_FIBS_20_DISORDER: (2 materiales) 20 fibers in random directions.
  *
  */
 
 enum {
-       	NO_COUPLING,
+       	LINEAR,
        	ONE_WAY,
        	FULL
 };
