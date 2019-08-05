@@ -72,7 +72,7 @@ inline void print_vec(const double *vec, int n, const char file_name[])
 }
 
 
-inline void mvp_2(const double m[2][2], const double x[2], double y[2])
+inline void mvp(const double m[2][2], const double x[2], double *y)
 {
 	for (int i = 0; i < 2; ++i) {
 		double tmp = 0.0;
@@ -83,18 +83,7 @@ inline void mvp_2(const double m[2][2], const double x[2], double y[2])
 }
 
 
-inline void mvp_3(const double m[2][2], const double x[2], double y[2])
-{
-	for (int i = 0; i < 2; ++i) {
-		double tmp = 0.0;
-		for (int j = 0; j < 2; ++j)
-			tmp += m[i][j] * x[j];
-		y[i] = tmp;
-	}
-}
-
-
-inline void mvp_3(const double m[3][3], const double x[3], double y[3])
+inline void mvp(const double m[3][3], const double x[3], double *y)
 {
 	for (int i = 0; i < 3; ++i) {
 		double tmp = 0.0;
@@ -102,6 +91,59 @@ inline void mvp_3(const double m[3][3], const double x[3], double y[3])
 			tmp += m[i][j] * x[j];
 		y[i] = tmp;
 	}
+}
+
+
+template<typename T, int n>
+inline double norm(const T v1[n])
+{
+	/*
+	 * Returns sqrt (v1[0] * v1[0] + ... + v1[n-1] * v1[n-1])
+	 */
+
+	T tmp = 0;
+	for (int i = 0; i < n; ++i) {
+		tmp += v1[i] * v1[i];
+	}
+	return sqrt((double)tmp);
+}
+
+
+template<typename T, int n>
+inline T dot_prod(const T v1[n], const T v2[n])
+{
+	/*
+	 * Returns v1[0] * v2[0] + ... + v1[n-1] * v2[n-1]
+	 */
+
+	T tmp = 0;
+	for (int i = 0; i < n; ++i) {
+		tmp += v1[i] * v2[i];
+	}
+	return tmp;
+}
+
+
+inline bool point_inf_cilinder(const double dir[3], const double center[3],
+			       const double radius, const double point[3])
+{
+	/*
+	 * Returns <true> if <point> is inside the infinite cilinder with 
+	 * <direction>, <center> and <radius>. Returns <false> otherwise.
+	 */
+
+	const double v[3] = {
+		point[0] - center[0],
+		point[1] - center[1],
+		point[2] - center[2]};
+
+	const double dir_dot_v = dot_prod<double, 3>(dir, v);
+	const double norm_dir = norm<double, 3>(dir);
+	const double norm_v = norm<double, 3>(v);
+	const double cos_tetha = dir_dot_v / (norm_dir * norm_v);
+	const double sin_tetha = sqrt(1 - cos_tetha * cos_tetha);
+	const double d_1 = norm_v * sin_tetha;
+	return (d_1 <= radius) ? true : false;
 }
 
 
