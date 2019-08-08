@@ -85,12 +85,10 @@ module libmicropp
        real(c_double), intent(out), dimension(*) :: ctan
      end subroutine micropp3_get_ctan
 
-     subroutine micropp3_homogenize(this, homog_type) bind(C)
-       use, intrinsic :: iso_c_binding, only: c_int
+     subroutine micropp3_homogenize(this) bind(C)
        import micropp3
        implicit none
        type(micropp3), intent(inout) :: this
-       integer(c_int), intent(in), value :: homog_type
      end subroutine micropp3_homogenize
 
      logical(c_bool) function micropp3_is_non_linear(this, gp_id) bind(C)

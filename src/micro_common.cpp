@@ -21,6 +21,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include "micro.hpp"
 #include "material.hpp"
 
@@ -49,6 +50,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	wg(((tdim == 3) ? dx * dy * dz : dx * dy) / npe),
 	vol_tot((tdim == 3) ? lx * ly * lz : lx * ly),
 	ivol(1.0 / (wg * npe)),
+	evol((tdim == 3) ? dx * dy * dz : dx * dy),
 	micro_type(params.type), nvars(nelem * npe * NUM_VAR_GP),
 
 	nr_max_its(params.nr_max_its),
@@ -125,6 +127,8 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 			}
 		}
 	}
+
+	calc_volume_fractions();
 
 	if (params.use_A0) {
 #ifdef _OPENMP
@@ -815,8 +819,10 @@ void micropp<tdim>::print_info() const
 			cout << "NO TYPE" << endl;
 			break;
 	}
+	cout << "MATRIX [%]  : " << Vm << endl;
+	cout << "FIBER  [%]  : " << Vf << endl;
 
-	cout << "LINEAR : " << num_no_coupling << " GPs" << endl;
+	cout << "LINEAR      : " << num_no_coupling << " GPs" << endl;
 	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
 	cout << "FULL        : " << num_full        << " GPs" << endl;
 	cout << "USE A0      : " << use_A0 << endl;
@@ -904,6 +910,28 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 
 	for (int v = 0; v < nvoi; ++v)
 		stress_ave[v] /= vol_tot;
+}
+
+
+template <int tdim>
+void micropp<tdim>::calc_volume_fractions()
+{
+	Vm = 0.0;
+	Vf = 0.0;
+	for (int ez = 0; ez < nez; ++ez) {
+		for (int ey = 0; ey < ney; ++ey) {
+			for (int ex = 0; ex < nex; ++ex) {
+				const int e_i = glo_elem(ex, ey, ez);
+				if (elem_type[e_i] == 0) {
+					Vm += evol;
+				} else if (elem_type[e_i] >= 1) {
+					Vf += evol;
+				}
+			}
+		}
+	}
+	Vm /= vol_tot;
+	Vf /= vol_tot;
 }
 
 

@@ -101,7 +101,7 @@ program test3d_3
         end if
 
         call micropp3_set_strain(micro, gp_id, eps)
-        call micropp3_homogenize(micro, 1)
+        call micropp3_homogenize(micro)
 
         call micropp3_get_stress(micro, gp_id, sig)
         call micropp3_get_ctan(micro, gp_id, ctan)

@@ -82,10 +82,10 @@ extern "C" {
 		ptr->get_ctan(gp, ctan);
 	}
 
-	void micropp3_homogenize(micropp3 *self, const int homog_type)
+	void micropp3_homogenize(micropp3 *self)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->homogenize(homog_type);
+		ptr->homogenize();
 	}
 
 	int micropp3_get_cost(const micropp3 *self, int gp_id)

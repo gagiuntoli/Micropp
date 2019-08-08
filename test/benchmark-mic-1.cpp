@@ -84,10 +84,10 @@ int main(int argc, char **argv)
 	mic_params.calc_ctan_lin = false;
 	mic_params.lin_stress = false;
 
-	mic_params.print();
+	//mic_params.print();
 
 	micropp<3> micro(mic_params);
-	//micro.print_info();
+	micro.print_info();
 
 	if (print) {
 		char filename[128];

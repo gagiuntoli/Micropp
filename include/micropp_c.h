@@ -49,7 +49,7 @@ extern "C" {
 	void micropp3_get_ctan(const struct micropp3 *self, const int gp_id,
 			       double *ctan);
 
-	void micropp3_homogenize(struct micropp3 *self, const int homog_type);
+	void micropp3_homogenize(struct micropp3 *self);
 
 	void micropp3_update_vars(struct micropp3 *self);
 

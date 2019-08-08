@@ -158,12 +158,8 @@ enum {
 enum {
        	LINEAR,
        	ONE_WAY,
-       	FULL
-};
-
-enum {
-	HOMOG_LINEAR,
-	HOMOG_NON_LINEAR
+       	FULL,
+       	RULE_MIXTURE_1
 };
 
 
@@ -184,7 +180,7 @@ class micropp {
 		const double lx, ly, lz;
 		const double dx, dy, dz;
 		const double vol_tot;
-		const double wg, ivol;
+		const double wg, ivol, evol;
 
 		const int micro_type, nvars;
 		const int nsubiterations;
@@ -230,6 +226,10 @@ class micropp {
 		int its_with_A0;
 		ell_matrix *A0;
 
+		/* Rule of Mixture Stuff (for 2 mats micro-structure only) */
+		double Vm;  // Volume fraction of Matrix
+		double Vf;  // Volume fraction of Fiber
+
 		/* IO files */
 		const bool write_log_flag;
 		int log_id = 0;
@@ -243,6 +243,7 @@ class micropp {
 
 		void homogenize_linear(gp_t<tdim> *gp_ptr);
 		void homogenize_non_linear(gp_t<tdim> *gp_ptr);
+		void homogenize_rule_mixture_1(gp_t<tdim> *gp_ptr);
 
 		void calc_ctan_lin();
 
@@ -281,6 +282,8 @@ class micropp {
 		void calc_fields(double *u, double *vars_old);
 
 		void calc_bmat(int gp, double bmat[nvoi][npe * dim]) const;
+
+		void calc_volume_fractions();
 
 		bool calc_vars_new(const double *u, const double *vars_old,
 				   double *vars_new) const;
@@ -328,7 +331,7 @@ class micropp {
 
 		void get_ctan(const int gp_id, double *ctan) const;
 
-		void homogenize(const int homog_type = HOMOG_NON_LINEAR);
+		void homogenize();
 
 		/* Extras */
 

@@ -56,7 +56,7 @@ void micropp<tdim>::get_ctan(const int gp_id, double *ctan) const
 
 
 template <int tdim>
-void micropp<tdim>::homogenize(const int homog_type)
+void micropp<tdim>::homogenize()
 {
 	INST_START;
 
@@ -65,8 +65,11 @@ void micropp<tdim>::homogenize(const int homog_type)
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
-		if ((homog_type == HOMOG_LINEAR && gp_ptr->coupling == ONE_WAY)
-		    || gp_ptr->coupling == LINEAR) {
+		if (gp_ptr->coupling == RULE_MIXTURE_1) {
+
+			homogenize_rule_mixture_1(gp_ptr);
+
+		} else if (gp_ptr->coupling == LINEAR) {
 
 			/*
 			 * Computational cheap calculation
@@ -94,7 +97,8 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr)
 	memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 	for (int i = 0; i < nvoi; ++i) {
 		for (int j = 0; j < nvoi; ++j) {
-			gp_ptr->stress[i] += ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
+			gp_ptr->stress[i] += 
+				ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
 		}
 	}
 }
@@ -208,6 +212,13 @@ void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 	free(u);
 	free(du);
 	free(vars_new_aux);
+}
+
+
+template<int tdim>
+void micropp<tdim>::homogenize_rule_mixture_1(gp_t<tdim> * gp_ptr)
+{
+	
 }
 
 
