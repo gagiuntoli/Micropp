@@ -88,6 +88,12 @@ extern "C" {
 		ptr->homogenize();
 	}
 
+	void micropp3_homogenize_linear(micropp3 *self)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->homogenize_linear();
+	}
+
 	int micropp3_get_cost(const micropp3 *self, int gp_id)
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;

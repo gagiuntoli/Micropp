@@ -341,6 +341,8 @@ class micropp {
 
 		void homogenize();
 
+		void homogenize_linear();
+
 		/* Extras */
 
 		int is_non_linear(const int gp_id) const;

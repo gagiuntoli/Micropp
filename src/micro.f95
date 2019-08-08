@@ -91,6 +91,12 @@ module libmicropp
        type(micropp3), intent(inout) :: this
      end subroutine micropp3_homogenize
 
+     subroutine micropp3_homogenize_linear(this) bind(C)
+       import micropp3
+       implicit none
+       type(micropp3), intent(inout) :: this
+     end subroutine micropp3_homogenize_linear
+
      logical(c_bool) function micropp3_is_non_linear(this, gp_id) bind(C)
        use, intrinsic :: iso_c_binding, only: c_bool, c_int
        import micropp3

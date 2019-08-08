@@ -58,6 +58,26 @@ void micropp<tdim>::get_ctan(const int gp_id, double *ctan) const
 
 
 template <int tdim>
+void micropp<tdim>::homogenize_linear()
+{
+	INST_START;
+
+#pragma omp parallel for schedule(dynamic,1)
+	for (int igp = 0; igp < ngp; ++igp) {
+
+		gp_t<tdim> *gp_ptr = &gp_list[igp];
+
+		/*
+		 * Computational cheap calculation
+		 * stress = ctan_lin * strain
+		 */
+
+		homogenize_linear(gp_ptr);
+	}
+}
+
+
+template <int tdim>
 void micropp<tdim>::homogenize()
 {
 	INST_START;
