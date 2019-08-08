@@ -82,27 +82,29 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		if(params.coupling != nullptr) {
 			gp_list[gp].coupling = params.coupling[gp];
 			switch (params.coupling[gp]) {
-				case LINEAR:
-					num_no_coupling ++;
+				case FE_LINEAR:
+					num_fe_linear ++;
 					break;
-				case ONE_WAY:
-					num_one_way ++;
+				case FE_ONE_WAY:
+					num_fe_one_way ++;
 					break;
-				case FULL:
-					num_full ++;
+				case FE_FULL:
+					num_fe_full ++;
 					break;
 			}
 		} else {
-			gp_list[gp].coupling = ONE_WAY;
-			num_one_way ++;
+			gp_list[gp].coupling = FE_ONE_WAY;
+			num_fe_one_way ++;
 		}
+
+		num_fe_points = num_fe_linear + num_fe_one_way + num_fe_full;
 
 		gp_list[gp].nndim = nndim;
 		gp_list[gp].nvars = nvars;
 
 		if (params.coupling == nullptr ||
-		    (params.coupling[gp] == ONE_WAY ||
-		     params.coupling[gp] == FULL)) {
+		    (params.coupling[gp] == FE_ONE_WAY ||
+		     params.coupling[gp] == FE_FULL)) {
 			gp_list[gp].allocate_u();
 		}
 	}
@@ -140,8 +142,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 #pragma omp parallel for schedule(dynamic,1)
 		for (int i = 0; i < num_of_A0s; ++i) {
-			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL,
-				 CG_REL_TOL, CG_MAX_ITS);
+			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 			double *u = (double *) calloc(nndim, sizeof(double));
 			assembly_mat(&A0[i], u, nullptr);
 			free(u);
@@ -150,14 +151,27 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 	/* Average tangent constitutive tensor initialization */
 
-	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
+	memset(ctan_lin_fe, 0.0, nvoi * nvoi * sizeof(double));
 
 	if (calc_ctan_lin_flag) {
-		calc_ctan_lin();
+		if (num_fe_points > 0) {
+			calc_ctan_lin_fe_models();
+		}
 	}
 
 	for (int gp = 0; gp < ngp; ++gp) {
-		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
+		if (gp_list[gp].coupling == FE_LINEAR || gp_list[gp].coupling == FE_ONE_WAY ||
+		    gp_list[gp].coupling == FE_FULL) {
+
+			memcpy(gp_list[gp].ctan, ctan_lin_fe, nvoi * nvoi * sizeof(double));
+
+		} else if (gp_list[gp].coupling == RULE_MIXTURE_LIN_1) {
+
+			double ctan[nvoi * nvoi];
+			calc_ctan_lin_rule_mixture_lin_1(ctan);
+			memcpy(gp_list[gp].ctan, ctan, nvoi * nvoi * sizeof(double));
+
+		}
 	}
 
 	/* Open the log file */
@@ -170,9 +184,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		strcpy(filename, file_name_string.c_str());
 
 		ofstream_log.open(filename, ios::out);
-		ofstream_log
-			<< "#<gp_id>  <non-linear>  <cost>  <converged>"
-			<< endl;
+		ofstream_log << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
 	}
 
 }
@@ -257,7 +269,7 @@ int micropp<tdim>::get_non_linear_gps(void) const
 
 
 template <int tdim>
-void micropp<tdim>::calc_ctan_lin()
+void micropp<tdim>::calc_ctan_lin_fe_models()
 {
 
 #pragma omp parallel for schedule(dynamic,1)
@@ -280,7 +292,7 @@ void micropp<tdim>::calc_ctan_lin()
 		calc_ave_stress(u, sig);
 
 		for (int v = 0; v < nvoi; ++v) {
-			ctan_lin[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
+			ctan_lin_fe[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
 		}
 
 		ell_free(&A);
@@ -288,6 +300,12 @@ void micropp<tdim>::calc_ctan_lin()
 		free(u);
 		free(du);
 	}
+}
+
+
+template <int tdim>
+void micropp<tdim>::calc_ctan_lin_rule_mixture_lin_1(double ctan[nvoi * nvoi])
+{
 }
 
 
@@ -819,15 +837,17 @@ void micropp<tdim>::print_info() const
 			cout << "NO TYPE" << endl;
 			break;
 	}
-	cout << "MATRIX [%]  : " << Vm << endl;
-	cout << "FIBER  [%]  : " << Vf << endl;
 
-	cout << "LINEAR      : " << num_no_coupling << " GPs" << endl;
-	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
-	cout << "FULL        : " << num_full        << " GPs" << endl;
-	cout << "USE A0      : " << use_A0 << endl;
-	cout << "NUM SUBITS  : " << nsubiterations << endl;
-	cout << "MPI RANK    : " << mpi_rank << endl;
+	cout << "MATRIX [%]        : " << Vm << endl;
+	cout << "FIBER  [%]        : " << Vf << endl;
+
+	cout << "FE_LINEAR         : " << num_fe_linear    << " GPs" << endl;
+	cout << "FE_ONE_WAY        : " << num_fe_one_way   << " GPs" << endl;
+	cout << "FE_FULL           : " << num_fe_full      << " GPs" << endl;
+	cout << "USE A0            : " << use_A0 << endl;
+	cout << "NUM SUBITS        : " << nsubiterations << endl;
+	cout << "MPI RANK          : " << mpi_rank << endl;
+
 #ifdef _OPENACC
 	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
@@ -856,10 +876,10 @@ void micropp<tdim>::print_info() const
 	}
 
 	cout << endl;
-	cout << "ctan lin = " << endl;
+	cout << "ctan_lin_fe = " << endl;
 	for (int i = 0; i < 6; ++i) {
 		for (int j = 0; j < 6; ++j) {
-			cout << ctan_lin[i * 6 + j] << "\t";
+			cout << ctan_lin_fe[i * 6 + j] << "\t";
 		}
 		cout << endl;
 	}

@@ -156,10 +156,10 @@ enum {
  */
 
 enum {
-       	LINEAR,
-       	ONE_WAY,
-       	FULL,
-       	RULE_MIXTURE_1
+       	FE_LINEAR,
+       	FE_ONE_WAY,
+       	FE_FULL,
+       	RULE_MIXTURE_LIN_1
 };
 
 
@@ -193,7 +193,7 @@ class micropp {
 		double geo_params[num_geo_params];
 
 		material_t *material_list[MAX_MATERIALS];
-		double ctan_lin[nvoi * nvoi];
+		double ctan_lin_fe[nvoi * nvoi];
 
 		int *elem_type;
 		double *elem_stress;
@@ -217,9 +217,10 @@ class micropp {
 		const bool lin_stress;
 
 		/* Number of micro-problems depending on the type */
-		int num_no_coupling = 0;
-		int num_one_way = 0;
-		int num_full = 0;
+		int num_fe_linear = 0;
+		int num_fe_one_way = 0;
+		int num_fe_full = 0;
+		int num_fe_points = 0;
 
 		/* Linear jacobian for optimization */
 		bool use_A0;
@@ -241,11 +242,18 @@ class micropp {
 
 		/* Private function members */
 
+		/* Linear homogenizations */
 		void homogenize_linear(gp_t<tdim> *gp_ptr);
-		void homogenize_non_linear(gp_t<tdim> *gp_ptr);
+
+		/* FE-based homogenizations */
+		void homogenize_fe_one_way(gp_t<tdim> *gp_ptr);
+		void homogenize_fe_full(gp_t<tdim> *gp_ptr);
+
+		/* Rule of mixture (cheap) */
 		void homogenize_rule_mixture_1(gp_t<tdim> *gp_ptr);
 
-		void calc_ctan_lin();
+		void calc_ctan_lin_fe_models();
+		void calc_ctan_lin_rule_mixture_lin_1(double ctan[nvoi * nvoi]);
 
 		material_t *get_material(const int e) const;
 
