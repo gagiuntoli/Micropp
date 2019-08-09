@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 	const int n = atoi(argv[1]);
 
 	const int mic_selected = atoi(argv[2]);
-	if (mic_selected < 0 || mic_selected > MIC3D_8) {
+	if (mic_selected < 0 || mic_selected > MIC3D_FIBS_20_DISORDER) {
 		cerr << "<mic_type = [0 ... 8]>" << endl;
 		exit(1);
 	}

@@ -114,7 +114,7 @@ inline bool point_inside_sphere(const double center[3], const double radius,
 				const double point[3])
 {
 	/*
-	 * Returns <true> if <point> is inside the sphere with <center> and 
+	 * Returns <true> if <point> is inside the sphere with <center> and
 	 * <radius>. Returns <false> otherwise.
 	 */
 
@@ -131,7 +131,7 @@ inline bool point_inside_cilinder_inf(const double dir[3], const double center[3
 				      const double radius, const double point[3])
 {
 	/*
-	 * Returns <true> if <point> is inside the infinite cilinder with 
+	 * Returns <true> if <point> is inside the infinite cilinder with
 	 * <direction>, <center> and <radius>. Returns <false> otherwise.
 	 */
 

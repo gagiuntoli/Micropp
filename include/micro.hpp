@@ -144,6 +144,8 @@ enum {
 };
 
 /*
+ * MIC_SPHERES : (2 materials) One sphere in the middle
+ *
  * MIC_HOMOGENEOUS : Only one material (mat[0])
  *
  * MIC3D_SPHERES : (2 materials) Random spheres.

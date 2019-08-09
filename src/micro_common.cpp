@@ -423,10 +423,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
 		double tmp = 0.;
-		for (int i = 0; i < dim; ++i)
-			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
-
-		return (tmp < rad * rad);
+		return point_inside_sphere(center, rad, coor);
 
 	} else if (micro_type == MIC_LAYER_Y) { // 2 flat layers in y dir
 
@@ -437,26 +434,23 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
-		double tmp = 0.;
-		for (int i = 0; i < 2; ++i)
-			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
+		const double dir[3] = { 0, 0, 1 };
 
-		return (tmp < rad * rad);
+		return point_inside_cilinder_inf(dir, center, rad, coor);
 
 	} else if (micro_type == MIC_CILI_FIB_XZ) { // 2 cilindrical fibers one in x and z dirs
 
 		const double rad = geo_params[0];
 		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
-		double tmp_1 = 0.;
-		for (int i = 0; i < 2; ++i)
-			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
-
 		const double cen_2[3] = { lx / 2., ly * .25, lz / 2. };
-		double tmp_2 = 0.;
-		for (int i = 1; i < 3; ++i)
-			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
+		const double dir_x[3] = { 1, 0, 0 };
+		const double dir_z[3] = { 0, 0, 1 };
 
-		return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
+		if (point_inside_cilinder_inf(dir_z, cen_1, rad, coor) ||
+		    point_inside_cilinder_inf(dir_x, cen_2, rad, coor)) {
+			return 1;
+		}
+		return 0;
 
 	} else if (micro_type == MIC_QUAD_FIB_XYZ) {
 
@@ -608,8 +602,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 
 		for (int i = 0; i < num_spheres; ++i) {
-			if (point_inside_sphere(centers[i], rads[i],
-						coor)) {
+			if (point_inside_sphere(centers[i], rads[i], coor)) {
 				return 1;
 			}
 		}
@@ -631,64 +624,31 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		const double width_flat_layer = geo_params[1];
 		const double width_cili_layer = geo_params[2];
 
-		const double cen_1[3] = { lx * .25, ly * .75, -1000.0 };
-		double tmp_1 = 0.0;
-		for (int i = 0; i < 2; ++i) {
-			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
+		const double cen_1[3] = { lx * .25, ly * .75, 0.0 };
+		const double cen_2[3] = { lx * .75, ly * .75, 0.0 };
+
+		const double cen_3[3] = { 0.0, ly * .25, lz * .25 };
+		const double cen_4[3] = { 0.0, ly * .25, lz * .75 };
+
+		const double dir_x[3] = { 1, 0, 0 };
+		const double dir_z[3] = { 0, 0, 1 };
+
+		if(point_inside_cilinder_inf(dir_z, cen_1, rad_cilinder, coor) ||
+		   point_inside_cilinder_inf(dir_z, cen_2, rad_cilinder, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_3, rad_cilinder, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_4, rad_cilinder, coor)) {
+			return 1;
 		}
 
-		const double cen_2[3] = { -1000.0, ly * .25, lz * .25 };
-		double tmp_2 = 0.0;
-		for (int i = 1; i < 3; ++i) {
-			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
-		}
-
-		const double cen_3[3] = { lx * .75, ly * .75, -1000.0 };
-		double tmp_3 = 0.0;
-		for (int i = 0; i < 2; ++i) {
-			tmp_3 += (cen_3[i] - coor[i]) * (cen_3[i] - coor[i]);
-		}
-
-		const double cen_4[3] = { -1000.0, ly * .25, lz * .75 };
-		double tmp_4 = 0.0;
-		for (int i = 1; i < 3; ++i) {
-			tmp_4 += (cen_4[i] - coor[i]) * (cen_4[i] - coor[i]);
-		}
-
-		if (tmp_1 < pow(rad_cilinder, 2) || tmp_2 < pow(rad_cilinder, 2) ||
-		    tmp_3 < pow(rad_cilinder, 2) || tmp_4 < pow(rad_cilinder, 2)) {
-
-			return 0;
-
-		} else if ((tmp_1 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_1 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((tmp_2 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_2 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((tmp_3 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_3 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((tmp_4 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_4 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((coor[1] < (ly / 2 + width_flat_layer / 2)) &&
-			   (coor[1] > (ly / 2 - width_flat_layer / 2))) {
-
-			return 1;
-
-		} else {
-
+		if(point_inside_cilinder_inf(dir_z, cen_1, rad_cilinder + width_cili_layer, coor) ||
+		   point_inside_cilinder_inf(dir_z, cen_2, rad_cilinder + width_cili_layer, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_3, rad_cilinder + width_cili_layer, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_4, rad_cilinder + width_cili_layer, coor)) {
 			return 2;
 		}
+
+		return 0;
+
 
 	} else if (micro_type == MIC3D_FIBS_20_DISORDER) {
 
@@ -743,13 +703,10 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		};
 
 		for (int i = 0; i < num_fibs; ++i) {
-			if(point_inside_cilinder_inf(dirs[i], centers[i],
-						     radius, coor)) {
-				// Is in a Fiber
+			if(point_inside_cilinder_inf(dirs[i], centers[i], radius, coor)) {
 				return 1;
 			}
 		}
-		// Is in the Matrix
 		return 0;
 
 	}
