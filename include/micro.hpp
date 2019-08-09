@@ -161,7 +161,7 @@ enum {
        	FE_LINEAR,
        	FE_ONE_WAY,
        	FE_FULL,
-       	RULE_MIXTURE_LIN_1
+       	MIXTURE_RULE_CHAMIS
 };
 
 
@@ -238,24 +238,25 @@ class micropp {
 		int log_id = 0;
 		ofstream ofstream_log;
 
-		/* GPU number of device selection */
+		/* GPU number for device selection */
 		int gpu_id = 0;
 
 
 		/* Private function members */
 
-		/* Linear homogenizations */
+		/*
+		 * Linear homogenizations 
+		 * Applies to FE RVE model and Mixture rules
+		 *
+		 */
 		void homogenize_linear(gp_t<tdim> *gp_ptr);
 
 		/* FE-based homogenizations */
 		void homogenize_fe_one_way(gp_t<tdim> *gp_ptr);
 		void homogenize_fe_full(gp_t<tdim> *gp_ptr);
 
-		/* Rule of mixture (cheap) */
-		void homogenize_rule_mixture_1(gp_t<tdim> *gp_ptr);
-
 		void calc_ctan_lin_fe_models();
-		void calc_ctan_lin_rule_mixture_lin_1(double ctan[nvoi * nvoi]);
+		void calc_ctan_lin_mixture_rule_Chamis(double ctan[nvoi * nvoi]);
 
 		material_t *get_material(const int e) const;
 

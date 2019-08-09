@@ -25,6 +25,7 @@ set(testsources
 	benchmark-mic-1.cpp
 	benchmark-mic-2.cpp
 	benchmark-mic-3.cpp
+	benchmark-mic-4.cpp
 	)
 
 # Iterate over the list above

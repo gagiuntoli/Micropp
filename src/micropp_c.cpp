@@ -53,6 +53,8 @@ extern "C" {
 		params.write_log = true;
 
 		self->ptr = new micropp<3>(params);
+
+		delete [] params.coupling;
 	}
 
 	void micropp3_free(micropp3 *self)

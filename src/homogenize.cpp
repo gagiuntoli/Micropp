@@ -87,11 +87,16 @@ void micropp<tdim>::homogenize()
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
-		if (gp_ptr->coupling == FE_LINEAR || gp_ptr->coupling == RULE_MIXTURE_LIN_1) {
+		if (gp_ptr->coupling == FE_LINEAR ||
+		    gp_ptr->coupling == MIXTURE_RULE_CHAMIS) {
 
 			/*
 			 * Computational cheap calculation
 			 * stress = ctan_lin * strain
+			 *
+			 * All mixture rules are linear in Micropp
+			 * so the homogenization of the stress tensor
+			 * is this simple and cheap procedure.
 			 */
 
 			homogenize_linear(gp_ptr);
@@ -314,13 +319,6 @@ void micropp<tdim>::homogenize_fe_full(gp_t<tdim> * gp_ptr)
 	free(u);
 	free(du);
 	free(vars_new_aux);
-}
-
-
-template<int tdim>
-void micropp<tdim>::homogenize_rule_mixture_1(gp_t<tdim> * gp_ptr)
-{
-	
 }
 
 

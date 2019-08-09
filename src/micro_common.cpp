@@ -103,8 +103,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		gp_list[gp].nvars = nvars;
 
 		if (params.coupling == nullptr ||
-		    (params.coupling[gp] == FE_ONE_WAY ||
-		     params.coupling[gp] == FE_FULL)) {
+		    (params.coupling[gp] == FE_ONE_WAY || params.coupling[gp] == FE_FULL)) {
 			gp_list[gp].allocate_u();
 		}
 	}
@@ -160,15 +159,16 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	}
 
 	for (int gp = 0; gp < ngp; ++gp) {
+
 		if (gp_list[gp].coupling == FE_LINEAR || gp_list[gp].coupling == FE_ONE_WAY ||
 		    gp_list[gp].coupling == FE_FULL) {
 
 			memcpy(gp_list[gp].ctan, ctan_lin_fe, nvoi * nvoi * sizeof(double));
 
-		} else if (gp_list[gp].coupling == RULE_MIXTURE_LIN_1) {
+		} else if (gp_list[gp].coupling == MIXTURE_RULE_CHAMIS) {
 
 			double ctan[nvoi * nvoi];
-			calc_ctan_lin_rule_mixture_lin_1(ctan);
+			calc_ctan_lin_mixture_rule_Chamis(ctan);
 			memcpy(gp_list[gp].ctan, ctan, nvoi * nvoi * sizeof(double));
 
 		}
@@ -261,9 +261,11 @@ template <int tdim>
 int micropp<tdim>::get_non_linear_gps(void) const
 {
 	int count = 0;
-	for (int gp = 0; gp < ngp; ++gp)
-		if (gp_list[gp].allocated)
+	for (int gp = 0; gp < ngp; ++gp) {
+		if (gp_list[gp].allocated) {
 			count ++;
+		}
+	}
 	return count;
 }
 
@@ -304,8 +306,63 @@ void micropp<tdim>::calc_ctan_lin_fe_models()
 
 
 template <int tdim>
-void micropp<tdim>::calc_ctan_lin_rule_mixture_lin_1(double ctan[nvoi * nvoi])
+void micropp<tdim>::calc_ctan_lin_mixture_rule_Chamis(double ctan[nvoi * nvoi])
 {
+
+ const double Em = material_list[0]->E;
+ const double nu_m = material_list[0]->nu;
+ const double Gm = Em / (2 * (1 + nu_m));
+
+ const double Ef = material_list[1]->E;
+ const double nu_f = material_list[1]->nu;
+ const double Gf = Ef / (2 * (1 + nu_f));
+
+ const double E11 = Vf * Ef + Vm * Em;
+ const double E22 = Em / (1 - sqrt(Vf) * (1 - Em / Ef));
+ const double nu_12 = Vf * nu_f + Vm * nu_m;
+ const double G12 = Gm / (1 - sqrt(Vf) * (1 - Gm / Gf));
+
+ const double S[3][3] = {
+	 {       1 / E11, - nu_12 / E11, - nu_12 / E11 },
+	 { - nu_12 / E11,       1 / E22, - nu_12 / E22 },
+	 { - nu_12 / E11, - nu_12 / E22,       1 / E22 },
+ };
+
+ double det =
+	 S[0][0] * (S[1][1] * S[2][2] - S[2][1] * S[1][2]) -
+	 S[0][1] * (S[1][0] * S[2][2] - S[2][0] * S[1][2]) +
+	 S[0][2] * (S[1][0] * S[2][1] - S[2][0] * S[1][1]);
+
+ double c00 = +(S[1][1] * S[2][2] - S[2][1] * S[1][2]);
+ double c01 = -(S[1][0] * S[2][2] - S[2][0] * S[1][2]);
+ double c02 = +(S[1][0] * S[2][1] - S[2][0] * S[1][1]);
+
+ double c10 = -(S[0][1] * S[2][2] - S[2][1] * S[0][2]);
+ double c11 = +(S[0][0] * S[2][2] - S[2][0] * S[0][2]);
+ double c12 = -(S[0][0] * S[2][1] - S[2][0] * S[0][1]);
+
+ double c20 = +(S[0][1] * S[1][2] - S[1][1] * S[0][2]);
+ double c21 = -(S[0][0] * S[1][2] - S[1][0] * S[0][2]);
+ double c22 = +(S[0][0] * S[1][1] - S[1][0] * S[0][1]);
+
+ memset (ctan, 0, nvoi * nvoi * sizeof(double));
+
+ ctan[0 * nvoi + 0] = c00 / det;
+ ctan[0 * nvoi + 1] = c01 / det;
+ ctan[0 * nvoi + 2] = c02 / det;
+
+ ctan[1 * nvoi + 0] = c10 / det;
+ ctan[1 * nvoi + 1] = c11 / det;
+ ctan[1 * nvoi + 2] = c12 / det;
+
+ ctan[2 * nvoi + 0] = c12 / det;
+ ctan[2 * nvoi + 1] = c21 / det;
+ ctan[2 * nvoi + 2] = c22 / det;
+
+ ctan[3 * nvoi + 3] = G12;
+ ctan[4 * nvoi + 4] = G12;
+ ctan[5 * nvoi + 5] = G12;
+
 }
 
 
@@ -875,12 +932,14 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 					double stress_gp[nvoi], strain_gp[nvoi];
 					get_strain(u, gp, strain_gp, ex, ey, ez);
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-					for (int v = 0; v < nvoi; ++v)
+					for (int v = 0; v < nvoi; ++v) {
 						stress_aux[v] += stress_gp[v] * wg;
+					}
 
 				}
-				for (int v = 0; v < nvoi; ++v)
+				for (int v = 0; v < nvoi; ++v) {
 					stress_ave[v] += stress_aux[v];
+				}
 			}
 		}
 	}
@@ -927,18 +986,21 @@ void micropp<tdim>::calc_ave_strain(const double *u, double strain_ave[nvoi]) co
 					double strain_gp[nvoi];
 
 					get_strain(u, gp, strain_gp, ex, ey, ez);
-					for (int v = 0; v < nvoi; ++v)
+					for (int v = 0; v < nvoi; ++v) {
 						strain_aux[v] += strain_gp[v] * wg;
+					}
 				}
 
-				for (int v = 0; v < nvoi; v++)
+				for (int v = 0; v < nvoi; v++) {
 					strain_ave[v] += strain_aux[v];
+				}
 			}
 		}
 	}
 
-	for (int v = 0; v < nvoi; v++)
+	for (int v = 0; v < nvoi; v++) {
 		strain_ave[v] /= vol_tot;
+	}
 }
 
 
