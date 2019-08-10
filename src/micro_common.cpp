@@ -487,6 +487,14 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		const double width = geo_params[0];
 		return (coor[1] < width);
 
+	} else if (micro_type == MIC_CILI_FIB_X) { // a cilindrical fiber in x dir
+
+		const double rad = geo_params[0];
+		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
+		const double dir[3] = { 1, 0, 0 };
+
+		return point_inside_cilinder_inf(dir, center, rad, coor);
+
 	} else if (micro_type == MIC_CILI_FIB_Z) { // a cilindrical fiber in z dir
 
 		const double rad = geo_params[0];
@@ -822,6 +830,9 @@ void micropp<tdim>::print_info() const
 			break;
 		case(MIC_LAYER_Y):
 			cout << "MIC_LAYER_Y" << endl;
+			break;
+		case(MIC_CILI_FIB_X):
+			cout << "MIC_CILI_FIB_X" << endl;
 			break;
 		case(MIC_CILI_FIB_Z):
 			cout << "MIC_CILI_FIB_Z" << endl;

@@ -133,6 +133,7 @@ enum {
 	MIC_HOMOGENEOUS,
        	MIC_SPHERE,
        	MIC_LAYER_Y,
+       	MIC_CILI_FIB_X,
        	MIC_CILI_FIB_Z,
        	MIC_CILI_FIB_XZ,
        	MIC_QUAD_FIB_XYZ,

@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC3D_8;
+	mic_params.type = MIC_CILI_FIB_X;
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 
 	auto start = high_resolution_clock::now();
 
-	double sig[6];
+	double sig[6], ctan[36];
 	double eps[6] = { 0. };
 
 	cout << scientific;
@@ -135,6 +135,16 @@ int main(int argc, char **argv)
 		micro.get_stress(0, sig);
 		for (int i = 0; i < 6; ++i) {
 			cout << sig[i] << "\t";
+		}
+		cout << endl;
+
+		micro.get_ctan(0, ctan);
+		cout << "ctan = " << endl;
+		for (int i = 0; i < 6; ++i) {
+			for (int j = 0; j < 6; ++j) {
+				cout << ctan[i * 6 + j] << "\t";
+			}
+			cout << endl;
 		}
 		cout << endl;
 
