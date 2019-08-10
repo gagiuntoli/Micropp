@@ -98,6 +98,7 @@ int main(int argc, char **argv)
 
 	ofstream file;
 	file.open("result.dat");
+	file << scientific << setw(14);
 
 	auto start = high_resolution_clock::now();
 
@@ -150,8 +151,7 @@ int main(int argc, char **argv)
 
 		micro.update_vars();
 
-		file    << setw(14)
-			<< eps[dir] << "\t"
+		file    << eps[dir] << "\t"
 			<< sig[dir] << "\t" << endl;
 
 		if (print) {

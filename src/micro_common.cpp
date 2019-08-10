@@ -355,7 +355,7 @@ void micropp<tdim>::calc_ctan_lin_mixture_rule_Chamis(double ctan[nvoi * nvoi])
  ctan[1 * nvoi + 1] = c11 / det;
  ctan[1 * nvoi + 2] = c12 / det;
 
- ctan[2 * nvoi + 0] = c12 / det;
+ ctan[2 * nvoi + 0] = c20 / det;
  ctan[2 * nvoi + 1] = c21 / det;
  ctan[2 * nvoi + 2] = c22 / det;
 
@@ -479,7 +479,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
-		double tmp = 0.;
+
 		return point_inside_sphere(center, rad, coor);
 
 	} else if (micro_type == MIC_LAYER_Y) { // 2 flat layers in y dir
@@ -678,10 +678,10 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		/*
 		 * returns
-		 * 0 : for the cilinders
-		 * 1 : for the layer around the cilinders
-		 * 1 : for the flat layer
-		 * 2 : for the matrix
+		 * 0 : for the matrix
+		 * 1 : for the cilinders
+		 * 2 : for the layer around the cilinders
+		 * 2 : for the flat layer
 		 *
 		 */
 
@@ -708,7 +708,8 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		if(point_inside_cilinder_inf(dir_z, cen_1, rad_cilinder + width_cili_layer, coor) ||
 		   point_inside_cilinder_inf(dir_z, cen_2, rad_cilinder + width_cili_layer, coor) ||
 		   point_inside_cilinder_inf(dir_x, cen_3, rad_cilinder + width_cili_layer, coor) ||
-		   point_inside_cilinder_inf(dir_x, cen_4, rad_cilinder + width_cili_layer, coor)) {
+		   point_inside_cilinder_inf(dir_x, cen_4, rad_cilinder + width_cili_layer, coor) ||
+		   fabs(coor[1] - ly / 2) < width_flat_layer) {
 			return 2;
 		}
 
