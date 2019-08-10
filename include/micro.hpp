@@ -30,6 +30,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <map>
 
 #include <cmath>
 #include <cassert>
@@ -131,17 +132,32 @@ typedef struct {
 
 enum {
 	MIC_HOMOGENEOUS,
-       	MIC_SPHERE,
-       	MIC_LAYER_Y,
-       	MIC_CILI_FIB_X,
-       	MIC_CILI_FIB_Z,
-       	MIC_CILI_FIB_XZ,
-       	MIC_QUAD_FIB_XYZ,
-       	MIC_QUAD_FIB_XZ,
+	MIC_SPHERE,
+	MIC_LAYER_Y,
+	MIC_CILI_FIB_X,
+	MIC_CILI_FIB_Z,
+	MIC_CILI_FIB_XZ,
+	MIC_QUAD_FIB_XYZ,
+	MIC_QUAD_FIB_XZ,
 	MIC_QUAD_FIB_XZ_BROKEN_X,
 	MIC3D_SPHERES,
 	MIC3D_8,
 	MIC3D_FIBS_20_DISORDER
+};
+
+static map<int, std::string> micro_names = {
+	{MIC_HOMOGENEOUS, "MIC_HOMOGENEOUS"},
+	{MIC_SPHERE, "MIC_SPHERE"},
+	{MIC_LAYER_Y, "MIC_LAYER_Y"},
+	{MIC_CILI_FIB_X, "MIC_CILI_FIB_X"},
+	{MIC_CILI_FIB_Z, "MIC_CILI_FIB_Z"},
+	{MIC_CILI_FIB_XZ, "MIC_CILI_FIB_XZ"},
+	{MIC_QUAD_FIB_XYZ, "MIC_QUAD_FIB_XYZ"},
+	{MIC_QUAD_FIB_XZ, "MIC_QUAD_FIB_XZ"},
+	{MIC_QUAD_FIB_XZ_BROKEN_X, "MIC_QUAD_FIB_XZ_BROKEN_X"},
+	{MIC3D_SPHERES, "MIC3D_SPHERES"},
+	{MIC3D_8, "MIC3D_8"},
+	{MIC3D_FIBS_20_DISORDER, "MIC3D_FIBS_20_DISORDER"}
 };
 
 /*

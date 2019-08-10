@@ -823,45 +823,7 @@ void micropp<tdim>::print_info() const
 {
 	cout << "micropp" << dim << endl;
 
-	cout << "Micro-structure : ";
-	switch(micro_type) {
-		case(MIC_SPHERE):
-			cout << "MIC_SPHERE" << endl;
-			break;
-		case(MIC_LAYER_Y):
-			cout << "MIC_LAYER_Y" << endl;
-			break;
-		case(MIC_CILI_FIB_X):
-			cout << "MIC_CILI_FIB_X" << endl;
-			break;
-		case(MIC_CILI_FIB_Z):
-			cout << "MIC_CILI_FIB_Z" << endl;
-			break;
-		case(MIC_CILI_FIB_XZ):
-			cout << "MIC_CILI_FIB_XZ" << endl;
-			break;
-		case(MIC_QUAD_FIB_XYZ):
-			cout << "MIC_QUAD_FIB_XYZ" << endl;
-			break;
-		case(MIC_QUAD_FIB_XZ):
-			cout << "MIC_QUAD_FIB_XZ" << endl;
-			break;
-		case(MIC_QUAD_FIB_XZ_BROKEN_X):
-			cout << "MIC_QUAD_FIB_XZ_BROKEN_X" << endl;
-			break;
-		case(MIC3D_SPHERES):
-			cout << "MIC3D_SPHERES" << endl;
-			break;
-		case(MIC3D_8):
-			cout << "MIC3D_8" << endl;
-			break;
-		case(MIC3D_FIBS_20_DISORDER):
-			cout << "MIC3D_FIBS_20_DISORDER" << endl;
-			break;
-		default:
-			cout << "NO TYPE" << endl;
-			break;
-	}
+	cout << "Micro-structure   : " << micro_names[micro_type] << endl;
 
 	cout << "MATRIX [%]        : " << Vm << endl;
 	cout << "FIBER  [%]        : " << Vf << endl;
