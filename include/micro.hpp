@@ -276,7 +276,7 @@ class micropp {
 		void homogenize_fe_full(gp_t<tdim> *gp_ptr);
 
 		void calc_ctan_lin_fe_models();
-		void calc_ctan_lin_mixture_rule_Chamis(double ctan[nvoi * nvoi]);
+		void calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi]);
 
 		material_t *get_material(const int e) const;
 

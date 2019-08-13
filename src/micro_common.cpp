@@ -157,7 +157,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		} else if (gp_list[gp].coupling == MIX_RULE_CHAMIS) {
 
 			double ctan[nvoi * nvoi];
-			calc_ctan_lin_mixture_rule_Chamis(ctan);
+			calc_ctan_lin_mix_rule_Chamis(ctan);
 			memcpy(gp_list[gp].ctan, ctan, nvoi * nvoi * sizeof(double));
 
 		}
@@ -295,62 +295,49 @@ void micropp<tdim>::calc_ctan_lin_fe_models()
 
 
 template <int tdim>
-void micropp<tdim>::calc_ctan_lin_mixture_rule_Chamis(double ctan[nvoi * nvoi])
+void micropp<tdim>::calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi])
 {
 
- const double Em = material_list[0]->E;
- const double nu_m = material_list[0]->nu;
- const double Gm = Em / (2 * (1 + nu_m));
+	const double Em = material_list[0]->E;
+	const double nu_m = material_list[0]->nu;
+	const double Gm = Em / (2 * (1 + nu_m));
 
- const double Ef = material_list[1]->E;
- const double nu_f = material_list[1]->nu;
- const double Gf = Ef / (2 * (1 + nu_f));
+	const double Ef = material_list[1]->E;
+	const double nu_f = material_list[1]->nu;
+	const double Gf = Ef / (2 * (1 + nu_f));
 
- const double E11 = Vf * Ef + Vm * Em;
- const double E22 = Em / (1 - sqrt(Vf) * (1 - Em / Ef));
- const double nu_12 = Vf * nu_f + Vm * nu_m;
- const double G12 = Gm / (1 - sqrt(Vf) * (1 - Gm / Gf));
+	const double E11 = Vf * Ef + Vm * Em;
+	const double E22 = Em / (1 - sqrt(Vf) * (1 - Em / Ef));
+	const double nu12 = Vf * nu_f + Vm * nu_m;
+	const double G12 = Gm / (1 - sqrt(Vf) * (1 - Gm / Gf));
+	const double nu23 = E22 / (2 * G12);
 
- const double S[3][3] = {
-	 {       1 / E11, - nu_12 / E11, - nu_12 / E11 },
-	 { - nu_12 / E11,       1 / E22, - nu_12 / E22 },
-	 { - nu_12 / E11, - nu_12 / E22,       1 / E22 },
- };
+	const double S[3][3] = {
+		{      1 / E11, - nu12 / E11, - nu12 / E11 },
+		{ - nu12 / E11,      1 / E22, - nu23 / E22 },
+		{ - nu12 / E11, - nu23 / E22,      1 / E22 },
+	};
 
- double det =
-	 S[0][0] * (S[1][1] * S[2][2] - S[2][1] * S[1][2]) -
-	 S[0][1] * (S[1][0] * S[2][2] - S[2][0] * S[1][2]) +
-	 S[0][2] * (S[1][0] * S[2][1] - S[2][0] * S[1][1]);
+	double S_inv[3][3];
+	invert_3x3(S, S_inv);
 
- double c00 = +(S[1][1] * S[2][2] - S[2][1] * S[1][2]);
- double c01 = -(S[1][0] * S[2][2] - S[2][0] * S[1][2]);
- double c02 = +(S[1][0] * S[2][1] - S[2][0] * S[1][1]);
+	memset (ctan, 0, nvoi * nvoi * sizeof(double));
 
- double c10 = -(S[0][1] * S[2][2] - S[2][1] * S[0][2]);
- double c11 = +(S[0][0] * S[2][2] - S[2][0] * S[0][2]);
- double c12 = -(S[0][0] * S[2][1] - S[2][0] * S[0][1]);
+	ctan[0 * nvoi + 0] = S_inv[0][0];
+	ctan[0 * nvoi + 1] = S_inv[0][1];
+	ctan[0 * nvoi + 2] = S_inv[0][2];
 
- double c20 = +(S[0][1] * S[1][2] - S[1][1] * S[0][2]);
- double c21 = -(S[0][0] * S[1][2] - S[1][0] * S[0][2]);
- double c22 = +(S[0][0] * S[1][1] - S[1][0] * S[0][1]);
+	ctan[1 * nvoi + 0] = S_inv[1][0];
+	ctan[1 * nvoi + 1] = S_inv[1][1];
+	ctan[1 * nvoi + 2] = S_inv[1][2];
 
- memset (ctan, 0, nvoi * nvoi * sizeof(double));
+	ctan[2 * nvoi + 0] = S_inv[2][0];
+	ctan[2 * nvoi + 1] = S_inv[2][1];
+	ctan[2 * nvoi + 2] = S_inv[2][2];
 
- ctan[0 * nvoi + 0] = c00 / det;
- ctan[0 * nvoi + 1] = c01 / det;
- ctan[0 * nvoi + 2] = c02 / det;
-
- ctan[1 * nvoi + 0] = c10 / det;
- ctan[1 * nvoi + 1] = c11 / det;
- ctan[1 * nvoi + 2] = c12 / det;
-
- ctan[2 * nvoi + 0] = c20 / det;
- ctan[2 * nvoi + 1] = c21 / det;
- ctan[2 * nvoi + 2] = c22 / det;
-
- ctan[3 * nvoi + 3] = G12;
- ctan[4 * nvoi + 4] = G12;
- ctan[5 * nvoi + 5] = G12;
+	ctan[3 * nvoi + 3] = G12;
+	ctan[4 * nvoi + 4] = G12;
+	ctan[5 * nvoi + 5] = G12;
 
 }
 

@@ -151,4 +151,27 @@ inline bool point_inside_cilinder_inf(const double dir[3], const double center[3
 }
 
 
+inline double invert_3x3(const double mat[3][3], double mat_inv[3][3])
+{
+	double det =
+		mat[0][0] * (mat[1][1] * mat[2][2] - mat[2][1] * mat[1][2]) -
+		mat[0][1] * (mat[1][0] * mat[2][2] - mat[2][0] * mat[1][2]) +
+		mat[0][2] * (mat[1][0] * mat[2][1] - mat[2][0] * mat[1][1]);
+
+	mat_inv[0][0] = +(mat[1][1] * mat[2][2] - mat[2][1] * mat[1][2]) / det;
+	mat_inv[0][1] = -(mat[1][0] * mat[2][2] - mat[2][0] * mat[1][2]) / det;
+	mat_inv[0][2] = +(mat[1][0] * mat[2][1] - mat[2][0] * mat[1][1]) / det;
+
+	mat_inv[1][0] = -(mat[0][1] * mat[2][2] - mat[2][1] * mat[0][2]) / det;
+	mat_inv[1][1] = +(mat[0][0] * mat[2][2] - mat[2][0] * mat[0][2]) / det;
+	mat_inv[1][2] = -(mat[0][0] * mat[2][1] - mat[2][0] * mat[0][1]) / det;
+
+	mat_inv[2][0] = +(mat[0][1] * mat[1][2] - mat[1][1] * mat[0][2]) / det;
+	mat_inv[2][1] = -(mat[0][0] * mat[1][2] - mat[1][0] * mat[0][2]) / det;
+	mat_inv[2][2] = +(mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1]) / det;
+
+	return det;
+}
+
+
 #endif
