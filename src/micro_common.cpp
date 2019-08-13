@@ -81,23 +81,11 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	for (int gp = 0; gp < ngp; ++gp) {
 		if(params.coupling != nullptr) {
 			gp_list[gp].coupling = params.coupling[gp];
-			switch (params.coupling[gp]) {
-				case FE_LINEAR:
-					num_fe_linear ++;
-					break;
-				case FE_ONE_WAY:
-					num_fe_one_way ++;
-					break;
-				case FE_FULL:
-					num_fe_full ++;
-					break;
-			}
+			gp_counter[gp_list[gp].coupling] ++;
 		} else {
 			gp_list[gp].coupling = FE_ONE_WAY;
-			num_fe_one_way ++;
+			gp_counter[gp_list[gp].coupling] ++;
 		}
-
-		num_fe_points = num_fe_linear + num_fe_one_way + num_fe_full;
 
 		gp_list[gp].nndim = nndim;
 		gp_list[gp].nvars = nvars;
@@ -153,6 +141,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	memset(ctan_lin_fe, 0.0, nvoi * nvoi * sizeof(double));
 
 	if (calc_ctan_lin_flag) {
+		int num_fe_points = gp_counter[FE_LINEAR] + gp_counter[FE_ONE_WAY] + gp_counter[FE_FULL];
 		if (num_fe_points > 0) {
 			calc_ctan_lin_fe_models();
 		}
@@ -165,7 +154,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 			memcpy(gp_list[gp].ctan, ctan_lin_fe, nvoi * nvoi * sizeof(double));
 
-		} else if (gp_list[gp].coupling == MIXTURE_RULE_CHAMIS) {
+		} else if (gp_list[gp].coupling == MIX_RULE_CHAMIS) {
 
 			double ctan[nvoi * nvoi];
 			calc_ctan_lin_mixture_rule_Chamis(ctan);
@@ -829,9 +818,10 @@ void micropp<tdim>::print_info() const
 	cout << "MATRIX [%]        : " << Vm << endl;
 	cout << "FIBER  [%]        : " << Vf << endl;
 
-	cout << "FE_LINEAR         : " << num_fe_linear    << " GPs" << endl;
-	cout << "FE_ONE_WAY        : " << num_fe_one_way   << " GPs" << endl;
-	cout << "FE_FULL           : " << num_fe_full      << " GPs" << endl;
+	cout << "FE_LINEAR         : " << gp_counter[FE_LINEAR]       << " GPs" << endl;
+	cout << "FE_ONE_WAY        : " << gp_counter[FE_ONE_WAY]      << " GPs" << endl;
+	cout << "FE_FULL           : " << gp_counter[FE_FULL]         << " GPs" << endl;
+	cout << "MIX_RULE_CHAMIS   : " << gp_counter[MIX_RULE_CHAMIS] << " GPs" << endl;
 	cout << "USE A0            : " << use_A0 << endl;
 	cout << "NUM SUBITS        : " << nsubiterations << endl;
 	cout << "MPI RANK          : " << mpi_rank << endl;

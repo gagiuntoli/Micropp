@@ -88,7 +88,7 @@ void micropp<tdim>::homogenize()
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
 		if (gp_ptr->coupling == FE_LINEAR ||
-		    gp_ptr->coupling == MIXTURE_RULE_CHAMIS) {
+		    gp_ptr->coupling == MIX_RULE_CHAMIS) {
 
 			/*
 			 * Computational cheap calculation

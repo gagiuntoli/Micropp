@@ -174,11 +174,20 @@ static map<int, std::string> micro_names = {
  *
  */
 
+
 enum {
-       	FE_LINEAR,
-       	FE_ONE_WAY,
-       	FE_FULL,
-       	MIXTURE_RULE_CHAMIS
+	FE_LINEAR,
+	FE_ONE_WAY,
+	FE_FULL,
+	MIX_RULE_CHAMIS
+};
+
+
+static map<int, int> gp_counter = {
+	{FE_LINEAR, 0},
+	{FE_ONE_WAY, 0},
+	{FE_FULL, 0},
+	{MIX_RULE_CHAMIS, 0}
 };
 
 
@@ -234,12 +243,6 @@ class micropp {
 		const bool calc_ctan_lin_flag;
 
 		const bool lin_stress;
-
-		/* Number of micro-problems depending on the type */
-		int num_fe_linear = 0;
-		int num_fe_one_way = 0;
-		int num_fe_full = 0;
-		int num_fe_points = 0;
 
 		/* Linear jacobian for optimization */
 		bool use_A0;

@@ -63,7 +63,8 @@ int main(int argc, char **argv)
 	const double dt = t_final / time_steps;
 	double time = 0.0;
 
-	assert(n > 1 && 0 <= print && print < 2 && time_steps >= 0);
+	assert(n > 1 && 0 <= print && print < 2 && time_steps >= 0 &&
+	       0 <= coupling && coupling <= MIX_RULE_CHAMIS);
 
 	micropp_params_t mic_params;
 
