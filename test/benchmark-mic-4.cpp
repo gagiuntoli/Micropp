@@ -49,7 +49,8 @@ int main(int argc, char **argv)
 
 	if (argc < 2) {
 		cerr    << "Usage: " << argv[0]
-			<< " n [print=0(def)|1] [steps] [fe_lin=0(def)|fe_one_way|fe_full|rule_mix]" << endl;
+			<< " n [print=0(def)|1] [steps] [fe_lin=0(def)|fe_one_way|fe_full|rule_mix]"
+			<< " [micro_type = 0(ORDER)|1(DISORDER)]"<< endl;
 		return 1;
 	}
 
@@ -57,6 +58,7 @@ int main(int argc, char **argv)
 	const int print = (argc > 2 ? atoi(argv[2]) : 0);  // Optional value
 	const int time_steps = (argc > 3 ? atoi(argv[3]) : 10);  // Optional value
 	const int coupling = (argc > 4 ? atoi(argv[4]) : 0);  // Optional value
+	const int micro_type = (argc > 5 ? (((atoi(argv[5]) == 0) ? MIC3D_FIBS_20_ORDER : MIC3D_FIBS_20_DISORDER)) : MIC3D_FIBS_20_ORDER);  // Optional value
 
 	const int dir = 0;
 	const double t_final = 0.15;
@@ -75,7 +77,7 @@ int main(int argc, char **argv)
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC3D_FIBS_20_ORDER;
+	mic_params.type = micro_type;
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
