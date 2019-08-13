@@ -691,6 +691,24 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		return 0;
 
+	} else if (micro_type == MIC3D_FIBS_20_ORDER) {
+
+		const double radius = 0.05;
+		const double dir[3] = { 1, 0, 0 };
+		const int fibs_z = 5;
+		const int fibs_y = 4;
+		const double dz = 1.0 / (fibs_z + 1);
+		const double dy = 1.0 / (fibs_y + 1);
+
+		for (int i = 0; i < fibs_z; ++i) {
+			for (int j = 0; j < fibs_y; ++j) {
+				const double center[3] = { 0.0, (j + 1) * dy, (i + 1) * dz };
+				if(point_inside_cilinder_inf(dir, center, radius, coor)) {
+					return 1;
+				}
+			}
+		}
+		return 0;
 
 	} else if (micro_type == MIC3D_FIBS_20_DISORDER) {
 

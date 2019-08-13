@@ -142,6 +142,7 @@ enum {
 	MIC_QUAD_FIB_XZ_BROKEN_X,
 	MIC3D_SPHERES,
 	MIC3D_8,
+	MIC3D_FIBS_20_ORDER,
 	MIC3D_FIBS_20_DISORDER
 };
 
@@ -157,6 +158,7 @@ static map<int, std::string> micro_names = {
 	{MIC_QUAD_FIB_XZ_BROKEN_X, "MIC_QUAD_FIB_XZ_BROKEN_X"},
 	{MIC3D_SPHERES, "MIC3D_SPHERES"},
 	{MIC3D_8, "MIC3D_8"},
+	{MIC3D_FIBS_20_ORDER, "MIC3D_FIBS_20_ORDER"},
 	{MIC3D_FIBS_20_DISORDER, "MIC3D_FIBS_20_DISORDER"}
 };
 
@@ -169,6 +171,8 @@ static map<int, std::string> micro_names = {
  *
  * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the
  * perimeter and a flat layer between the fibers.
+ *
+ * MIC3D_FIBS_20_ORDER: (2 materiales) 20 fibers in oriented in X direction.
  *
  * MIC3D_FIBS_20_DISORDER: (2 materiales) 20 fibers in random directions.
  *

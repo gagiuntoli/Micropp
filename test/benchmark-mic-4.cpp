@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 	mic_params.size[0] = n;
 	mic_params.size[1] = n;
 	mic_params.size[2] = n;
-	mic_params.type = MIC_CILI_FIB_X;
+	mic_params.type = MIC3D_FIBS_20_ORDER;
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
