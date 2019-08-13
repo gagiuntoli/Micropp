@@ -30,6 +30,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <map>
 
 #include <cmath>
 #include <cassert>
@@ -131,19 +132,39 @@ typedef struct {
 
 enum {
 	MIC_HOMOGENEOUS,
-       	MIC_SPHERE,
-       	MIC_LAYER_Y,
-       	MIC_CILI_FIB_Z,
-       	MIC_CILI_FIB_XZ,
-       	MIC_QUAD_FIB_XYZ,
-       	MIC_QUAD_FIB_XZ,
+	MIC_SPHERE,
+	MIC_LAYER_Y,
+	MIC_CILI_FIB_X,
+	MIC_CILI_FIB_Z,
+	MIC_CILI_FIB_XZ,
+	MIC_QUAD_FIB_XYZ,
+	MIC_QUAD_FIB_XZ,
 	MIC_QUAD_FIB_XZ_BROKEN_X,
 	MIC3D_SPHERES,
 	MIC3D_8,
+	MIC3D_FIBS_20_ORDER,
 	MIC3D_FIBS_20_DISORDER
 };
 
+static map<int, std::string> micro_names = {
+	{MIC_HOMOGENEOUS, "MIC_HOMOGENEOUS"},
+	{MIC_SPHERE, "MIC_SPHERE"},
+	{MIC_LAYER_Y, "MIC_LAYER_Y"},
+	{MIC_CILI_FIB_X, "MIC_CILI_FIB_X"},
+	{MIC_CILI_FIB_Z, "MIC_CILI_FIB_Z"},
+	{MIC_CILI_FIB_XZ, "MIC_CILI_FIB_XZ"},
+	{MIC_QUAD_FIB_XYZ, "MIC_QUAD_FIB_XYZ"},
+	{MIC_QUAD_FIB_XZ, "MIC_QUAD_FIB_XZ"},
+	{MIC_QUAD_FIB_XZ_BROKEN_X, "MIC_QUAD_FIB_XZ_BROKEN_X"},
+	{MIC3D_SPHERES, "MIC3D_SPHERES"},
+	{MIC3D_8, "MIC3D_8"},
+	{MIC3D_FIBS_20_ORDER, "MIC3D_FIBS_20_ORDER"},
+	{MIC3D_FIBS_20_DISORDER, "MIC3D_FIBS_20_DISORDER"}
+};
+
 /*
+ * MIC_SPHERES : (2 materials) One sphere in the middle
+ *
  * MIC_HOMOGENEOUS : Only one material (mat[0])
  *
  * MIC3D_SPHERES : (2 materials) Random spheres.
@@ -151,15 +172,26 @@ enum {
  * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the
  * perimeter and a flat layer between the fibers.
  *
+ * MIC3D_FIBS_20_ORDER: (2 materiales) 20 fibers in oriented in X direction.
+ *
  * MIC3D_FIBS_20_DISORDER: (2 materiales) 20 fibers in random directions.
  *
  */
 
+
 enum {
-       	LINEAR,
-       	ONE_WAY,
-       	FULL,
-       	RULE_MIXTURE_1
+	FE_LINEAR,
+	FE_ONE_WAY,
+	FE_FULL,
+	MIX_RULE_CHAMIS
+};
+
+
+static map<int, int> gp_counter = {
+	{FE_LINEAR, 0},
+	{FE_ONE_WAY, 0},
+	{FE_FULL, 0},
+	{MIX_RULE_CHAMIS, 0}
 };
 
 
@@ -193,7 +225,7 @@ class micropp {
 		double geo_params[num_geo_params];
 
 		material_t *material_list[MAX_MATERIALS];
-		double ctan_lin[nvoi * nvoi];
+		double ctan_lin_fe[nvoi * nvoi];
 
 		int *elem_type;
 		double *elem_stress;
@@ -216,11 +248,6 @@ class micropp {
 
 		const bool lin_stress;
 
-		/* Number of micro-problems depending on the type */
-		int num_no_coupling = 0;
-		int num_one_way = 0;
-		int num_full = 0;
-
 		/* Linear jacobian for optimization */
 		bool use_A0;
 		int its_with_A0;
@@ -235,17 +262,25 @@ class micropp {
 		int log_id = 0;
 		ofstream ofstream_log;
 
-		/* GPU number of device selection */
+		/* GPU number for device selection */
 		int gpu_id = 0;
 
 
 		/* Private function members */
 
+		/*
+		 * Linear homogenizations 
+		 * Applies to FE RVE model and Mixture rules
+		 *
+		 */
 		void homogenize_linear(gp_t<tdim> *gp_ptr);
-		void homogenize_non_linear(gp_t<tdim> *gp_ptr);
-		void homogenize_rule_mixture_1(gp_t<tdim> *gp_ptr);
 
-		void calc_ctan_lin();
+		/* FE-based homogenizations */
+		void homogenize_fe_one_way(gp_t<tdim> *gp_ptr);
+		void homogenize_fe_full(gp_t<tdim> *gp_ptr);
+
+		void calc_ctan_lin_fe_models();
+		void calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi]);
 
 		material_t *get_material(const int e) const;
 
@@ -332,6 +367,8 @@ class micropp {
 		void get_ctan(const int gp_id, double *ctan) const;
 
 		void homogenize();
+
+		void homogenize_linear();
 
 		/* Extras */
 

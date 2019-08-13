@@ -114,7 +114,7 @@ inline bool point_inside_sphere(const double center[3], const double radius,
 				const double point[3])
 {
 	/*
-	 * Returns <true> if <point> is inside the sphere with <center> and 
+	 * Returns <true> if <point> is inside the sphere with <center> and
 	 * <radius>. Returns <false> otherwise.
 	 */
 
@@ -131,7 +131,7 @@ inline bool point_inside_cilinder_inf(const double dir[3], const double center[3
 				      const double radius, const double point[3])
 {
 	/*
-	 * Returns <true> if <point> is inside the infinite cilinder with 
+	 * Returns <true> if <point> is inside the infinite cilinder with
 	 * <direction>, <center> and <radius>. Returns <false> otherwise.
 	 */
 
@@ -148,6 +148,29 @@ inline bool point_inside_cilinder_inf(const double dir[3], const double center[3
 	const double d_1 = norm_v * sin_tetha;
 
 	return (d_1 <= radius) ? true : false;
+}
+
+
+inline double invert_3x3(const double mat[3][3], double mat_inv[3][3])
+{
+	const double det =
+		mat[0][0] * (mat[1][1] * mat[2][2] - mat[2][1] * mat[1][2]) -
+		mat[0][1] * (mat[1][0] * mat[2][2] - mat[2][0] * mat[1][2]) +
+		mat[0][2] * (mat[1][0] * mat[2][1] - mat[2][0] * mat[1][1]);
+
+	mat_inv[0][0] = +(mat[1][1] * mat[2][2] - mat[2][1] * mat[1][2]) / det;
+	mat_inv[0][1] = -(mat[1][0] * mat[2][2] - mat[2][0] * mat[1][2]) / det;
+	mat_inv[0][2] = +(mat[1][0] * mat[2][1] - mat[2][0] * mat[1][1]) / det;
+
+	mat_inv[1][0] = -(mat[0][1] * mat[2][2] - mat[2][1] * mat[0][2]) / det;
+	mat_inv[1][1] = +(mat[0][0] * mat[2][2] - mat[2][0] * mat[0][2]) / det;
+	mat_inv[1][2] = -(mat[0][0] * mat[2][1] - mat[2][0] * mat[0][1]) / det;
+
+	mat_inv[2][0] = +(mat[0][1] * mat[1][2] - mat[1][1] * mat[0][2]) / det;
+	mat_inv[2][1] = -(mat[0][0] * mat[1][2] - mat[1][0] * mat[0][2]) / det;
+	mat_inv[2][2] = +(mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1]) / det;
+
+	return det;
 }
 
 

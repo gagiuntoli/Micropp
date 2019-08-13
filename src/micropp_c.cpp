@@ -53,6 +53,8 @@ extern "C" {
 		params.write_log = true;
 
 		self->ptr = new micropp<3>(params);
+
+		delete [] params.coupling;
 	}
 
 	void micropp3_free(micropp3 *self)
@@ -86,6 +88,12 @@ extern "C" {
 	{
 		micropp<3> *ptr = (micropp<3> *) self->ptr;
 		ptr->homogenize();
+	}
+
+	void micropp3_homogenize_linear(micropp3 *self)
+	{
+		micropp<3> *ptr = (micropp<3> *) self->ptr;
+		ptr->homogenize_linear();
 	}
 
 	int micropp3_get_cost(const micropp3 *self, int gp_id)

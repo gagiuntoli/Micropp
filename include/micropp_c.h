@@ -51,6 +51,8 @@ extern "C" {
 
 	void micropp3_homogenize(struct micropp3 *self);
 
+	void micropp3_homogenize_linear(struct micropp3 *self);
+
 	void micropp3_update_vars(struct micropp3 *self);
 
 	bool micropp3_is_non_linear(const struct micropp3 *self,

@@ -21,8 +21,10 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 #include <cmath>
 #include <cassert>
+
 
 #include "instrument.hpp"
 #include "micro.hpp"
@@ -56,6 +58,26 @@ void micropp<tdim>::get_ctan(const int gp_id, double *ctan) const
 
 
 template <int tdim>
+void micropp<tdim>::homogenize_linear()
+{
+	INST_START;
+
+#pragma omp parallel for schedule(dynamic,1)
+	for (int igp = 0; igp < ngp; ++igp) {
+
+		gp_t<tdim> *gp_ptr = &gp_list[igp];
+
+		/*
+		 * Computational cheap calculation
+		 * stress = ctan_lin * strain
+		 */
+
+		homogenize_linear(gp_ptr);
+	}
+}
+
+
+template <int tdim>
 void micropp<tdim>::homogenize()
 {
 	INST_START;
@@ -65,22 +87,27 @@ void micropp<tdim>::homogenize()
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
-		if (gp_ptr->coupling == RULE_MIXTURE_1) {
-
-			homogenize_rule_mixture_1(gp_ptr);
-
-		} else if (gp_ptr->coupling == LINEAR) {
+		if (gp_ptr->coupling == FE_LINEAR ||
+		    gp_ptr->coupling == MIX_RULE_CHAMIS) {
 
 			/*
 			 * Computational cheap calculation
 			 * stress = ctan_lin * strain
+			 *
+			 * All mixture rules are linear in Micropp
+			 * so the homogenization of the stress tensor
+			 * is this simple and cheap procedure.
 			 */
 
 			homogenize_linear(gp_ptr);
 
-		} else {
+		} else if (gp_ptr->coupling == FE_ONE_WAY) {
 
-			homogenize_non_linear(gp_ptr);
+			homogenize_fe_one_way(gp_ptr);
+
+		} else if (gp_ptr->coupling == FE_FULL) {
+
+			homogenize_fe_full(gp_ptr);
 
 		}
 	}
@@ -97,15 +124,14 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr)
 	memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 	for (int i = 0; i < nvoi; ++i) {
 		for (int j = 0; j < nvoi; ++j) {
-			gp_ptr->stress[i] += 
-				ctan_lin[i * nvoi + j] * gp_ptr->strain[j];
+			gp_ptr->stress[i] += gp_ptr->ctan[i * nvoi + j] * gp_ptr->strain[j];
 		}
 	}
 }
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
+void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr)
 {
 
 	ell_matrix A;  // Jacobian
@@ -124,8 +150,91 @@ void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 	// SIGMA 1 Newton-Raphson
 	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
 
-	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain,
-					 gp_ptr->vars_n);
+	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
+
+	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
+	gp_ptr->cost += newton.solver_its;
+	gp_ptr->converged = newton.converged;
+
+	/*
+	 * In case it has not converged do the sub-iterations
+	 */
+	if (gp_ptr->converged == false && subiterations == true) {
+
+		double eps_sub[nvoi], deps_sub[nvoi];
+		memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
+		memcpy(eps_sub, gp_ptr->strain_old, nvoi * sizeof(double));
+		gp_ptr->subiterated = true;
+
+		for (int i = 0; i < nvoi; ++i)
+			deps_sub[i] = (gp_ptr->strain[i] - gp_ptr->strain_old[i]) / nsubiterations;
+
+		for (int its = 0; its < nsubiterations; ++its) {
+
+			for (int j = 0; j < nvoi; ++j) {
+				eps_sub[j] += deps_sub[j];
+			}
+
+			newton = newton_raphson(&A, b, u, du, eps_sub, gp_ptr->vars_n);
+			gp_ptr->cost += newton.solver_its;
+		}
+
+		gp_ptr->converged = newton.converged;
+		memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
+	}
+
+	if (lin_stress) {
+
+		memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
+		for (int i = 0; i < nvoi; ++i) {
+			for (int j = 0; j < nvoi; ++j) {
+				gp_ptr->stress[i] += gp_ptr->ctan[i * nvoi + j] * gp_ptr->strain[j];
+			}
+		}
+
+	} else {
+		calc_ave_stress(gp_ptr->u_k, gp_ptr->stress, gp_ptr->vars_n);
+	}
+
+	// Updates <vars_new>
+	bool non_linear = calc_vars_new(gp_ptr->u_k, gp_ptr->vars_n, vars_new);
+
+	if (non_linear == true) {
+		if (gp_ptr->allocated == false) {
+			gp_ptr->allocate();
+			memcpy(gp_ptr->vars_k, vars_new, nvars * sizeof(double));
+		}
+	}
+
+	ell_free(&A);
+	free(b);
+	free(u);
+	free(du);
+	free(vars_new_aux);
+}
+
+
+template<int tdim>
+void micropp<tdim>::homogenize_fe_full(gp_t<tdim> * gp_ptr)
+{
+
+	ell_matrix A;  // Jacobian
+	const int ns[3] = { nx, ny, nz };
+	ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+	double *b = (double *) calloc(nndim, sizeof(double));
+	double *du = (double *) calloc(nndim, sizeof(double));
+	double *u = (double *) calloc(nndim, sizeof(double));
+	double *vars_new_aux = (double *) calloc(nvars, sizeof(double));
+
+	double *vars_new = (gp_ptr->allocated) ? gp_ptr->vars_k : vars_new_aux;
+
+	gp_ptr->cost = 0;
+	gp_ptr->subiterated = false;
+
+	// SIGMA 1 Newton-Raphson
+	memcpy(u, gp_ptr->u_n, nndim * sizeof(double));
+
+	newton_t newton = newton_raphson(&A, b, u, du, gp_ptr->strain, gp_ptr->vars_n);
 
 	memcpy(gp_ptr->u_k, u, nndim * sizeof(double));
 	gp_ptr->cost += newton.solver_its;
@@ -162,8 +271,7 @@ void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 		memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 		for (int i = 0; i < nvoi; ++i) {
 			for (int j = 0; j < nvoi; ++j) {
-				gp_ptr->stress[i] += ctan_lin[i * nvoi + j] *
-					gp_ptr->strain[j];
+				gp_ptr->stress[i] += gp_ptr->ctan[i * nvoi + j] * gp_ptr->strain[j];
 			}
 		}
 
@@ -181,7 +289,7 @@ void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 		}
 	}
 
-	if (gp_ptr->allocated && gp_ptr->coupling == FULL) {
+	if (gp_ptr->allocated) {
 
 		// CTAN 3/6 Newton-Raphsons in 2D/3D
 		double eps_1[6], sig_0[6], sig_1[6];
@@ -201,8 +309,7 @@ void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 			calc_ave_stress(u, sig_1, gp_ptr->vars_n);
 
 			for (int v = 0; v < nvoi; ++v)
-				gp_ptr->ctan[v * nvoi + i] =
-					(sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
+				gp_ptr->ctan[v * nvoi + i] = (sig_1[v] - sig_0[v]) / D_EPS_CTAN_AVE;
 
 		}
 	}
@@ -212,13 +319,6 @@ void micropp<tdim>::homogenize_non_linear(gp_t<tdim> * gp_ptr)
 	free(u);
 	free(du);
 	free(vars_new_aux);
-}
-
-
-template<int tdim>
-void micropp<tdim>::homogenize_rule_mixture_1(gp_t<tdim> * gp_ptr)
-{
-	
 }
 
 

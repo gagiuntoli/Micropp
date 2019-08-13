@@ -81,28 +81,17 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	for (int gp = 0; gp < ngp; ++gp) {
 		if(params.coupling != nullptr) {
 			gp_list[gp].coupling = params.coupling[gp];
-			switch (params.coupling[gp]) {
-				case LINEAR:
-					num_no_coupling ++;
-					break;
-				case ONE_WAY:
-					num_one_way ++;
-					break;
-				case FULL:
-					num_full ++;
-					break;
-			}
+			gp_counter[gp_list[gp].coupling] ++;
 		} else {
-			gp_list[gp].coupling = ONE_WAY;
-			num_one_way ++;
+			gp_list[gp].coupling = FE_ONE_WAY;
+			gp_counter[gp_list[gp].coupling] ++;
 		}
 
 		gp_list[gp].nndim = nndim;
 		gp_list[gp].nvars = nvars;
 
 		if (params.coupling == nullptr ||
-		    (params.coupling[gp] == ONE_WAY ||
-		     params.coupling[gp] == FULL)) {
+		    (params.coupling[gp] == FE_ONE_WAY || params.coupling[gp] == FE_FULL)) {
 			gp_list[gp].allocate_u();
 		}
 	}
@@ -140,8 +129,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 #pragma omp parallel for schedule(dynamic,1)
 		for (int i = 0; i < num_of_A0s; ++i) {
-			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL,
-				 CG_REL_TOL, CG_MAX_ITS);
+			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 			double *u = (double *) calloc(nndim, sizeof(double));
 			assembly_mat(&A0[i], u, nullptr);
 			free(u);
@@ -150,14 +138,29 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 	/* Average tangent constitutive tensor initialization */
 
-	memset(ctan_lin, 0.0, nvoi * nvoi * sizeof(double));
+	memset(ctan_lin_fe, 0.0, nvoi * nvoi * sizeof(double));
 
 	if (calc_ctan_lin_flag) {
-		calc_ctan_lin();
+		int num_fe_points = gp_counter[FE_LINEAR] + gp_counter[FE_ONE_WAY] + gp_counter[FE_FULL];
+		if (num_fe_points > 0) {
+			calc_ctan_lin_fe_models();
+		}
 	}
 
 	for (int gp = 0; gp < ngp; ++gp) {
-		memcpy(gp_list[gp].ctan, ctan_lin, nvoi * nvoi * sizeof(double));
+
+		if (gp_list[gp].coupling == FE_LINEAR || gp_list[gp].coupling == FE_ONE_WAY ||
+		    gp_list[gp].coupling == FE_FULL) {
+
+			memcpy(gp_list[gp].ctan, ctan_lin_fe, nvoi * nvoi * sizeof(double));
+
+		} else if (gp_list[gp].coupling == MIX_RULE_CHAMIS) {
+
+			double ctan[nvoi * nvoi];
+			calc_ctan_lin_mix_rule_Chamis(ctan);
+			memcpy(gp_list[gp].ctan, ctan, nvoi * nvoi * sizeof(double));
+
+		}
 	}
 
 	/* Open the log file */
@@ -170,9 +173,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		strcpy(filename, file_name_string.c_str());
 
 		ofstream_log.open(filename, ios::out);
-		ofstream_log
-			<< "#<gp_id>  <non-linear>  <cost>  <converged>"
-			<< endl;
+		ofstream_log << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
 	}
 
 }
@@ -249,15 +250,17 @@ template <int tdim>
 int micropp<tdim>::get_non_linear_gps(void) const
 {
 	int count = 0;
-	for (int gp = 0; gp < ngp; ++gp)
-		if (gp_list[gp].allocated)
+	for (int gp = 0; gp < ngp; ++gp) {
+		if (gp_list[gp].allocated) {
 			count ++;
+		}
+	}
 	return count;
 }
 
 
 template <int tdim>
-void micropp<tdim>::calc_ctan_lin()
+void micropp<tdim>::calc_ctan_lin_fe_models()
 {
 
 #pragma omp parallel for schedule(dynamic,1)
@@ -280,7 +283,7 @@ void micropp<tdim>::calc_ctan_lin()
 		calc_ave_stress(u, sig);
 
 		for (int v = 0; v < nvoi; ++v) {
-			ctan_lin[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
+			ctan_lin_fe[v * nvoi + i] = sig[v] / D_EPS_CTAN_AVE;
 		}
 
 		ell_free(&A);
@@ -288,6 +291,54 @@ void micropp<tdim>::calc_ctan_lin()
 		free(u);
 		free(du);
 	}
+}
+
+
+template <int tdim>
+void micropp<tdim>::calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi])
+{
+
+	const double Em = material_list[0]->E;
+	const double nu_m = material_list[0]->nu;
+	const double Gm = Em / (2 * (1 + nu_m));
+
+	const double Ef = material_list[1]->E;
+	const double nu_f = material_list[1]->nu;
+	const double Gf = Ef / (2 * (1 + nu_f));
+
+	const double E11 = Vf * Ef + Vm * Em;
+	const double E22 = Em / (1 - sqrt(Vf) * (1 - Em / Ef));
+	const double nu12 = Vf * nu_f + Vm * nu_m;
+	const double G12 = Gm / (1 - sqrt(Vf) * (1 - Gm / Gf));
+	const double nu23 = E22 / (2 * G12);
+
+	const double S[3][3] = {
+		{      1 / E11, - nu12 / E11, - nu12 / E11 },
+		{ - nu12 / E11,      1 / E22, - nu23 / E22 },
+		{ - nu12 / E11, - nu23 / E22,      1 / E22 },
+	};
+
+	double S_inv[3][3];
+	invert_3x3(S, S_inv);
+
+	memset (ctan, 0, nvoi * nvoi * sizeof(double));
+
+	ctan[0 * nvoi + 0] = S_inv[0][0];
+	ctan[0 * nvoi + 1] = S_inv[0][1];
+	ctan[0 * nvoi + 2] = S_inv[0][2];
+
+	ctan[1 * nvoi + 0] = S_inv[1][0];
+	ctan[1 * nvoi + 1] = S_inv[1][1];
+	ctan[1 * nvoi + 2] = S_inv[1][2];
+
+	ctan[2 * nvoi + 0] = S_inv[2][0];
+	ctan[2 * nvoi + 1] = S_inv[2][1];
+	ctan[2 * nvoi + 2] = S_inv[2][2];
+
+	ctan[3 * nvoi + 3] = G12;
+	ctan[4 * nvoi + 4] = G12;
+	ctan[5 * nvoi + 5] = G12;
+
 }
 
 
@@ -404,41 +455,43 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
-		double tmp = 0.;
-		for (int i = 0; i < dim; ++i)
-			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
 
-		return (tmp < rad * rad);
+		return point_inside_sphere(center, rad, coor);
 
 	} else if (micro_type == MIC_LAYER_Y) { // 2 flat layers in y dir
 
 		const double width = geo_params[0];
 		return (coor[1] < width);
 
+	} else if (micro_type == MIC_CILI_FIB_X) { // a cilindrical fiber in x dir
+
+		const double rad = geo_params[0];
+		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
+		const double dir[3] = { 1, 0, 0 };
+
+		return point_inside_cilinder_inf(dir, center, rad, coor);
+
 	} else if (micro_type == MIC_CILI_FIB_Z) { // a cilindrical fiber in z dir
 
 		const double rad = geo_params[0];
 		const double center[3] = { lx / 2, ly / 2, lz / 2 }; // 2D lz = 0
-		double tmp = 0.;
-		for (int i = 0; i < 2; ++i)
-			tmp += (center[i] - coor[i]) * (center[i] - coor[i]);
+		const double dir[3] = { 0, 0, 1 };
 
-		return (tmp < rad * rad);
+		return point_inside_cilinder_inf(dir, center, rad, coor);
 
 	} else if (micro_type == MIC_CILI_FIB_XZ) { // 2 cilindrical fibers one in x and z dirs
 
 		const double rad = geo_params[0];
 		const double cen_1[3] = { lx / 2., ly * .75, lz / 2. };
-		double tmp_1 = 0.;
-		for (int i = 0; i < 2; ++i)
-			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
-
 		const double cen_2[3] = { lx / 2., ly * .25, lz / 2. };
-		double tmp_2 = 0.;
-		for (int i = 1; i < 3; ++i)
-			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
+		const double dir_x[3] = { 1, 0, 0 };
+		const double dir_z[3] = { 0, 0, 1 };
 
-		return ((tmp_1 < rad * rad) || (tmp_2 < rad * rad));
+		if (point_inside_cilinder_inf(dir_z, cen_1, rad, coor) ||
+		    point_inside_cilinder_inf(dir_x, cen_2, rad, coor)) {
+			return 1;
+		}
+		return 0;
 
 	} else if (micro_type == MIC_QUAD_FIB_XYZ) {
 
@@ -590,8 +643,7 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 
 		for (int i = 0; i < num_spheres; ++i) {
-			if (point_inside_sphere(centers[i], rads[i],
-						coor)) {
+			if (point_inside_sphere(centers[i], rads[i], coor)) {
 				return 1;
 			}
 		}
@@ -602,10 +654,10 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 		/*
 		 * returns
-		 * 0 : for the cilinders
-		 * 1 : for the layer around the cilinders
-		 * 1 : for the flat layer
-		 * 2 : for the matrix
+		 * 0 : for the matrix
+		 * 1 : for the cilinders
+		 * 2 : for the layer around the cilinders
+		 * 2 : for the flat layer
 		 *
 		 */
 
@@ -613,64 +665,50 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		const double width_flat_layer = geo_params[1];
 		const double width_cili_layer = geo_params[2];
 
-		const double cen_1[3] = { lx * .25, ly * .75, -1000.0 };
-		double tmp_1 = 0.0;
-		for (int i = 0; i < 2; ++i) {
-			tmp_1 += (cen_1[i] - coor[i]) * (cen_1[i] - coor[i]);
+		const double cen_1[3] = { lx * .25, ly * .75, 0.0 };
+		const double cen_2[3] = { lx * .75, ly * .75, 0.0 };
+
+		const double cen_3[3] = { 0.0, ly * .25, lz * .25 };
+		const double cen_4[3] = { 0.0, ly * .25, lz * .75 };
+
+		const double dir_x[3] = { 1, 0, 0 };
+		const double dir_z[3] = { 0, 0, 1 };
+
+		if(point_inside_cilinder_inf(dir_z, cen_1, rad_cilinder, coor) ||
+		   point_inside_cilinder_inf(dir_z, cen_2, rad_cilinder, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_3, rad_cilinder, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_4, rad_cilinder, coor)) {
+			return 1;
 		}
 
-		const double cen_2[3] = { -1000.0, ly * .25, lz * .25 };
-		double tmp_2 = 0.0;
-		for (int i = 1; i < 3; ++i) {
-			tmp_2 += (cen_2[i] - coor[i]) * (cen_2[i] - coor[i]);
-		}
-
-		const double cen_3[3] = { lx * .75, ly * .75, -1000.0 };
-		double tmp_3 = 0.0;
-		for (int i = 0; i < 2; ++i) {
-			tmp_3 += (cen_3[i] - coor[i]) * (cen_3[i] - coor[i]);
-		}
-
-		const double cen_4[3] = { -1000.0, ly * .25, lz * .75 };
-		double tmp_4 = 0.0;
-		for (int i = 1; i < 3; ++i) {
-			tmp_4 += (cen_4[i] - coor[i]) * (cen_4[i] - coor[i]);
-		}
-
-		if (tmp_1 < pow(rad_cilinder, 2) || tmp_2 < pow(rad_cilinder, 2) ||
-		    tmp_3 < pow(rad_cilinder, 2) || tmp_4 < pow(rad_cilinder, 2)) {
-
-			return 0;
-
-		} else if ((tmp_1 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_1 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((tmp_2 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_2 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((tmp_3 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_3 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((tmp_4 < pow(rad_cilinder + width_cili_layer, 2)) &&
-			   (tmp_4 > pow(rad_cilinder, 2))) {
-
-			return 1;
-
-		} else if ((coor[1] < (ly / 2 + width_flat_layer / 2)) &&
-			   (coor[1] > (ly / 2 - width_flat_layer / 2))) {
-
-			return 1;
-
-		} else {
-
+		if(point_inside_cilinder_inf(dir_z, cen_1, rad_cilinder + width_cili_layer, coor) ||
+		   point_inside_cilinder_inf(dir_z, cen_2, rad_cilinder + width_cili_layer, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_3, rad_cilinder + width_cili_layer, coor) ||
+		   point_inside_cilinder_inf(dir_x, cen_4, rad_cilinder + width_cili_layer, coor) ||
+		   fabs(coor[1] - ly / 2) < width_flat_layer) {
 			return 2;
 		}
+
+		return 0;
+
+	} else if (micro_type == MIC3D_FIBS_20_ORDER) {
+
+		const double radius = 0.05;
+		const double dir[3] = { 1, 0, 0 };
+		const int fibs_z = 5;
+		const int fibs_y = 4;
+		const double dz = 1.0 / (fibs_z + 1);
+		const double dy = 1.0 / (fibs_y + 1);
+
+		for (int i = 0; i < fibs_z; ++i) {
+			for (int j = 0; j < fibs_y; ++j) {
+				const double center[3] = { 0.0, (j + 1) * dy, (i + 1) * dz };
+				if(point_inside_cilinder_inf(dir, center, radius, coor)) {
+					return 1;
+				}
+			}
+		}
+		return 0;
 
 	} else if (micro_type == MIC3D_FIBS_20_DISORDER) {
 
@@ -725,13 +763,10 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		};
 
 		for (int i = 0; i < num_fibs; ++i) {
-			if(point_inside_cilinder_inf(dirs[i], centers[i],
-						     radius, coor)) {
-				// Is in a Fiber
+			if(point_inside_cilinder_inf(dirs[i], centers[i], radius, coor)) {
 				return 1;
 			}
 		}
-		// Is in the Matrix
 		return 0;
 
 	}
@@ -783,51 +818,19 @@ void micropp<tdim>::print_info() const
 {
 	cout << "micropp" << dim << endl;
 
-	cout << "Micro-structure : ";
-	switch(micro_type) {
-		case(MIC_SPHERE):
-			cout << "MIC_SPHERE" << endl;
-			break;
-		case(MIC_LAYER_Y):
-			cout << "MIC_LAYER_Y" << endl;
-			break;
-		case(MIC_CILI_FIB_Z):
-			cout << "MIC_CILI_FIB_Z" << endl;
-			break;
-		case(MIC_CILI_FIB_XZ):
-			cout << "MIC_CILI_FIB_XZ" << endl;
-			break;
-		case(MIC_QUAD_FIB_XYZ):
-			cout << "MIC_QUAD_FIB_XYZ" << endl;
-			break;
-		case(MIC_QUAD_FIB_XZ):
-			cout << "MIC_QUAD_FIB_XZ" << endl;
-			break;
-		case(MIC_QUAD_FIB_XZ_BROKEN_X):
-			cout << "MIC_QUAD_FIB_XZ_BROKEN_X" << endl;
-			break;
-		case(MIC3D_SPHERES):
-			cout << "MIC3D_SPHERES" << endl;
-			break;
-		case(MIC3D_8):
-			cout << "MIC3D_8" << endl;
-			break;
-		case(MIC3D_FIBS_20_DISORDER):
-			cout << "MIC3D_FIBS_20_DISORDER" << endl;
-			break;
-		default:
-			cout << "NO TYPE" << endl;
-			break;
-	}
-	cout << "MATRIX [%]  : " << Vm << endl;
-	cout << "FIBER  [%]  : " << Vf << endl;
+	cout << "Micro-structure   : " << micro_names[micro_type] << endl;
 
-	cout << "LINEAR      : " << num_no_coupling << " GPs" << endl;
-	cout << "ONE_WAY     : " << num_one_way     << " GPs" << endl;
-	cout << "FULL        : " << num_full        << " GPs" << endl;
-	cout << "USE A0      : " << use_A0 << endl;
-	cout << "NUM SUBITS  : " << nsubiterations << endl;
-	cout << "MPI RANK    : " << mpi_rank << endl;
+	cout << "MATRIX [%]        : " << Vm << endl;
+	cout << "FIBER  [%]        : " << Vf << endl;
+
+	cout << "FE_LINEAR         : " << gp_counter[FE_LINEAR]       << " GPs" << endl;
+	cout << "FE_ONE_WAY        : " << gp_counter[FE_ONE_WAY]      << " GPs" << endl;
+	cout << "FE_FULL           : " << gp_counter[FE_FULL]         << " GPs" << endl;
+	cout << "MIX_RULE_CHAMIS   : " << gp_counter[MIX_RULE_CHAMIS] << " GPs" << endl;
+	cout << "USE A0            : " << use_A0 << endl;
+	cout << "NUM SUBITS        : " << nsubiterations << endl;
+	cout << "MPI RANK          : " << mpi_rank << endl;
+
 #ifdef _OPENACC
 	int acc_num_gpus = acc_get_num_devices(acc_device_nvidia);
 	cout << "ACC NUM GPUS      : " << acc_num_gpus << endl;
@@ -856,10 +859,10 @@ void micropp<tdim>::print_info() const
 	}
 
 	cout << endl;
-	cout << "ctan lin = " << endl;
+	cout << "ctan_lin_fe = " << endl;
 	for (int i = 0; i < 6; ++i) {
 		for (int j = 0; j < 6; ++j) {
-			cout << ctan_lin[i * 6 + j] << "\t";
+			cout << ctan_lin_fe[i * 6 + j] << "\t";
 		}
 		cout << endl;
 	}
@@ -898,12 +901,14 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 					double stress_gp[nvoi], strain_gp[nvoi];
 					get_strain(u, gp, strain_gp, ex, ey, ez);
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
-					for (int v = 0; v < nvoi; ++v)
+					for (int v = 0; v < nvoi; ++v) {
 						stress_aux[v] += stress_gp[v] * wg;
+					}
 
 				}
-				for (int v = 0; v < nvoi; ++v)
+				for (int v = 0; v < nvoi; ++v) {
 					stress_ave[v] += stress_aux[v];
+				}
 			}
 		}
 	}
@@ -950,18 +955,21 @@ void micropp<tdim>::calc_ave_strain(const double *u, double strain_ave[nvoi]) co
 					double strain_gp[nvoi];
 
 					get_strain(u, gp, strain_gp, ex, ey, ez);
-					for (int v = 0; v < nvoi; ++v)
+					for (int v = 0; v < nvoi; ++v) {
 						strain_aux[v] += strain_gp[v] * wg;
+					}
 				}
 
-				for (int v = 0; v < nvoi; v++)
+				for (int v = 0; v < nvoi; v++) {
 					strain_ave[v] += strain_aux[v];
+				}
 			}
 		}
 	}
 
-	for (int v = 0; v < nvoi; v++)
+	for (int v = 0; v < nvoi; v++) {
 		strain_ave[v] /= vol_tot;
+	}
 }
 
 
