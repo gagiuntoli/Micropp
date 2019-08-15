@@ -310,7 +310,8 @@ void micropp<tdim>::calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi])
 	const double E22 = Em / (1 - sqrt(Vf) * (1 - Em / Ef));
 	const double nu12 = Vf * nu_f + Vm * nu_m;
 	const double G12 = Gm / (1 - sqrt(Vf) * (1 - Gm / Gf));
-	const double nu23 = E22 / (2 * G12);
+	//const double nu23 = E22 / (2 * G12);
+	const double nu23 = nu12;
 
 	const double S[3][3] = {
 		{      1 / E11, - nu12 / E11, - nu12 / E11 },

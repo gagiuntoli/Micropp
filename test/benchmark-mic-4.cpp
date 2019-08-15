@@ -81,8 +81,8 @@ int main(int argc, char **argv)
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
-	material_set(&mic_params.materials[0], 0, 1.0e7, 0.3, 0.0, 0.0, 0.0);
-	material_set(&mic_params.materials[1], 0, 3.0e7, 0.3, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[0], 0, 3.0e7, 0.25, 0.0, 0.0, 0.0);
+	material_set(&mic_params.materials[1], 0, 3.0e8, 0.25, 0.0, 0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 3.0e7, 0.3, 0.0, 0.0, 0.0);
 	mic_params.lin_stress = true;
 
@@ -152,16 +152,21 @@ int main(int argc, char **argv)
 		}
 		cout << endl;
 
-		micro.update_vars();
-
-		file    << eps[dir] << "\t"
-			<< sig[dir] << "\t" << endl;
+		file << eps[dir] << "\t";
+		for (int i = 0; i < 6; ++i) {
+			file << sig[i] << "\t";
+		}
+		file << sqrt(pow(sig[0], 2) + pow(sig[1], 2) + pow(sig[2], 2) + \
+			     pow(sig[3], 2) + pow(sig[4], 2) + pow(sig[5], 2)) << "\t"
+			<< endl;
 
 		if (print) {
 			char filename[128];
 			snprintf(filename, 128, "micropp_%d", t);
-			micro.output (0, filename);
+			micro.output(0, filename);
 		}
+
+		micro.update_vars();
 
 		time += dt;
 	}
