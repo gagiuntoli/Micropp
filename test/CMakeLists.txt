@@ -26,6 +26,9 @@ set(testsources
 	benchmark-mic-2.cpp
 	benchmark-mic-3.cpp
 	benchmark-mic-4.cpp
+	benchmark-elastic.cpp
+	benchmark-plastic.cpp
+	benchmark-damage.cpp
 	)
 
 # Iterate over the list above
@@ -50,6 +53,9 @@ add_test(NAME test_ell_2 COMMAND test_ell_2)
 add_test(NAME test_ell_mvp_openacc COMMAND test_ell_mvp_openacc 5 5)
 add_test(NAME test_util_1 COMMAND test_util_1)
 add_test(NAME test_material COMMAND test_material 5)
+add_test(NAME benchmark-elastic COMMAND benchmark-elastic)
+add_test(NAME benchmark-plastic COMMAND benchmark-plastic)
+add_test(NAME benchmark-damage COMMAND benchmark-damage)
 add_test(NAME test_damage COMMAND test_damage 10)
 
 set_property(TARGET test3d_3 PROPERTY LINKER_LANGUAGE Fortran)
