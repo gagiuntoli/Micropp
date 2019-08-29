@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 	mic_params.geo_params[0] = 0.0;
 	mic_params.geo_params[1] = 0.0;
 	mic_params.geo_params[2] = 0.0;
-	mic_params.geo_params[4] = 0.0;
+	mic_params.geo_params[3] = 0.0;
 	//mic_params.subiterations = true;
 	//mic_params.nsubiterations = 10;
 	mic_params.nr_max_its = 12;

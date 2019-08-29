@@ -19,17 +19,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MATERIAL_HPP
-#define MATERIAL_HPP
-
-
-#include "material_base.h"
+#pragma once
 
 
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+
+
+#include "material_base.h"
 
 
 using namespace std;
@@ -171,6 +170,3 @@ class material_damage : public material_t {
 				double *stress_lin) const;
 
 };
-
-
-#endif

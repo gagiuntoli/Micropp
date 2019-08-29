@@ -19,16 +19,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
 
+#pragma once
+
+
+#include <fstream>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
 
+
 using namespace std;
 
-#ifndef ELL_H_
-#define ELL_H_
 
 #define CG_ABS_TOL      1.0e-50
 #define CG_MAX_ITS      1000
@@ -37,6 +39,7 @@ using namespace std;
 #define nod_index(i,j,k)   ((k)*nx*ny + (j)*nx + (i))
 #define nod_index3D(i,j,k) ((k)*nx*ny + (j)*nx + (i))
 #define nod_index2D(i,j)   ((j)*nx + (i))
+
 
 typedef struct {
 
@@ -91,5 +94,3 @@ double get_norm_acc(const double *vector, const int n);
 double get_dot_acc(const double *v1, const double *v2, const int n);
 
 void print_ell_acc(const ell_matrix *A);
-
-#endif

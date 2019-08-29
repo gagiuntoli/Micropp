@@ -20,8 +20,7 @@
  */
 
 
-#ifndef UTIL_HPP
-#define UTIL_HPP
+#pragma once
 
 
 #include <vector>
@@ -172,6 +171,3 @@ inline double invert_3x3(const double mat[3][3], double mat_inv[3][3])
 
 	return det;
 }
-
-
-#endif

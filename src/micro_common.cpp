@@ -662,9 +662,9 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 		 *
 		 */
 
-		const double rad_cilinder = geo_params[0];
-		const double width_flat_layer = geo_params[1];
-		const double width_cili_layer = geo_params[2];
+		const double rad_cilinder = 0.1;
+		const double width_flat_layer = 0.02;
+		const double width_cili_layer = 0.01;
 
 		const double cen_1[3] = { lx * .25, ly * .75, 0.0 };
 		const double cen_2[3] = { lx * .75, ly * .75, 0.0 };

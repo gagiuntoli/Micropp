@@ -50,7 +50,7 @@ extern "C" {
 		params.mpi_rank = mpi_rank;
 		params.use_A0 = false;
 		params.its_with_A0 = 1;
-		params.write_log = true;
+		params.write_log = false;
 
 		self->ptr = new micropp<3>(params);
 

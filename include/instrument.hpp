@@ -20,8 +20,8 @@
  */
 
 
-#ifndef INSTRUMENT_HPP
-#define INSTRUMENT_HPP
+#pragma once
+
 
 #ifndef TIMER
 
@@ -82,6 +82,3 @@ class instrument {
 };
 
 #endif // TIMER
-
-#endif //INSTRUMENT_HPP
-

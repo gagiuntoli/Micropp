@@ -21,8 +21,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MICRO_HPP
-#define MICRO_HPP
+#pragma once
 
 #include <vector>
 #include <iostream>
@@ -396,6 +395,3 @@ class micropp {
 		void print_info() const;
 
 };
-
-
-#endif
