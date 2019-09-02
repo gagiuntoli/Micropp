@@ -29,18 +29,11 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
-#include <map>
 
 #include <cmath>
 #include <cassert>
 #include <cstring>
 #include <ctime>
-
-#include "util.hpp"
-#include "ell.hpp"
-#include "material.hpp"
-#include "gp.hpp"
-#include "instrument.hpp"
 
 #ifdef _OPENACC
 #include <openacc.h>
@@ -49,149 +42,13 @@
 #include <omp.h>
 #endif
 
-#define MAX_DIM         3
-#define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
-#define MAX_MATERIALS   3
-
-#define FILTER_REL_TOL  1.0e-5
-
-#define D_EPS_CTAN_AVE  1.0e-8
-
-#define CONSTXG         0.577350269189626
-
-#define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
-#define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
-
-#define NR_MAX_TOL      1.0e-10
-#define NR_MAX_ITS      4
-#define NR_REL_TOL      1.0e-3 // factor against first residual
-
-
-typedef struct {
-
-	/* Results from newton-raphson loop */
-	int its = 0;
-	int solver_its = 0;
-	bool converged = false;
-
-	void print()
-	{
-		cout << "newton.its        : " << its << endl;
-		cout << "newton.solver_its : " << solver_its << endl;
-		cout << "newton.converged  : " << converged << endl;
-	}
-
-} newton_t;
-
-
-typedef struct {
-
-	int ngp = 1;
-	int size[3];
-	int type = 0;
-	double geo_params[4] = {0.1, 0.1, 0.1, 0.1};
-	struct material_base materials[4];
-	int *coupling = nullptr;
-	bool subiterations = false;
-	int nsubiterations = 10;
-	int mpi_rank = 0;
-	int nr_max_its = NR_MAX_ITS;
-	double nr_max_tol = NR_MAX_TOL;
-	double nr_rel_tol = NR_REL_TOL;
-	int cg_max_its = CG_MAX_ITS;
-	double cg_abs_tol = CG_ABS_TOL;
-	double cg_rel_tol = CG_REL_TOL;
-	bool calc_ctan_lin = true;
-	bool use_A0 = false;
-	int its_with_A0 = 1;
-	bool lin_stress = true;
-	bool write_log = false;
-
-	void print()
-	{
-		cout << "ngp  : " << ngp << endl;
-		cout << "size : " << size[0] << endl;
-		cout << "type  : " << type << endl;
-		cout << "geo_params : " << geo_params[0] << endl;
-		cout << "subiterations : " << subiterations << endl;
-		cout << "nsubiterations : " << nsubiterations << endl;
-		cout << "mpi_rank : " << mpi_rank << endl;
-		cout << "nr_max_its : " << nr_max_its << endl;
-		cout << "nr_max_tol : " << nr_max_tol << endl;
-		cout << "nr_rel_tol : " << nr_rel_tol << endl;
-		cout << "calc_ctan_lin : " << calc_ctan_lin << endl;
-		cout << "use_A0 : " << use_A0 << endl;
-		cout << "its_with_A0 : " << its_with_A0 << endl;
-		cout << "lin_stress : " << lin_stress << endl;
-		cout << "write_log : " << write_log << endl;
-	}
-
-} micropp_params_t;
-
-
-enum {
-	MIC_HOMOGENEOUS,
-	MIC_SPHERE,
-	MIC_LAYER_Y,
-	MIC_CILI_FIB_X,
-	MIC_CILI_FIB_Z,
-	MIC_CILI_FIB_XZ,
-	MIC_QUAD_FIB_XYZ,
-	MIC_QUAD_FIB_XZ,
-	MIC_QUAD_FIB_XZ_BROKEN_X,
-	MIC3D_SPHERES,
-	MIC3D_8,
-	MIC3D_FIBS_20_ORDER,
-	MIC3D_FIBS_20_DISORDER
-};
-
-static map<int, std::string> micro_names = {
-	{MIC_HOMOGENEOUS, "MIC_HOMOGENEOUS"},
-	{MIC_SPHERE, "MIC_SPHERE"},
-	{MIC_LAYER_Y, "MIC_LAYER_Y"},
-	{MIC_CILI_FIB_X, "MIC_CILI_FIB_X"},
-	{MIC_CILI_FIB_Z, "MIC_CILI_FIB_Z"},
-	{MIC_CILI_FIB_XZ, "MIC_CILI_FIB_XZ"},
-	{MIC_QUAD_FIB_XYZ, "MIC_QUAD_FIB_XYZ"},
-	{MIC_QUAD_FIB_XZ, "MIC_QUAD_FIB_XZ"},
-	{MIC_QUAD_FIB_XZ_BROKEN_X, "MIC_QUAD_FIB_XZ_BROKEN_X"},
-	{MIC3D_SPHERES, "MIC3D_SPHERES"},
-	{MIC3D_8, "MIC3D_8"},
-	{MIC3D_FIBS_20_ORDER, "MIC3D_FIBS_20_ORDER"},
-	{MIC3D_FIBS_20_DISORDER, "MIC3D_FIBS_20_DISORDER"}
-};
-
-/*
- * MIC_SPHERES : (2 materials) One sphere in the middle
- *
- * MIC_HOMOGENEOUS : Only one material (mat[0])
- *
- * MIC3D_SPHERES : (2 materials) Random spheres.
- *
- * MIC3D_8 : (3 materiales) 2 cilinders at 90 deg with a layer around the
- * perimeter and a flat layer between the fibers.
- *
- * MIC3D_FIBS_20_ORDER: (2 materiales) 20 fibers in oriented in X direction.
- *
- * MIC3D_FIBS_20_DISORDER: (2 materiales) 20 fibers in random directions.
- *
- */
-
-
-enum {
-	FE_LINEAR,
-	FE_ONE_WAY,
-	FE_FULL,
-	MIX_RULE_CHAMIS
-};
-
-
-static map<int, int> gp_counter = {
-	{FE_LINEAR, 0},
-	{FE_ONE_WAY, 0},
-	{FE_FULL, 0},
-	{MIX_RULE_CHAMIS, 0}
-};
+#include "util.hpp"
+#include "ell.hpp"
+#include "material.hpp"
+#include "gp.hpp"
+#include "instrument.hpp"
+#include "params.hpp"
+#include "types.hpp"
 
 
 using namespace std;
@@ -268,8 +125,11 @@ class micropp {
 		/* Private function members */
 
 		/*
-		 * Linear homogenizations 
-		 * Applies to FE RVE model and Mixture rules
+		 * Linear homogenizations : Does not perform
+		 * FE computation when it is called
+		 *
+		 * Applies the FE RVE model and Mixture rules
+		 * linearly
 		 *
 		 */
 		void homogenize_linear(gp_t<tdim> *gp_ptr);
