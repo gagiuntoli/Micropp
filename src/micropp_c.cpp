@@ -22,7 +22,7 @@
  */
 
 #include "micropp_c.h"
-#include "micro.hpp"
+#include "micropp.hpp"
 #include "material_base.h"
 
 extern "C" {

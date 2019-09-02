@@ -27,7 +27,7 @@
 
 
 #include "instrument.hpp"
-#include "micro.hpp"
+#include "micropp.hpp"
 
 
 template <int tdim>

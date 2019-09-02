@@ -25,7 +25,7 @@
 #include <ctime>
 #include <cassert>
 
-#include "micro.hpp"
+#include "micropp.hpp"
 
 #define REPETITIONS 20
 
