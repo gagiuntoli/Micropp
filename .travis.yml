@@ -1,8 +1,19 @@
+
 language:
         - cpp
         - c
+
 compiler:
         - gcc
+
+
+addons:
+   apt:
+      packages:
+         # Travis doesn't include fortran compiler as 
+         # default we download it 
+         - gfortran
+
 script:
         - mkdir -p build
         - cd build
