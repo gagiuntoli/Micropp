@@ -69,17 +69,11 @@ tabsize=4
 
 \begin{figure}
 	\centering
-	\resizebox{\textwidth}{!}{
-		\begin{tikzpicture}[]
-			\node[draw=none,fill=none,scale=2.0] at (0,0)   {\includegraphics[width=0.95\linewidth]{figures/mac_1.png}};
-			\node[draw=none,fill=none,scale=1.4] at (20,0)  {\includegraphics[width=0.95\linewidth]{figures/mic_1.png}};
-			\node[draw=none,fill=none,scale=3.0] at (5, -9) {macro-scale};
-			\node[draw=none,fill=none,scale=3.0] at (13,-9) {\emph{micropp}};
-			\draw[-{Latex[length=8mm, width=4mm]}, black,line width=0.5mm] (0,10) .. controls ++(8.5,2) .. ++(17,0);
-			\draw[-{Latex[length=8mm, width=4mm]}, black,line width=0.5mm] (17,-10) .. controls ++(-8.5,-2) .. ++(-17,0);
-		\end{tikzpicture}
+	\includegraphics[width=0.95\linewidth]{figures/coupling-micropp-macro.png}
+	\caption{\label{fig:disp}
+		Coupling between a macro-scale solid mechanics code and Micropp to simulate a composite material
+		problem.
 	}
-	\caption{\label{fig:disp} Coupling between the macro-scale code \emph{Alya} \& \emph{micropp} to simulate damage in composite material for aeronautics.}
 \end{figure}
 
 \input{governing_equations_and_fe.tex}
@@ -203,6 +197,8 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \end{algorithm}
 
 \input{coding_style.tex}
+
+\input{Sections/benchmarks.tex}
 
 \section{Conclusion}
 The conclusion goes here.
