@@ -3,6 +3,72 @@
 
 
 \subsection{\texttt{benchmarks-sol-ass}}
+
+This benchmark is intended to measure the computing times of the assembly of the Residue vector ($\times2$) and the
+Jacobian matrix and the solver (CGPD).
+
+Basically the benchmark executes a tipical Newton-Raphson iteration:
+
+\begin{lstlisting}
+	double norm = assembly_rhs_acc(u, nullptr, b);
+
+#ifdef _OPENACC
+	assembly_mat_acc(&A, u, nullptr);
+#else
+	assembly_mat(&A, u, nullptr);
+#endif
+
+#ifdef _OPENACC
+	int cg_its = ell_solve_cgpd_acc(&A, b, du, &cg_err);
+#else
+	int cg_its = ell_solve_cgpd(&A, b, du, &cg_err);
+#endif
+
+	for (int i = 0; i < nn * dim; ++i)
+		u[i] += du[i];
+
+	norm = assembly_rhs_acc(u, nullptr, b);
+\end{lstlisting}
+
+\begin{figure}[!htbp]
+	\centering
+	\begin{tikzpicture}[]
+		\pgfplotsset{every tick label/.append style={font=\small}}
+		\pgfplotstableread{data/benchmark-sol-ass-macintosh.dat}{\times}
+		\begin{axis}[
+%			grid=major,
+%			y unit=s,
+%			legend pos=north west,
+%			legend cell align={left},
+%			ylabel=Computing Time,
+%			xlabel=Micro-resolution,
+%			x unit=\# Elements,
+%			ymin = 0,
+%			ymax = 600,
+%			xtick = {0,20,40,60,80,100},
+%			xticklabels = {0,20\tst,40\tst,60\tst,80\tst,100\tst},
+%			ytick = {0,200,400,600,800},
+			]
+			\addplot [color=blue,mark=*,line width = 0.5mm] table [x index={0}, y index={1}] {\times};
+			\addplot [color=green,mark=*,line width = 0.5mm] table [x index={0}, y index={2}] {\times};
+%				%{\times} [yshift=9pt] 
+%				%node[pos=0.0,yshift=10pt] {36\%}
+%				%node[pos=0.105,yshift=11pt] {68\%}
+%				%node[pos=1.0] {79\%};
+%			%\addplot [color=blue ,mark=*,line width = 0.5mm]  table [x={n1}, y expr=\thisrowno{2}*1.0e-6]
+%				%{\times} [yshift=9pt] 
+%				%node[pos=0.0] {64\%}
+%				%node[pos=0.253,yshift=5pt] {32\%}
+%				%node[pos=1.0] {21\%};
+%			%\legend{Jacobian \& Residue Assembly}
+		\end{axis}
+	\end{tikzpicture}
+%	\caption{\label{fig:ass_vs_sol}
+%		Computing time used for the assembly of the Jacobian Matrix and the Residue vector and the solver
+%		algorithm of the Micropp code to perform the micro-scale FE calculation.
+%	}
+\end{figure}
+
 \subsection{\texttt{benchmarks-cpu-gpu}}
 \subsection{\texttt{benchmarks-elastic}}
 \subsection{\texttt{benchmarks-plastic}}

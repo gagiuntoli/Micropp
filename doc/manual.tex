@@ -1,23 +1,19 @@
 \documentclass[conference, onecolumn]{IEEEtran}
-% \usepackage[pdftex]{graphicx}
-% \usepackage[dvips]{graphicx}
-%\usepackage{amsmath}
+
 \usepackage{algorithm}
 \usepackage{algorithmic}
-%\usepackage{array}
-%\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
-%\usepackage{fixltx2e}
-%\usepackage{stfloats}
-%\usepackage{url}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \RequirePackage{amsfonts}
-\RequirePackage{standalone}
-\RequirePackage{tikz}
-\usetikzlibrary{matrix,backgrounds,calc,shapes,arrows,arrows.meta,fit,positioning}                                                                
-\usetikzlibrary{chains,shapes.multipart}                                                                                                          
-\usetikzlibrary{shapes,calc} 
-
+\usepackage{siunitx}
+\usepackage{standalone}
+\usepackage{tikz}
+\usetikzlibrary{matrix,backgrounds,calc,shapes,arrows,arrows.meta,fit,positioning}
+\usetikzlibrary{chains,shapes.multipart}
+\usepackage{pgfplots, pgfplotstable}
+\usepgfplotslibrary{units}
+\usepackage{xcolor}
+\usepackage{xspace}
 \usepackage{listings}
 \usepackage{color}
 
@@ -196,7 +192,8 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \end{algorithmic}
 \end{algorithm}
 
-\input{coding_style.tex}
+\input{Sections/compilation.tex}
+\input{Sections/coding_style.tex}
 
 \input{Sections/benchmarks.tex}
 
@@ -206,12 +203,28 @@ The conclusion goes here.
 % use section* for acknowledgment
 \section*{Acknowledgment}
 
-The authors would like to thank to the Barcelona Supercomputing Center for the resources provided to develop and test \emph{micropp} code in the architectures: \emph{Marenostrum IV} \& \emph{CTE-POWER} during Sep., 2016 and Dic., 2019. The simulations were primary done coupling \emph{micropp} with the multi-physics code \emph{Alya} to solve the macro-scale equations.
+The authors would like to thank to the Barcelona Supercomputing Center for the resources provided to develop and test Micropp code in the architectures: Marenostrum IV \& CTE-POWER during Sep., 2016 and Dic., 2019. The simulations were primary done coupling Micropp with the multi-physics code Alya to solve the macro-scale equations.
 
 \begin{thebibliography}{1}
-\bibitem{paper1}G. Giuntoli, J. Aguilar, M. Vazquez, S. Oller and G. Houzeaux. \textit{A FE$^2$ multi-scale implementation for modeling composite materials on distributed architectures}. Coupled Systems Mechanics, 8(2), 2018
-\bibitem{simo} J.C. Simo \& T.J.R. Huges.\emph{Computational Ineslasticity}, Springer, 2000. 
-\bibitem{oller} S. Oller. \emph{Numerical Simulation of Mechanical Behavior of Composite Materials}, Springer, 2014. 
+
+	\bibitem{paper1}{
+		G. Giuntoli, J. Aguilar, M. Vazquez, S. Oller and G. Houzeaux.
+		``An FE$^2$ multi-scale	implementation for modeling composite materials on distributed architectures''. 
+		Coupled Systems Mechanics, 8(2), 2018
+	}
+
+	\bibitem{simo}{
+		J.C. Simo \& T.J.R. Huges.
+		``Computational Ineslasticity''.
+		Springer, 2000. 
+	}
+
+	\bibitem{oller}{
+		S. Oller.
+		``Numerical Simulation of Mechanical Behavior of Composite Materials''.
+		Springer, 2014. 
+	}
+
 \end{thebibliography}
 
 \end{document}

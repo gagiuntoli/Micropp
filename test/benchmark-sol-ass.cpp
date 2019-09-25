@@ -115,10 +115,10 @@ class test_t : public micropp<3> {
 				<< "sol : " << percentage_sol << " \%" << endl;
 			cout << "|r| : " << norm << endl;
 			file
-				<< nx - 1 << " "
-				<< ass_res.count() + ass_mat.count() << " "
-				<< solver.count() << " "
-				<< percentage_ass << " "
+				<< nx - 1 << "\t"
+				<< ass_res.count() + ass_mat.count() << "\t"
+				<< solver.count() << "\t"
+				<< percentage_ass << "\t"
 				<< percentage_sol << endl;
 
 			ell_free(&A);
