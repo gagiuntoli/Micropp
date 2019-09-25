@@ -82,6 +82,75 @@ To execute this benchmark:
 \end{figure}
 
 \subsection{\texttt{benchmarks-cpu-gpu}}
+
+This benchmark measures the speedup achieved when the CPU/GPU strategy is used against pure CPU. To execute this test
+Micropp should be compiled with OpenACC:
+
+\begin{lstlisting}[language=Bash,backgroundcolor=\color{lightgray} ]
+./benchmark-cpu-gpu
+\end{lstlisting}
+
+The output of this program is stored in \texttt{benchmark-cpu-gpu.dat}.
+
+Fig.~\ref{fig:cpu-vs-gpu} shows the computing time of one Newton-Raphson iteration for the micro-scale problem
+evaluating different mesh resolutions. The comparison is performed between one IBM Power 9 CPU core and an NVidia V100
+Tesla GPU of the CTE-POWER cluster~\cite{cte-power} using \texttt{benchmark-cpu-gpu}~\cite{micropp-doc}. The
+Newton-Raphson iteration includes the assembly of the Jacobian matrix, two times the assembly of the Residue vector (the
+second assembly is done for checking the that the final norm is near zero after the solver) and the CGPD solver part.
+This is the most fundamental procedure that it is done at the micro-scale in the linear or elastic cases when the
+One-Way or the Full coupling schemes are activated. Moreover, in non-linear cases, this procedure is repeated several
+times after the convergence is achieved. Fig.~\ref{fig:cpu-vs-gpu} demonstrates the speedup gained with the CPU/GPU
+acceleration against using a pure CPU core. The speedup increases as the micro-scale mesh resolution increases, for
+instance, a speedup of $\times$25 is gained for the mesh resolution of 100\tst elements. This increment in the speed up
+with the mesh resolution is due to that the CGPD solver occupies a dominant part in the algorithm mainly for large mesh
+resolutions. Being the solver the part which is better parallelized with the GPU the computations (principally the MVP
+product) of the stage is accelerated and it is translated to the whole calculation.
+
+\begin{figure}
+	\centering
+	\begin{tikzpicture}
+		\pgfplotstableread[row sep=\\,col sep=&]{
+			interval & CPU    & GPU  & Speedup  \\
+			%10       & 53     & 176  & $\times$0.3  \\
+			%20       & 496    & 349  & $\times$1.4  \\
+			30       & 2.183   & 0.648  & $\times$3.3  \\
+			40       & 6.221   & 1.146 & $\times$5.4  \\
+			50       & 13.824  & 1.541 & $\times$9.0  \\
+			60       & 24.751  & 1.464 & $\times$16.9 \\
+			70       & 41.142  & 2.369 & $\times$17.4 \\
+			80       & 73.224  & 4.204 & $\times$17.4 \\
+			90       & 105.634 & 5.365 & $\times$19.7 \\
+			100      & 182.470 & 7.315 & $\times$24.9 \\
+		}\mydata
+		\begin{axis}[
+			grid=major,
+			ybar=0.5cm,
+			xlabel=Micro-Scale Mesh Resolution,
+			x unit=\# Elements,
+			ylabel=Computing Time,
+			y unit=s,
+			x=0.15cm, 
+			ymin=-1,
+			xtick={30,40,50,60,70,80,90,100},
+			xticklabels={30\tst,40\tst,50\tst,60\tst,70\tst,80\tst,90\tst,100\tst},
+			x tick label style={anchor=east},
+			scaled y ticks=false,
+			legend style={anchor=north west},
+			legend pos= north west
+			]
+			\addplot [fill=blue, ybar, point meta = explicit symbolic, nodes near coords]  
+				table[meta=Speedup,x=interval,y=CPU] {\mydata};
+			\addplot [fill=green, ybar, point meta = explicit symbolic, nodes near coords]  
+				table[x=interval,y=GPU] {\mydata};
+			\legend{CPU, GPU};
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\label{fig:cpu-vs-gpu}
+		Computing Time of one Newton-Raphson iteration step in the micro-scale for different mesh resolutions
+		(\texttt{benchmark-cpu-gpu}~\cite{micropp-doc}). Comparison between one CPU IBM Power 9 CPU core and an
+		NVIDIA V100 GPU (computing node of CTE-POWER cluster).
+	}
+\end{figure}
 \subsection{\texttt{benchmarks-elastic}}
 \subsection{\texttt{benchmarks-plastic}}
 \subsection{\texttt{benchmarks-damage}}
