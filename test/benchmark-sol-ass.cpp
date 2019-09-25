@@ -103,16 +103,19 @@ class test_t : public micropp<3> {
 			auto solver = 
 				duration_cast<milliseconds>(time_6 - time_5);
 
+			auto ass_tot = ass_res.count() + ass_mat.count();
+			auto total = solver.count() + ass_tot;
+			double percentage_ass = (100.0 * ass_tot) / total;
+			double percentage_sol = (100.0 * solver.count()) / total;
+
 			cout << "ass_res : " << ass_res.count() << " ms" << endl;
 			cout << "ass_mat : " << ass_mat.count() << " ms" << endl;
-			cout << "ass_tot : " << ass_res.count() + ass_mat.count() << " ms" << endl;
+			cout << "ass_tot : " << ass_tot << " ms" << endl;
 			cout << "solver : " << solver.count() << " ms" << endl;
-			auto total = solver.count() + ass_res.count() + ass_mat.count();
-			double percentage_ass = (double)(100 * ass_res.count() + ass_mat.count()) / total;
-			double percentage_sol = (double)(100 * solver.count()) / total;
 			cout
 				<< "ass : " << percentage_ass << " \% " 
 				<< "sol : " << percentage_sol << " \%" << endl;
+
 			cout << "|r| : " << norm << endl;
 			file
 				<< nx - 1 << "\t"
@@ -150,7 +153,7 @@ int main (int argc, char *argv[])
 
 	ofstream file;
 	file.open("benchmark-sol-ass.dat");
-	file << "N    time_ass   time_sol    ass\%     sol\%" << endl;
+	file << "#N    time_ass   time_sol    ass\%     sol\%" << endl;
 
 	for (int i = 0; i < n_cases; ++i) {
 		mic_params.size[0] = n[i];
