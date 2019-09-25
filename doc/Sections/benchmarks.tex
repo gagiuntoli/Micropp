@@ -40,27 +40,39 @@ To execute this benchmark:
 	\centering
 	\begin{tikzpicture}[]
 		\pgfplotsset{every tick label/.append style={font=\small}}
-		\pgfplotstableread{data/benchmark-sol-ass-macintosh-intel-I7-3520M.dat}{\times}
-		\begin{axis}[
+		\pgfplotstableread{data/benchmark-sol-ass-macintosh-intel-I7-3520M.dat}{\mac}
+		\pgfplotstableread{data/benchmark-sol-ass-CTEPOWER-PGI19.4-cpu.dat}{\ibmcpu}
+		\pgfplotstableread{data/benchmark-sol-ass-CTEPOWER-PGI19.4-gpu.dat}{\ibmgpu}
+		\begin{loglogaxis}[
 			grid=major,
 			y unit=s,
-			legend pos=north west,
+			legend style={at={(1.7,0.45)},anchor=south east},
 			legend cell align={left},
 			ylabel=Computing Time,
 			xlabel=Micro-Scale Mesh Resolution,
 			x unit=\# Elements,
 			scaled y ticks=false,
-			xmin=-1,
-			ymin=-1,
-			xtick = {0,20,40,60,80,100},
-			xticklabels = {0,20\tst,40\tst,60\tst,80\tst,100\tst},
+			%xmin=-1,
+			%ymin=-1,
+			xtick = {20,40,60,80,100},
+			xticklabels = {20\tst,40\tst,60\tst,80\tst,100\tst},
 			]
-			\addplot [color=blue,mark=*,line width = 0.5mm] table [x index={0}, y
-				expr=\thisrowno{1}*1.0e-3] {\times};
-			\addplot [color=green,mark=*,line width = 0.5mm] table [x index={0}, y
-				expr=\thisrowno{2}*1.0e-3] {\times};
-			\legend{Jacobian \& Residue Assembly, Solver}
-		\end{axis}
+			\addplot [color=blue,mark=*,line width = 0.2mm] table [x index={0}, y
+				expr=\thisrowno{1}*1.0e-3] {\mac};
+			\addplot [color=green,mark=*,line width = 0.2mm] table [x index={0}, y
+				expr=\thisrowno{2}*1.0e-3] {\mac};
+			\addplot [color=blue,mark=+,line width = 0.2mm] table [x index={0}, y
+				expr=\thisrowno{1}*1.0e-3] {\ibmcpu};
+			\addplot [color=green,mark=+,line width = 0.2mm] table [x index={0}, y
+				expr=\thisrowno{2}*1.0e-3] {\ibmcpu};
+			\addplot [color=blue,mark=x,line width = 0.2mm] table [x index={0}, y
+				expr=\thisrowno{1}*1.0e-3] {\ibmgpu};
+			\addplot [color=green,mark=x,line width = 0.2mm] table [x index={0}, y
+				expr=\thisrowno{2}*1.0e-3] {\ibmgpu};
+			\legend{Assembly (Intel I7 CPU), Solver (Intel I7 CPU),
+			Assembly (IBM P9 CPU), Solver (IBM P9 CPU),
+			Assembly (V100 GPU), Solver (V100 GPU)}
+		\end{loglogaxis}
 	\end{tikzpicture}
 	\caption{\label{fig:ass_vs_sol}
 		Computing time used for the assembly of the Jacobian Matrix and the Residue vector and
