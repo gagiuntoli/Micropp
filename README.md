@@ -1,19 +1,22 @@
-# _micropp_
+# Micropp
 
-Code to _localize_ strains and _homogenize_ stress in a Representative Volume Element (RVE) by using Finite Element Method (FEM).
+[![Build Status](https://travis-ci.org/GG1991/Micropp.svg?branch=master)](https://travis-ci.org/GG1991/Micropp)
+
+Code to localize strains and homogenize stress in a Representative Volume Element (RVE) by using Finite Element Method (FEM).
 
 # Characteristics
 
-1. Works with structured grids 2D or 3D
-2. Plastic non-linear material model for testing the memory storage and efficiency.
-3. Supports boundary condition : uniform strains (Pure Dirichlet)
-4. Runs sequentially.
-5. Own ELL matrix routines with CG iterative solver (diagonal pre-conditioner).
-6. Different kinds of micro-structures
+1. Works with 3D structured FE elements problems
+2. OpenACC acceleration support for GPUs
+3. OpenMP support for multi-core CPUs
+4. Solver: Conjugate Gradients with Diagonal Preconditioner (CGPD) 
+5. Different varieties of micro-structures and material laws
+6. Native instrumentation to measure performance
+7. C and Fortran Wrappers
 
 # Main Characteristics
 
-_micropp_ solves the FE problem on heterogeneous RVEs composed with more than one material and calculates the average properties of it. In the next figure a typical micro-structure is solved.
+Micropp solves the FE problem on heterogeneous RVEs composed with more than one material and calculates the average properties of it. In the next figure a typical micro-structure is solved.
 
 <img src="./pics/mic_1.png" alt="drawing" width="300"/>
 
@@ -21,7 +24,7 @@ _micropp_ is designed to be coupled with a macro-scale code in order to simulate
 
 <img src="./pics/coupling-micropp-macro.png" alt="drawing" width="300"/>
 
-`MicroPP` has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the Barcelona Supercomputing center ([BSC](https://www.bsc.es/)) to performed **FE2** calculations. Also it was coupled with [MacroC](https://github.com/GG1991/macroc), a FE code that uses PETSc library on structured meshes. With this good performance was reach until 30720 processors on Marenostrum IV supercomputer.
+Micropp has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the Barcelona Supercomputing center ([BSC](https://www.bsc.es/)) to performed **FE2** calculations. Also it was coupled with [MacroC](https://github.com/GG1991/macroc), a FE code that uses PETSc library on structured meshes. With this good performance was reach until 30720 processors on Marenostrum IV supercomputer.
 
 <img src="./pics/scala.png" alt="drawing" width="350"/>
 
@@ -53,20 +56,9 @@ and the debug version:
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-Other possible options are: Debug, Release, RelWithDebInfo, MinSizeRel. Read CMake documentation for more information.
+Other possible options are: 
 
-An option **TIMER** was added to insert time measure instrumentation for the execution. You can enable the option during cmake configuration time.
-
-```bash
-cmake -DTIMER=on ..
-```
-
-Option **CGDEBUG** was included to study the CG solver and see the convergence under different conditions.
-
-```bash
-cmake -DCGDEBUG=on ..
-```
-
-The new option is independent of Debug or release mode. But remember that any 
-
+1. `TIMER=[ON|OFF]` activate the native instrumentation for measuring times
+2. `OPENACC=[ON|OFF]` compiles with OpenACC (only supported by some compilers such as PGI)
+3. `OPENMP=[ON|OFF]` compiles with OpenMP for multi-core CPUs
 
