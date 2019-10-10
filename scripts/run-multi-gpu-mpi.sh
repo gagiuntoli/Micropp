@@ -10,17 +10,12 @@
 #SBATCH --exclusive
 #SBATCH --time=01:30:00
 
-### #SBATCH --nodes=1
-### #SBATCH --ntasks-per-node=4
-### #SBATCH --qos=bsc_case
-### #SBATCH --qos=debug
-
-N=100
-NGP=32
+N=5
+NGP=5
 STEPS=5
+N_MPI=5
 
-#EXEC="../build-gpu/test/test3d_2"
-EXEC="../test/multi-gpu-mpi"
+EXEC="../build/multi-gpu-mpi"
 
 export OMP_NUM_THREADS=1
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
@@ -31,10 +26,10 @@ export CUDA_VISIBLE_DEVICES="0,1,2,3"
 
 rm -rf times.txt
 
-for i in {1..9}; do
+for (( i=1; i<=$N_MPI; i++ )); do
 
 	echo "running" $i MPI processes
-	time mpirun -np $i $EXEC $N $NGP $STEPS > output-${N}-${NGP}-${i}.out
+	mpirun -np $i $EXEC $N $NGP $STEPS > output-${N}-${NGP}-${i}.out
 	tim=$(awk '/time =/{print $3}' output-${N}-${NGP}-${i}.out)
 	echo $i $tim >> times.txt
 

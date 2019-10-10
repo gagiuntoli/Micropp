@@ -19,14 +19,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include <iostream>
 #include <iomanip>
 #include <cstring>
 #include <cassert>
 #include <chrono>
-
-
 #include <bits/stdc++.h>
 #include <mpi.h>
 
