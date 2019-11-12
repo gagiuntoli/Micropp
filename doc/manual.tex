@@ -4,12 +4,13 @@
 \usepackage{algorithmic}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\RequirePackage{amsfonts}
+\usepackage{amsfonts}
 \usepackage{siunitx}
 \usepackage{standalone}
 \usepackage{tikz}
 \usetikzlibrary{matrix,backgrounds,calc,shapes,arrows,arrows.meta,fit,positioning}
 \usetikzlibrary{chains,shapes.multipart}
+
 \usepackage{pgfplots, pgfplotstable}
 \usepgfplotslibrary{units}
 \usepackage{xcolor}
@@ -46,14 +47,23 @@ tabsize=4
 
 \begin{document}
 
-\title{MicroPP: Reference Manual}
+\title{Micropp: Reference Manual}
 
-\author{\IEEEauthorblockN{
-	Guido Giuntoli\IEEEauthorrefmark{1}\IEEEauthorrefmark{2},
-	Jimmy Aguilar\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}}
-\IEEEauthorblockA{\IEEEauthorrefmark{1}Barcelona Supercomputing Center}
-\IEEEauthorblockA{\IEEEauthorrefmark{2}guido.giuntoli@bsc.es}
-\IEEEauthorblockA{\IEEEauthorrefmark{3}jimmy.aguilar@bsc.es}}
+%\author{\IEEEauthorblockN{
+%	Guido Giuntoli\IEEEauthorrefmark{1}\IEEEauthorrefmark{3},
+%	Jimmy Aguilar\IEEEauthorrefmark{1}\IEEEauthorrefmark{4}
+%	Judica\"el Grasset\IEEEauthorrefmark{2}\IEEEauthorrefmark{5}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}Barcelona Supercomputing Center, Spain}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}STFC Daresbury Laboratory, UK}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}guido.giuntoli@bsc.es}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}jimmy.aguilar@bsc.es}
+%\IEEEauthorblockA{\IEEEauthorrefmark{5}judicael.grasset@stfc.ac.uk}}
+
+\author{
+Guido Giuntoli (gagiuntoli@gmail.com) \\
+Jimmy Aguilar (spacibba@aol.com) \\
+Judica\"el Grasset (judicael.grasset@stfc.ac.uk)
+}
 
 \maketitle
 
@@ -79,16 +89,10 @@ tabsize=4
 
 \section{Implementation}
 
-\begin{figure}[!htbp]
-	\centering
-	\resizebox{5cm}{!}{\input{figures/work_basis.tikz}}
-	\vspace{0.5cm}
-	\caption{\label{fig:comp_scheme}}
-\end{figure}
-
 The Voigt convention used here is the same as in Ref.~\cite{simo}.
+
 \begin{equation}
-\epsilon = \left[\epsilon_{11} \quad \epsilon_{22} \quad \epsilon_{33} \quad \epsilon_{12} \quad \epsilon_{13} \quad \epsilon_{23} \right]^T
+\epsilon = \left[\epsilon_{12} \quad \epsilon_{22} \quad \epsilon_{33} \quad \epsilon_{12} \quad \epsilon_{13} \quad \epsilon_{23} \right]^T
 \end{equation}
 
 \section{Geometries}
@@ -175,7 +179,7 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \begin{array}{ll}
 \epsilon_{n+1}^{p} = \epsilon_{n}^{p} - \Delta \gamma  \mathbf{n}_{n+1} \\[5pt]
 \alpha_{n+1} = \alpha_{n} + \sqrt{\frac{2}{3}} \Delta \gamma \\[5pt]
-\sigma_{n+1} = k \, \text{tr} (\epsilon_{n+1}) + s_{n+1}^{\text{trial}} - 2 \mu \Delta \gamma \mathbf{n}_{n+1} 
+\sigma_{n+1} = k \, \text{tr} (\epsilon_{n+1}) + s_{n+1}^{\text{trial}} - 2 \mu \Delta \gamma \mathbf{n}_{n+1}
 \end{array}
 \right.
 \end {equation}
@@ -196,6 +200,7 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \end{algorithm}
 
 \input{Sections/compilation.tex}
+
 \input{Sections/coding_style.tex}
 
 \input{Sections/benchmarks.tex}
@@ -212,14 +217,14 @@ The authors would like to thank to the Barcelona Supercomputing Center for the r
 
 	\bibitem{paper1}{
 		G. Giuntoli, J. Aguilar, M. Vazquez, S. Oller and G. Houzeaux.
-		``An FE$^2$ multi-scale	implementation for modeling composite materials on distributed architectures''. 
+		``An FE$^2$ multi-scale	implementation for modeling composite materials on distributed architectures''.
 		Coupled Systems Mechanics, 8(2), 2018
 	}
 
 	\bibitem{simo}{
 		J.C. Simo \& T.J.R. Huges.
 		``Computational Ineslasticity''.
-		Springer, 2000. 
+		Springer, 2000.
 	}
 
 	\bibitem{cte-power}{
@@ -230,7 +235,7 @@ The authors would like to thank to the Barcelona Supercomputing Center for the r
 	\bibitem{oller}{
 		S. Oller.
 		``Numerical Simulation of Mechanical Behavior of Composite Materials''.
-		Springer, 2014. 
+		Springer, 2014.
 	}
 
 \end{thebibliography}

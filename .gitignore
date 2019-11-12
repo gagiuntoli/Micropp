@@ -29,9 +29,12 @@ extract_data.py
 compile_commands.json
 scripts/output*
 
-# Latex 
+# Latex
 *.blg
 *.bbl
+*.synctex.gz
+*.fls
+*.fdb_latexmk
 
 \#*
 .#*

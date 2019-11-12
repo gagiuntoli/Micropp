@@ -1,7 +1,6 @@
 
 \section{Benchmarks}
 
-
 \subsection{\texttt{benchmarks-sol-ass}}
 
 This benchmark is intended to measure the computing times of the assembly of the Residue vector ($\times2$) and the
@@ -129,7 +128,7 @@ product) of the stage is accelerated and it is translated to the whole calculati
 			x unit=\# Elements,
 			ylabel=Computing Time,
 			y unit=s,
-			x=0.15cm, 
+			x=0.15cm,
 			ymin=-1,
 			xtick={30,40,50,60,70,80,90,100},
 			xticklabels={30\tst,40\tst,50\tst,60\tst,70\tst,80\tst,90\tst,100\tst},
@@ -138,9 +137,9 @@ product) of the stage is accelerated and it is translated to the whole calculati
 			legend style={anchor=north west},
 			legend pos= north west
 			]
-			\addplot [fill=blue, ybar, point meta = explicit symbolic, nodes near coords]  
+			\addplot [fill=blue, ybar, point meta = explicit symbolic, nodes near coords]
 				table[meta=Speedup,x=interval,y=CPU] {\mydata};
-			\addplot [fill=green, ybar, point meta = explicit symbolic, nodes near coords]  
+			\addplot [fill=green, ybar, point meta = explicit symbolic, nodes near coords]
 				table[x=interval,y=GPU] {\mydata};
 			\legend{CPU, GPU};
 		\end{axis}
