@@ -1,25 +1,23 @@
 \documentclass[conference, onecolumn]{IEEEtran}
-% \usepackage[pdftex]{graphicx}
-% \usepackage[dvips]{graphicx}
-%\usepackage{amsmath}
+
 \usepackage{algorithm}
 \usepackage{algorithmic}
-%\usepackage{array}
-%\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
-%\usepackage{fixltx2e}
-%\usepackage{stfloats}
-%\usepackage{url}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\RequirePackage{amsfonts}
-\RequirePackage{standalone}
-\RequirePackage{tikz}
-\usetikzlibrary{matrix,backgrounds,calc,shapes,arrows,arrows.meta,fit,positioning}                                                                
-\usetikzlibrary{chains,shapes.multipart}                                                                                                          
-\usetikzlibrary{shapes,calc} 
+\usepackage{amsfonts}
+\usepackage{siunitx}
+\usepackage{standalone}
+\usepackage{tikz}
+\usetikzlibrary{matrix,backgrounds,calc,shapes,arrows,arrows.meta,fit,positioning}
+\usetikzlibrary{chains,shapes.multipart}
 
+\usepackage{pgfplots, pgfplotstable}
+\usepgfplotslibrary{units}
+\usepackage{xcolor}
+\usepackage{xspace}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{framed}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -43,18 +41,29 @@ tabsize=4
 
 %columns=flexible,
 \hyphenation{op-tical net-works semi-conduc-tor}
+\newcommand{\ts}{\textsuperscript\xspace}
+\newcommand{\tst}{\textsuperscript{3}\xspace}
 
 
 \begin{document}
 
-\title{MicroPP: Reference Manual}
+\title{Micropp: Reference Manual}
 
-\author{\IEEEauthorblockN{
-	Guido Giuntoli\IEEEauthorrefmark{1}\IEEEauthorrefmark{2},
-	Jimmy Aguilar\IEEEauthorrefmark{1}\IEEEauthorrefmark{3}}
-\IEEEauthorblockA{\IEEEauthorrefmark{1}Barcelona Supercomputing Center}
-\IEEEauthorblockA{\IEEEauthorrefmark{2}guido.giuntoli@bsc.es}
-\IEEEauthorblockA{\IEEEauthorrefmark{3}jimmy.aguilar@bsc.es}}
+%\author{\IEEEauthorblockN{
+%	Guido Giuntoli\IEEEauthorrefmark{1}\IEEEauthorrefmark{3},
+%	Jimmy Aguilar\IEEEauthorrefmark{1}\IEEEauthorrefmark{4}
+%	Judica\"el Grasset\IEEEauthorrefmark{2}\IEEEauthorrefmark{5}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}Barcelona Supercomputing Center, Spain}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}STFC Daresbury Laboratory, UK}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}guido.giuntoli@bsc.es}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}jimmy.aguilar@bsc.es}
+%\IEEEauthorblockA{\IEEEauthorrefmark{5}judicael.grasset@stfc.ac.uk}}
+
+\author{
+Guido Giuntoli (gagiuntoli@gmail.com) \\
+Jimmy Aguilar (spacibba@aol.com) \\
+Judica\"el Grasset (judicael.grasset@stfc.ac.uk)
+}
 
 \maketitle
 
@@ -69,33 +78,21 @@ tabsize=4
 
 \begin{figure}
 	\centering
-	\resizebox{\textwidth}{!}{
-		\begin{tikzpicture}[]
-			\node[draw=none,fill=none,scale=2.0] at (0,0)   {\includegraphics[width=0.95\linewidth]{figures/mac_1.png}};
-			\node[draw=none,fill=none,scale=1.4] at (20,0)  {\includegraphics[width=0.95\linewidth]{figures/mic_1.png}};
-			\node[draw=none,fill=none,scale=3.0] at (5, -9) {macro-scale};
-			\node[draw=none,fill=none,scale=3.0] at (13,-9) {\emph{micropp}};
-			\draw[-{Latex[length=8mm, width=4mm]}, black,line width=0.5mm] (0,10) .. controls ++(8.5,2) .. ++(17,0);
-			\draw[-{Latex[length=8mm, width=4mm]}, black,line width=0.5mm] (17,-10) .. controls ++(-8.5,-2) .. ++(-17,0);
-		\end{tikzpicture}
+	\includegraphics[width=0.95\linewidth]{figures/coupling-micropp-macro.png}
+	\caption{\label{fig:disp}
+		Coupling between a macro-scale solid mechanics code and Micropp to simulate a composite material
+		problem.
 	}
-	\caption{\label{fig:disp} Coupling between the macro-scale code \emph{Alya} \& \emph{micropp} to simulate damage in composite material for aeronautics.}
 \end{figure}
 
 \input{governing_equations_and_fe.tex}
 
 \section{Implementation}
 
-\begin{figure}[!hhh]
-	\centering
-	\resizebox{5cm}{!}{\input{figures/work_basis.tikz}}
-	\vspace{0.5cm}
-	\caption{\label{fig:comp_scheme}}
-\end{figure}
-
 The Voigt convention used here is the same as in Ref.~\cite{simo}.
+
 \begin{equation}
-\epsilon = \left[\epsilon_{11} \quad \epsilon_{22} \quad \epsilon_{33} \quad \epsilon_{12} \quad \epsilon_{13} \quad \epsilon_{23} \right]^T
+\epsilon = \left[\epsilon_{12} \quad \epsilon_{22} \quad \epsilon_{33} \quad \epsilon_{12} \quad \epsilon_{13} \quad \epsilon_{23} \right]^T
 \end{equation}
 
 \section{Geometries}
@@ -182,7 +179,7 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \begin{array}{ll}
 \epsilon_{n+1}^{p} = \epsilon_{n}^{p} - \Delta \gamma  \mathbf{n}_{n+1} \\[5pt]
 \alpha_{n+1} = \alpha_{n} + \sqrt{\frac{2}{3}} \Delta \gamma \\[5pt]
-\sigma_{n+1} = k \, \text{tr} (\epsilon_{n+1}) + s_{n+1}^{\text{trial}} - 2 \mu \Delta \gamma \mathbf{n}_{n+1} 
+\sigma_{n+1} = k \, \text{tr} (\epsilon_{n+1}) + s_{n+1}^{\text{trial}} - 2 \mu \Delta \gamma \mathbf{n}_{n+1}
 \end{array}
 \right.
 \end {equation}
@@ -202,7 +199,11 @@ f_{n+1}^{\text{trial}} = || s_{n+1}^{\text{trial}} || - \sqrt{\frac{2}{3}} (\sig
 \end{algorithmic}
 \end{algorithm}
 
-\input{coding_style.tex}
+\input{Sections/compilation.tex}
+
+\input{Sections/coding_style.tex}
+
+\input{Sections/benchmarks.tex}
 
 \section{Conclusion}
 The conclusion goes here.
@@ -210,12 +211,33 @@ The conclusion goes here.
 % use section* for acknowledgment
 \section*{Acknowledgment}
 
-The authors would like to thank to the Barcelona Supercomputing Center for the resources provided to develop and test \emph{micropp} code in the architectures: \emph{Marenostrum IV} \& \emph{CTE-POWER} during Sep., 2016 and Dic., 2019. The simulations were primary done coupling \emph{micropp} with the multi-physics code \emph{Alya} to solve the macro-scale equations.
+The authors would like to thank to the Barcelona Supercomputing Center for the resources provided to develop and test Micropp code in the architectures: Marenostrum IV \& CTE-POWER during Sep., 2016 and Dic., 2019. The simulations were primary done coupling Micropp with the multi-physics code Alya to solve the macro-scale equations.
 
 \begin{thebibliography}{1}
-\bibitem{paper1}G. Giuntoli, J. Aguilar, M. Vazquez, S. Oller and G. Houzeaux. \textit{A FE$^2$ multi-scale implementation for modeling composite materials on distributed architectures}. Coupled Systems Mechanics, 8(2), 2018
-\bibitem{simo} J.C. Simo \& T.J.R. Huges.\emph{Computational Ineslasticity}, Springer, 2000. 
-\bibitem{oller} S. Oller. \emph{Numerical Simulation of Mechanical Behavior of Composite Materials}, Springer, 2014. 
+
+	\bibitem{paper1}{
+		G. Giuntoli, J. Aguilar, M. Vazquez, S. Oller and G. Houzeaux.
+		``An FE$^2$ multi-scale	implementation for modeling composite materials on distributed architectures''.
+		Coupled Systems Mechanics, 8(2), 2018
+	}
+
+	\bibitem{simo}{
+		J.C. Simo \& T.J.R. Huges.
+		``Computational Ineslasticity''.
+		Springer, 2000.
+	}
+
+	\bibitem{cte-power}{
+		Barcelona Supercomputing Center (2019),
+		``Power9 CTE User's Guide''.
+	}
+
+	\bibitem{oller}{
+		S. Oller.
+		``Numerical Simulation of Mechanical Behavior of Composite Materials''.
+		Springer, 2014.
+	}
+
 \end{thebibliography}
 
 \end{document}

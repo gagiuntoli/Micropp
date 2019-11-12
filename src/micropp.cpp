@@ -184,6 +184,8 @@ micropp<tdim>::~micropp()
 {
 	INST_DESTRUCT;
 
+	cout << "Calling micropp<" << dim << "> destructor" << endl;
+
 	free(elem_stress);
 	free(elem_strain);
 	free(elem_type);

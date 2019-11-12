@@ -25,8 +25,6 @@
 #include <cstring>
 #include <cassert>
 #include <chrono>
-
-
 #include <bits/stdc++.h>
 #include <mpi.h>
 
@@ -82,8 +80,6 @@ int main(int argc, char **argv)
 	mic_params.geo_params[0] = 0.1;
 	mic_params.geo_params[1] = 0.02;
 	mic_params.geo_params[2] = 0.01;
-	//mic_params.subiterations = true;
-	//mic_params.nsubiterations = 10;
 	mic_params.nr_max_its = 12;
 	material_set(&mic_params.materials[0], 2, 1.0e7, 0.3, 0.0, 0.0, 1.0e5);
 	material_set(&mic_params.materials[1], 0, 3.0e7, 0.3, 0.0, 0.0, 0.0);
@@ -95,7 +91,6 @@ int main(int argc, char **argv)
 	mic_params.print();
 
 	micropp<3> micro(mic_params);
-	//micro.print_info();
 
 	auto start = high_resolution_clock::now();
 
