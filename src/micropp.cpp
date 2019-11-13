@@ -74,7 +74,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 #endif
 
 	for (int gp = 0; gp < npe; gp++) {
-		calc_bmat(gp, calc_bmat_cache[gp]);
+		calc_bmat(gp, bmat_cache[gp]);
 	}
 
 	gp_list = new gp_t<tdim>[ngp]();
@@ -370,7 +370,7 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
-				be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
+				be[i] += bmat_cache[gp][j][i] * stress_gp[j] * wg;
 	}
 }
 
@@ -404,7 +404,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 			for (int j = 0; j < npedim; ++j) {
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
-					tmp += ctan[i][k] * calc_bmat_cache[gp][k][j];
+					tmp += ctan[i][k] * bmat_cache[gp][k][j];
 				cxb[i][j] = tmp * wg;
 			}
 		}
@@ -412,7 +412,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		for (int m = 0; m < nvoi; ++m) {
 			for (int i = 0; i < npedim; ++i) {
 				const int inpedim = i * npedim;
-				const double bmatmi = calc_bmat_cache[gp][m][i];
+				const double bmatmi = bmat_cache[gp][m][i];
 				for (int j = 0; j < npedim; ++j)
 					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
@@ -809,8 +809,8 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 	}
 
 	for (int v = 0; v < nvoi; ++v) {
-		for (int i = 0; i < npe * dim; i++){
-			strain_gp[v] += calc_bmat_cache[gp][v][i] * elem_disp[i];
+		for (int i = 0; i < npe * dim; ++i){
+			strain_gp[v] += bmat_cache[gp][v][i] * elem_disp[i];
 		}
 	}
 }

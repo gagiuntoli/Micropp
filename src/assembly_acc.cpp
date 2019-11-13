@@ -70,7 +70,7 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 
 					for (int i = 0; i < npedim; ++i)
 						for (int j = 0; j < nvoi; ++j)
-							be[i] += calc_bmat_cache[gp][j][i] * stress_gp[j] * wg;
+							be[i] += bmat_cache[gp][j][i] * stress_gp[j] * wg;
 				}
 
 				for (int i = 0; i < npe * dim; ++i)
@@ -136,8 +136,6 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 }
 
 
-
-
 template <>
 void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 			      const double *vars_old)
@@ -168,7 +166,7 @@ void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
 	for (int gp = 0; gp < npe; ++gp) {
 		for (int i = 0; i < nvoi; i++){
 		  for (int j = 0; j < npedim; j++){
-				bmat[gp*nvoi*npedim+i*npedim+j] = calc_bmat_cache[gp][i][j];
+				bmat[gp*nvoi*npedim+i*npedim+j] = bmat_cache[gp][i][j];
 	    }
     }
 	}
