@@ -39,3 +39,13 @@
 
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
+
+struct Params {
+
+	int dim, npe, nvoi;
+	int nex, ney, nez;
+	int nx, ny, nz;
+	double bmat_cache[8][6][8 * 3];
+	double wg;
+
+};

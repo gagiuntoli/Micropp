@@ -64,10 +64,15 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		 */
 		ell_matrix *A_ptr;
 		if (!use_A0 || its > (its_with_A0 - 1)) {
-#ifdef _OPENACC
+#if defined (_OPENACC)
 			assembly_mat_acc(A, u, vars_old);
+			cout << "solving with OPENACC" << endl;
+#elif defined (_CUDA)
+			assembly_mat_cuda(A, u, vars_old);
+			cout << "solving with CUDA" << endl;
 #else
 			assembly_mat(A, u, vars_old);
+			cout << "solving with CPU" << endl;
 #endif
 			A_ptr = A;
 		} else {
@@ -80,8 +85,10 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		}
 
 		double cg_err;
-#ifdef _OPENACC
+#if defined (_OPENACC)
 		int cg_its = ell_solve_cgpd_acc(A_ptr, b, du, &cg_err);
+#elif defined(_CUDA)
+		int cg_its = ell_solve_cgpd_cuda(A_ptr, b, du, &cg_err);
 #else
 		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 #endif

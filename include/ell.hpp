@@ -94,3 +94,8 @@ double get_norm_acc(const double *vector, const int n);
 double get_dot_acc(const double *v1, const double *v2, const int n);
 
 void print_ell_acc(const ell_matrix *A);
+
+#if defined(_CUDA)
+int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x,
+			double *err_);
+#endif

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(MicroPP VERSION 0.1 LANGUAGES C CXX Fortran)
 set (CMAKE_CXX_STANDARD 11)
+enable_language(CUDA)
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
 
@@ -33,6 +34,13 @@ if(OPENACC)
 	endif()
 endif()
 
+option(CUDA "Enable CUDA" OFF)
+if(CUDA)
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CUDA")
+	endif()
+endif()
+
 option(TIMER "Enable time benchmarks instrumentation" OFF)
 if(TIMER)
 	add_definitions(-DTIMER)
@@ -42,7 +50,11 @@ endif()
 include_directories(include ${CMAKE_BINARY_DIR})
 
 # wildcard all the sources in src
-file(GLOB SOURCES src/*.c src/*.cpp src/*.f95)
+if(CUDA)
+	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95 src/*.cu)
+else()
+	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95)
+endif()
 
 add_library(micropp ${SOURCES})
 
