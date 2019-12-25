@@ -230,8 +230,6 @@ double micropp<3>::assembly_rhs(const double *u,
 }
 
 
-
-
 template <>
 void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *int_vars_old)
 {

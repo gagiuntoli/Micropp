@@ -42,8 +42,10 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 
 	int its = 0;
 
-#ifdef _OPENACC
+#if defined (_OPENACC)
 	double norm = assembly_rhs_acc(u, vars_old, b);
+#elif defined (_CUDA)
+	double norm = assembly_rhs_cuda(u, vars_old, b);
 #else
 	double norm = assembly_rhs(u, vars_old, b);
 #endif
@@ -98,8 +100,10 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
-#ifdef _OPENACC
+#if defined (_OPENACC)
 		norm = assembly_rhs_acc(u, vars_old, b);
+#elif defined (_CUDA)
+		norm = assembly_rhs_cuda(u, vars_old, b);
 #else
 		norm = assembly_rhs(u, vars_old, b);
 #endif
