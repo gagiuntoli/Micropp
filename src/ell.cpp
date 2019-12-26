@@ -247,8 +247,8 @@ int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 			m->z[i] = m->k[i] * m->r[i];
 
 		pnorm = sqrt(get_dot(m->z, m->z, m->nrow));
-		double rz_n = 0;
-		rz_n = get_dot(m->r, m->z, m->nrow);
+
+		double rz_n = get_dot(m->r, m->z, m->nrow);
 
 		const double beta = rz_n / rz;
 		for (int i = 0; i < m->nrow; ++i)

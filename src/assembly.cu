@@ -331,7 +331,7 @@ void micropp<3>::assembly_mat_cuda(ell_matrix *A, const double *u,
 	INST_START;
 
 	cout << "assembly_mat_cuda" << endl;
-	cudaProfilerStart();
+	//cudaProfilerStart();
 	ell_set_zero_mat(A);
 
 	Params params_h;
@@ -372,7 +372,7 @@ void micropp<3>::assembly_mat_cuda(ell_matrix *A, const double *u,
 	cudaFree(params_d);
 
 	ell_set_bc_3D(A);
-	cudaProfilerStop();
+	//cudaProfilerStop();
 
 	return;
 }
