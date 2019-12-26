@@ -22,6 +22,7 @@
 #include <cstdio>
 #include "micropp.hpp"
 #include "ell.hpp"
+#include "instrument.hpp"
 
 #include "cuda_profiler_api.h"
 
@@ -118,8 +119,11 @@ void ell_add_3D_gpu(ell_matrix *m, double *vals_d, int ex, int ey, int ez,
 __device__
 void get_ctan_d(const double *eps, double *ctan, const double *history_params)
 {
-	const double lambda = 1.0e1;
-	const double mu = 1.3e5;
+	const double E = 1.0e7;
+	const double nu = 0.25;
+
+	const double lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
+	const double mu = E / (2. * (1. + nu));
 
 	memset(ctan, 0, 6 * 6 * sizeof(double));
 
@@ -136,8 +140,11 @@ void get_ctan_d(const double *eps, double *ctan, const double *history_params)
 
 void get_stress_h(const double eps[NVOI], double stress[NVOI], const double *history_params)
 {
-	const double lambda = 1.0e1;
-	const double mu = 1.3e5;
+	const double E = 1.0e7;
+	const double nu = 0.25;
+
+	const double lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
+	const double mu = E / (2. * (1. + nu));
 
 	// stress[i][j] = lambda eps[k][k] * delta[i][j] + mu eps[i][j]
 	for (int i = 0; i < 3; ++i)
@@ -150,8 +157,11 @@ void get_stress_h(const double eps[NVOI], double stress[NVOI], const double *his
 __device__
 void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *history_params)
 {
-	const double lambda = 1.0e1;
-	const double mu = 1.3e5;
+	const double E = 1.0e7;
+	const double nu = 0.25;
+
+	const double lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
+	const double mu = E / (2. * (1. + nu));
 
 	// stress[i][j] = lambda eps[k][k] * delta[i][j] + mu eps[i][j]
 	for (int i = 0; i < 3; ++i)
@@ -318,7 +328,9 @@ template <>
 void micropp<3>::assembly_mat_cuda(ell_matrix *A, const double *u,
 				   const double *vars_old)
 {
-	cout << "It is entering in assembly_mat_cuda" << endl;
+	INST_START;
+
+	cout << "assembly_mat_cuda" << endl;
 	cudaProfilerStart();
 	ell_set_zero_mat(A);
 
@@ -330,7 +342,7 @@ void micropp<3>::assembly_mat_cuda(ell_matrix *A, const double *u,
 	params_h.nex = nex;
 	params_h.ney = ney;
 	params_h.nez = nez;
-	params_h.wg = nez;
+	params_h.wg = wg;
 	memcpy(&params_h.bmat_cache, bmat_cache, NPE * NVOI * NPE * DIM * sizeof(double));
 
 	Params *params_d;
@@ -387,6 +399,9 @@ template<>
 double micropp<3>::assembly_rhs_cuda(const double *u, const double *vars_old,
 				     double *b)
 {
+	INST_START;
+
+	cout << "assembly_rhs_cuda" << endl;
 	Params params_h;
 
 	params_h.nx = nx;
@@ -395,7 +410,8 @@ double micropp<3>::assembly_rhs_cuda(const double *u, const double *vars_old,
 	params_h.nex = nex;
 	params_h.ney = ney;
 	params_h.nez = nez;
-	params_h.wg = nez;
+	params_h.wg = wg;
+	memcpy(&params_h.bmat_cache, bmat_cache, NPE * NVOI * NPE * DIM * sizeof(double));
 
 	memset(b, 0., nndim * sizeof(double));
 
