@@ -80,6 +80,8 @@ double get_norm(const double *vector, const int n);
 double get_dot(const double *v1, const double *v2, const int n);
 double ell_get_norm(const ell_matrix *m);
 
+int ell_write(string filename, const ell_matrix *A);
+int ell_read(string filename, ell_matrix *A);
 void print_ell(const ell_matrix *A);
 
 // OpenACC compatibility

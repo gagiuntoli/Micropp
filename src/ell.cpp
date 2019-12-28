@@ -24,6 +24,8 @@
 
 #include <cstdio>
 #include <cmath>
+#include <fstream>
+#include <iostream>
 
 
 #include "ell.hpp"
@@ -468,6 +470,34 @@ void ell_free(ell_matrix *m)
 		free(m->p);
 	if (m->Ap != NULL)
 		free(m->Ap);
+}
+
+
+int ell_write(string filename, const ell_matrix *A) 
+{
+	ofstream file(filename, ios::out | ios::binary);
+	if (!file) {
+		cout << "Cannot open file:" << filename << endl;
+		return 1;
+	}
+	file.write((char *)A, sizeof(ell_matrix));
+	file.write((char *)A->vals, A->nrow * A->nnz * sizeof(double));
+	file.write((char *)A->cols, A->nrow * A->nnz * sizeof(int));
+	return 0;
+}
+
+
+int ell_read(string filename, ell_matrix *A) 
+{
+	ifstream file(filename, ios::in | ios::binary);
+	if (!file) {
+		cout << "Cannot open file:" << filename << endl;
+		return 1;
+	}
+	file.read((char *)A, sizeof(ell_matrix));
+	file.read((char *)A->vals, A->nrow * A->nnz * sizeof(double));
+	file.read((char *)A->cols, A->nrow * A->nnz * sizeof(int));
+	return 0;
 }
 
 
