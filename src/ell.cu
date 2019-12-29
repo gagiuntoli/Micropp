@@ -39,18 +39,16 @@ void ell_mvp_kernel(const ell_matrix *m_d, const double *vals_d,
 {
 	__shared__ double cache[2 * 128];
 
-	const unsigned int col = threadIdx.y; // 0 .. 127
+	// threadIdx.y 0 .. 127
 	const unsigned int row_begin = threadIdx.x + blockDim.x * blockIdx.x;
 	const unsigned int stride = gridDim.x * blockDim.x;
 
-	const unsigned int num_strides = m_d->nrow / stride + 1;
-
-	for (int row = row_begin; row < stride * num_strides; row += stride) {
+	for (int row = row_begin; row < m_d->nrow; row += stride) {
 
 	const unsigned int ix = row * m_d->nnz + threadIdx.y;
 
 	cache[blockDim.y * threadIdx.x + threadIdx.y] = 
-		(row < m_d->nrow && col < m_d->nnz) ? vals_d[ix] * x_d[cols_d[ix]] : 0;
+		(row < m_d->nrow && threadIdx.y < m_d->nnz) ? vals_d[ix] * x_d[cols_d[ix]] : 0;
 	__syncthreads();
 
 	for (unsigned int s = 1; s < blockDim.y; s *= 2) {
@@ -108,7 +106,7 @@ __global__
 void dot_prod_kernel(const double *arr1_d, const double *arr2_d, double *g_res, const int n)
 {    
 	// There is a different shared memory for each block
-	extern __shared__ double sdata[]; 
+	__shared__ double sdata[512]; 
 	int it = threadIdx.x + blockDim.x * blockIdx.x;
 
 	sdata[threadIdx.x] = (it < n) ? arr1_d[it] * arr2_d[it] : 0; // mv data to shared memory
@@ -124,6 +122,26 @@ void dot_prod_kernel(const double *arr1_d, const double *arr2_d, double *g_res, 
 	if (threadIdx.x == 0) g_res[blockIdx.x] = sdata[0];
 }
 
+__global__
+void reduce(double *res_d, const double *arr_d, const int n)
+{    
+	__shared__ double sdata[1024]; 
+	int it = threadIdx.x;
+	int stride = blockDim.x;
+
+	sdata[threadIdx.x] = 0; // mv data to shared memory
+
+	for (int i = it; i < n; i += stride) {
+		sdata[threadIdx.x] += arr_d[i]; 
+	}
+	if (threadIdx.x == 0) {
+		*res_d = 0.0;
+		for (int i = 0; i < 1024; ++i) {
+			*res_d += sdata[i]; 
+		}
+	}
+}
+
 
 int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double *err)
 {
@@ -132,8 +150,8 @@ int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double 
 	const int grid = 512;
 	const int block = 1024;
 
-	const int grid_dot = 100000;
-	const int block_dot = 512;
+	const int grid_dot = 50000;
+	const int block_dot = 128;
 
 	ell_matrix *m_d;
 	double *vals_d;
@@ -142,6 +160,7 @@ int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double 
 	double dot_h;
 	double *b_d, *k_d, *r_d, *x_d, *z_d, *p_d, *Ap_d;
 	double *g_res_h, *g_res_d;
+	double *res_d;
 
 	cudaMalloc((void **)&b_d, m->nrow * sizeof(double));
 	cudaMalloc((void **)&k_d, m->nrow * sizeof(double));
@@ -153,6 +172,7 @@ int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double 
 
 	g_res_h = (double *)malloc(grid_dot * sizeof(double));
 	cudaMalloc((void **)&g_res_d, grid_dot * sizeof(double));
+	cudaMalloc((void **)&res_d, sizeof(double));
 
 	cudaMalloc((void **)&m_d, sizeof(ell_matrix));
 	cudaMalloc((void **)&vals_d, m->nrow * m->nnz * sizeof(double));
@@ -184,20 +204,14 @@ int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double 
 
 	cudaMemcpy(p_d, z_d, m->nrow * sizeof(double), cudaMemcpyDeviceToDevice);
 
-	dot_prod_kernel<<<grid_dot, block_dot, block_dot* 8>>>(r_d, z_d, g_res_d, m->nrow);
-	cudaMemcpy(g_res_h, g_res_d, grid_dot * sizeof(double), cudaMemcpyDeviceToHost);
-	dot_h = 0.0;
-	for (int i = 0; i < grid_dot; ++i) {
-		dot_h += g_res_h[i];
-	}
+	dot_prod_kernel<<<grid_dot, block_dot>>>(r_d, z_d, g_res_d, m->nrow);
+	reduce<<<1, 1024>>>(res_d, g_res_d, grid_dot);
+	cudaMemcpy(&dot_h, res_d, sizeof(double), cudaMemcpyDeviceToHost);
 	double rz = dot_h;
 
-	dot_prod_kernel<<<grid_dot, block_dot, block_dot* 8>>>(z_d, z_d, g_res_d, m->nrow);
-	cudaMemcpy(g_res_h, g_res_d, grid_dot * sizeof(double), cudaMemcpyDeviceToHost);
-	dot_h = 0.0;
-	for (int i = 0; i < grid_dot; ++i) {
-		dot_h += g_res_h[i];
-	}
+	dot_prod_kernel<<<grid_dot, block_dot>>>(z_d, z_d, g_res_d, m->nrow);
+	reduce<<<1, 1024>>>(res_d, g_res_d, grid_dot);
+	cudaMemcpy(&dot_h, res_d, sizeof(double), cudaMemcpyDeviceToHost);
 
 	double pnorm_0 = sqrt(dot_h);
 	double pnorm = pnorm_0;
@@ -209,16 +223,13 @@ int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double 
 		if (pnorm < m->min_err || pnorm < pnorm_0 * m->rel_err)
 			break;
 
-		dim3 grid_mvp(10000, 1, 1);
-		dim3 block_mvp(2, 128, 1);
+		dim3 grid_mvp(5000, 1, 1);
+		dim3 block_mvp(1, 128, 1);
 		ell_mvp_kernel<<<grid_mvp, block_mvp>>>(m_d, vals_d, cols_d, p_d, Ap_d);
 
-		dot_prod_kernel<<<grid_dot, block_dot, block_dot* 8>>>(p_d, Ap_d, g_res_d, m->nrow);
-		cudaMemcpy(g_res_h, g_res_d, grid_dot * sizeof(double), cudaMemcpyDeviceToHost);
-		dot_h = 0.0;
-		for (int i = 0; i < grid_dot; ++i) {
-			dot_h += g_res_h[i];
-		}
+		dot_prod_kernel<<<grid_dot, block_dot>>>(p_d, Ap_d, g_res_d, m->nrow);
+		reduce<<<1, 1024>>>(res_d, g_res_d, grid_dot);
+		cudaMemcpy(&dot_h, res_d, sizeof(double), cudaMemcpyDeviceToHost);
 
 		double pAp = dot_h;
 
@@ -230,20 +241,14 @@ int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double 
 
 		dot_i<<<grid, block>>>(z_d, k_d, r_d, m->nrow);
 
-		dot_prod_kernel<<<grid_dot, block_dot, block_dot* 8>>>(z_d, z_d, g_res_d, m->nrow);
-		cudaMemcpy(g_res_h, g_res_d, grid_dot * sizeof(double), cudaMemcpyDeviceToHost);
-		dot_h = 0.0;
-		for (int i = 0; i < grid_dot; ++i) {
-			dot_h += g_res_h[i];
-		}
+		dot_prod_kernel<<<grid_dot, block_dot>>>(z_d, z_d, g_res_d, m->nrow);
+		reduce<<<1, 1024>>>(res_d, g_res_d, grid_dot);
+		cudaMemcpy(&dot_h, res_d, sizeof(double), cudaMemcpyDeviceToHost);
 		pnorm = sqrt(dot_h);
 
-		dot_prod_kernel<<<grid_dot, block_dot, block_dot* 8>>>(r_d, z_d, g_res_d, m->nrow);
-		cudaMemcpy(g_res_h, g_res_d, grid_dot * sizeof(double), cudaMemcpyDeviceToHost);
-		dot_h = 0.0;
-		for (int i = 0; i < grid_dot; ++i) {
-			dot_h += g_res_h[i];
-		}
+		dot_prod_kernel<<<grid_dot, block_dot>>>(r_d, z_d, g_res_d, m->nrow);
+		reduce<<<1, 1024>>>(res_d, g_res_d, grid_dot);
+		cudaMemcpy(&dot_h, res_d, sizeof(double), cudaMemcpyDeviceToHost);
 		double rz_n = dot_h;
 
 		const double beta = rz_n / rz;
