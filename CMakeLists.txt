@@ -3,9 +3,16 @@ cmake_minimum_required(VERSION 3.0)
 
 project(MicroPP VERSION 0.1 LANGUAGES C CXX Fortran)
 set (CMAKE_CXX_STANDARD 11)
-enable_language(CUDA)
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
+
+option(CUDA "Enable CUDA" OFF)
+if(CUDA)
+	enable_language(CUDA)
+	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CUDA")
+	endif()
+endif()
 
 option(OPENMP "Enables OpenMP paralelization" OFF)
 if(OPENMP)
@@ -34,12 +41,6 @@ if(OPENACC)
 	endif()
 endif()
 
-option(CUDA "Enable CUDA" OFF)
-if(CUDA)
-	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CUDA")
-	endif()
-endif()
 
 option(TIMER "Enable time benchmarks instrumentation" OFF)
 if(TIMER)
