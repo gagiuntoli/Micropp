@@ -138,22 +138,6 @@ void get_ctan_d(const double *eps, double *ctan, const double *history_params)
 		ctan[i * 6 + i] = mu;
 }
 
-void get_stress_h(const double eps[NVOI], double stress[NVOI], const double *history_params)
-{
-	const double E = 1.0e7;
-	const double nu = 0.25;
-
-	const double lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
-	const double mu = E / (2. * (1. + nu));
-
-	// stress[i][j] = lambda eps[k][k] * delta[i][j] + mu eps[i][j]
-	for (int i = 0; i < 3; ++i)
-		stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
-			    + 2 * mu * eps[i];
-
-	for (int i = 3; i < 6; ++i)
-		stress[i] = mu * eps[i];
-}
 __device__
 void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *history_params)
 {
@@ -172,22 +156,7 @@ void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *his
 		stress[i] = mu * eps[i];
 }
 
-void get_elem_nodes_h(int n[NPE], Params *params_d, int ex, int ey, int ez)
-{
-	const int nx = params_d->nx;
-	const int ny = params_d->ny;
-	const int nxny = ny * nx;
-	const int n0 = ez * nxny + ey * nx + ex;
-	n[0] = n0;
-	n[1] = n0 + 1;
-	n[2] = n0 + nx + 1;
-	n[3] = n0 + nx;
 
-	n[4] = n[0] + nxny;
-	n[5] = n[1] + nxny;
-	n[6] = n[2] + nxny;
-	n[7] = n[3] + nxny;
-}
 __device__
 void get_elem_nodes_d(int n[NPE], Params *params_d, int ex, int ey, int ez)
 {
@@ -207,18 +176,6 @@ void get_elem_nodes_d(int n[NPE], Params *params_d, int ex, int ey, int ez)
 }
 
 
-void get_elem_displ_h(const double *u, double elem_disp[NPE * DIM], 
-		      Params *params_d, int ex, int ey, int ez)
-{
-	int n[NPE];
-	get_elem_nodes_h(n, params_d, ex, ey, ez);
-
-	for (int i = 0 ; i < NPE; ++i) {
-		for (int d = 0; d < DIM; ++d) {
-			elem_disp[i * DIM + d] = u[n[i] * DIM + d];
-		}
-	}
-}
 __device__
 void get_elem_displ_d(const double *u, double elem_disp[NPE * DIM], 
 		      Params *params_d, int ex, int ey, int ez)
@@ -234,23 +191,6 @@ void get_elem_displ_d(const double *u, double elem_disp[NPE * DIM],
 }
 
 
-void get_strain_h(const double *u, int gp, double *strain_gp,
-	       	  Params *params_d, int ex, int ey, int ez)
-{
-	double elem_disp[NPE * DIM];
-
-	get_elem_displ_h(u, elem_disp, params_d, ex, ey, ez);
-
-	for (int i = 0; i < NVOI; ++i) {
-		strain_gp[i] = 0;
-	}
-
-	for (int v = 0; v < NVOI; ++v) {
-		for (int i = 0; i < NPE * DIM; ++i){
-			strain_gp[v] += params_d->bmat_cache[gp][v][i] * elem_disp[i];
-		}
-	}
-}
 __device__
 void get_strain_d(const double *u, int gp, double *strain_gp,
 	       	  Params *params_d, int ex, int ey, int ez)
@@ -377,8 +317,9 @@ void micropp<3>::assembly_mat_cuda(ell_matrix *A, const double *u,
 	return;
 }
 
-void get_elem_rhs_cuda(const double *u, const double *vars_old, double be[NPEDIM],
-		       Params *params_d, int ex, int ey, int ez)
+__device__
+void get_elem_rhs(const double *u, const double *vars_old, double be[NPEDIM],
+		  Params *params_d, int ex, int ey, int ez)
 {
 	double stress_gp[NVOI], strain_gp[NVOI];
 
@@ -386,12 +327,52 @@ void get_elem_rhs_cuda(const double *u, const double *vars_old, double be[NPEDIM
 
 	for (int gp = 0; gp < NPE; ++gp) {
 
-		get_strain_h(u, gp, strain_gp, params_d, ex, ey, ez);
-		get_stress_h(strain_gp, stress_gp, vars_old);
+		get_strain_d(u, gp, strain_gp, params_d, ex, ey, ez);
+		get_stress_d(strain_gp, stress_gp, vars_old);
 
 		for (int i = 0; i < NPEDIM; ++i)
 			for (int j = 0; j < NVOI; ++j)
-				be[i] += params_d->bmat_cache[gp][j][i] * stress_gp[j] * params_d->wg;
+				be[i] += params_d->bmat_cache[gp][j][i] 
+					* stress_gp[j] * params_d->wg;
+	}
+}
+
+__global__
+void assembly_rhs_kernel(double *b_d, const double *u, Params *params_d)
+{
+	const int nex = params_d->nex;
+	const int ney = params_d->ney;
+	const int nez = params_d->nez;
+
+	int ex_t = threadIdx.x + blockDim.x * blockIdx.x;
+	int ey_t = threadIdx.y + blockDim.y * blockIdx.y;
+	int ez_t = threadIdx.z + blockDim.z * blockIdx.z;
+	int stride_x = blockDim.x * gridDim.x;
+	int stride_y = blockDim.y * gridDim.y;
+	int stride_z = blockDim.z * gridDim.z;
+
+	for (int ex = ex_t; ex < nex; ex += stride_x) {
+	for (int ey = ey_t; ey < ney; ey += stride_y) {
+	for (int ez = ez_t; ez < nez; ez += stride_z) {
+
+		int n[NPE];
+		get_elem_nodes_d(n, params_d, ex, ey, ez);
+
+		double be[DIM * NPE];
+		int index[DIM * NPE];
+		for (int j = 0; j < NPE; ++j)
+			for (int d = 0; d < DIM; ++d)
+				index[j * DIM + d] = n[j] * DIM + d;
+
+		for (int gp = 0; gp < NPE; ++gp) {
+			get_elem_rhs(u, nullptr, be, params_d, ex, ey, ez);
+		}
+
+		for (int i = 0; i < NPE * DIM; ++i)
+			atomicAdd_d(&b_d[index[i]], be[i]);
+
+	}
+	}
 	}
 }
 
@@ -413,29 +394,27 @@ double micropp<3>::assembly_rhs_cuda(const double *u, const double *vars_old,
 	params_h.wg = wg;
 	memcpy(&params_h.bmat_cache, bmat_cache, NPE * NVOI * NPE * DIM * sizeof(double));
 
-	memset(b, 0., nndim * sizeof(double));
+	Params *params_d;
+	double *u_d;
+	double *b_d;
 
-	double be[dim * npe];
-	int index[dim * npe];
+	cudaMalloc((void **)&params_d, sizeof(Params));
+	cudaMalloc((void**)&u_d, nndim * sizeof(double));
+	cudaMalloc((void**)&b_d, nndim * sizeof(double));
 
-	for (int ez = 0; ez < nez; ++ez) {
-		for (int ey = 0; ey < ney; ++ey) {
-			for (int ex = 0; ex < nex; ++ex) {
+	cudaMemcpy(params_d, &params_h, sizeof(Params), cudaMemcpyHostToDevice);
+	cudaMemcpy(u_d, u, nndim * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemset(b_d, 0, nndim * sizeof(double));
 
-				int n[npe];
-				get_elem_nodes(n, ex, ey, ez);
+	dim3 grid(15, 15, 15);
+	dim3 block(4, 4, 4);
+	assembly_rhs_kernel<<<grid, block>>>(b_d, u, params_d);
 
-				for (int j = 0; j < npe; ++j)
-					for (int d = 0; d < dim; ++d)
-						index[j * dim + d] = n[j] * dim + d;
+	cudaMemcpy(b, b_d, nndim * sizeof(double), cudaMemcpyDeviceToHost);
 
-				get_elem_rhs_cuda(u, vars_old, be, &params_h, ex, ey, ez);
-
-				for (int i = 0; i < npe * dim; ++i)
-					b[index[i]] += be[i];
-			}
-		}
-	}
+	cudaFree(b_d);
+	cudaFree(u_d);
+	cudaFree(params_d);
 
 	// boundary conditions
 	for (int i = 0; i < nx; ++i) {
