@@ -2,33 +2,53 @@
 
 [![Build Status](https://travis-ci.org/GG1991/Micropp.svg?branch=master)](https://travis-ci.org/GG1991/Micropp)
 
-Code to localize strains and homogenize stress in a Representative Volume Element (RVE) by using Finite Element Method (FEM).
+High-Perfomance Computing (HPC) 3-D Finite Element Method (FEM) solid
+mechanics code to solve micro-scale problems for composite materials.
 
-# Characteristics
-
-1. Works with 3D structured FE elements problems
-2. OpenACC acceleration support for GPUs
-3. OpenMP support for multi-core CPUs
-4. Solver: Conjugate Gradients with Diagonal Preconditioner (CGPD)
-5. Different varieties of micro-structures and material laws
-6. Native instrumentation to measure performance
-7. C and Fortran Wrappers
-
-# Main Characteristics
-
-Micropp solves the FE problem on heterogeneous RVEs composed with more than one material and calculates the average properties of it. In the next figure a typical micro-structure is solved.
+The code solve the equilibrium equations at Representative Volume
+Elements (RVE) to calculate average properties (stresses and
+constitutive tensors) for multi-scale simulations:
 
 <img src="./pics/mic_1.png" alt="drawing" width="300"/>
 
-Micropp is designed to be coupled with a macro-scale code in order to simulate multi-scale physical systems like an composite aircraft panel:
+The code it is design to be coupled with macro-scale code that
+operate with the FEM and preferably are MPI-based. Currently the code
+has been coupled with the FEM multi-physics code Alya and has achieved
+to solve the largest simulation in the field (10 K elements at the
+macro-scale and 100^3 elements at the micro-scale):
 
 <img src="./pics/coupling-micropp-macro.png" alt="drawing" width="300"/>
 
-Micropp has been coupled with high-performance codes such as [Alya](http://bsccase02.bsc.es/alya) developed at the Barcelona Supercomputing center ([BSC](https://www.bsc.es/)) to performed **FE2** calculations. Also it was coupled with [MacroC](https://github.com/GG1991/macroc), a FE code that uses PETSc library on structured meshes. With this good performance was reach until 30720 processors on Marenostrum IV supercomputer.
+The code has been ported to GPUs to accelerate the calculation of the
+micro-scale problems.
 
-<img src="./pics/scala.png" alt="drawing" width="350"/>
+# Characteristics
 
-Micropp has its own ELL matrix format routines optimized for the structured grid geometries that it has to manage. This allows to reach a really good performance in the assembly stage of the matrix. The relation between the assembly time and the solving time can be below than 1% depending on the problem size. The solving algorithm for the linear system of equations consists on a Conjugate Gradient algorithm with diagonal preconditioner.
+1. Works with 3-D structured FE elements problems
+2. OpenACC and CUDA (under development in `cuda` branch)
+   acceleration support for GPUs
+3. OpenMP support for multi-core CPUs
+4. Solver: Diagonal Preconditioned Conjugate Gradients (DPCG)
+5. Around 10 micro-structures patterns and 3 material laws (elastic,
+   damage and plastic)
+6. No external dependencies
+7. Native instrumentation to measure performance
+8. C and Fortran Wrappers
+
+# Performance CPU vs. GPUs
+
+The peformance using the hybrid CPU/GPU execution in notably better
+than CPU-only:
+
+<img src="./pics/cpu-acc-cuda.png" alt="drawing" width="300"/>
+
+For hybrid CPU/GPU the parallelization with CUDA has proven better
+perfomance than OpenACC:
+
+<img src="./pics/acc-cuda.png" alt="drawing" width="300"/>
+
+Currently CUDA acceleration only works with some parts of the code and
+has not been completely integrated.
 
 Build steps with CMake:
 -----------------------
@@ -40,9 +60,9 @@ Build steps with CMake:
 5. cmake .. (important the 2 points)
 6. make
 
-This will build the examples and the library in debug mode. CMake does not touch
-the original sources and you can have many build directories with different
-options if you want.
+This will build the examples and the library in debug mode. CMake does
+not touch the original sources and you can have many build directories
+with different options if you want.
 
 To build the optimized version:
 
@@ -58,6 +78,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 Other possible options are:
 
-1. `TIMER=[ON|OFF]` activate the native instrumentation for measuring times
+1. `CUDA=[ON|OFF]` compiles with CUDA
 2. `OPENACC=[ON|OFF]` compiles with OpenACC (only supported by some compilers such as PGI)
 3. `OPENMP=[ON|OFF]` compiles with OpenMP for multi-core CPUs
+4. `TIMER=[ON|OFF]` activate the native instrumentation for measuring times
