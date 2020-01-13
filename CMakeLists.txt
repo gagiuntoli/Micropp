@@ -51,7 +51,23 @@ include_directories(include ${CMAKE_BINARY_DIR})
 
 # wildcard all the sources in src
 if(ENABLE_CUDA)
-	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95 src/cuda/*.cu)
+	file(GLOB SOURCES 
+		src/material.c 
+		src/material.cpp
+		src/material.f95 
+		src/micropp.cpp 
+		src/micropp_c.cpp 
+		src/micropp.f95
+		src/cuda/assembly.cu 
+		src/cuda/ell.cu 
+		src/ell-common.cpp 
+		src/instrument.cpp 
+		src/homogenize.cpp 
+		src/common.cpp 
+		src/solve.cpp 
+		src/micro3D.cpp 
+		src/output.cpp 
+		)
         set_source_files_properties(src/common.cpp PROPERTIES LANGUAGE CUDA)
 elseif(ENABLE_OPENACC)
 	file(GLOB SOURCES 

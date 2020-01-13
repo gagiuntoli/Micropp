@@ -40,10 +40,6 @@ foreach (testfile ${testsources})
 	# Create the executable test_i and link.
 	add_executable(${testname} ${testfile})
 	target_link_libraries(${testname} micropp)
-        if (ENABLE_CUDA)
-	   set_property(TARGET "${testname}" PROPERTY CUDA_SEPARABLE_COMPILATION ON)
-           set_source_files_properties("${testfile}" PROPERTIES LANGUAGE CUDA)
-	endif()
 endforeach ()
 
 # As some tests will require commands and could be executed in loops we add the
