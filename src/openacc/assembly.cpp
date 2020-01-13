@@ -27,8 +27,7 @@
 
 
 template<>
-double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
-				    double *b)
+double micropp<3>::assembly_rhs(const double *u, const double *vars_old, double *b)
 {
 	INST_START;
 
@@ -138,8 +137,7 @@ double micropp<3>::assembly_rhs_acc(const double *u, const double *vars_old,
 
 
 template <>
-void micropp<3>::assembly_mat_acc(ell_matrix *A, const double *u,
-			      const double *vars_old)
+void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars_old)
 {
 	INST_START;
 

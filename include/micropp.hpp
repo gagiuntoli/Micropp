@@ -205,9 +205,6 @@ class micropp {
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *vars_old);
 
-		void assembly_mat_acc(ell_matrix *A, const double *u,
-				      const double *vars_old);
-
 		// CUDA
 		void assembly_mat_cuda(ell_matrix *A, const double *u,
 				       const double *vars_old);

@@ -265,8 +265,7 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *p
 
 
 template <>
-void micropp<3>::assembly_mat_cuda(ell_matrix *A, const double *u,
-				   const double *vars_old)
+void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars_old)
 {
 	INST_START;
 
@@ -377,8 +376,7 @@ void assembly_rhs_kernel(double *b_d, const double *u, Params *params_d)
 }
 
 template<>
-double micropp<3>::assembly_rhs_cuda(const double *u, const double *vars_old,
-				     double *b)
+double micropp<3>::assembly_rhs(const double *u, const double *vars_old, double *b)
 {
 	INST_START;
 

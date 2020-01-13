@@ -42,13 +42,8 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 
 	int its = 0;
 
-#if defined (_OPENACC)
-	double norm = assembly_rhs_acc(u, vars_old, b);
-#elif defined (_CUDA)
-	double norm = assembly_rhs_cuda(u, vars_old, b);
-#else
 	double norm = assembly_rhs(u, vars_old, b);
-#endif
+
 	const double norm_0 = norm;
 
 	while (its < nr_max_its) {
@@ -66,16 +61,8 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		 */
 		ell_matrix *A_ptr;
 		if (!use_A0 || its > (its_with_A0 - 1)) {
-#if defined (_OPENACC)
-			assembly_mat_acc(A, u, vars_old);
-			cout << "solving with OPENACC" << endl;
-#elif defined (_CUDA)
-			assembly_mat_cuda(A, u, vars_old);
-			cout << "solving with CUDA" << endl;
-#else
 			assembly_mat(A, u, vars_old);
 			cout << "solving with CPU" << endl;
-#endif
 			A_ptr = A;
 		} else {
 #ifdef _OPENMP
@@ -87,26 +74,14 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		}
 
 		double cg_err;
-#if defined (_OPENACC)
-		int cg_its = ell_solve_cgpd_acc(A_ptr, b, du, &cg_err);
-#elif defined(_CUDA)
-		int cg_its = ell_solve_cgpd_cuda(A_ptr, b, du, &cg_err);
-#else
 		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
-#endif
 
 		newton.solver_its += cg_its;
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
-#if defined (_OPENACC)
-		norm = assembly_rhs_acc(u, vars_old, b);
-#elif defined (_CUDA)
-		norm = assembly_rhs_cuda(u, vars_old, b);
-#else
 		norm = assembly_rhs(u, vars_old, b);
-#endif
 
 		its++;
 	}

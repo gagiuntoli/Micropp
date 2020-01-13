@@ -143,7 +143,7 @@ void reduce(double *res_d, const double *arr_d, const int n)
 }
 
 
-int ell_solve_cgpd_cuda(const ell_matrix *m, const double *b, double *x, double *err)
+int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 {
 	INST_START;
 
