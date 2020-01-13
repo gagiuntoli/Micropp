@@ -41,7 +41,7 @@ void get_elem_nodes(int n[8], const int nx, const int ny,
 }
 
 
-CUDA_HOSTDEV
+//CUDA_HOSTDEV
 #pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_elem_displ(const double *u,
@@ -59,7 +59,7 @@ void micropp<tdim>::get_elem_displ(const double *u,
 }
 
 
-CUDA_HOSTDEV
+//CUDA_HOSTDEV
 #pragma acc routine seq
 template <int tdim>
 void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
@@ -78,6 +78,5 @@ void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
 		}
 	}
 }
-
 
 template class micropp<3>;

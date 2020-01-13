@@ -42,12 +42,6 @@
 #include <omp.h>
 #endif
 
-#ifdef _CUDA
-#define CUDA_HOSTDEV __host__ __device__
-#else
-#define CUDA_HOSTDEV
-#endif
-
 #include "util.hpp"
 #include "ell.hpp"
 #include "material.hpp"

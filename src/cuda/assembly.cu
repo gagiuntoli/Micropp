@@ -23,6 +23,7 @@
 #include "micropp.hpp"
 #include "ell.hpp"
 #include "instrument.hpp"
+#include "common.hpp"
 
 #include "cuda_profiler_api.h"
 
@@ -158,30 +159,11 @@ void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *his
 
 
 __device__
-void get_elem_nodes_d(int n[NPE], Params *params_d, int ex, int ey, int ez)
-{
-	const int nx = params_d->nx;
-	const int ny = params_d->ny;
-	const int nxny = ny * nx;
-	const int n0 = ez * nxny + ey * nx + ex;
-	n[0] = n0;
-	n[1] = n0 + 1;
-	n[2] = n0 + nx + 1;
-	n[3] = n0 + nx;
-
-	n[4] = n[0] + nxny;
-	n[5] = n[1] + nxny;
-	n[6] = n[2] + nxny;
-	n[7] = n[3] + nxny;
-}
-
-
-__device__
 void get_elem_displ_d(const double *u, double elem_disp[NPE * DIM], 
 		      Params *params_d, int ex, int ey, int ez)
 {
 	int n[NPE];
-	get_elem_nodes_d(n, params_d, ex, ey, ez);
+	get_elem_nodes(n, params_d->nx, params_d->ny, ex, ey, ez);
 
 	for (int i = 0 ; i < NPE; ++i) {
 		for (int d = 0; d < DIM; ++d) {
@@ -355,7 +337,7 @@ void assembly_rhs_kernel(double *b_d, const double *u, Params *params_d)
 	for (int ez = ez_t; ez < nez; ez += stride_z) {
 
 		int n[NPE];
-		get_elem_nodes_d(n, params_d, ex, ey, ez);
+		get_elem_nodes(n, params_d->nx, params_d->ny, ex, ey, ez);
 
 		double be[DIM * NPE];
 		int index[DIM * NPE];

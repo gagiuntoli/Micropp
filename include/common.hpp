@@ -18,6 +18,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+#pragma once
+
+
+#ifdef __CUDACC__
+#define CUDA_HOSTDEV __host__ __device__
+#else
+#define CUDA_HOSTDEV
+#endif
+
+
+CUDA_HOSTDEV
 #pragma acc routine seq
 void get_elem_nodes(int n[8], const int nx, const int ny,
 		    const int ex, const int ey, const int ez = 0);
