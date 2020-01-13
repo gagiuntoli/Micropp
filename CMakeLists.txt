@@ -54,9 +54,41 @@ if(ENABLE_CUDA)
 	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95 src/cuda/*.cu)
         set_source_files_properties(src/common.cpp PROPERTIES LANGUAGE CUDA)
 elseif(ENABLE_OPENACC)
-	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95 src/openacc/*.cpp)
+	file(GLOB SOURCES 
+		src/material.c 
+		src/material.cpp
+		src/material.f95 
+		src/micropp.cpp 
+		src/micropp_c.cpp 
+		src/micropp.f95
+		src/openacc/assembly.cpp 
+		src/openacc/ell.cpp 
+		src/ell-common.cpp 
+		src/instrument.cpp 
+		src/homogenize.cpp 
+		src/common.cpp 
+		src/solve.cpp 
+		src/micro3D.cpp 
+		src/output.cpp 
+		)
 else()
-	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95)
+	file(GLOB SOURCES 
+		src/material.c 
+		src/material.cpp
+		src/material.f95 
+		src/micropp.cpp 
+		src/micropp_c.cpp 
+		src/micropp.f95
+		src/assembly.cpp 
+		src/ell.cpp 
+		src/ell-common.cpp 
+		src/instrument.cpp 
+		src/homogenize.cpp 
+		src/common.cpp 
+		src/solve.cpp 
+		src/micro3D.cpp 
+		src/output.cpp 
+		)
 endif()
 
 add_library(micropp ${SOURCES})
