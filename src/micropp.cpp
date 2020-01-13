@@ -422,22 +422,39 @@ void micropp<tdim>::get_elem_mat(const double *u,
 }
 
 
+//#pragma acc routine seq
+//template <int tdim>
+//void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
+//{
+//	const int nxny = ny * nx;
+//	const int n0 = ez * nxny + ey * nx + ex;
+//	n[0] = n0;
+//	n[1] = n0 + 1;
+//	n[2] = n0 + nx + 1;
+//	n[3] = n0 + nx;
+//
+//	if (dim == 3) {
+//		n[4] = n[0] + nxny;
+//		n[5] = n[1] + nxny;
+//		n[6] = n[2] + nxny;
+//		n[7] = n[3] + nxny;
+//	}
+//}
+
+
 #pragma acc routine seq
 template <int tdim>
-void micropp<tdim>::get_elem_nodes(int n[npe], int ex, int ey, int ez) const
+void micropp<tdim>::get_elem_displ(const double *u,
+				   double elem_disp[npe * dim],
+				   int ex, int ey, int ez) const
 {
-	const int nxny = ny * nx;
-	const int n0 = ez * nxny + ey * nx + ex;
-	n[0] = n0;
-	n[1] = n0 + 1;
-	n[2] = n0 + nx + 1;
-	n[3] = n0 + nx;
+	int n[npe] ;
+	get_elem_nodes(n, ex, ey, ez);
 
-	if (dim == 3) {
-		n[4] = n[0] + nxny;
-		n[5] = n[1] + nxny;
-		n[6] = n[2] + nxny;
-		n[7] = n[3] + nxny;
+	for (int i = 0 ; i < npe; ++i) {
+		for (int d = 0; d < dim; ++d) {
+			elem_disp[i * dim + d] = u[n[i] * dim + d];
+		}
 	}
 }
 
@@ -776,23 +793,6 @@ int micropp<tdim>::get_elem_type(int ex, int ey, int ez) const
 
 	cerr << "Invalid micro_type = " << micro_type << endl;
 	return -1;
-}
-
-
-#pragma acc routine seq
-template <int tdim>
-void micropp<tdim>::get_elem_displ(const double *u,
-				   double elem_disp[npe * dim],
-				   int ex, int ey, int ez) const
-{
-	int n[npe] ;
-	get_elem_nodes(n, ex, ey, ez);
-
-	for (int i = 0 ; i < npe; ++i) {
-		for (int d = 0; d < dim; ++d) {
-			elem_disp[i * dim + d] = u[n[i] * dim + d];
-		}
-	}
 }
 
 

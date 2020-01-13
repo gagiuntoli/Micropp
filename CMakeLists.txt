@@ -10,6 +10,7 @@ option(ENABLE_CUDA "Enable CUDA" OFF)
 if(ENABLE_CUDA)
 	enable_language(CUDA)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CUDA")
+        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DCUDA")
 endif()
 
 option(ENABLE_OPENMP "Enables OpenMP paralelization" OFF)
@@ -51,11 +52,16 @@ include_directories(include ${CMAKE_BINARY_DIR})
 # wildcard all the sources in src
 if(ENABLE_CUDA)
 	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95 src/*.cu)
+        set_source_files_properties(src/common.cpp PROPERTIES LANGUAGE CUDA)
 else()
 	file(GLOB SOURCES src/*.c src/*.cpp src/*.f95)
 endif()
 
 add_library(micropp ${SOURCES})
+
+if(ENABLE_CUDA)
+set_property(TARGET micropp PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+endif()
 
 enable_testing()
 add_subdirectory(test)
