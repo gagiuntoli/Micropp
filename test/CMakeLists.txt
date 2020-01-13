@@ -29,11 +29,8 @@ set(testsources
 	benchmark-elastic.cpp
 	benchmark-plastic.cpp
 	benchmark-damage.cpp
-	benchmark-sol-ass.cpp
-	benchmark-cpu-gpu.cpp
 	)
 
-  
 
 # Iterate over the list above
 foreach (testfile ${testsources})
