@@ -22,6 +22,7 @@
  */
 
 #include "micropp.hpp"
+#include "common.hpp"
 
 
 template <>
@@ -160,7 +161,7 @@ double micropp<3>::assembly_rhs(const double *u,
 			for (int ex = 0; ex < nex; ++ex) {
 
 				int n[npe];
-				get_elem_nodes(n, ex, ey, ez);
+				get_elem_nodes(n, nx, ny, ex, ey, ez);
 
 				for (int j = 0; j < npe; ++j)
 					for (int d = 0; d < dim; ++d)

@@ -60,6 +60,7 @@
 using namespace std;
 
 
+
 template <int tdim>
 class micropp {
 
@@ -149,9 +150,6 @@ class micropp {
 
 		material_t *get_material(const int e) const;
 
-#pragma acc routine seq
-		void get_elem_nodes(int n[npe],
-				    int ex, int ey, int ez = 0) const;
 
 #pragma acc routine seq
 		void get_elem_displ(const double *u,
