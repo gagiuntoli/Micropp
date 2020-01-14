@@ -144,16 +144,6 @@ class micropp {
 
 		material_t *get_material(const int e) const;
 
-
-#pragma acc routine seq
-		void get_elem_displ(const double *u,
-				    double elem_disp[npe * dim],
-				    int ex, int ey, int ez = 0) const;
-
-#pragma acc routine seq
-		void get_strain(const double *u, int gp, double strain_gp[nvoi],
-				int ex, int ey, int ez = 0) const;
-
 		void get_stress(int gp, const double eps[nvoi],
 				const double *vars_old,
 				double stress_gp[nvoi],

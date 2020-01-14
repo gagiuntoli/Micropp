@@ -158,41 +158,6 @@ void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *his
 }
 
 
-__device__
-void get_elem_displ_d(const double *u, double elem_disp[NPE * DIM], 
-		      Params *params_d, int ex, int ey, int ez)
-{
-	int n[NPE];
-	get_elem_nodes(n, params_d->nx, params_d->ny, ex, ey, ez);
-
-	for (int i = 0 ; i < NPE; ++i) {
-		for (int d = 0; d < DIM; ++d) {
-			elem_disp[i * DIM + d] = u[n[i] * DIM + d];
-		}
-	}
-}
-
-
-__device__
-void get_strain_d(const double *u, int gp, double *strain_gp,
-	       	  Params *params_d, int ex, int ey, int ez)
-{
-	double elem_disp[NPE * DIM];
-
-	get_elem_displ_d(u, elem_disp, params_d, ex, ey, ez);
-
-	for (int i = 0; i < NVOI; ++i) {
-		strain_gp[i] = 0;
-	}
-
-	for (int v = 0; v < NVOI; ++v) {
-		for (int i = 0; i < NPE * DIM; ++i){
-			strain_gp[v] += params_d->bmat_cache[gp][v][i] * elem_disp[i];
-		}
-	}
-}
-
-
 __global__
 void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *params_d)
 {
@@ -216,7 +181,7 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *p
 
 		double eps[NVOI];
 		double ctan[NVOI2];
-		get_strain_d(u, gp, eps, params_d, ex, ey, ez);
+		get_strain(u, gp, eps, params_d->bmat_cache, params_d->nx, params_d->ny, ex, ey, ez);
 		get_ctan_d(eps, ctan, nullptr);
 		double cxb[NVOI][NPEDIM];
 
@@ -308,7 +273,7 @@ void get_elem_rhs(const double *u, const double *vars_old, double be[NPEDIM],
 
 	for (int gp = 0; gp < NPE; ++gp) {
 
-		get_strain_d(u, gp, strain_gp, params_d, ex, ey, ez);
+		get_strain(u, gp, strain_gp, params_d->bmat_cache, params_d->nx, params_d->ny, ex, ey, ez);
 		get_stress_d(strain_gp, stress_gp, vars_old);
 
 		for (int i = 0; i < NPEDIM; ++i)

@@ -41,40 +41,40 @@ void get_elem_nodes(int n[8], const int nx, const int ny,
 }
 
 
-//CUDA_HOSTDEV
+CUDA_HOSTDEV
 #pragma acc routine seq
-template <int tdim>
-void micropp<tdim>::get_elem_displ(const double *u,
-				   double elem_disp[npe * dim],
-				   int ex, int ey, int ez) const
+void get_elem_displ(const double *u,
+				   double elem_disp[NPE * DIM],
+				   int nx, int ny,
+				   int ex, int ey, int ez)
 {
-	int n[npe];
+	int n[NPE];
 	get_elem_nodes(n, nx, ny, ex, ey, ez);
 
-	for (int i = 0 ; i < npe; ++i) {
-		for (int d = 0; d < dim; ++d) {
-			elem_disp[i * dim + d] = u[n[i] * dim + d];
+	for (int i = 0 ; i < NPE; ++i) {
+		for (int d = 0; d < DIM; ++d) {
+			elem_disp[i * DIM + d] = u[n[i] * DIM + d];
 		}
 	}
 }
 
 
-//CUDA_HOSTDEV
+CUDA_HOSTDEV
 #pragma acc routine seq
-template <int tdim>
-void micropp<tdim>::get_strain(const double *u, int gp, double *strain_gp,
-			       int ex, int ey, int ez) const
+void get_strain(const double *u, int gp, double *strain_gp,
+		const double bmat[NPE][NVOI][NPE * DIM], int nx, int ny,
+		int ex, int ey, int ez)
 {
-	double elem_disp[npe * dim];
-	get_elem_displ(u, elem_disp, ex, ey, ez);
+	double elem_disp[NPE * DIM];
+	get_elem_displ(u, elem_disp, nx, ny, ex, ey, ez);
 
-	for (int i = 0; i < nvoi; ++i) {
+	for (int i = 0; i < NVOI; ++i) {
 		strain_gp[i] = 0;
 	}
 
-	for (int v = 0; v < nvoi; ++v) {
-		for (int i = 0; i < npe * dim; ++i){
-			strain_gp[v] += bmat_cache[gp][v][i] * elem_disp[i];
+	for (int v = 0; v < NVOI; ++v) {
+		for (int i = 0; i < NPE * DIM; ++i){
+			strain_gp[v] += bmat[gp][v][i] * elem_disp[i];
 		}
 	}
 }

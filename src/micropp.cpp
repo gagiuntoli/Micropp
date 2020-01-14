@@ -24,6 +24,7 @@
 
 #include "micropp.hpp"
 #include "material.hpp"
+#include "common.hpp"
 
 
 template<int tdim>
@@ -365,7 +366,7 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 
 	for (int gp = 0; gp < npe; ++gp) {
 
-		get_strain(u, gp, strain_gp, ex, ey, ez);
+		get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
 		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
@@ -393,7 +394,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 	for (int gp = 0; gp < npe; ++gp) {
 
 		double eps[6];
-		get_strain(u, gp, eps, ex, ey, ez);
+		get_strain(u, gp, eps, bmat_cache, nx, ny, ex, ey, ez);
 
 		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 		material->get_ctan(eps, (double *)ctan, vars);
@@ -845,7 +846,7 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 				for (int gp = 0; gp < npe; ++gp) {
 
 					double stress_gp[nvoi], strain_gp[nvoi];
-					get_strain(u, gp, strain_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v) {
 						stress_aux[v] += stress_gp[v] * wg;
@@ -900,7 +901,7 @@ void micropp<tdim>::calc_ave_strain(const double *u, double strain_ave[nvoi]) co
 				for (int gp = 0; gp < npe; ++gp) {
 					double strain_gp[nvoi];
 
-					get_strain(u, gp, strain_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v) {
 						strain_aux[v] += strain_gp[v] * wg;
 					}
@@ -933,7 +934,7 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
 
 					double stress_gp[nvoi], strain_gp[nvoi];
 
-					get_strain(u, gp, strain_gp, ex, ey, ez);
+					get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 					for (int v = 0; v < nvoi; ++v) {
@@ -977,7 +978,7 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
 
 					double eps[nvoi];
-					get_strain(u, gp, eps, ex, ey, ez);
+					get_strain(u, gp, eps, bmat_cache, nx, ny, ex, ey, ez);
 
 					non_linear |= material->evolute(eps, vars_old, vars_new);
 				}
