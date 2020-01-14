@@ -128,3 +128,75 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *int_
 	}
 	ell_set_bc_3D(A);
 }
+
+
+template <int tdim>
+void micropp<tdim>::get_elem_rhs(const double *u,
+				 const double *vars_old,
+				 double be[npe * dim],
+				 int ex, int ey, int ez) const
+{
+	constexpr int npedim = npe * dim;
+	double stress_gp[nvoi], strain_gp[nvoi];
+
+	memset(be, 0, npedim * sizeof(double));
+
+	for (int gp = 0; gp < npe; ++gp) {
+
+		get_strain(u, gp, strain_gp, bmat, nx, ny, ex, ey, ez);
+		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
+
+		for (int i = 0; i < npedim; ++i)
+			for (int j = 0; j < nvoi; ++j)
+				be[i] += bmat[gp][j][i] * stress_gp[j] * wg;
+	}
+}
+
+
+template <int tdim>
+void micropp<tdim>::get_elem_mat(const double *u,
+				 const double *vars_old,
+				 double Ae[npe * dim * npe * dim],
+				 int ex, int ey, int ez) const
+{
+	const int e = glo_elem(ex, ey, ez);
+	const material_t *material = get_material(e);
+
+	double ctan[nvoi][nvoi];
+	constexpr int npedim = npe * dim;
+	constexpr int npedim2 = npedim * npedim;
+
+	double TAe[npedim2] = { 0.0 };
+
+	for (int gp = 0; gp < npe; ++gp) {
+
+		double eps[6];
+		get_strain(u, gp, eps, bmat, nx, ny, ex, ey, ez);
+
+		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
+		material->get_ctan(eps, (double *)ctan, vars);
+
+		double cxb[nvoi][npedim];
+
+		for (int i = 0; i < nvoi; ++i) {
+			for (int j = 0; j < npedim; ++j) {
+				double tmp = 0.0;
+				for (int k = 0; k < nvoi; ++k)
+					tmp += ctan[i][k] * bmat[gp][k][j];
+				cxb[i][j] = tmp * wg;
+			}
+		}
+
+		for (int m = 0; m < nvoi; ++m) {
+			for (int i = 0; i < npedim; ++i) {
+				const int inpedim = i * npedim;
+				const double bmatmi = bmat[gp][m][i];
+				for (int j = 0; j < npedim; ++j)
+					TAe[inpedim + j] += bmatmi * cxb[m][j];
+			}
+		}
+	}
+	memcpy(Ae, TAe, npedim2 * sizeof(double));
+}
+
+

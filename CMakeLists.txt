@@ -10,7 +10,7 @@ option(ENABLE_CUDA "Enable CUDA" OFF)
 if(ENABLE_CUDA)
 	enable_language(CUDA)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CUDA")
-        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -DCUDA")
+        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -D_CUDA")
 endif()
 
 option(ENABLE_OPENMP "Enables OpenMP paralelization" OFF)
@@ -58,6 +58,8 @@ if(ENABLE_CUDA)
 		src/micropp.cpp 
 		src/micropp_c.cpp 
 		src/micropp.f95
+		src/average.cpp 
+		src/update.cpp 
 		src/cuda/assembly.cu 
 		src/cuda/ell.cu 
 		src/ell-common.cpp 
@@ -69,6 +71,9 @@ if(ENABLE_CUDA)
 		src/output.cpp 
 		)
         set_source_files_properties(src/common.cpp PROPERTIES LANGUAGE CUDA)
+        set_source_files_properties(src/output.cpp PROPERTIES LANGUAGE CUDA)
+        set_source_files_properties(src/average.cpp PROPERTIES LANGUAGE CUDA)
+        set_source_files_properties(src/update.cpp PROPERTIES LANGUAGE CUDA)
 elseif(ENABLE_OPENACC)
 	file(GLOB SOURCES 
 		src/material.c 
@@ -77,6 +82,8 @@ elseif(ENABLE_OPENACC)
 		src/micropp.cpp 
 		src/micropp_c.cpp 
 		src/micropp.f95
+		src/average.cpp 
+		src/update.cpp 
 		src/openacc/assembly.cpp 
 		src/openacc/ell.cpp 
 		src/ell-common.cpp 
@@ -96,6 +103,8 @@ else()
 		src/micropp_c.cpp 
 		src/micropp.f95
 		src/assembly.cpp 
+		src/average.cpp 
+		src/update.cpp 
 		src/ell.cpp 
 		src/ell-common.cpp 
 		src/instrument.cpp 

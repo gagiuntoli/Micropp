@@ -20,7 +20,6 @@
 
 
 #include "micropp.hpp"
-#include "common.hpp"
 
 
 template <>

@@ -22,11 +22,19 @@
 #pragma once
 
 
-#ifdef __CUDACC__
+#ifdef _CUDA
 #define CUDA_HOSTDEV __host__ __device__
+
+struct cuda_params_t {
+
+	int *elem_type_d;
+
+};
+
 #else
 #define CUDA_HOSTDEV
 #endif
+
 
 #define DIM 3
 #define NPE 8
@@ -40,13 +48,11 @@ void get_elem_nodes(int n[8], const int nx, const int ny,
 
 CUDA_HOSTDEV
 #pragma acc routine seq
-void get_elem_displ(const double *u,
-				   double elem_disp[NPE * DIM],
-				   int nx, int ny,
-				   int ex, int ey, int ez);
+void get_elem_displ(const double *u, double elem_disp[NPE * DIM],
+		    int nx, int ny, int ex, int ey, int ez);
 
 CUDA_HOSTDEV
 #pragma acc routine seq
 void get_strain(const double *u, int gp, double *strain_gp,
-		const double bmat[NPE][NVOI][NPE * DIM], int nx, int ny,
-		int ex, int ey, int ez);
+		const double bmat[NPE][NVOI][NPE * DIM], 
+		int nx, int ny, int ex, int ey, int ez);
