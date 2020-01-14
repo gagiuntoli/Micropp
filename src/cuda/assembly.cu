@@ -50,7 +50,7 @@ struct Params {
 	int dim, npe, nvoi;
 	int nex, ney, nez;
 	int nx, ny, nz;
-	double bmat_cache[NPE][NVOI][NPE * DIM];
+	double bmat[NPE][NVOI][NPE * DIM];
 	double wg;
 
 };
@@ -181,7 +181,7 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *p
 
 		double eps[NVOI];
 		double ctan[NVOI2];
-		get_strain(u, gp, eps, params_d->bmat_cache, params_d->nx, params_d->ny, ex, ey, ez);
+		get_strain(u, gp, eps, params_d->bmat, params_d->nx, params_d->ny, ex, ey, ez);
 		get_ctan_d(eps, ctan, nullptr);
 		double cxb[NVOI][NPEDIM];
 
@@ -190,7 +190,7 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *p
 				double tmp = 0.0;
 				for (int k = 0; k < NVOI; ++k)
 					tmp += ctan[i * NVOI + k] 
-						* params_d->bmat_cache[gp][k][j];
+						* params_d->bmat[gp][k][j];
 				cxb[i][j] = tmp * wg;
 			}
 		}
@@ -198,7 +198,7 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *p
 		for (int m = 0; m < NVOI; ++m) {
 			for (int i = 0; i < NPEDIM; ++i) {
 				const int inpedim = i * NPEDIM;
-				const double bmatmi = params_d->bmat_cache[gp][m][i];
+				const double bmatmi = params_d->bmat[gp][m][i];
 				for (int j = 0; j < NPEDIM; ++j)
 					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
@@ -229,7 +229,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 	params_h.ney = ney;
 	params_h.nez = nez;
 	params_h.wg = wg;
-	memcpy(&params_h.bmat_cache, bmat_cache, NPE * NVOI * NPE * DIM * sizeof(double));
+	memcpy(&params_h.bmat, bmat, NPE * NVOI * NPE * DIM * sizeof(double));
 
 	Params *params_d;
 	double *u_d;
@@ -273,12 +273,12 @@ void get_elem_rhs(const double *u, const double *vars_old, double be[NPEDIM],
 
 	for (int gp = 0; gp < NPE; ++gp) {
 
-		get_strain(u, gp, strain_gp, params_d->bmat_cache, params_d->nx, params_d->ny, ex, ey, ez);
+		get_strain(u, gp, strain_gp, params_d->bmat, params_d->nx, params_d->ny, ex, ey, ez);
 		get_stress_d(strain_gp, stress_gp, vars_old);
 
 		for (int i = 0; i < NPEDIM; ++i)
 			for (int j = 0; j < NVOI; ++j)
-				be[i] += params_d->bmat_cache[gp][j][i] 
+				be[i] += params_d->bmat[gp][j][i] 
 					* stress_gp[j] * params_d->wg;
 	}
 }
@@ -337,7 +337,7 @@ double micropp<3>::assembly_rhs(const double *u, const double *vars_old, double 
 	params_h.ney = ney;
 	params_h.nez = nez;
 	params_h.wg = wg;
-	memcpy(&params_h.bmat_cache, bmat_cache, NPE * NVOI * NPE * DIM * sizeof(double));
+	memcpy(&params_h.bmat, bmat, NPE * NVOI * NPE * DIM * sizeof(double));
 
 	Params *params_d;
 	double *u_d;

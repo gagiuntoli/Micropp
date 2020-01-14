@@ -62,7 +62,7 @@ class micropp {
 		static constexpr int dim = tdim;                  // 2, 3
 		static constexpr int npe = mypow(2, dim);         // 4, 8
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
-		double bmat_cache[npe][nvoi][npe*dim];
+		double bmat[npe][nvoi][npe*dim];
 
 		const int ngp, nx, ny, nz, nn, nndim;
 		const int nex, ney, nez, nelem;

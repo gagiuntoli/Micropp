@@ -75,7 +75,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 #endif
 
 	for (int gp = 0; gp < npe; gp++) {
-		calc_bmat(gp, bmat_cache[gp]);
+		calc_bmat(gp, bmat[gp]);
 	}
 
 	gp_list = new gp_t<tdim>[ngp]();
@@ -366,12 +366,12 @@ void micropp<tdim>::get_elem_rhs(const double *u,
 
 	for (int gp = 0; gp < npe; ++gp) {
 
-		get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
+		get_strain(u, gp, strain_gp, bmat, nx, ny, ex, ey, ez);
 		get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 		for (int i = 0; i < npedim; ++i)
 			for (int j = 0; j < nvoi; ++j)
-				be[i] += bmat_cache[gp][j][i] * stress_gp[j] * wg;
+				be[i] += bmat[gp][j][i] * stress_gp[j] * wg;
 	}
 }
 
@@ -394,7 +394,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 	for (int gp = 0; gp < npe; ++gp) {
 
 		double eps[6];
-		get_strain(u, gp, eps, bmat_cache, nx, ny, ex, ey, ez);
+		get_strain(u, gp, eps, bmat, nx, ny, ex, ey, ez);
 
 		const double *vars = (vars_old) ? &vars_old[intvar_ix(e, gp, 0)] : nullptr;
 		material->get_ctan(eps, (double *)ctan, vars);
@@ -405,7 +405,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 			for (int j = 0; j < npedim; ++j) {
 				double tmp = 0.0;
 				for (int k = 0; k < nvoi; ++k)
-					tmp += ctan[i][k] * bmat_cache[gp][k][j];
+					tmp += ctan[i][k] * bmat[gp][k][j];
 				cxb[i][j] = tmp * wg;
 			}
 		}
@@ -413,7 +413,7 @@ void micropp<tdim>::get_elem_mat(const double *u,
 		for (int m = 0; m < nvoi; ++m) {
 			for (int i = 0; i < npedim; ++i) {
 				const int inpedim = i * npedim;
-				const double bmatmi = bmat_cache[gp][m][i];
+				const double bmatmi = bmat[gp][m][i];
 				for (int j = 0; j < npedim; ++j)
 					TAe[inpedim + j] += bmatmi * cxb[m][j];
 			}
@@ -846,7 +846,7 @@ void micropp<tdim>::calc_ave_stress(const double *u, double stress_ave[nvoi],
 				for (int gp = 0; gp < npe; ++gp) {
 
 					double stress_gp[nvoi], strain_gp[nvoi];
-					get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
+					get_strain(u, gp, strain_gp, bmat, nx, ny, ex, ey, ez);
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v) {
 						stress_aux[v] += stress_gp[v] * wg;
@@ -901,7 +901,7 @@ void micropp<tdim>::calc_ave_strain(const double *u, double strain_ave[nvoi]) co
 				for (int gp = 0; gp < npe; ++gp) {
 					double strain_gp[nvoi];
 
-					get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
+					get_strain(u, gp, strain_gp, bmat, nx, ny, ex, ey, ez);
 					for (int v = 0; v < nvoi; ++v) {
 						strain_aux[v] += strain_gp[v] * wg;
 					}
@@ -934,7 +934,7 @@ void micropp<tdim>::calc_fields(double *u, double *vars_old)
 
 					double stress_gp[nvoi], strain_gp[nvoi];
 
-					get_strain(u, gp, strain_gp, bmat_cache, nx, ny, ex, ey, ez);
+					get_strain(u, gp, strain_gp, bmat, nx, ny, ex, ey, ez);
 					get_stress(gp, strain_gp, vars_old, stress_gp, ex, ey, ez);
 
 					for (int v = 0; v < nvoi; ++v) {
@@ -978,7 +978,7 @@ bool micropp<tdim>::calc_vars_new(const double *u, const double *_vars_old,
 					double *vars_new = &_vars_new[intvar_ix(e, gp, 0)];
 
 					double eps[nvoi];
-					get_strain(u, gp, eps, bmat_cache, nx, ny, ex, ey, ez);
+					get_strain(u, gp, eps, bmat, nx, ny, ex, ey, ez);
 
 					non_linear |= material->evolute(eps, vars_old, vars_new);
 				}
