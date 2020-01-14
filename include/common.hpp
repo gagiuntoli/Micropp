@@ -1,6 +1,6 @@
 /*
- *  This source code is part of MicroPP: a finite element library
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Micropp: a Finite Element library
+ *  to solve composite materials micro-scale problems.
  *
  *  Copyright (C) - 2018
  *
@@ -24,13 +24,6 @@
 
 #ifdef _CUDA
 #define CUDA_HOSTDEV __host__ __device__
-
-struct cuda_params_t {
-
-	int *elem_type_d;
-
-};
-
 #else
 #define CUDA_HOSTDEV
 #endif

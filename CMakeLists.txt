@@ -62,6 +62,7 @@ if(ENABLE_CUDA)
 		src/update.cpp 
 		src/cuda/assembly.cu 
 		src/cuda/ell.cu 
+		src/cuda/init.cu 
 		src/ell-common.cpp 
 		src/instrument.cpp 
 		src/homogenize.cpp 

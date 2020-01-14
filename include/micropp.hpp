@@ -1,11 +1,8 @@
 /*
- *  This source code is part of MicroPP: a finite element library
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Micropp: a Finite Element library
+ *  to solve composite materials micro-scale problems.
  *
- *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                         Guido Giuntoli <gagiuntoli@gmail.com>
- *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
- *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
+ *  Copyright (C) - 2018
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +49,6 @@
 
 
 using namespace std;
-
 
 
 template <int tdim>
@@ -122,6 +118,7 @@ class micropp {
 		/* GPU number for device selection */
 		int gpu_id = 0;
 
+		cuda_params_t cuda_params;
 
 		/* Private function members */
 
@@ -183,24 +180,18 @@ class micropp {
 		double assembly_rhs(const double *u, const double *vars_old,
 				    double *b);
 
-		double assembly_rhs_acc(const double *u, const double *vars_old,
-					double *b);
-
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *vars_old);
-
-		// CUDA
-		void assembly_mat_cuda(ell_matrix *A, const double *u,
-				       const double *vars_old);
-
-		double assembly_rhs_cuda(const double *u, const double *vars_old,
-					 double *b);
-		//
 
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);
 
 		void write_log();
+
+#ifdef _CUDA
+		void cuda_init();
+		void cuda_finalize();
+#endif
 
 	public:
 
