@@ -120,46 +120,6 @@ void ell_add_3D_gpu(ell_matrix *m, double *vals_d, int ex, int ey, int ez,
 
 }
 
-__device__
-void get_ctan_d(const double *eps, double *ctan, const double *history_params)
-{
-	const double E = 1.0e7;
-	const double nu = 0.25;
-
-	const double lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
-	const double mu = E / (2. * (1. + nu));
-
-	memset(ctan, 0, 6 * 6 * sizeof(double));
-
-	for (int i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
-			ctan[i * 6 + j] += lambda;
-
-	for (int i = 0; i < 3; ++i)
-		ctan[i * 6 + i] += 2 * mu;
-
-	for (int i = 3; i < 6; ++i)
-		ctan[i * 6 + i] = mu;
-}
-
-__device__
-void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *history_params)
-{
-	const double E = 1.0e7;
-	const double nu = 0.25;
-
-	const double lambda = nu * E / ((1. + nu) * (1. - 2. * nu));
-	const double mu = E / (2. * (1. + nu));
-
-	// stress[i][j] = lambda eps[k][k] * delta[i][j] + mu eps[i][j]
-	for (int i = 0; i < 3; ++i)
-		stress[i] = lambda * (eps[0] + eps[1] + eps[2]) \
-			    + 2 * mu * eps[i];
-
-	for (int i = 3; i < 6; ++i)
-		stress[i] = mu * eps[i];
-}
-
 
 __global__
 void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u,
@@ -191,8 +151,7 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u,
 		double eps[NVOI];
 		double ctan[NVOI2];
 		get_strain(u, gp, eps, params_d->bmat, params_d->nx, params_d->ny, ex, ey, ez);
-		//get_ctan_d(eps, ctan, nullptr);
-		material->get_ctan(eps, ctan, nullptr);
+		material->get_ctan(eps, ctan, vars);
 		double cxb[NVOI][NPEDIM];
 
 		for (int i = 0; i < NVOI; ++i) {
@@ -288,7 +247,6 @@ void get_elem_rhs(const double *u, const double *vars_old, double be[NPEDIM],
 	for (int gp = 0; gp < NPE; ++gp) {
 
 		get_strain(u, gp, strain_gp, params_d->bmat, params_d->nx, params_d->ny, ex, ey, ez);
-		//get_stress_d(strain_gp, stress_gp, vars_old);
 		material->get_stress(strain_gp, stress_gp, vars);
 
 		for (int i = 0; i < NPEDIM; ++i)

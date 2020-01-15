@@ -43,7 +43,7 @@ double micropp<3>::assembly_rhs(const double *u, const double *vars_old, double 
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ex = 0; ex < nex; ++ex) {
 				for (int gp = 0; gp < npe; ++gp) {
-					get_strain(u, gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], ex, ey, ez);
+					get_strain(u, gp, &strain_gp[ex*ney*nez*npe*nvoi+ey*nez*npe*nvoi+ez*npe*nvoi+gp*nvoi], bmat, nx, ny, ex, ey, ez);
 				}
 			}
 		}
@@ -161,11 +161,11 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 	constexpr int npedim = npe * dim;
 	constexpr int npedim2 = npedim * npedim;
 
-	double *bmat = new double[npe*nvoi*npedim];
+	double *bmat_arr = new double[npe*nvoi*npedim];
 	for (int gp = 0; gp < npe; ++gp) {
 		for (int i = 0; i < nvoi; i++){
 		  for (int j = 0; j < npedim; j++){
-				bmat[gp*nvoi*npedim+i*npedim+j] = bmat[gp][i][j];
+				bmat_arr[gp*nvoi*npedim+i*npedim+j] = bmat[gp][i][j];
 	    }
     }
 	}
@@ -179,7 +179,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ez = 0; ez < nez; ++ez) {
 				for (int gp = 0; gp < npe; ++gp) {
-					get_strain(u, gp, &eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], ex, ey, ez);
+					get_strain(u, gp, &eps[ex*ney*nez*npe*6+ey*nez*npe*6+ez*npe*6+gp*6], bmat, nx, ny, ex, ey, ez);
 				}
 			}
 		}
@@ -217,7 +217,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 	}
 	delete[] eps;
 #pragma acc parallel loop gang vector copyin(ctan[:nex*ney*nez*npe*nvoi*nvoi], \
-					     bmat[:npe*nvoi*npedim], \
+					     bmat_arr[:npe*nvoi*npedim], \
 					     A[:1], A->nrow, A->nnz, cols_row[:8][:8],\
 					     ix_glo[:nex*ney*nez*8]) \
 	copy(A->vals[:A->nrow * A->nnz])
@@ -232,7 +232,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 						for (int j = 0; j < npedim; ++j) {
 							double tmp = 0.0;
 							for (int k = 0; k < nvoi; ++k){
-								tmp += ctan[ex*npe*nvoi*nvoi+gp*nvoi*nvoi+i*nvoi+k] * bmat[gp*nvoi*npedim+k*npedim+j];
+								tmp += ctan[ex*npe*nvoi*nvoi+gp*nvoi*nvoi+i*nvoi+k] * bmat_arr[gp*nvoi*npedim+k*npedim+j];
 							}
 							cxb[i][j] = tmp * wg;
 						}
@@ -240,7 +240,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 					for (int m = 0; m < nvoi; ++m) {
 						for (int i = 0; i < npedim; ++i) {
 							const int inpedim = i * npedim;
-							const double bmatmi = bmat[gp*nvoi*npedim+m*npedim+i];
+							const double bmatmi = bmat_arr[gp*nvoi*npedim+m*npedim+i];
 							for (int j = 0; j < npedim; ++j){
 								Ae[inpedim + j] += bmatmi * cxb[m][j];
 							}
@@ -260,7 +260,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 				}
 	}
 	delete []ix_glo;
-	delete []bmat;
+	delete []bmat_arr;
 	delete []ctan;
 	ell_set_bc_3D(A);
 }
