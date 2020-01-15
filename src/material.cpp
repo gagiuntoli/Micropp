@@ -22,6 +22,7 @@
 #include "material.hpp"
 
 
+CUDA_HOSTDEV
 material_t *material_t::make_material(const struct material_base material)
 {
 	/*
@@ -47,6 +48,7 @@ material_t *material_t::make_material(const struct material_base material)
 }
 
 
+CUDA_HOSTDEV
 void material_t::apply_perturbation(const double *eps, double *ctan,
 				    const double *vars_old) const
 {
@@ -69,6 +71,7 @@ void material_t::apply_perturbation(const double *eps, double *ctan,
 }
 
 
+CUDA_HOSTDEV
 void get_dev_tensor(const double tensor[6], double tensor_dev[6])
 {
 	memcpy(tensor_dev, tensor, 6 * sizeof(double));
@@ -86,6 +89,7 @@ void material_elastic::init_vars(double *vars_old) const
 }
 
 
+CUDA_HOSTDEV
 void material_elastic::get_stress(const double *eps, double *stress,
 				  const double *history_params) const
 {
@@ -99,6 +103,7 @@ void material_elastic::get_stress(const double *eps, double *stress,
 }
 
 
+CUDA_HOSTDEV
 void material_elastic::get_ctan(const double *eps, double *ctan,
 				const double *history_params) const
 {
@@ -140,6 +145,7 @@ void material_plastic::init_vars(double *vars_old) const
 }
 
 
+CUDA_HOSTDEV
 bool material_plastic::plastic_law(const double eps[6],
 				   const double *_eps_p_old,
 				   const double *_alpha_old,
@@ -191,6 +197,7 @@ bool material_plastic::plastic_law(const double eps[6],
 }
 
 
+CUDA_HOSTDEV
 void material_plastic::get_stress(const double *eps, double *stress,
 				  const double *history_params) const
 {
@@ -212,6 +219,7 @@ void material_plastic::get_stress(const double *eps, double *stress,
 }
 
 
+CUDA_HOSTDEV
 void material_plastic::get_ctan(const double *eps, double *ctan,
 				const double *vars_old) const
 {
@@ -265,6 +273,7 @@ void material_damage::init_vars(double *vars_old) const
 }
 
 
+CUDA_HOSTDEV
 double material_damage::hardening_law(const double r) const
 {
     const double Ey = 10.0e4;
@@ -288,6 +297,7 @@ double material_damage::hardening_law(const double r) const
 }
 
 
+CUDA_HOSTDEV
 bool material_damage::damage_law(const double *eps, const double r_old,
 				 const double D_old, double *_r, 
 				 double *_D, double *_stress) const
@@ -337,6 +347,7 @@ bool material_damage::damage_law(const double *eps, const double r_old,
 }
 
 
+CUDA_HOSTDEV
 void material_damage::get_stress(const double *eps, double *stress,
 				 const double *vars_old) const
 {
@@ -358,6 +369,7 @@ void material_damage::get_stress(const double *eps, double *stress,
 }
 
 
+CUDA_HOSTDEV
 void material_damage::get_ctan(const double *eps, double *ctan,
 			       const double *vars_old) const
 {

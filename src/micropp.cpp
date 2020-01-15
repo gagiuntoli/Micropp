@@ -162,7 +162,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	}
 
 #ifdef _CUDA
-	cuda_init();
+	cuda_init(params);
 #endif
 
 	/* Open the log file */

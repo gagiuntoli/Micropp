@@ -36,13 +36,16 @@ using namespace std;
 
 struct material_t : public material_base {
 
+	CUDA_HOSTDEV
 	static material_t *make_material(const struct material_base material);
 
 	virtual void init_vars(double *vars_old) const = 0;
 
+	CUDA_HOSTDEV
 	virtual void get_stress(const double *eps, double *stress,
 				const double *history_params) const = 0;
 
+	CUDA_HOSTDEV
 	virtual void get_ctan(const double *eps, double *ctan,
 			      const double *history_params) const = 0;
 
@@ -61,6 +64,7 @@ struct material_t : public material_base {
 	 * Apply_perturbation calculates <ctan> by applying the pertubation
 	 * procedure.
 	 */
+	CUDA_HOSTDEV
 	void apply_perturbation(const double *eps, double *ctan,
 				const double *vars_old) const;
 
@@ -85,9 +89,11 @@ class material_elastic : public material_t {
 
 		void init_vars(double *vars_old) const;
 
+		CUDA_HOSTDEV
 		void get_stress(const double *eps, double *stress,
 				const double *history_params) const;
 
+		CUDA_HOSTDEV
 		void get_ctan(const double *eps, double *ctan,
 			      const double *history_params) const;
 
@@ -102,6 +108,7 @@ class material_elastic : public material_t {
 class material_plastic : public material_t {
 
 	public:
+		CUDA_HOSTDEV
 		material_plastic(double _E, double _nu, double _Ka, double _Sy)
 		{
 			E = _E;
@@ -116,9 +123,11 @@ class material_plastic : public material_t {
 
 		void init_vars(double *vars_old) const;
 
+		CUDA_HOSTDEV
 		void get_stress(const double *eps, double *stress,
 				const double *history_params) const;
 
+	        CUDA_HOSTDEV
 		void get_ctan(const double *eps, double *ctan,
 			      const double *history_params) const;
 
@@ -127,6 +136,7 @@ class material_plastic : public material_t {
 		void print() const;
 
 	private:
+		CUDA_HOSTDEV
 		bool plastic_law(const double eps[6],
 				 const double *_eps_p_old,
 				 const double *_alpha_old,
@@ -139,6 +149,7 @@ class material_plastic : public material_t {
 class material_damage : public material_t {
 
 	public:
+		CUDA_HOSTDEV
 		material_damage(double _E, double _nu, double _Xt)
 		{
 			E = _E;
@@ -153,9 +164,11 @@ class material_damage : public material_t {
 
 		void init_vars(double *vars_old) const;
 
+		CUDA_HOSTDEV
 		void get_stress(const double *eps, double *stress,
 				const double *history_params) const;
 
+		CUDA_HOSTDEV
 		void get_ctan(const double *eps, double *ctan,
 			      const double *history_params) const;
 
@@ -165,7 +178,10 @@ class material_damage : public material_t {
 		void print() const;
 
 	private:
+		CUDA_HOSTDEV
 		double hardening_law(const double r) const;
+
+		CUDA_HOSTDEV
 		bool damage_law(const double *eps, const double e_old,
 				const double D_old, double *_e, double *_D,
 				double *stress_lin) const;

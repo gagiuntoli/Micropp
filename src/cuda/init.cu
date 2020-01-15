@@ -24,11 +24,16 @@
 #include "cuda.hpp"
 
 
+__device__ material_t *material_list_d[MAX_MATERIALS];
+material_base *material_base_list_d;
+struct cuda_params_t cuda_params;
+
+
 __global__
-void device_init_material()
+void device_init_material(material_base *material_base_list_d)
 {
 	for (int i = 0; i < MAX_MATERIALS; ++i) {
-		material_list_d[i] = new material_elastic(1.0, 1.0);
+		material_list_d[i] = material_t::make_material(material_base_list_d[i]);
 	}
 }
 
@@ -41,11 +46,17 @@ void device_delete_material()
 }
 
 template<>
-void micropp<3>::cuda_init()
+void micropp<3>::cuda_init(const micropp_params_t &params)
 {
 	cudaMalloc((void **)&cuda_params.elem_type_d, nelem * sizeof(int));
 
-	device_init_material<<<1, 1>>>();
+	cudaMalloc((void **)&material_base_list_d, MAX_MATERIALS * sizeof(material_base));
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
+		cudaMemcpy(&material_base_list_d[i], &params.materials[i], 
+				sizeof(material_base), cudaMemcpyHostToDevice);
+	}
+
+	device_init_material<<<1, 1>>>(material_base_list_d);
 
 	cudaMemcpy(cuda_params.elem_type_d, elem_type, 
 		   nelem * sizeof(int), cudaMemcpyHostToDevice);

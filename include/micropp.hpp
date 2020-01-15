@@ -187,7 +187,7 @@ class micropp {
 		void write_log();
 
 #ifdef _CUDA
-		void cuda_init();
+		void cuda_init(const micropp_params_t &params);
 		void cuda_finalize();
 #endif
 

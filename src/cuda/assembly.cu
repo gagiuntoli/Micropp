@@ -24,6 +24,7 @@
 #include "ell.hpp"
 #include "instrument.hpp"
 #include "common.hpp"
+#include "cuda.hpp"
 
 #include "cuda_profiler_api.h"
 
