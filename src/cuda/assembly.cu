@@ -36,6 +36,8 @@ if(e != cudaSuccess) { \
 } \
 }
 
+#define glo_elem_cu(nx,ny,ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
+
 #define DIM 3
 #define NPE 8
 #define NVOI 6
@@ -160,7 +162,8 @@ void get_stress_d(const double eps[NVOI], double stress[NVOI], const double *his
 
 
 __global__
-void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *params_d)
+void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u,
+		     int *elem_type_d, Params *params_d)
 {
 	const int nex = params_d->nex;
 	const int ney = params_d->ney;
@@ -178,12 +181,18 @@ void assembly_kernel(ell_matrix *A_d, double *vals_d, const double *u, Params *p
 		for (int ey = ey_t; ey < ney; ey += stride_y) {
 			for (int ez = ez_t; ez < nez; ez += stride_z) {
 	double TAe[NPEDIM2] = { 0.0 };
+
+	const int e = glo_elem_cu(params_d->nx, params_d->ny, ex, ey, ez);
+	const material_t *material = material_list_d[elem_type_d[e]];
+	const double *vars = nullptr;
+
 	for (int gp = 0; gp < NPE; ++gp) {
 
 		double eps[NVOI];
 		double ctan[NVOI2];
 		get_strain(u, gp, eps, params_d->bmat, params_d->nx, params_d->ny, ex, ey, ez);
-		get_ctan_d(eps, ctan, nullptr);
+		//get_ctan_d(eps, ctan, nullptr);
+		material->get_ctan(eps, ctan, nullptr);
 		double cxb[NVOI][NPEDIM];
 
 		for (int i = 0; i < NVOI; ++i) {
@@ -248,7 +257,7 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 
 	dim3 grid(15, 15, 15);
 	dim3 block(4, 4, 4);
-	assembly_kernel<<<grid, block>>>(A_d, vals_d, u_d, params_d);
+	assembly_kernel<<<grid, block>>>(A_d, vals_d, u_d, elem_type_d, params_d);
         cudaCheckError();
 
 	cudaMemcpy(A->vals, vals_d, A->nrow * A->nnz * sizeof(double), cudaMemcpyDeviceToHost);
@@ -266,16 +275,21 @@ void micropp<3>::assembly_mat(ell_matrix *A, const double *u, const double *vars
 
 __device__
 void get_elem_rhs(const double *u, const double *vars_old, double be[NPEDIM],
-		  Params *params_d, int ex, int ey, int ez)
+		  int *elem_type_d, Params *params_d, int ex, int ey, int ez)
 {
 	double stress_gp[NVOI], strain_gp[NVOI];
 
 	memset(be, 0, NPEDIM * sizeof(double));
 
+	const int e = glo_elem_cu(params_d->nx, params_d->ny, ex, ey, ez);
+	const material_t *material = material_list_d[elem_type_d[e]];
+	const double *vars = nullptr;
+
 	for (int gp = 0; gp < NPE; ++gp) {
 
 		get_strain(u, gp, strain_gp, params_d->bmat, params_d->nx, params_d->ny, ex, ey, ez);
-		get_stress_d(strain_gp, stress_gp, vars_old);
+		//get_stress_d(strain_gp, stress_gp, vars_old);
+		material->get_stress(strain_gp, stress_gp, vars);
 
 		for (int i = 0; i < NPEDIM; ++i)
 			for (int j = 0; j < NVOI; ++j)
@@ -285,7 +299,7 @@ void get_elem_rhs(const double *u, const double *vars_old, double be[NPEDIM],
 }
 
 __global__
-void assembly_rhs_kernel(double *b_d, const double *u, Params *params_d)
+void assembly_rhs_kernel(double *b_d, const double *u, int *elem_type_d, Params *params_d)
 {
 	const int nex = params_d->nex;
 	const int ney = params_d->ney;
@@ -312,7 +326,7 @@ void assembly_rhs_kernel(double *b_d, const double *u, Params *params_d)
 				index[j * DIM + d] = n[j] * DIM + d;
 
 		for (int gp = 0; gp < NPE; ++gp) {
-			get_elem_rhs(u, nullptr, be, params_d, ex, ey, ez);
+			get_elem_rhs(u, nullptr, be, elem_type_d, params_d, ex, ey, ez);
 		}
 
 		for (int i = 0; i < NPE * DIM; ++i)
@@ -354,7 +368,7 @@ double micropp<3>::assembly_rhs(const double *u, const double *vars_old, double 
 
 	dim3 grid(15, 15, 15);
 	dim3 block(4, 4, 4);
-	assembly_rhs_kernel<<<grid, block>>>(b_d, u, params_d);
+	assembly_rhs_kernel<<<grid, block>>>(b_d, u, elem_type_d, params_d);
 
 	cudaMemcpy(b, b_d, nndim * sizeof(double), cudaMemcpyDeviceToHost);
 

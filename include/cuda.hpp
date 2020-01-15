@@ -34,4 +34,6 @@ struct cuda_params_t {
 
 };
 
+extern int *elem_type_d;
+
 extern struct cuda_params_t cuda_params;
