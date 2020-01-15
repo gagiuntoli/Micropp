@@ -42,6 +42,7 @@
 struct cuda_params_t {
 
 	int *elem_type_d;
+	material_t *material_list;
 
 };
 #endif

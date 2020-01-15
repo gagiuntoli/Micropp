@@ -328,6 +328,7 @@ void micropp<tdim>::calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi])
 
 	memset (ctan, 0, nvoi * nvoi * sizeof(double));
 
+#ifndef _CUDA
 	ctan[0 * nvoi + 0] = S_inv[0][0];
 	ctan[0 * nvoi + 1] = S_inv[0][1];
 	ctan[0 * nvoi + 2] = S_inv[0][2];
@@ -343,6 +344,7 @@ void micropp<tdim>::calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi])
 	ctan[3 * nvoi + 3] = G12;
 	ctan[4 * nvoi + 4] = G12;
 	ctan[5 * nvoi + 5] = G12;
+#endif
 
 }
 

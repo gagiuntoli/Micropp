@@ -49,71 +49,55 @@ endif()
 # Include Directories (for all targets)
 include_directories(include ${CMAKE_BINARY_DIR})
 
+file(GLOB SOURCES_COMMON_CPP
+     src/material.cpp
+     src/micropp.cpp
+     src/micropp_c.cpp 
+     src/average.cpp 
+     src/update.cpp 
+     src/ell-common.cpp 
+     src/homogenize.cpp 
+     src/common.cpp 
+     src/solve.cpp 
+     src/micro3D.cpp 
+     src/output.cpp 
+)
+
 # wildcard all the sources in src
 if(ENABLE_CUDA)
 	file(GLOB SOURCES 
+	        ${SOURCES_COMMON_CPP}
 		src/material.c 
-		src/material.cpp
 		src/material.f95 
-		src/micropp.cpp 
-		src/micropp_c.cpp 
 		src/micropp.f95
-		src/average.cpp 
-		src/update.cpp 
 		src/cuda/assembly.cu 
 		src/cuda/ell.cu 
 		src/cuda/init.cu 
-		src/ell-common.cpp 
 		src/instrument.cpp 
-		src/homogenize.cpp 
-		src/common.cpp 
-		src/solve.cpp 
-		src/micro3D.cpp 
-		src/output.cpp 
 		)
-        set_source_files_properties(src/common.cpp PROPERTIES LANGUAGE CUDA)
-        set_source_files_properties(src/output.cpp PROPERTIES LANGUAGE CUDA)
-        set_source_files_properties(src/average.cpp PROPERTIES LANGUAGE CUDA)
-        set_source_files_properties(src/update.cpp PROPERTIES LANGUAGE CUDA)
+        set_source_files_properties(${SOURCES_COMMON_CPP} PROPERTIES LANGUAGE CUDA)
+        set_source_files_properties(src/material.c PROPERTIES LANGUAGE CUDA)
 elseif(ENABLE_OPENACC)
 	file(GLOB SOURCES 
+	        ${SOURCES_COMMON_CPP}
 		src/material.c 
-		src/material.cpp
 		src/material.f95 
-		src/micropp.cpp 
-		src/micropp_c.cpp 
 		src/micropp.f95
-		src/average.cpp 
-		src/update.cpp 
 		src/openacc/assembly.cpp 
 		src/openacc/ell.cpp 
-		src/ell-common.cpp 
 		src/instrument.cpp 
-		src/homogenize.cpp 
-		src/common.cpp 
-		src/solve.cpp 
-		src/micro3D.cpp 
-		src/output.cpp 
 		)
 else()
 	file(GLOB SOURCES 
+	        ${SOURCES_COMMON_CPP}
 		src/material.c 
-		src/material.cpp
 		src/material.f95 
-		src/micropp.cpp 
-		src/micropp_c.cpp 
 		src/micropp.f95
 		src/assembly.cpp 
 		src/average.cpp 
 		src/update.cpp 
 		src/ell.cpp 
-		src/ell-common.cpp 
 		src/instrument.cpp 
-		src/homogenize.cpp 
-		src/common.cpp 
-		src/solve.cpp 
-		src/micro3D.cpp 
-		src/output.cpp 
 		)
 endif()
 
