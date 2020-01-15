@@ -28,6 +28,7 @@
 
 
 #include "material_base.h"
+#include "common.hpp"
 
 
 using namespace std;
@@ -70,6 +71,7 @@ struct material_t : public material_base {
 class material_elastic : public material_t {
 
 	public:
+		CUDA_HOSTDEV
 		material_elastic(double _E, double _nu) {
 			E = _E;
 			nu = _nu;

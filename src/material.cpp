@@ -1,11 +1,8 @@
 /*
- *  This source code is part of MicroPP: a finite element library
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Micropp: a Finite Element library
+ *  to solve composite materials micro-scale problems.
  *
- *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                         Guido Giuntoli <gagiuntoli@gmail.com>
- *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
- *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
+ *  Copyright (C) - 2018
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +25,7 @@
 material_t *material_t::make_material(const struct material_base material)
 {
 	/*
-	 * This fabric creates the corresponding subclass according to the
+	 * This factory creates the corresponding subclass according to the
 	 * data members of <material>. This last is a "struct" than can be
 	 * manage also from C/Fortran easily and that is why we passed micropp
 	 * constructor the data in this form.

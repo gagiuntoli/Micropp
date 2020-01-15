@@ -118,10 +118,6 @@ class micropp {
 		/* GPU number for device selection */
 		int gpu_id = 0;
 
-#ifdef _CUDA
-		cuda_params_t cuda_params;
-#endif
-
 		/* Private function members */
 
 		/*

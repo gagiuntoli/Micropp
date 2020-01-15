@@ -38,11 +38,3 @@
 #define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
 #define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
 
-#ifdef _CUDA
-struct cuda_params_t {
-
-	int *elem_type_d;
-	material_t *material_list;
-
-};
-#endif

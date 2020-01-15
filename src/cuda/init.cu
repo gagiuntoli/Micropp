@@ -21,32 +21,34 @@
 
 #include "micropp.hpp"
 #include "common.hpp"
+#include "cuda.hpp"
 
-__device__ material_t *material_list_d[MAX_MATERIALS];
 
 __global__
 void device_init_material()
 {
-	//for (int i = 0; i < MAX_MATERIALS; ++i) {
-	//	material_list_d[i] = new material_elastic(1.0, 1.0);
-	//}
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
+		material_list_d[i] = new material_elastic(1.0, 1.0);
+	}
+}
+
+__global__
+void device_delete_material()
+{
+	for (int i = 0; i < MAX_MATERIALS; ++i) {
+		delete material_list_d;
+	}
 }
 
 template<>
 void micropp<3>::cuda_init()
 {
 	cudaMalloc((void **)&cuda_params.elem_type_d, nelem * sizeof(int));
-	for (int i = 0; i < MAX_MATERIALS; ++i) {
-		cudaMalloc((void **)&cuda_params.material_list, 
-				MAX_MATERIALS * sizeof(material_t));
-	}
+
+	device_init_material<<<1, 1>>>();
 
 	cudaMemcpy(cuda_params.elem_type_d, elem_type, 
 		   nelem * sizeof(int), cudaMemcpyHostToDevice);
-	for (int i = 0; i < MAX_MATERIALS; ++i) {
-		cudaMemcpy(&cuda_params.material_list[i], &material_list[i], 
-			   sizeof(material_t), cudaMemcpyHostToDevice);
-	}
 }
 
 template<>
