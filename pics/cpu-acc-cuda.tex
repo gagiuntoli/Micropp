@@ -1,0 +1,65 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{pgfplots}
+\usepackage{tikz}
+\pgfplotsset{width=13cm,compat=1.8}
+
+\begin{document}
+\begin{tikzpicture}[]
+  \begin{axis}[scale=1.0,
+      xbar stacked,
+      bar width=75pt,
+      %ybar=1pt,
+      %width = 1cm,
+      %enlargelimits=0.15,
+      y=5cm,
+      xlabel={Computing Time [sec]},
+      symbolic y coords={CUDA,OpenACC,CPU},
+      %y tick label style={at={axis cs:(0.5,0.5)}rotate=45, anchor=north east, inner sep=0mm},
+      ytick=data,
+      legend pos=outer north east,
+      %legend cell align={left},
+      legend style={fill=white},
+      %legend style={at={(0.5,0.5)},fill=white,anchor=south west} 
+      nodes near coords align={horizontal}
+    ]
+    \addplot[fill=blue,xbar] plot coordinates {
+      (84.2,CPU)
+      (2.2,OpenACC) 
+      (2.5,CUDA) 
+    }; % sol cpu
+    \addplot[fill=green,xbar] plot coordinates {
+      (21.1,CPU)
+      (2.2,OpenACC)
+      (1.1,CUDA)
+    }; % mat
+    \addplot[fill=red,xbar] plot coordinates {
+      (2.1,CPU)
+      (1.1,OpenACC)
+      (0.07,CUDA)
+    }; % res cpu
+
+    \legend{Solver, Matrix Assembly, Residue Assembly};
+    \node[scale=1.2] at (2.3cm,5.0cm) {$\times$\textbf{19.5 Faster}};
+    \node[scale=1.2] at (2.3cm,0.2cm) {$\times$\textbf{29.1 Faster}};
+  \end{axis}
+\end{tikzpicture}
+
+% CPU
+%ell_solve_cgpd 84251302
+%assembly_mat   21056894
+%assembly_rhs   2199559 
+%total 107.5
+
+% OpenACC
+%ell_solve_cgpd 2158738         
+%assembly_mat   2200091          
+%assembly_rhs   1055412           
+%total 5.5 
+
+% CUDA
+%ell_solve_cgpd 2543878 
+%assembly_mat   1114047
+%assembly_rhs   73563
+%total 3.7
+
+\end{document}
