@@ -95,7 +95,6 @@ int main(int argc, char **argv)
 	micropp<3> micro(mic_params);
 	//micro.print_info();
 
-	auto start = high_resolution_clock::now();
 
 	double sig[6];
 	double eps_lin[6] = { 0. };
@@ -128,8 +127,13 @@ int main(int argc, char **argv)
 		}
 		cout << endl;
 
+		auto start = high_resolution_clock::now();
+
 		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
+
+		auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<milliseconds>(stop - start);
 
 		for (int gp = 0; gp < ngp_per_mpi; ++gp) {
 			micro.get_stress(gp, sig);
@@ -150,11 +154,10 @@ int main(int argc, char **argv)
 		micro.update_vars();
 
 		MPI_Barrier(MPI_COMM_WORLD);
-	}
 
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(stop - start);
-	cout << "time = " << duration.count() << " ms" << endl;
+		cout << "Rank = " << rank
+		     << " time = " << duration.count() << " ms" << endl;
+	}
 
 	MPI_Finalize();
 
