@@ -1,11 +1,8 @@
 /*
- *  This source code is part of MicroPP: a finite element library
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Micropp: a Finite Element library
+ *  to solve composite materials micro-scale problems.
  *
- *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                         Guido Giuntoli <gagiuntoli@gmail.com>
- *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
- *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
+ *  Copyright (C) - 2018
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,7 +58,7 @@ class micropp {
 		static constexpr int dim = tdim;                  // 2, 3
 		static constexpr int npe = mypow(2, dim);         // 4, 8
 		static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
-		double bmat_cache[npe][nvoi][npe*dim];
+		double bmat[npe][nvoi][npe*dim];
 
 		const int ngp, nx, ny, nz, nn, nndim;
 		const int nex, ney, nez, nelem;
@@ -121,7 +118,6 @@ class micropp {
 		/* GPU number for device selection */
 		int gpu_id = 0;
 
-
 		/* Private function members */
 
 		/*
@@ -142,19 +138,6 @@ class micropp {
 		void calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi]);
 
 		material_t *get_material(const int e) const;
-
-#pragma acc routine seq
-		void get_elem_nodes(int n[npe],
-				    int ex, int ey, int ez = 0) const;
-
-#pragma acc routine seq
-		void get_elem_displ(const double *u,
-				    double elem_disp[npe * dim],
-				    int ex, int ey, int ez = 0) const;
-
-#pragma acc routine seq
-		void get_strain(const double *u, int gp, double strain_gp[nvoi],
-				int ex, int ey, int ez = 0) const;
 
 		void get_stress(int gp, const double eps[nvoi],
 				const double *vars_old,
@@ -195,19 +178,18 @@ class micropp {
 		double assembly_rhs(const double *u, const double *vars_old,
 				    double *b);
 
-		double assembly_rhs_acc(const double *u, const double *vars_old,
-					double *b);
-
 		void assembly_mat(ell_matrix *A, const double *u,
 				  const double *vars_old);
-
-		void assembly_mat_acc(ell_matrix *A, const double *u,
-				      const double *vars_old);
 
 		void write_vtu(double *u, double *vars_old,
 			       const char *filename);
 
 		void write_log();
+
+#ifdef _CUDA
+		void cuda_init(const micropp_params_t &params);
+		void cuda_finalize();
+#endif
 
 	public:
 

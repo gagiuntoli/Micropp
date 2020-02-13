@@ -22,6 +22,7 @@
  */
 
 #include "micropp.hpp"
+#include "common.hpp"
 
 using namespace std;
 
@@ -109,7 +110,7 @@ void micropp<tdim>::write_vtu(double *u, double *vars_old, const char *filename)
 		for (int ey = 0; ey < ney; ++ey) {
 			for (int ex = 0; ex < nex; ++ex) {
 				int n[8];
-				get_elem_nodes(n, ex, ey, ez);
+				get_elem_nodes(n, nx, ny, ex, ey, ez);
 				for (int i = 0; i < npe; ++i)
 					file << n[i] << ' ';
 				file << "\n";

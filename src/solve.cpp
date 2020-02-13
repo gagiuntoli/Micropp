@@ -1,11 +1,8 @@
 /*
- *  This source code is part of MicroPP: a finite element library
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Micropp: a Finite Element library
+ *  to solve composite materials micro-scale problems.
  *
- *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                         Guido Giuntoli <gagiuntoli@gmail.com>
- *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
- *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
+ *  Copyright (C) - 2018
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,11 +39,8 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 
 	int its = 0;
 
-#ifdef _OPENACC
-	double norm = assembly_rhs_acc(u, vars_old, b);
-#else
 	double norm = assembly_rhs(u, vars_old, b);
-#endif
+
 	const double norm_0 = norm;
 
 	while (its < nr_max_its) {
@@ -64,11 +58,7 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		 */
 		ell_matrix *A_ptr;
 		if (!use_A0 || its > (its_with_A0 - 1)) {
-#ifdef _OPENACC
-			assembly_mat_acc(A, u, vars_old);
-#else
 			assembly_mat(A, u, vars_old);
-#endif
 			A_ptr = A;
 		} else {
 #ifdef _OPENMP
@@ -80,22 +70,14 @@ newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
 		}
 
 		double cg_err;
-#ifdef _OPENACC
-		int cg_its = ell_solve_cgpd_acc(A_ptr, b, du, &cg_err);
-#else
 		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
-#endif
 
 		newton.solver_its += cg_its;
 
 		for (int i = 0; i < nn * dim; ++i)
 			u[i] += du[i];
 
-#ifdef _OPENACC
-		norm = assembly_rhs_acc(u, vars_old, b);
-#else
 		norm = assembly_rhs(u, vars_old, b);
-#endif
 
 		its++;
 	}

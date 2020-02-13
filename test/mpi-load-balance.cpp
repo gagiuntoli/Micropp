@@ -1,9 +1,8 @@
 /*
- *  This is a test example for MicroPP: a finite element library
- *  to solve microstructural problems for composite materials.
+ *  This source code is part of Micropp: a Finite Element library
+ *  to solve composite materials micro-scale problems.
  *
- *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                         Guido Giuntoli <gagiuntoli@gmail.com>
+ *  Copyright (C) - 2018
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -96,7 +95,6 @@ int main(int argc, char **argv)
 	micropp<3> micro(mic_params);
 	//micro.print_info();
 
-	auto start = high_resolution_clock::now();
 
 	double sig[6];
 	double eps_lin[6] = { 0. };
@@ -129,8 +127,13 @@ int main(int argc, char **argv)
 		}
 		cout << endl;
 
+		auto start = high_resolution_clock::now();
+
 		cout << "Homogenizing ..." << endl;
 		micro.homogenize();
+
+		auto stop = high_resolution_clock::now();
+		auto duration = duration_cast<milliseconds>(stop - start);
 
 		for (int gp = 0; gp < ngp_per_mpi; ++gp) {
 			micro.get_stress(gp, sig);
@@ -151,11 +154,10 @@ int main(int argc, char **argv)
 		micro.update_vars();
 
 		MPI_Barrier(MPI_COMM_WORLD);
-	}
 
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(stop - start);
-	cout << "time = " << duration.count() << " ms" << endl;
+		cout << "Rank = " << rank
+		     << " time = " << duration.count() << " ms" << endl;
+	}
 
 	MPI_Finalize();
 

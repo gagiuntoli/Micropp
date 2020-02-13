@@ -40,12 +40,12 @@ micro-scale problems.
 The peformance using the hybrid CPU/GPU execution in notably better
 than CPU-only:
 
-<img src="./pics/cpu-acc-cuda.png" alt="drawing" width="300"/>
+<img src="./pics/cpu-acc-cuda.png" alt="drawing" width="500"/>
 
 For hybrid CPU/GPU the parallelization with CUDA has proven better
 perfomance than OpenACC:
 
-<img src="./pics/acc-cuda.png" alt="drawing" width="300"/>
+<img src="./pics/acc-cuda.png" alt="drawing" width="500"/>
 
 Currently CUDA acceleration only works with some parts of the code and
 has not been completely integrated.
@@ -78,7 +78,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 Other possible options are:
 
-1. `CUDA=[ON|OFF]` compiles with CUDA
-2. `OPENACC=[ON|OFF]` compiles with OpenACC (only supported by some compilers such as PGI)
-3. `OPENMP=[ON|OFF]` compiles with OpenMP for multi-core CPUs
-4. `TIMER=[ON|OFF]` activate the native instrumentation for measuring times
+1. `ENABLE_CUDA=[ON|OFF]` compiles with CUDA
+2. `ENABLE_OPENACC=[ON|OFF]` compiles with OpenACC (only supported by some compilers such as PGI)
+3. `ENABLE_OPENMP=[ON|OFF]` compiles with OpenMP for multi-core CPUs
+4. `ENABLE_TIMER=[ON|OFF]` activate the native instrumentation for measuring times

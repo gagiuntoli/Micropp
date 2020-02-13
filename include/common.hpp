@@ -21,20 +21,31 @@
 
 #pragma once
 
-#define MAX_DIM         3
-#define NUM_VAR_GP      7  // eps_p_1 (6) , alpha_1 (1)
-#define MAX_MATERIALS   3
 
-#define FILTER_REL_TOL  1.0e-5
+#ifdef _CUDA
+#define CUDA_HOSTDEV __host__ __device__
+#else
+#define CUDA_HOSTDEV
+#endif
 
-#define D_EPS_CTAN_AVE  1.0e-8
 
-#define CONSTXG         0.577350269189626
+#define DIM 3
+#define NPE 8
+#define NVOI 6
 
-#define NR_MAX_TOL      1.0e-10
-#define NR_MAX_ITS      4
-#define NR_REL_TOL      1.0e-3 // factor against first residual
 
-#define glo_elem(ex,ey,ez)   ((ez) * (nx-1) * (ny-1) + (ey) * (nx-1) + (ex))
-#define intvar_ix(e,gp,var)  ((e) * npe * NUM_VAR_GP + (gp) * NUM_VAR_GP + (var))
+CUDA_HOSTDEV
+#pragma acc routine seq
+void get_elem_nodes(int n[8], const int nx, const int ny,
+		    const int ex, const int ey, const int ez = 0);
 
+CUDA_HOSTDEV
+#pragma acc routine seq
+void get_elem_displ(const double *u, double elem_disp[NPE * DIM],
+		    int nx, int ny, int ex, int ey, int ez);
+
+CUDA_HOSTDEV
+#pragma acc routine seq
+void get_strain(const double *u, int gp, double *strain_gp,
+		const double bmat[NPE][NVOI][NPE * DIM], 
+		int nx, int ny, int ex, int ey, int ez);
