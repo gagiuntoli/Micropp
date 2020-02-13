@@ -76,8 +76,8 @@ int main(int argc, char **argv)
 	//mic_params.subiterations = true;
 	//mic_params.nsubiterations = 10;
 	mic_params.nr_max_its = 12;
-	material_set(&mic_params.materials[0], 1, 3.0e7, 0.3, 1.0e7, 1.0e7, 0.0);
-	material_set(&mic_params.materials[1], 0, 3.0e3, 0.3,   0.0,   0.0, 0.0);
+	material_set(&mic_params.materials[0], 0, 1.0e7, 0.25, 1.0e7, 1.0e7, 0.0);
+	material_set(&mic_params.materials[1], 0, 2.0e7, 0.25,   0.0,   0.0, 0.0);
 	material_set(&mic_params.materials[2], 0, 3.0e7, 0.3,   0.0,   0.0, 0.0);
 	mic_params.mpi_rank = 0;
 	mic_params.calc_ctan_lin = false;

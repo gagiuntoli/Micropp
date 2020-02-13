@@ -26,6 +26,7 @@
 #include <cassert>
 
 #include "micropp.hpp"
+#include "common.hpp"
 
 using namespace std;
 
@@ -38,24 +39,28 @@ class test_t : public micropp<tdim> {
 
 		~test_t() {};
 
-		void public_get_elem_nodes(int n[8], int ex, int ey, int ez = 0)
+		void public_get_elem_nodes(int n[8], int nx, int ny,
+					   int ex, int ey, int ez = 0)
 		{
-			micropp<tdim>::get_elem_nodes(n, ex, ey, ez);
+			get_elem_nodes(n, nx, ny, ex, ey, ez);
 		};
 };
 
 int main (int argc, char *argv[])
 {
 	int n[8];
+	const int nx = 5;
+	const int ny = 5;
+	const int nz = 5;
 
 	micropp_params_t mic_params;
-	mic_params.size[0] = 5;
-	mic_params.size[1] = 5;
-	mic_params.size[2] = 5;
+	mic_params.size[0] = nx;
+	mic_params.size[1] = ny;
+	mic_params.size[2] = nz;
 
 	test_t<3> test(mic_params);
 
-	test.public_get_elem_nodes(n, 0, 0, 0);
+	test.public_get_elem_nodes(n, nx, ny, 0, 0, 0);
 	const int n_1_exact[8] = { 0, 1, 6, 5, 25, 26, 31, 30 };
 
 	for (int i = 0; i < 8; ++i) {
@@ -63,7 +68,7 @@ int main (int argc, char *argv[])
 		assert(n[i] == n_1_exact[i]);
 	}
 
-	test.public_get_elem_nodes(n, 0, 1, 0);
+	test.public_get_elem_nodes(n, nx, ny, 0, 1, 0);
 	const int n_2_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
 
 	for (int i = 0; i < 8; ++i) {
@@ -71,7 +76,7 @@ int main (int argc, char *argv[])
 		assert(n[i] == n_2_exact[i]);
 	}
 
-	test.public_get_elem_nodes(n, 0, 1);
+	test.public_get_elem_nodes(n, nx, ny, 0, 1);
 	const int n_3_exact[8] = { 5, 6, 11, 10, 30, 31, 36, 35 };
 
 	for (int i = 0; i < 8; ++i) {

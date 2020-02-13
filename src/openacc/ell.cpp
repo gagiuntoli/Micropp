@@ -2,10 +2,7 @@
  *  This source code is part of MicroPP: a finite element library
  *  to solve microstructural problems for composite materials.
  *
- *  Copyright (C) - 2018 - Jimmy Aguilar Mena <kratsbinovish@gmail.com>
- *                         Guido Giuntoli <gagiuntoli@gmail.com>
- *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
- *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
+ *  Copyright (C) - 2018
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,7 +67,7 @@ double get_dot_acc(const double *v1, const double *v2, const int n)
 }
 
 
-int ell_solve_cgpd_acc(const ell_matrix *m, const double *b, double *x, double *err)
+int ell_solve_cgpd(const ell_matrix *m, const double *b, double *x, double *err)
 {
 	INST_START;
 
