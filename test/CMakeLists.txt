@@ -31,20 +31,20 @@ set(testsources
 	benchmark-damage.cpp
 	)
 
-
-
 # Iterate over the list above
 foreach (testfile ${testsources})
+
 	# Delete File extensions (test_i.cpp -> test_i)
 	get_filename_component(testname ${testfile} NAME_WE)
 
 	# Create the executable test_i and link.
 	add_executable(${testname} ${testfile})
 	target_link_libraries(${testname} micropp)
+
 	if(ENABLE_CUDA)
-	set_source_files_properties(${PROJECT_SOURCE_DIR}/test/${testfile} PROPERTIES LANGUAGE CUDA)
-	#set_property(TARGET ${testname} PROPERTY LINKER_LANGUAGE CUDA)
+	  set_source_files_properties(${PROJECT_SOURCE_DIR}/test/${testfile} PROPERTIES LANGUAGE CUDA)
 	endif()
+
 endforeach ()
 
 # As some tests will require commands and could be executed in loops we add the

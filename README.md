@@ -2,8 +2,9 @@
 
 [![Build Status](https://travis-ci.org/GG1991/Micropp.svg?branch=master)](https://travis-ci.org/GG1991/Micropp)
 
-High-Perfomance Computing (HPC) 3-D Finite Element Method (FEM) solid
-mechanics code to solve micro-scale problems for composite materials.
+Micropp is a 3-D Finite Element (FEM) code for solving solid
+mechanics problems for modeling micro-scale effects in composite
+materials.
 
 The code solve the equilibrium equations at Representative Volume
 Elements (RVE) to calculate average properties (stresses and
@@ -11,11 +12,8 @@ constitutive tensors) for multi-scale simulations:
 
 <img src="./pics/mic_1.png" alt="drawing" width="300"/>
 
-The code it is design to be coupled with macro-scale code that
-operate with the FEM and preferably are MPI-based. Currently the code
-has been coupled with the FEM multi-physics code Alya and has achieved
-to solve the largest simulation in the field (10 K elements at the
-macro-scale and 100^3 elements at the micro-scale):
+The code is mainly designed to be coupled with codes for
+modeling with FEM the macro-scale, e.g. a wing of an aircraft.
 
 <img src="./pics/coupling-micropp-macro.png" alt="drawing" width="300"/>
 
@@ -29,11 +27,11 @@ micro-scale problems.
    acceleration support for GPUs
 3. OpenMP support for multi-core CPUs
 4. Solver: Diagonal Preconditioned Conjugate Gradients (DPCG)
-5. Around 10 micro-structures patterns and 3 material laws (elastic,
-   damage and plastic)
-6. No external dependencies
+5. More than 10 micro-structures patterns and 3 material laws
+   (elastic, damage and plastic)
+6. No external libraries are required
 7. Native instrumentation to measure performance
-8. C and Fortran Wrappers
+8. C and Fortran Wrappers for coupling Micropp with external codes
 
 # Performance CPU vs. GPUs
 
@@ -50,35 +48,55 @@ perfomance than OpenACC:
 Currently CUDA acceleration only works with some parts of the code and
 has not been completely integrated.
 
-Build steps with CMake:
------------------------
+# Select the compiler
 
-1. Clone the repository
-2. cd cloned directory
-3. mkdir build (can be also build+anything)
-4. cd build
-5. cmake .. (important the 2 points)
-6. make
+CMake has a certain rules for searching the compiler available in your
+system if a specific compiler is needed the following environmental
+variables should be set. E.g. in Bash:
 
-This will build the examples and the library in debug mode. CMake does
-not touch the original sources and you can have many build directories
-with different options if you want.
+    export CC=<path-to-C-compiler>
+    export CXX=<path-to-C++-compiler>
+    export FC=<path-to-Fortran-compiler>
 
-To build the optimized version:
+# Compilation
 
-```bash
-cmake -DCMAKE_BUILD_TYPE=Release ..
-```
+    git clone git@github.com:gagiuntoli/Micropp.git
+    cd Micropp
+    mkdir <build-dir>
+    cd <build-dir>
+    cmake ..
+    make
 
-and the debug version:
+# Compilation Options
 
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-```
+It is suggested to use the graphical `ccmake` tool for setting the
+configuration options. After executing on the `<build-dir>` the
+command:
 
-Other possible options are:
+    ccmake .
 
-1. `ENABLE_CUDA=[ON|OFF]` compiles with CUDA
-2. `ENABLE_OPENACC=[ON|OFF]` compiles with OpenACC (only supported by some compilers such as PGI)
-3. `ENABLE_OPENMP=[ON|OFF]` compiles with OpenMP for multi-core CPUs
-4. `ENABLE_TIMER=[ON|OFF]` activate the native instrumentation for measuring times
+The following menu with the default options appears:
+
+    CMAKE_BUILD_TYPE
+    CMAKE_INSTALL_PREFIX             /usr/local
+    ENABLE_CUDA                      OFF
+    ENABLE_OPENACC                   OFF
+    ENABLE_OPENMP                    OFF
+    ENABLE_TIMER                     OFF
+
+In straightforware manner it is possible to toggle across the
+different options using the arrows and `Enter` keys and finalizing by
+pressing `c` and `g` keys.
+
+Also the options can be set in the first called to `cmake`, e.g.:
+
+    cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CUDA=On
+
+
+# Future Work
+
+* Finalize and optimize CUDA integration
+* Refactoring of the entired code
+* Add in the CI environment with more compilers to the tests
+* Implement Periodic and Uniform Stress BCs (numerical method)
+
