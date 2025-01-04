@@ -3,7 +3,7 @@
  *  to solve microstructural problems for composite materials.
  *
  *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
- *						   Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                         Jimmy Aguilar Mena <kratsbinovish@gmail.com>
  *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
  *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
