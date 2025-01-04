@@ -19,117 +19,105 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
-
-#include <iostream>
-#include <fstream>
 #include <cassert>
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
 
 using namespace std;
 
 template <int dim>
 class gp_t {
+  static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
 
-	static constexpr int nvoi = dim * (dim + 1) / 2;  // 3, 6
+ public:
+  double strain_old[nvoi] = {0.0};
+  double strain[nvoi];
+  double stress[nvoi];
+  double ctan[nvoi * nvoi];
 
-	public:
+  bool allocated;  // flag for memory optimization
 
-	double strain_old[nvoi] = { 0.0 };
-	double strain[nvoi];
-	double stress[nvoi];
-	double ctan[nvoi * nvoi];
+  double *vars_n;  // vectors for calculations
+  double *vars_k;
+  double *u_n;
+  double *u_k;
+  int nvars;
+  int nndim;
 
-	bool allocated; // flag for memory optimization
+  long int cost;
+  bool converged;
+  bool subiterated;
+  int coupling;
 
-	double *vars_n; // vectors for calculations
-	double *vars_k;
-	double *u_n;
-	double *u_k;
-	int nvars;
-	int nndim;
+  gp_t()
+      : u_n(nullptr),
+        u_k(nullptr),
+        vars_n(nullptr),
+        vars_k(nullptr),
+        allocated(false),
+        cost(0),
+        converged(true),
+        subiterated(false) {}
 
-	long int cost;
-	bool converged;
-	bool subiterated;
-	int coupling;
+  ~gp_t() {
+    if (u_n != nullptr) {
+      free(u_n);
+    }
+    if (u_k != nullptr) {
+      free(u_k);
+    }
+    if (allocated) {
+      free(vars_n);
+      free(vars_k);
+    }
+  }
 
-	gp_t():
-		u_n(nullptr),
-		u_k(nullptr),
-		vars_n(nullptr),
-		vars_k(nullptr),
-		allocated(false),
-		cost(0),
-		converged(true),
-		subiterated(false)
-	{}
+  void allocate_u() {
+    u_n = (double *)calloc(nndim, sizeof(double));
+    u_k = (double *)calloc(nndim, sizeof(double));
+  }
 
-	~gp_t()
-	{
-		if (u_n != nullptr) {
-			free(u_n);
-		}
-		if (u_k != nullptr) {
-			free(u_k);
-		}
-		if (allocated) {
-			free(vars_n);
-			free(vars_k);
-		}
-	}
+  void allocate() {
+    assert(!allocated);
 
-	void allocate_u()
-	{
-		u_n = (double *) calloc(nndim, sizeof(double));
-		u_k = (double *) calloc(nndim, sizeof(double));
-	}
+    vars_n = (double *)calloc(nvars, sizeof(double));
+    vars_k = (double *)calloc(nvars, sizeof(double));
 
-	void allocate()
-	{
-		assert(!allocated);
+    allocated = (vars_n && vars_k);
+    assert(allocated);
+  }
 
-		vars_n = (double *) calloc(nvars, sizeof(double));
-		vars_k = (double *) calloc(nvars, sizeof(double));
+  void update_vars() {
+    double *tmp = vars_n;
+    vars_n = vars_k;
+    vars_k = tmp;
 
-		allocated = (vars_n && vars_k);
-		assert(allocated);
-	}
+    tmp = u_n;
+    u_n = u_k;
+    u_k = tmp;
 
+    memcpy(strain_old, strain, nvoi * sizeof(double));
+  }
 
-	void update_vars()
-	{
-		double *tmp = vars_n;
-		vars_n = vars_k;
-		vars_k = tmp;
+  void write_restart(std::ofstream &file) {
+    file.write((char *)&allocated, sizeof(bool));
+    if (allocated) {
+      file.write((char *)vars_n, nvars * sizeof(double));
+      file.write((char *)u_n, nndim * sizeof(double));
+    }
+  }
 
-		tmp = u_n;
-		u_n = u_k;
-		u_k = tmp;
+  void read_restart(std::ifstream &file) {
+    file.read((char *)&allocated, sizeof(bool));
+    if (allocated) {
+      vars_n = (double *)calloc(nvars, sizeof(double));
+      vars_k = (double *)calloc(nvars, sizeof(double));
 
-		memcpy(strain_old, strain, nvoi * sizeof(double));
-	}
-
-	void write_restart(std::ofstream& file)
-	{
-		file.write((char *)&allocated, sizeof(bool));
-		if (allocated) {
-			file.write((char *)vars_n, nvars * sizeof(double));
-			file.write((char *)u_n, nndim * sizeof(double));
-		}
-	}
-
-	void read_restart(std::ifstream& file)
-	{
-		file.read((char *)&allocated, sizeof(bool));
-		if (allocated) {
-			vars_n = (double *)calloc(nvars, sizeof(double));
-			vars_k = (double *)calloc(nvars, sizeof(double));
-
-			file.read((char *)vars_n, nvars * sizeof(double));
-			file.read((char *)u_n, nndim * sizeof(double));
-		}
-	}
+      file.read((char *)vars_n, nvars * sizeof(double));
+      file.read((char *)u_n, nndim * sizeof(double));
+    }
+  }
 };

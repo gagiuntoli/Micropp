@@ -18,20 +18,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
-
 #include "params.hpp"
-
 
 extern __device__ material_t *material_list_d[MAX_MATERIALS];
 extern material_base *material_base_list_d;
 
 struct cuda_params_t {
-
-	int *elem_type_d;
-
+  int *elem_type_d;
 };
 
 extern int *elem_type_d;

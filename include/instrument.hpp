@@ -19,9 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
-
 
 #ifndef TIMER
 
@@ -30,19 +28,19 @@
 #define INST_START
 #define INST_CUSTOM(strname)
 
-#else // For time benchmarks
+#else  // For time benchmarks
 
 #define INST_CONSTRUCT instrument::initialize()
 #define INST_DESTRUCT instrument::finalize()
 #define INST_START instrument __timer__(__FUNCTION__)
 #define INST_CUSTOM(strname) instrument __custom__(strname)
 
+#include <atomic>
 #include <chrono>
-#include <unordered_map>
-#include <vector>
 #include <stack>
 #include <string>
-#include <atomic>
+#include <unordered_map>
+#include <vector>
 
 #include "util.hpp"
 
@@ -51,34 +49,29 @@ using namespace std;
 typedef vector<uint64_t> timevect;
 
 class instrument {
-	private:
-		const uint64_t start_time_;
-		const string funct_;
+ private:
+  const uint64_t start_time_;
+  const string funct_;
 
-		static atomic<size_t> instances;               // Counter
-		static uint64_t initialTime;                   // Time collection
-		static unordered_map<string, timevect> times;  // Final register time
+  static atomic<size_t> instances;               // Counter
+  static uint64_t initialTime;                   // Time collection
+  static unordered_map<string, timevect> times;  // Final register time
 
-		static inline uint64_t take_time_stamp()
-		{
-			return uint64_t(
-					chrono::high_resolution_clock::now().time_since_epoch().count());
-		}
+  static inline uint64_t take_time_stamp() {
+    return uint64_t(chrono::high_resolution_clock::now().time_since_epoch().count());
+  }
 
-	public:
+ public:
+  instrument(const string funct) : funct_(funct), start_time_(take_time_stamp()) {}
 
-		instrument(const string funct):
-			funct_(funct), start_time_(take_time_stamp()){}
+  ~instrument() {
+    const uint64_t elapsed = (take_time_stamp() - start_time_) * 1E-3;
+    times[funct_].push_back(elapsed);
+  }
 
-		~instrument()
-		{
-			const uint64_t elapsed =  (take_time_stamp() - start_time_) * 1E-3;
-			times[funct_].push_back(elapsed);
-		}
+  static void initialize();
 
-		static void initialize();
-
-		static void finalize();
+  static void finalize();
 };
 
-#endif // TIMER
+#endif  // TIMER

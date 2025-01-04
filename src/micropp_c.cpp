@@ -22,145 +22,121 @@
  */
 
 #include "micropp_c.h"
-#include "micropp.hpp"
+
 #include "material_base.h"
+#include "micropp.hpp"
 
 extern "C" {
 
-	// IMPORTANT!! This struct should match with the one in FORTRAN
+// IMPORTANT!! This struct should match with the one in FORTRAN
 
-	void micropp3_new(struct micropp3 *self, int ngp, const int size[3],
-			  const int type, const double *geo_params,
-	                  const struct material_base *materials,
-			  const int *coupling, const int nsubiterations,
-			  const int mpi_rank)
-	{
-		micropp_params_t params;
-		params.ngp = ngp;
-		memcpy(params.size, size, 3 * sizeof(int));
-		params.type = type;
-		memcpy(params.geo_params, geo_params, 4 * sizeof(double));
-		for (int i = 0; i < MAX_MATERIALS; ++i) {
-			params.materials[i] = materials[i];
-		}
-		params.coupling = new int[ngp];
-		memcpy(params.coupling, coupling, ngp * sizeof(int));
-		params.subiterations = true;
-		params.nsubiterations = nsubiterations;
-		params.mpi_rank = mpi_rank;
-		params.use_A0 = false;
-		params.its_with_A0 = 1;
-		params.write_log = false;
+void micropp3_new(struct micropp3 *self, int ngp, const int size[3], const int type, const double *geo_params,
+                  const struct material_base *materials, const int *coupling, const int nsubiterations,
+                  const int mpi_rank) {
+  micropp_params_t params;
+  params.ngp = ngp;
+  memcpy(params.size, size, 3 * sizeof(int));
+  params.type = type;
+  memcpy(params.geo_params, geo_params, 4 * sizeof(double));
+  for (int i = 0; i < MAX_MATERIALS; ++i) {
+    params.materials[i] = materials[i];
+  }
+  params.coupling = new int[ngp];
+  memcpy(params.coupling, coupling, ngp * sizeof(int));
+  params.subiterations = true;
+  params.nsubiterations = nsubiterations;
+  params.mpi_rank = mpi_rank;
+  params.use_A0 = false;
+  params.its_with_A0 = 1;
+  params.write_log = false;
 
-		self->ptr = new micropp<3>(params);
+  self->ptr = new micropp<3>(params);
 
-		delete [] params.coupling;
-	}
+  delete[] params.coupling;
+}
 
-	void micropp3_free(micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		delete ptr;
-	}
+void micropp3_free(micropp3 *self) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  delete ptr;
+}
 
-	void micropp3_set_strain(micropp3 *self, const int gp_id,
-				 const double *strain)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->set_strain(gp_id, strain);
-	}
+void micropp3_set_strain(micropp3 *self, const int gp_id, const double *strain) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->set_strain(gp_id, strain);
+}
 
-	void micropp3_get_stress(const micropp3 *self, const int gp_id,
-				 double *stress)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->get_stress(gp_id, stress);
-	}
+void micropp3_get_stress(const micropp3 *self, const int gp_id, double *stress) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->get_stress(gp_id, stress);
+}
 
-	void micropp3_get_ctan(const micropp3 *self, int gp,
-			       double ctan[36])
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->get_ctan(gp, ctan);
-	}
+void micropp3_get_ctan(const micropp3 *self, int gp, double ctan[36]) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->get_ctan(gp, ctan);
+}
 
-	void micropp3_homogenize(micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->homogenize();
-	}
+void micropp3_homogenize(micropp3 *self) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->homogenize();
+}
 
-	void micropp3_homogenize_linear(micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->homogenize_linear();
-	}
+void micropp3_homogenize_linear(micropp3 *self) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->homogenize_linear();
+}
 
-	int micropp3_get_cost(const micropp3 *self, int gp_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->get_cost(gp_id);
-	}
+int micropp3_get_cost(const micropp3 *self, int gp_id) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  return ptr->get_cost(gp_id);
+}
 
-	bool micropp3_has_converged(const micropp3 *self, const int gp_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->has_converged(gp_id);
-	}
+bool micropp3_has_converged(const micropp3 *self, const int gp_id) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  return ptr->has_converged(gp_id);
+}
 
-	bool micropp3_has_subiterated(const micropp3 *self, const int gp_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->has_subiterated(gp_id);
-	}
+bool micropp3_has_subiterated(const micropp3 *self, const int gp_id) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  return ptr->has_subiterated(gp_id);
+}
 
-	void micropp3_update_vars(micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->update_vars();
-	}
+void micropp3_update_vars(micropp3 *self) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->update_vars();
+}
 
-	void micropp3_output(micropp3 *self, const int gp_id,
-			     const char *filename)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->output(gp_id, filename);
-	}
+void micropp3_output(micropp3 *self, const int gp_id, const char *filename) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->output(gp_id, filename);
+}
 
-	void micropp3_output2(micropp3 *self, const int gp_id,
-			      const int elem_global, const int time_step)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->output2(gp_id, elem_global, time_step);
-	}
+void micropp3_output2(micropp3 *self, const int gp_id, const int elem_global, const int time_step) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->output2(gp_id, elem_global, time_step);
+}
 
-	void micropp3_print_info(micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->print_info();
-	}
+void micropp3_print_info(micropp3 *self) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->print_info();
+}
 
-	bool micropp3_is_non_linear(const micropp3 *self, const int gp_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->is_non_linear(gp_id);
-	}
+bool micropp3_is_non_linear(const micropp3 *self, const int gp_id) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  return ptr->is_non_linear(gp_id);
+}
 
-	int micropp3_get_non_linear_gps(const micropp3 *self)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		return ptr->get_non_linear_gps();
-	}
+int micropp3_get_non_linear_gps(const micropp3 *self) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  return ptr->get_non_linear_gps();
+}
 
-	void micropp3_write_restart(const micropp3 *self, const int restart_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->write_restart(restart_id);
-	}
+void micropp3_write_restart(const micropp3 *self, const int restart_id) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->write_restart(restart_id);
+}
 
-	void micropp3_read_restart(const micropp3 *self, const int restart_id)
-	{
-		micropp<3> *ptr = (micropp<3> *) self->ptr;
-		ptr->read_restart(restart_id);
-	}
+void micropp3_read_restart(const micropp3 *self, const int restart_id) {
+  micropp<3> *ptr = (micropp<3> *)self->ptr;
+  ptr->read_restart(restart_id);
+}
 }

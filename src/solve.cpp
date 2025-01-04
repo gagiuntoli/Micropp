@@ -18,73 +18,64 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "micropp.hpp"
-
 
 using namespace std;
 
-
 template <int tdim>
-newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u,
-				       double *du, const double strain[nvoi],
-				       const double *vars_old)
-{
+newton_t micropp<tdim>::newton_raphson(ell_matrix *A, double *b, double *u, double *du, const double strain[nvoi],
+                                       const double *vars_old) {
+  INST_START;
 
-	INST_START;
+  newton_t newton;
 
-	newton_t newton;
+  set_displ_bc(strain, u);
 
-	set_displ_bc(strain, u);
+  int its = 0;
 
-	int its = 0;
+  double norm = assembly_rhs(u, vars_old, b);
 
-	double norm = assembly_rhs(u, vars_old, b);
+  const double norm_0 = norm;
 
-	const double norm_0 = norm;
+  while (its < nr_max_its) {
+    if (norm < nr_max_tol || norm < norm_0 * nr_rel_tol) {
+      newton.converged = true;
+      break;
+    }
 
-	while (its < nr_max_its) {
-
-		if (norm < nr_max_tol || norm < norm_0 * nr_rel_tol) {
-			newton.converged = true;
-			break;
-		}
-
-		/*
-		 * Matrix selection according if it's linear or non-linear.
-		 * All OpenMP threads can access to A0 with no cost because
-		 * is a read-only matrix.
-		 *
-		 */
-		ell_matrix *A_ptr;
-		if (!use_A0 || its > (its_with_A0 - 1)) {
-			assembly_mat(A, u, vars_old);
-			A_ptr = A;
-		} else {
+    /*
+     * Matrix selection according if it's linear or non-linear.
+     * All OpenMP threads can access to A0 with no cost because
+     * is a read-only matrix.
+     *
+     */
+    ell_matrix *A_ptr;
+    if (!use_A0 || its > (its_with_A0 - 1)) {
+      assembly_mat(A, u, vars_old);
+      A_ptr = A;
+    } else {
 #ifdef _OPENMP
-			int tid = omp_get_thread_num();
+      int tid = omp_get_thread_num();
 #else
-			int tid = 0;
+      int tid = 0;
 #endif
-			A_ptr = &A0[tid];
-		}
+      A_ptr = &A0[tid];
+    }
 
-		double cg_err;
-		int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
+    double cg_err;
+    int cg_its = ell_solve_cgpd(A_ptr, b, du, &cg_err);
 
-		newton.solver_its += cg_its;
+    newton.solver_its += cg_its;
 
-		for (int i = 0; i < nn * dim; ++i)
-			u[i] += du[i];
+    for (int i = 0; i < nn * dim; ++i) u[i] += du[i];
 
-		norm = assembly_rhs(u, vars_old, b);
+    norm = assembly_rhs(u, vars_old, b);
 
-		its++;
-	}
+    its++;
+  }
 
-	newton.its = its;
-	return newton;
+  newton.its = its;
+  return newton;
 }
-
 
 template class micropp<3>;
