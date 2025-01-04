@@ -2,7 +2,10 @@
  *  This source code is part of MicroPP: a finite element library
  *  to solve microstructural problems for composite materials.
  *
- *  Copyright (C) - 2018
+ *  Copyright (C) - 2018 - Guido Giuntoli <gagiuntoli@gmail.com>
+ *						   Jimmy Aguilar Mena <kratsbinovish@gmail.com>
+ *                         Judicaël Grasset <judicael.grasset@stfc.ac.uk>
+ *                         Alejandro Figueroa <afiguer7@maisonlive.gmu.edu>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published
