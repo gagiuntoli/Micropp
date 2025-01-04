@@ -20,6 +20,20 @@ modeling with FEM the macro-scale, e.g. a wing of an aircraft.
 The code has been ported to GPUs to accelerate the calculation of the
 micro-scale problems.
 
+# Compilation 
+
+```shell
+cmake -B build \
+    -DCMAKE_BUILD_TYPE=[Debug|Release] \
+    -DENABLE_CUDA=[On|Off] \
+    -DENABLE_OPENACC=[On|Off] \
+    -DENABLE_OPENMP=[On|Off] \
+    -DENABLE_TIMER=[On|Off]
+
+cmake --build build
+ctest --test-dir build
+```
+
 # Characteristics
 
 1. Works with 3-D structured FE elements problems
@@ -47,56 +61,3 @@ perfomance than OpenACC:
 
 Currently CUDA acceleration only works with some parts of the code and
 has not been completely integrated.
-
-# Select the compiler
-
-CMake has a certain rules for searching the compiler available in your
-system if a specific compiler is needed the following environmental
-variables should be set. E.g. in Bash:
-
-    export CC=<path-to-C-compiler>
-    export CXX=<path-to-C++-compiler>
-    export FC=<path-to-Fortran-compiler>
-
-# Compilation
-
-    git clone git@github.com:gagiuntoli/Micropp.git
-    cd Micropp
-    mkdir <build-dir>
-    cd <build-dir>
-    cmake ..
-    make
-
-# Compilation Options
-
-It is suggested to use the graphical `ccmake` tool for setting the
-configuration options. After executing on the `<build-dir>` the
-command:
-
-    ccmake .
-
-The following menu with the default options appears:
-
-    CMAKE_BUILD_TYPE
-    CMAKE_INSTALL_PREFIX             /usr/local
-    ENABLE_CUDA                      OFF
-    ENABLE_OPENACC                   OFF
-    ENABLE_OPENMP                    OFF
-    ENABLE_TIMER                     OFF
-
-In straightforware manner it is possible to toggle across the
-different options using the arrows and `Enter` keys and finalizing by
-pressing `c` and `g` keys.
-
-Also the options can be set in the first called to `cmake`, e.g.:
-
-    cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_CUDA=On
-
-
-# Future Work
-
-* Finalize and optimize CUDA integration
-* Refactoring of the entired code
-* Add in the CI environment with more compilers to the tests
-* Implement Periodic and Uniform Stress BCs (numerical method)
-
